@@ -311,22 +311,25 @@ document.addEventListener("click", (event) => {
     }
 });
 
-// MONITOR DE ATUALIZAÇÃO DO PWA (Service Worker)
-if ('serviceWorker' in navigator) {
-    let newWorker;
+// GESTÃO E SINCRONIZAÇÃO DO SERVICE WORKER (PWA)
+let swRegistration = null;
+let newWorker = null;
 
+if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then((registration) => {
+        swRegistration = registration;
+
+        // Verifica se já tem uma atualização aguardando para ser aplicada
+        if (registration.waiting) {
+            exibirBannerAtualizacao(registration.waiting);
+        }
+
         registration.addEventListener('updatefound', () => {
             newWorker = registration.installing;
 
             newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed') {
-                    if (navigator.serviceWorker.controller) {
-                        const banner = document.getElementById('updateBanner');
-                        if (banner) {
-                            banner.style.display = 'flex';
-                        }
-                    }
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    exibirBannerAtualizacao(newWorker);
                 }
             });
         });
@@ -346,8 +349,65 @@ if ('serviceWorker' in navigator) {
             btnReload.addEventListener('click', () => {
                 if (newWorker) {
                     newWorker.postMessage({ action: 'skipWaiting' });
+                } else if (swRegistration && swRegistration.waiting) {
+                    swRegistration.waiting.postMessage({ action: 'skipWaiting' });
+                } else {
+                    window.location.reload();
                 }
             });
         }
     });
+}
+
+function exibirBannerAtualizacao(worker) {
+    newWorker = worker;
+    const banner = document.getElementById('updateBanner');
+    if (banner) {
+        banner.style.display = 'flex';
+    }
+}
+
+// 🔄 FUNÇÃO DE FORÇAR VERIFICAÇÃO / RESINCRONIZAR MANUALMENTE
+function forcarVerificacaoAtualizacao() {
+    if ('serviceWorker' in navigator && swRegistration) {
+        swRegistration.update().then(() => {
+            if (swRegistration.waiting) {
+                exibirBannerAtualizacao(swRegistration.waiting);
+                alert("🔄 Nova versão encontrada e pronta para instalação!");
+            } else if (swRegistration.installing) {
+                alert("📥 Baixando novas atualizações em segundo plano...");
+            } else {
+                alert("✅ Seu aplicativo já está totalmente atualizado!");
+            }
+        }).catch((err) => {
+            console.error("Erro ao verificar atualização:", err);
+            alert("⚠️ Erro ao verificar atualização. Cheque sua conexão.");
+        });
+    } else {
+        alert("O Service Worker não está ativo neste navegador.");
+    }
+}
+
+// 🧹 LIMPEZA FORÇADA DE CACHE E RECARREGAMENTO COMPLETO
+function limparCacheERecarregar() {
+    if (confirm("Isso apagará o cache local das páginas e recarregará a versão mais recente do servidor. Deseja continuar?")) {
+        if ('caches' in window) {
+            caches.keys().then((names) => {
+                return Promise.all(names.map(name => caches.delete(name)));
+            }).then(() => {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        for (let registration of registrations) {
+                            registration.unregister();
+                        }
+                        window.location.reload(true);
+                    });
+                } else {
+                    window.location.reload(true);
+                }
+            });
+        } else {
+            window.location.reload(true);
+        }
+    }
 }

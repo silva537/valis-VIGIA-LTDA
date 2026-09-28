@@ -34,12 +34,19 @@
                 <button class="dev-menu-btn" onclick="toggleMenuDev()" title="Menu Developer">☰</button>
                 <div class="dev-dropdown" id="devDropdown">
                     <div class="card-header">
-                        <h2>🛠️ MENU DEV</h2>
-                        <span class="status-tag dev-tag">EM DEV</span>
+                        <h2>🛠️ MENU DEV / SYNC</h2>
+                        <span class="status-tag dev-tag">SISTEMA</span>
                     </div>
                     <p class="dev-description">
                         Módulo Push Server ativo via OneSignal Web SDK. Notificações automáticas sem custo adicional.
                     </p>
+                    <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
+                    <button class="btn btn-warning full-btn" onclick="forcarVerificacaoAtualizacao()" style="margin-top: 0; font-size: 0.75rem;">
+                        🔄 Resincronizar App / Buscar Update
+                    </button>
+                    <button class="btn btn-danger full-btn" onclick="limparCacheERecarregar()" style="margin-top: 6px; font-size: 0.75rem;">
+                        🧹 Limpar Cache & Forçar Reload
+                    </button>
                 </div>
             </div>
         </div>
@@ -215,8 +222,9 @@
                 </div>
             </details>
 
-            <h3 class="section-title">Ferramentas</h3>
+            <h3 class="section-title">Ferramentas & Sincronização</h3>
             <button class="btn btn-outline full-btn" onclick="exportarExcel()">📊 Exportar Dados para Excel (CSV Discriminado)</button>
+            <button class="btn btn-outline full-btn" onclick="forcarVerificacaoAtualizacao()" style="margin-top: 8px;">🔄 Buscar Atualizações Manualmente</button>
         </section>
 
     </main>
@@ -231,13 +239,14 @@
     <script src="storage.js"></script>
     <script src="dashboard.js"></script>
     <script src="app.js"></script>
-  <!-- Banner de Atualização Pendente -->
-<div id="updateBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #007bff; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; text-align: center; font-family: sans-serif; max-width: 90%; align-items: center; gap: 10px;">
-  <span>🔄 Nova atualização disponível!</span>
-  <button id="btnReloadApp" style="background-color: white; color: #007bff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    Reiniciar App
-  </button>
-</div>
+
+    <!-- Banner de Atualização Pendente -->
+    <div id="updateBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #007bff; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; text-align: center; font-family: sans-serif; max-width: 90%; align-items: center; gap: 10px;">
+      <span>🔄 Nova atualização disponível!</span>
+      <button id="btnReloadApp" style="background-color: white; color: #007bff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        Reiniciar App
+      </button>
+    </div>
 </body>
 
 </html>
