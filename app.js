@@ -336,3 +336,29 @@ document.addEventListener("click", (event) => {
         dropdown.classList.remove("show");
     }
 });
+
+// Registra e monitora atualizações do aplicativo
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((registration) => {
+            
+            // Verifica se há uma atualização no servidor
+            registration.onupdatefound = () => {
+                const installingWorker = registration.installing;
+                if (installingWorker == null) return;
+
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            // Nova versão encontrada e baixada!
+                            console.log('Nova versão encontrada! Atualizando...');
+                            
+                            // Recarrega a página automaticamente para aplicar as novidades
+                            window.location.reload();
+                        }
+                    }
+                };
+            };
+        });
+    });
+}
