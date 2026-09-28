@@ -311,77 +311,30 @@ document.addEventListener("click", (event) => {
     }
 });
 
-// GESTÃO E SINCRONIZAÇÃO DO SERVICE WORKER (PWA)
-let swRegistration = null;
-let newWorker = null;
-
+// GESTÃO E ATUALIZAÇÃO AUTOMÁTICA DO SERVICE WORKER (PWA)
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then((registration) => {
-        swRegistration = registration;
-
-        // Verifica se já tem uma atualização aguardando para ser aplicada
-        if (registration.waiting) {
-            exibirBannerAtualizacao(registration.waiting);
-        }
-
-        registration.addEventListener('updatefound', () => {
-            newWorker = registration.installing;
-
-            newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    exibirBannerAtualizacao(newWorker);
-                }
-            });
-        });
+        // Verifica proativamente por novas versões sempre que o app é aberto
+        registration.update();
     });
 
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
-            window.location.reload();
             refreshing = true;
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const btnReload = document.getElementById('btnReloadApp');
-        if (btnReload) {
-            btnReload.addEventListener('click', () => {
-                if (newWorker) {
-                    newWorker.postMessage({ action: 'skipWaiting' });
-                } else if (swRegistration && swRegistration.waiting) {
-                    swRegistration.waiting.postMessage({ action: 'skipWaiting' });
-                } else {
-                    window.location.reload();
-                }
-            });
+            console.log("🚀 Nova versão instalada. A recarregar a aplicação...");
+            window.location.reload();
         }
     });
 }
 
-function exibirBannerAtualizacao(worker) {
-    newWorker = worker;
-    const banner = document.getElementById('updateBanner');
-    if (banner) {
-        banner.style.display = 'flex';
-    }
-}
-
-// 🔄 FUNÇÃO DE FORÇAR VERIFICAÇÃO / RESINCRONIZAR MANUALMENTE
+// 🔄 FUNÇÃO DE FORÇAR VERIFICAÇÃO MANUAL
 function forcarVerificacaoAtualizacao() {
-    if ('serviceWorker' in navigator && swRegistration) {
-        swRegistration.update().then(() => {
-            if (swRegistration.waiting) {
-                exibirBannerAtualizacao(swRegistration.waiting);
-                alert("🔄 Nova versão encontrada e pronta para instalação!");
-            } else if (swRegistration.installing) {
-                alert("📥 Baixando novas atualizações em segundo plano...");
-            } else {
-                alert("✅ Seu aplicativo já está totalmente atualizado!");
-            }
-        }).catch((err) => {
-            console.error("Erro ao verificar atualização:", err);
-            alert("⚠️ Erro ao verificar atualização. Cheque sua conexão.");
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+            registration.update().then(() => {
+                alert("🔍 Verificação concluída! Se houver alguma nova versão, o app atualizará automaticamente.");
+            });
         });
     } else {
         alert("O Service Worker não está ativo neste navegador.");

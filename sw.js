@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ponto-pwa-v1.0.1'; // <-- Mude a versão aqui a cada update
+const CACHE_NAME = 'ponto-pwa-v1.0.2'; // <-- Incrementa esta versão a cada deploy
 
 const ASSETS_TO_CACHE = [
   './',
@@ -9,7 +9,10 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Nova versão detectada, instalando...');
+  console.log('[SW] Nova versão detectada, instalando e assumindo imediatamente...');
+  // Força o Service Worker novo a ficar ativo de imediato sem esperar que a aba seja fechada
+  self.skipWaiting();
+
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -17,7 +20,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Escuta a mensagem de clique no botão "Reiniciar App"
+// Suporte para mensagem manual de skipWaiting (se necessário)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'skipWaiting') {
     self.skipWaiting();
@@ -25,6 +28,7 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Limpando caches antigos...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -35,7 +39,7 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => self.clients.claim()) // Assume o controlo das páginas abertas no momento
   );
 });
 
