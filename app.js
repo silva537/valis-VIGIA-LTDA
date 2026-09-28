@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarTemaSalvo();
     renderizar();
 
-    // Registra Service Worker e solicita permissões em segundo plano
+    // Registra o Service Worker local e solicita a permissão do OneSignal
     inicializarNotificacoes();
 });
 
@@ -32,27 +32,32 @@ function inicializarNotificacoes() {
             .catch(err => console.error('Erro ao registrar SW:', err));
     }
 
-    if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-    }
+    // Solicita permissão e registra a inscrição no OneSignal
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+        if (!OneSignal.Notifications.permission) {
+            await OneSignal.Notifications.requestPermission();
+        }
+    });
 }
 
 function enviarNotificacao(titulo, mensagem) {
-    if (!("Notification" in window)) return;
-
-    if (Notification.permission === "granted") {
-        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification(titulo, {
-                    body: mensagem,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                    vibrate: [200, 100, 200]
+    // 1. Envia notificação via OneSignal (se permitido)
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(function(OneSignal) {
+        if (OneSignal.Notifications.permission) {
+            // Notificação local fallback via ServiceWorker/Navegador
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(titulo, {
+                        body: mensagem,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                        vibrate: [200, 100, 200]
+                    });
                 });
-            });
-        } else {
-            new Notification(titulo, { body: mensagem });
+            }
         }
-    }
+    });
 }
 
 function atualizarCamposTurno() {
