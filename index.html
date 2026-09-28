@@ -7,7 +7,7 @@
     <title>Vales Naturalidade LTDA • Sistema Ponto</title>
     <link rel="stylesheet" href="style.css">
 
-    <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS -->
+    <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS (100% GRATUITO) -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -28,20 +28,17 @@
         </div>
         <div class="header-badges">
             <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
-            <span class="badge version">v3.2 Cloud</span>
+            <span class="badge version">v3.3 Cloud</span>
             
-            <!-- BOTÃO TRÊS TRACINHOS (MENU DEV) -->
             <div class="dev-menu-wrapper">
                 <button class="dev-menu-btn" onclick="toggleMenuDev()" title="Menu Developer">☰</button>
-                
-                <!-- PAINEL SUSPENSO DEV -->
                 <div class="dev-dropdown" id="devDropdown">
                     <div class="card-header">
                         <h2>🛠️ MENU DEV</h2>
                         <span class="status-tag dev-tag">EM DEV</span>
                     </div>
                     <p class="dev-description">
-                        Módulo Push Server ativo via OneSignal! Notificações locais e em nuvem configuradas.
+                        Módulo Push Server ativo via OneSignal Web SDK. Notificações automáticas sem custo adicional.
                     </p>
                 </div>
             </div>
@@ -50,14 +47,13 @@
 
     <main class="container">
 
-        <!-- MODO PLANTÃO ATIVO (INTERATIVO + RGB) -->
+        <!-- MODO PLANTÃO ATIVO -->
         <section class="card border-rgb">
             <div class="card-header">
                 <h2>⚡ MODO PLANTÃO ATIVO</h2>
                 <span class="status-tag inactive" id="statusPlantaoTag">INATIVO</span>
             </div>
 
-            <!-- Painel Interativo de Status -->
             <div class="ponto-status-box" id="pontoStatusBox">
                 <p class="subtitle" id="statusPlantaoTexto">Nenhum plantão em andamento no momento.</p>
                 <div class="live-info" id="liveInfo" style="display: none;">
@@ -209,7 +205,7 @@
                 <strong id="totalFiltrado" class="success-text">R$ 0.00</strong>
             </div>
 
-            <!-- LOGS EXPANSÍVEIS (SANFONA) -->
+            <!-- LOGS EXPANSÍVEIS -->
             <details class="logs-accordion" style="margin-top: 15px;">
                 <summary class="section-title" style="cursor: pointer; font-weight: bold; user-select: none;">
                     📋 LOGS DE CHECK-IN / INTERVALOS (clique para expandir/recolher)
@@ -221,7 +217,6 @@
 
             <h3 class="section-title">Ferramentas</h3>
             <button class="btn btn-outline full-btn" onclick="exportarExcel()">📊 Exportar Dados para Excel (CSV Discriminado)</button>
-            <button class="btn btn-outline full-btn" style="margin-top: 8px;" onclick="enviarNotificacao('🔔 Teste de Notificação', 'As notificações em tempo real estão funcionando perfeitamente!')">🔔 Testar Notificações</button>
         </section>
 
     </main>

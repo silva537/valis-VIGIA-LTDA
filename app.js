@@ -21,16 +21,15 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarTemaSalvo();
     renderizar();
 
-    // Inicializa o Service Worker e pede permissão para notificações
+    // Registra Service Worker e solicita permissões em segundo plano
     inicializarNotificacoes();
 });
 
-/* INICIALIZAÇÃO DE NOTIFICAÇÕES (PWA / BROWSER) */
 function inicializarNotificacoes() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
             .then(() => console.log('Service Worker registrado com sucesso.'))
-            .catch(err => console.error('Erro ao registrar Service Worker:', err));
+            .catch(err => console.error('Erro ao registrar SW:', err));
     }
 
     if ("Notification" in window && Notification.permission === "default") {
@@ -38,7 +37,6 @@ function inicializarNotificacoes() {
     }
 }
 
-/* ENVIAR NOTIFICAÇÃO EM TEMPO REAL (LOCAL/IN-APP) */
 function enviarNotificacao(titulo, mensagem) {
     if (!("Notification" in window)) return;
 
@@ -82,7 +80,6 @@ function atualizarCamposTurno() {
     }
 }
 
-/* GERENCIAMENTO DE TEMAS (CLARO / ESCURO) */
 function toggleTema() {
     const htmlEl = document.documentElement;
     const currentTheme = htmlEl.getAttribute("data-theme");
@@ -109,7 +106,6 @@ function carregarTemaSalvo() {
     }
 }
 
-/* REGISTRO DE PONTO INTERATIVO E FECHAMENTO AUTOMÁTICO */
 function registrarPonto(tipo) {
     const logs = JSON.parse(localStorage.getItem("logsPonto")) || [];
     const agora = new Date();
@@ -321,7 +317,6 @@ function renderizar() {
     renderizarLogs();
 }
 
-/* CONTROLADOR DO MENU DEV (TRÊS TRACINHOS) */
 function toggleMenuDev() {
     const dropdown = document.getElementById("devDropdown");
     if (dropdown) {
