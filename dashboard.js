@@ -20,16 +20,30 @@ function atualizarDashboard() {
     const mediaValor = qtd > 0 ? (totalValores / qtd) : 0;
     const mediaSono = qtd > 0 ? (totalSono / qtd) : 0;
 
-    document.getElementById("totalPlantoes").innerText = qtd;
-    document.getElementById("propriosCoberturas").innerText = `${proprios} / ${coberturas}`;
-    document.getElementById("mediaPorPlantao").innerText = `R$ ${mediaValor.toFixed(2)}`;
-    document.getElementById("mediaSono").innerText = `${mediaSono.toFixed(1)}h`;
-    document.getElementById("totalFiltrado").innerText = `R$ ${totalValores.toFixed(2)}`;
+    const totalPlantoesEl = document.getElementById("totalPlantoes");
+    if (totalPlantoesEl) totalPlantoesEl.innerText = qtd;
+
+    const propriosCoberturasEl = document.getElementById("propriosCoberturas");
+    if (propriosCoberturasEl) propriosCoberturasEl.innerText = `${proprios} / ${coberturas}`;
+
+    const mediaPorPlantaoEl = document.getElementById("mediaPorPlantao");
+    if (mediaPorPlantaoEl) mediaPorPlantaoEl.innerText = `R$ ${mediaValor.toFixed(2)}`;
+
+    const mediaSonoEl = document.getElementById("mediaSono");
+    if (mediaSonoEl) mediaSonoEl.innerText = `${mediaSono.toFixed(1)}h`;
+
+    const totalFiltradoEl = document.getElementById("totalFiltrado");
+    if (totalFiltradoEl) totalFiltradoEl.innerText = `R$ ${totalValores.toFixed(2)}`;
 
     const meta = parseFloat(localStorage.getItem("metaFinanceira")) || 1000.00;
     const percentual = Math.min((totalValores / meta) * 100, 100).toFixed(0);
 
-    document.getElementById("metaValorText").innerText = `R$ ${meta.toFixed(2)}`;
-    document.getElementById("metaPercentText").innerText = `${percentual}%`;
-    document.getElementById("metaProgressBar").style.width = `${percentual}%`;
+    const metaValorTextEl = document.getElementById("metaValorText");
+    if (metaValorTextEl) metaValorTextEl.innerText = `R$ ${meta.toFixed(2)}`;
+
+    const metaPercentTextEl = document.getElementById("metaPercentText");
+    if (metaPercentTextEl) metaPercentTextEl.innerText = `${percentual}%`;
+
+    const metaProgressBarEl = document.getElementById("metaProgressBar");
+    if (metaProgressBarEl) metaProgressBarEl.style.width = `${percentual}%`;
 }

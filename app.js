@@ -11,15 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (dataInput) {
         dataInput.valueAsDate = new Date();
     }
+    
+    const turnoSelect = document.getElementById("turno");
+    if (turnoSelect) {
+        turnoSelect.addEventListener("change", atualizarCamposTurno);
+    }
+
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
 });
-
-const turnoSelect = document.getElementById("turno");
-if (turnoSelect) {
-    turnoSelect.addEventListener("change", atualizarCamposTurno);
-}
 
 function atualizarCamposTurno() {
     const turnoEl = document.getElementById("turno");
