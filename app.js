@@ -311,10 +311,20 @@ document.addEventListener("click", (event) => {
     }
 });
 
+// TERMOS DE USO E DIRETRIZES TECNOLÓGICAS (PADRÃO LGPD - Lei nº 13.709/2018)
+function exibirTermosUso() {
+    alert(
+        "📜 TERMOS DE USO E POLÍTICA DE PRIVACIDADE (LGPD - Lei nº 13.709/2018)\n\n" +
+        "1. Armazenamento Local: Os dados de plantões, horários e valores são gravados prioritariamente no armazenamento local do navegador (LocalStorage).\n\n" +
+        "2. Privacidade e Titularidade: O usuário tem total controle sobre seus registros, podendo exportá-los em arquivo CSV ou excluí-los a qualquer momento.\n\n" +
+        "3. Notificações e Push: Os alertas são utilizados exclusivamente para gerenciamento dos turnos e registros de ponto em tempo real.\n\n" +
+        "4. Marco Civil da Internet: O uso do aplicativo segue os princípios de segurança, proteção à privacidade e transparência das redes."
+    );
+}
+
 // GESTÃO E ATUALIZAÇÃO AUTOMÁTICA DO SERVICE WORKER (PWA)
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then((registration) => {
-        // Verifica proativamente por novas versões sempre que o app é aberto
         registration.update();
     });
 
