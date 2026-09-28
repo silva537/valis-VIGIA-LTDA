@@ -20,7 +20,42 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
+
+    // Inicializa o Service Worker e pede permissão para notificações
+    inicializarNotificacoes();
 });
+
+/* INICIALIZAÇÃO DE NOTIFICAÇÕES (PWA / BROWSER) */
+function inicializarNotificacoes() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker registrado com sucesso.'))
+            .catch(err => console.error('Erro ao registrar Service Worker:', err));
+    }
+
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
+/* ENVIAR NOTIFICAÇÃO EM TEMPO REAL */
+function enviarNotificacao(titulo, mensagem) {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification(titulo, {
+                    body: mensagem,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                    vibrate: [200, 100, 200]
+                });
+            });
+        } else {
+            new Notification(titulo, { body: mensagem });
+        }
+    }
+}
 
 function atualizarCamposTurno() {
     const turnoEl = document.getElementById("turno");
@@ -122,6 +157,9 @@ function registrarPonto(tipo) {
         document.getElementById("obs").value = "";
 
         renderizar();
+        
+        // Envia notificação em tempo real no dispositivo
+        enviarNotificacao("🔴 Plantão Encerrado", `Check-out registrado às ${horaStr}. Extrato atualizado!`);
         alert("🟢 Plantão fechado com sucesso! Registrado na tabela abaixo.");
     } else {
         if (tag) {
@@ -137,6 +175,9 @@ function registrarPonto(tipo) {
         if (liveInfo) liveInfo.style.display = "flex";
 
         renderizarLogs();
+
+        // Envia notificação em tempo real no dispositivo
+        enviarNotificacao("🟢 Ponto Registrado", `${tipo} efetuado com sucesso às ${horaStr}.`);
     }
 }
 
@@ -170,6 +211,8 @@ function salvarPlantao() {
     document.getElementById("colega").value = "";
     document.getElementById("obs").value = "";
     renderizar();
+
+    enviarNotificacao("📋 Plantão Salvo", `Plantão salvo no sistema com sucesso.`);
 }
 
 function excluirPlantao(id) {
