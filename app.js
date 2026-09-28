@@ -20,44 +20,18 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
-
-    // Registra o Service Worker local e solicita a permissão do OneSignal
-    inicializarNotificacoes();
 });
 
-function inicializarNotificacoes() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Service Worker registrado com sucesso.'))
-            .catch(err => console.error('Erro ao registrar SW:', err));
+function enviarNotificacaoLocal(titulo, mensagem) {
+    if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(titulo, {
+                body: mensagem,
+                icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                vibrate: [200, 100, 200]
+            });
+        });
     }
-
-    // Solicita permissão e registra a inscrição no OneSignal
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        if (!OneSignal.Notifications.permission) {
-            await OneSignal.Notifications.requestPermission();
-        }
-    });
-}
-
-function enviarNotificacao(titulo, mensagem) {
-    // 1. Envia notificação via OneSignal (se permitido)
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(function(OneSignal) {
-        if (OneSignal.Notifications.permission) {
-            // Notificação local fallback via ServiceWorker/Navegador
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(titulo, {
-                        body: mensagem,
-                        icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                        vibrate: [200, 100, 200]
-                    });
-                });
-            }
-        }
-    });
 }
 
 function atualizarCamposTurno() {
@@ -159,7 +133,7 @@ function registrarPonto(tipo) {
 
         renderizar();
         
-        enviarNotificacao("🔴 Plantão Encerrado", `Check-out registrado às ${horaStr}. Extrato atualizado!`);
+        enviarNotificacaoLocal("🔴 Plantão Encerrado", `Check-out registrado às ${horaStr}. Extrato atualizado!`);
         alert("🟢 Plantão fechado com sucesso! Registrado na tabela abaixo.");
     } else {
         if (tag) {
@@ -176,7 +150,7 @@ function registrarPonto(tipo) {
 
         renderizarLogs();
 
-        enviarNotificacao("🟢 Ponto Registrado", `${tipo} efetuado com sucesso às ${horaStr}.`);
+        enviarNotificacaoLocal("🟢 Ponto Registrado", `${tipo} efetuado com sucesso às ${horaStr}.`);
     }
 }
 
@@ -211,7 +185,7 @@ function salvarPlantao() {
     document.getElementById("obs").value = "";
     renderizar();
 
-    enviarNotificacao("📋 Plantão Salvo", `Plantão salvo no sistema com sucesso.`);
+    enviarNotificacaoLocal("📋 Plantão Salvo", `Plantão salvo no sistema com sucesso.`);
 }
 
 function excluirPlantao(id) {
@@ -337,46 +311,17 @@ document.addEventListener("click", (event) => {
     }
 });
 
-// Registra e monitora atualizações do aplicativo
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then((registration) => {
-            
-            // Verifica se há uma atualização no servidor
-            registration.onupdatefound = () => {
-                const installingWorker = registration.installing;
-                if (installingWorker == null) return;
-
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
-                            // Nova versão encontrada e baixada!
-                            console.log('Nova versão encontrada! Atualizando...');
-                            
-                            // Recarrega a página automaticamente para aplicar as novidades
-                            window.location.reload();
-                        }
-                    }
-                };
-            };
-        });
-    });
-}
-
-// Monitora atualizações e exibe o aviso na tela
+// MONITOR DE ATUALIZAÇÃO DO PWA (Service Worker)
 if ('serviceWorker' in navigator) {
     let newWorker;
 
     navigator.serviceWorker.register('./sw.js').then((registration) => {
-        
-        // Verifica se há atualização disponível ao abrir o app
         registration.addEventListener('updatefound', () => {
             newWorker = registration.installing;
 
             newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed') {
                     if (navigator.serviceWorker.controller) {
-                        // Exibe o banner na tela
                         const banner = document.getElementById('updateBanner');
                         if (banner) {
                             banner.style.display = 'flex';
@@ -387,7 +332,6 @@ if ('serviceWorker' in navigator) {
         });
     });
 
-    // Recarrega a página assim que o novo Service Worker assumir o controle
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
@@ -396,7 +340,6 @@ if ('serviceWorker' in navigator) {
         }
     });
 
-    // Configura o botão "Reiniciar App"
     document.addEventListener('DOMContentLoaded', () => {
         const btnReload = document.getElementById('btnReloadApp');
         if (btnReload) {
