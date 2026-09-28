@@ -5,7 +5,6 @@
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-/* VARIÁVEIS DE TEMA DARK/LIGHT */
 :root[data-theme="dark"] {
     --bg-main: #0b111e;
     --card-bg: #111827;
@@ -43,7 +42,6 @@ body {
     gap: 15px;
 }
 
-/* HEADER */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -83,7 +81,6 @@ body {
     color: #38bdf8;
 }
 
-/* BORDA RGB NEON ANIMADA */
 @keyframes rgbGlow {
     0% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
     33% { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
@@ -96,7 +93,6 @@ body {
     animation: rgbGlow 6s infinite linear;
 }
 
-/* CARDS E ELEMENTOS */
 .card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -145,7 +141,6 @@ body {
     color: var(--text-secondary);
 }
 
-/* STATUS TAGS */
 .status-tag {
     font-size: 0.65rem;
     padding: 2px 6px;
@@ -157,7 +152,6 @@ body {
 .status-tag.active { background: #10b98122; color: #10b981; }
 .status-tag.dev-tag { background: #f59e0b22; color: #f59e0b; }
 
-/* FORM GRID */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -190,7 +184,6 @@ input, select, textarea {
     outline: none;
 }
 
-/* BOTÕES */
 .btn {
     border: none;
     padding: 10px 14px;
@@ -215,7 +208,6 @@ input, select, textarea {
     margin-bottom: 8px;
 }
 
-/* STATS */
 .stats-cards-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -240,7 +232,6 @@ input, select, textarea {
 .info-text { color: #38bdf8 !important; }
 .success-text { color: #10b981 !important; }
 
-/* META BAR */
 .meta-container {
     background: var(--input-bg);
     padding: 12px;
@@ -273,7 +264,6 @@ input, select, textarea {
     margin-top: 6px;
 }
 
-/* TABELA */
 .table-responsive { width: 100%; overflow-x: auto; }
 
 table {
@@ -302,7 +292,6 @@ td { padding: 8px; border-bottom: 1px solid var(--input-border); }
 
 .section-title { font-size: 0.75rem; color: var(--text-secondary); margin: 15px 0 8px; }
 
-/* CAIXA DE LOGS (COMPACTA E COM ROLAGEM) */
 .logs-container { 
     font-size: 0.75rem; 
     background: var(--input-bg); 
@@ -333,18 +322,6 @@ td { padding: 8px; border-bottom: 1px solid var(--input-border); }
     border-bottom: none;
 }
 
-/* MENU DEV */
-.dev-card {
-    border: 1px dashed #f59e0b88;
-}
-
-.dev-description {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-/* FOOTER */
 .main-footer {
     text-align: center;
     font-size: 0.75rem;
@@ -360,7 +337,6 @@ td { padding: 8px; border-bottom: 1px solid var(--input-border); }
 .dev-by { margin-top: 6px; color: var(--text-primary); }
 .vazio { font-size: 0.75rem; color: var(--text-secondary); text-align: center; padding: 6px 0; }
 
-/* MENU DEV (TRÊS TRACINHOS / DROPDOWN) */
 .dev-menu-wrapper {
     position: relative;
     display: inline-block;

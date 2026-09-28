@@ -81,7 +81,6 @@ function registrarPonto(tipo) {
     const dataIso = agora.toISOString().split('T')[0];
     const dataHoraStr = agora.toLocaleDateString("pt-BR") + " às " + horaStr;
 
-    // Salva o log de check-in / check-out
     logs.push({ tipo, dataHora: dataHoraStr });
     localStorage.setItem("logsPonto", JSON.stringify(logs));
 
@@ -90,7 +89,6 @@ function registrarPonto(tipo) {
     const liveInfo = document.getElementById("liveInfo");
 
     if (tipo.includes("Check-out")) {
-        // --- FECHAMENTO AUTOMÁTICO DO PLANTÃO ---
         const turnoSel = document.getElementById("turno").value;
         const valorVal = parseFloat(document.getElementById("valor").value) || VALORES_TURNO[turnoSel] || 100;
 
@@ -101,7 +99,7 @@ function registrarPonto(tipo) {
             data: document.getElementById("data").value || dataIso,
             turno: turnoSel,
             horaInicio: document.getElementById("horaInicio").value || "06:00",
-            horaFim: horaStr, // Registra o horário exato do Check-out
+            horaFim: horaStr,
             sono: parseFloat(document.getElementById("sono").value) || 0,
             valor: valorVal,
             horasExtras: parseFloat(document.getElementById("horasExtras").value) || 0,
@@ -112,7 +110,6 @@ function registrarPonto(tipo) {
         plantoes.push(novoPlantao);
         salvarStorage(plantoes);
 
-        // Reseta o painel superior para inativo
         if (tag) {
             tag.className = "status-tag inactive";
             tag.innerText = "INATIVO";
@@ -120,15 +117,12 @@ function registrarPonto(tipo) {
         if (txt) txt.innerText = "Plantão finalizado e registrado no extrato abaixo!";
         if (liveInfo) liveInfo.style.display = "none";
 
-        // Limpa campos opcionais
         document.getElementById("colega").value = "";
         document.getElementById("obs").value = "";
 
-        // Atualiza a tabela na tela
         renderizar();
         alert("🟢 Plantão fechado com sucesso! Registrado na tabela abaixo.");
     } else {
-        // --- CHECK-IN OU REFEIÇÃO EM ANDAMENTO ---
         if (tag) {
             tag.className = "status-tag active";
             tag.innerText = "EM ANDAMENTO";
@@ -262,7 +256,6 @@ function renderizar() {
         return;
     }
 
-    // Ordena do mais recente para o mais antigo
     const ordenados = plantoes.slice().sort((a, b) => b.id - a.id);
 
     tbody.innerHTML = ordenados.map(item => `
@@ -285,6 +278,7 @@ function renderizar() {
     atualizarDashboard();
     renderizarLogs();
 }
+
 /* CONTROLADOR DO MENU DEV (TRÊS TRACINHOS) */
 function toggleMenuDev() {
     const dropdown = document.getElementById("devDropdown");
@@ -293,7 +287,6 @@ function toggleMenuDev() {
     }
 }
 
-// Fecha o menu Dev se clicar fora dele
 document.addEventListener("click", (event) => {
     const wrapper = document.querySelector(".dev-menu-wrapper");
     const dropdown = document.getElementById("devDropdown");
