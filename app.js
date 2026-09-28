@@ -362,3 +362,49 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
+
+// Monitora atualizações e exibe o aviso na tela
+if ('serviceWorker' in navigator) {
+    let newWorker;
+
+    navigator.serviceWorker.register('./sw.js').then((registration) => {
+        
+        // Verifica se há atualização disponível ao abrir o app
+        registration.addEventListener('updatefound', () => {
+            newWorker = registration.installing;
+
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed') {
+                    if (navigator.serviceWorker.controller) {
+                        // Exibe o banner na tela
+                        const banner = document.getElementById('updateBanner');
+                        if (banner) {
+                            banner.style.display = 'flex';
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    // Recarrega a página assim que o novo Service Worker assumir o controle
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            window.location.reload();
+            refreshing = true;
+        }
+    });
+
+    // Configura o botão "Reiniciar App"
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnReload = document.getElementById('btnReloadApp');
+        if (btnReload) {
+            btnReload.addEventListener('click', () => {
+                if (newWorker) {
+                    newWorker.postMessage({ action: 'skipWaiting' });
+                }
+            });
+        }
+    });
+}

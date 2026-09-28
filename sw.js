@@ -1,5 +1,4 @@
-// Altere esta versão toda vez que subir uma mudança importante (ex: v1.0.1, v1.0.2)
-const CACHE_NAME = 'ponto-pwa-v1.0.1';
+const CACHE_NAME = 'ponto-pwa-v1.0.1'; // <-- Mude a versão aqui a cada update
 
 const ASSETS_TO_CACHE = [
   './',
@@ -9,20 +8,22 @@ const ASSETS_TO_CACHE = [
   './manifest.json'
 ];
 
-// Instalação do Service Worker
 self.addEventListener('install', (event) => {
-  // Força o novo Service Worker a assumir o controle imediatamente
-  self.skipWaiting();
-
+  console.log('[SW] Nova versão detectada, instalando...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Salvando arquivos no cache...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
-// Ativação e Limpeza de Caches Antigos
+// Escuta a mensagem de clique no botão "Reiniciar App"
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -34,16 +35,14 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim()) // Assume o controle do aplicativo imediatamente
+    }).then(() => self.clients.claim())
   );
 });
 
-// Intercepta as requisições (Busca na rede primeiro; se falhar, pega do cache)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Atualiza o cache dinamicamente com a versão mais recente
         if (event.request.method === 'GET') {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -52,9 +51,6 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       })
-      .catch(() => {
-        // Se estiver offline, entrega o que está salvo no cache
-        return caches.match(event.request);
-      })
+      .catch(() => caches.match(event.request))
   );
 });
