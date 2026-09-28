@@ -38,7 +38,7 @@ function inicializarNotificacoes() {
     }
 }
 
-/* ENVIAR NOTIFICAÇÃO EM TEMPO REAL */
+/* ENVIAR NOTIFICAÇÃO EM TEMPO REAL (LOCAL/IN-APP) */
 function enviarNotificacao(titulo, mensagem) {
     if (!("Notification" in window)) return;
 
@@ -158,7 +158,6 @@ function registrarPonto(tipo) {
 
         renderizar();
         
-        // Envia notificação em tempo real no dispositivo
         enviarNotificacao("🔴 Plantão Encerrado", `Check-out registrado às ${horaStr}. Extrato atualizado!`);
         alert("🟢 Plantão fechado com sucesso! Registrado na tabela abaixo.");
     } else {
@@ -176,7 +175,6 @@ function registrarPonto(tipo) {
 
         renderizarLogs();
 
-        // Envia notificação em tempo real no dispositivo
         enviarNotificacao("🟢 Ponto Registrado", `${tipo} efetuado com sucesso às ${horaStr}.`);
     }
 }

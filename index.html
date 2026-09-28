@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vales Naturalidade LTDA • Sistema Ponto</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "820d6cd6-724a-40c0-889f-7e75f016aff1",
+        });
+      });
+    </script>
 </head>
 
 <body>
@@ -30,7 +41,7 @@
                         <span class="status-tag dev-tag">EM DEV</span>
                     </div>
                     <p class="dev-description">
-                        Módulo em construção. Notificações locais ativas! Em breve: alertas via Push Server em nuvem.
+                        Módulo Push Server ativo via OneSignal! Notificações locais e em nuvem configuradas.
                     </p>
                 </div>
             </div>
