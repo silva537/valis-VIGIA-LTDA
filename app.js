@@ -2,7 +2,16 @@
 const SUPABASE_URL = 'https://sxrthryhzodryrzndveg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_3FDSO7qfonD0BLRTzPT6bA_7a7jUarD';
 
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let _supabase = null;
+try {
+    if (typeof supabase !== 'undefined') {
+        _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+        console.warn("SDK do Supabase ausente. Rodando apenas no modo local.");
+    }
+} catch (e) {
+    console.error("Erro ao inicializar conexão com o Supabase:", e);
+}
 
 const VALORES_TURNO = {
     "Manhã": 100.00,
@@ -26,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
-    renderizarLogs(); // Carrega os logs da nuvem ao iniciar
+    renderizarLogs(); 
 });
 
 function enviarNotificacaoLocal(titulo, mensagem) {
@@ -92,23 +101,30 @@ function carregarTemaSalvo() {
     }
 }
 
-// --- REGISTRAR PONTO DIRETO NA NUVEM (SUPABASE) ---
+// --- REGISTRAR PONTO (Híbrido: Nuvem + Local) ---
 async function registrarPonto(tipo) {
     const agora = new Date();
     const horaStr = agora.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
     const dataIso = agora.toISOString().split('T')[0];
     const dataHoraStr = agora.toLocaleDateString("pt-BR") + " às " + horaStr;
 
-    const { error } = await _supabase
-        .from('logs_ponto')
-        .insert([{ id: Date.now(), tipo: tipo, data_hora: dataHoraStr }]);
+    // Tenta enviar para o Supabase sem bloquear a rotina local
+    if (_supabase) {
+        try {
+            const { error } = await _supabase
+                .from('logs_ponto')
+                .insert([{ id: Date.now(), tipo: tipo, data_hora: dataHoraStr }]);
 
-    if (error) {
-        console.error("Erro ao sincronizar log com a nuvem:", error);
-        alert("❌ Erro ao enviar log para a nuvem.");
-        return;
+            if (error) {
+                console.warn("Falha no Supabase:", error);
+                alert("⚠️ A nuvem está inativa. O registro foi salvo APENAS LOCALMENTE no seu aparelho.");
+            }
+        } catch (e) {
+            console.warn("Erro de rede ao conectar à nuvem:", e);
+        }
     }
 
+    // --- SALVAMENTO E ATUALIZAÇÃO LOCAL (Sempre executa) ---
     const tag = document.getElementById("statusPlantaoTag");
     const txt = document.getElementById("statusPlantaoTexto");
     const liveInfo = document.getElementById("liveInfo");
@@ -149,7 +165,7 @@ async function registrarPonto(tipo) {
         renderizarLogs();
         
         enviarNotificacaoLocal("🔴 Plantão Encerrado", `Check-out registrado às ${horaStr}. Extrato atualizado!`);
-        alert("🟢 Plantão fechado com sucesso! Registrado na tabela abaixo.");
+        alert("🟢 Plantão fechado com sucesso! Salvo na tabela.");
     } else {
         if (tag) {
             tag.className = "status-tag active";
@@ -222,28 +238,36 @@ async function renderizarLogs() {
     const container = document.getElementById("logsCheckin");
     if (!container) return;
 
-    const { data: logs, error } = await _supabase
-        .from('logs_ponto')
-        .select('*')
-        .order('id', { ascending: false });
-
-    if (error) {
-        console.error("Erro ao buscar logs do Supabase:", error);
-        container.innerHTML = `<p class="vazio">Erro ao carregar logs da nuvem.</p>`;
+    if (!_supabase) {
+        container.innerHTML = `<p class="vazio">Logs na nuvem inacessíveis. Trabalhando offline.</p>`;
         return;
     }
 
-    if (!logs || logs.length === 0) {
-        container.innerHTML = `<p class="vazio">Nenhum log de ponto registrado.</p>`;
-        return;
-    }
+    try {
+        const { data: logs, error } = await _supabase
+            .from('logs_ponto')
+            .select('*')
+            .order('id', { ascending: false });
 
-    container.innerHTML = logs.map(log => `
-        <div class="log-item">
-            <span><strong>${log.tipo}</strong></span>
-            <span>${log.data_hora}</span>
-        </div>
-    `).join("");
+        if (error) {
+            container.innerHTML = `<p class="vazio">Sem conexão com o banco de dados (Supabase inativo).</p>`;
+            return;
+        }
+
+        if (!logs || logs.length === 0) {
+            container.innerHTML = `<p class="vazio">Nenhum log de ponto registrado na nuvem.</p>`;
+            return;
+        }
+
+        container.innerHTML = logs.map(log => `
+            <div class="log-item">
+                <span><strong>${log.tipo}</strong></span>
+                <span>${log.data_hora}</span>
+            </div>
+        `).join("");
+    } catch (e) {
+        container.innerHTML = `<p class="vazio">Erro de conexão com os logs da nuvem.</p>`;
+    }
 }
 function ajustarMeta() {
     const novaMeta = prompt("Digite o novo valor da meta financeira (R$):", metaFinanceira);
@@ -362,23 +386,32 @@ function bloquearMenuDev() {
 }
 
 async function limparLogsGlobalSupabase() {
+    if (!_supabase) {
+        alert("❌ O Banco de Dados na nuvem não está conectado no momento.");
+        return;
+    }
+
     const primeiraConf = confirm("⚠️ ATENÇÃO: Isso apagará permanentemente os logs de ponto de TODOS OS USUÁRIOS conectados à nuvem. Deseja continuar?");
     if (!primeiraConf) return;
 
     const segundaConf = confirm("🚨 ÚLTIMA CHANCE: Tem certeza ABSOLUTA que deseja zerar os logs globais de todos os aparelhos?");
     if (!segundaConf) return;
 
-    const { error } = await _supabase
-        .from('logs_ponto')
-        .delete()
-        .neq('id', 0);
+    try {
+        const { error } = await _supabase
+            .from('logs_ponto')
+            .delete()
+            .neq('id', 0);
 
-    if (error) {
-        alert("❌ Erro ao limpar logs globais na nuvem.");
-        console.error(error);
-    } else {
-        alert("🧹 Sucesso! Todos os logs globais foram apagados da nuvem.");
-        renderizarLogs();
+        if (error) {
+            alert("❌ Erro ao limpar logs globais na nuvem.");
+            console.error(error);
+        } else {
+            alert("🧹 Sucesso! Todos os logs globais foram apagados da nuvem.");
+            renderizarLogs();
+        }
+    } catch (e) {
+        alert("❌ Erro de rede ao tentar limpar logs globais.");
     }
 }
 
