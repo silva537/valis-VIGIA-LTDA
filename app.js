@@ -182,7 +182,6 @@ async function registrarPonto(tipo) {
 
     const coords = await obterGPS();
     
-    // CORRIGIDO: Removido 'id: Date.now()' para evitar estouro de inteiro no ID auto-incremento do Supabase
     const payloadLog = { 
         type: tipo, 
         lat: coords ? coords.lat : null, 
@@ -309,7 +308,8 @@ async function renderizarLogs() {
     }
 
     try {
-        const { data: logs, error } = await _supabase.from('logs_ponto').select('*').order('id', { ascending: false });
+        // CORRIGIDO: Ordenado com segurança por created_at
+        const { data: logs, error } = await _supabase.from('logs_ponto').select('*').order('created_at', { ascending: false });
         if (error || !logs || logs.length === 0) {
             container.innerHTML = `<p class="vazio">Nenhum log de ponto na nuvem.</p>`;
             return;
@@ -469,7 +469,7 @@ function mostrarConsoleLocal() {
     }
     if (consoleEl) {
         consoleEl.style.display = consoleVisivel ? "block" : "none";
-        if (consoleVisivel) consoleEl.innerHTML = "<strong>🖥️ Console de Debug Ativo</strong><br>Sistema pronto.<br>";
+        if (consoleVisivel) consoleEl.innerHTML = "<strong>🖥️️ Console de Debug Ativo</strong><br>Sistema pronto.<br>";
     }
 }
 
@@ -506,7 +506,7 @@ async function testarPingSupabase() {
         if (!error) {
             alert(`⚡ Ping / Latência Nuvem: ${latencia} ms (Conexão OK)`);
         } else {
-            alert(`⚠️️ Conectado com aviso: ${error.message} (${latencia} ms)`);
+            alert(`⚠ Conectado com aviso: ${error.message} (${latencia} ms)`);
         }
     } catch (err) {
         alert(`❌ Erro ao testar ping: ${err.message}`);
