@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarTemaSalvo();
     renderizar();
     renderizarLogs();
-    renderizarAvisos(); // Carrega os avisos da nuvem ao iniciar
+    renderizarAvisos();
 });
 
 function enviarNotificacaoLocal(titulo, mensagem) {
@@ -92,7 +92,6 @@ function carregarTemaSalvo() {
         themeBtn.innerText = temaSalvo === "dark" ? "☀️ Tema Claro" : "🌙 Tema Escuro";
     }
 }
-
 // --- REGISTRAR PONTO DIRETO NA NUVEM (SUPABASE) ---
 async function registrarPonto(tipo) {
     const agora = new Date();
@@ -294,6 +293,7 @@ async function promptCriarAviso() {
         renderizarAvisos();
     }
 }
+
 function ajustarMeta() {
     const novaMeta = prompt("Digite o novo valor da meta financeira (R$):", metaFinanceira);
     if (novaMeta && !isNaN(novaMeta)) {
@@ -437,10 +437,14 @@ function dumpLocalStorage() {
         metaFinanceira: localStorage.getItem("metaFinanceira") || 1000,
         temaPonto: localStorage.getItem("temaPonto") || "dark"
     };
+    
+    const textoFormatado = JSON.stringify(dadosGerais, null, 2);
+    
     console.group("🖥️ [VALIS DEV STATE INSPECTOR]");
     console.log("Dados Atuais:", dadosGerais);
     console.groupEnd();
-    alert("💻 Estado atual do localStorage impresso no Console do Navegador (F12)!");
+
+    alert("🖥️ ESTADO ATUAL DO LOCALSTORAGE:\n\n" + textoFormatado);
 }
 
 function toggleMenuSistema() {
