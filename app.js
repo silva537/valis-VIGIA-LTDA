@@ -254,7 +254,7 @@ function exportarExcel() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Vales_Naturalidade_Plantoes.csv`);
+    link.setAttribute("download", `Valis_Naturalidade_Plantoes.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -336,7 +336,7 @@ function exportarBackupJSON() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `vales_backup_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `valis_backup_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
