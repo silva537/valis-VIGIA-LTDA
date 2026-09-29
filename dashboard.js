@@ -1,3 +1,5 @@
+let meuGraficoInstancia = null;
+
 function atualizarDashboard() {
     const plantoes = buscarPlantoes();
 
@@ -5,6 +7,7 @@ function atualizarDashboard() {
     let totalSono = 0;
     let proprios = 0;
     let coberturas = 0;
+    let turnosContagem = { "Manhã": 0, "Noturno": 0, "24h": 0 };
 
     plantoes.forEach(item => {
         totalValores += parseFloat(item.valor) || 0;
@@ -13,6 +16,11 @@ function atualizarDashboard() {
             coberturas++;
         } else {
             proprios++;
+        }
+        if (turnosContagem[item.turno] !== undefined) {
+            turnosContagem[item.turno]++;
+        } else {
+            turnosContagem[item.turno] = 1;
         }
     });
 
@@ -46,4 +54,39 @@ function atualizarDashboard() {
 
     const metaProgressBarEl = document.getElementById("metaProgressBar");
     if (metaProgressBarEl) metaProgressBarEl.style.width = `${percentual}%`;
+
+    // Atualizar Gráfico Chart.js no Dashboard
+    renderizarGrafico(turnosContagem);
+}
+
+function renderizarGrafico(dadosTurnos) {
+    const ctx = document.getElementById('graficoDesempenho');
+    if (!ctx) return;
+
+    if (meuGraficoInstancia) {
+        meuGraficoInstancia.destroy();
+    }
+
+    meuGraficoInstancia = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(dadosTurnos),
+            datasets: [{
+                data: Object.values(dadosTurnos),
+                backgroundColor: ['#2563eb', '#10b981', '#f59e0b'],
+                borderColor: '#0d1322',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
 }

@@ -10,6 +10,9 @@
     <!-- SDK OFICIAL DO SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- SDK CHART.JS PARA GRÁFICOS (Opção 4) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS (100% GRATUITO) -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -31,9 +34,9 @@
         </div>
         <div class="header-badges" style="display: flex; gap: 8px; align-items: center;">
             <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
-            <span class="badge version">v3.7 Cloud Ponto</span>
+            <span class="badge version">v3.8 Cloud Ponto</span>
             
-            <!-- ⚙️ MENU SISTEMA (Atualizações e Cache) -->
+            <!-- ⚙️ MENU SISTEMA -->
             <div class="dev-menu-wrapper">
                 <button class="dev-menu-btn" onclick="toggleMenuSistema()" title="Menu Sistema">⚙️</button>
                 <div class="dev-dropdown" id="sistemaDropdown">
@@ -54,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- 🛠️ MENU DEV (Com Senha e Limpeza Global via Supabase) -->
+            <!-- 🛠️ MENU DEV -->
             <div class="dev-menu-wrapper">
                 <button class="dev-menu-btn" onclick="tentarAbrirMenuDev()" title="Menu Developer">🛠️</button>
                 <div class="dev-dropdown" id="devDropdown">
@@ -63,10 +66,40 @@
                         <span class="status-tag dev-tag" id="statusDevTag">PROTEGIDO</span>
                     </div>
                     <p class="dev-description">
-                        Ferramentas avançadas e banco de dados em nuvem.
+                        Ferramentas avançadas, banco em nuvem e fila offline.
                     </p>
                     <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
                     
+                    <button class="btn btn-primary full-btn" onclick="injetarDadosTeste()" style="margin-top: 0; font-size: 0.75rem;">
+                        📝 Preencher Auto (Mock Data)
+                    </button>
+
+                    <button class="btn btn-outline full-btn" id="btnModoOffline" onclick="alternarModoOffline()" style="margin-top: 6px; font-size: 0.75rem;">
+                        🌐 Modo Offline Simulado: <strong style="color:#10b981">OFF</strong>
+                    </button>
+
+                    <button class="btn btn-outline full-btn" onclick="mostrarConsoleLocal()" style="margin-top: 6px; font-size: 0.75rem; border-color: #00ffcc;">
+                        🖥️ Exibir Console na Tela
+                    </button>
+
+                    <button class="btn btn-outline full-btn" onclick="toggleCSSOutline()" style="margin-top: 6px; font-size: 0.75rem;">
+                        🔳 Debugger Visual (CSS Outline)
+                    </button>
+
+                    <button class="btn btn-outline full-btn" onclick="testarVibracao()" style="margin-top: 6px; font-size: 0.75rem;">
+                        📳 Testar Vibração (Haptic)
+                    </button>
+
+                    <button class="btn btn-outline full-btn" onclick="testarPingSupabase()" style="margin-top: 6px; font-size: 0.75rem;">
+                        ⚡ Testar Ping / Latência Nuvem
+                    </button>
+
+                    <button class="btn btn-danger full-btn" onclick="hardResetLocal()" style="margin-top: 6px; font-size: 0.75rem;">
+                        🔥 Hard Reset (Zerar LocalStorage)
+                    </button>
+
+                    <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
+
                     <button class="btn btn-outline full-btn" onclick="exportarBackupJSON()" style="margin-top: 0; font-size: 0.75rem;">
                         💾 Exportar Backup (JSON)
                     </button>
@@ -197,7 +230,15 @@
                 <button class="btn-link" onclick="ajustarMeta()">⚙ Ajustar Meta</button>
             </div>
 
-            <div class="stats-cards-grid">
+            <!-- GRÁFICO DE DESEMPENHO (Opção 4) -->
+            <div class="meta-container" style="margin-top: 15px;">
+                <h3 class="section-title" style="margin-top: 0;">Distribuição de Turnos</h3>
+                <div style="position: relative; height: 180px; width: 100%;">
+                    <canvas id="graficoDesempenho"></canvas>
+                </div>
+            </div>
+
+            <div class="stats-cards-grid" style="margin-top: 15px;">
                 <div class="stat-card">
                     <small>Previsão Cash</small>
                     <strong class="warning-text">Falta 1 dia</strong>
