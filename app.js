@@ -16,7 +16,7 @@ try {
 const VALORES_TURNO = {
     "Manhã": 100.00,
     "Noturno": 100.00,
-    "24h": 250.00
+    "24h": 200.00
 };
 
 let metaFinanceira = parseFloat(localStorage.getItem("metaFinanceira")) || 1000.00;
@@ -106,14 +106,14 @@ async function registrarPonto(tipo) {
     const agora = new Date();
     const horaStr = agora.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
     const dataIso = agora.toISOString().split('T')[0];
-    const dataHoraStr = agora.toLocaleDateString("pt-BR") + " às " + horaStr;
 
     // Tenta enviar para o Supabase sem bloquear a rotina local
     if (_supabase) {
         try {
+            // CORREÇÃO: Enviando apenas 'id' e 'type'
             const { error } = await _supabase
                 .from('logs_ponto')
-                .insert([{ id: Date.now(), tipo: tipo, data_hora: dataHoraStr }]);
+                .insert([{ id: Date.now(), type: tipo }]);
 
             if (error) {
                 console.warn("Falha no Supabase:", error);
@@ -233,7 +233,6 @@ function formatarData(dataIso) {
     if (partes.length < 3) return dataIso;
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
-
 async function renderizarLogs() {
     const container = document.getElementById("logsCheckin");
     if (!container) return;
@@ -259,16 +258,21 @@ async function renderizarLogs() {
             return;
         }
 
-        container.innerHTML = logs.map(log => `
-            <div class="log-item">
-                <span><strong>${log.tipo}</strong></span>
-                <span>${log.data_hora}</span>
-            </div>
-        `).join("");
+        // CORREÇÃO: Buscando 'type' e 'created_at' do banco de dados
+        container.innerHTML = logs.map(log => {
+            const dataFormatada = log.created_at ? new Date(log.created_at).toLocaleString("pt-BR") : "";
+            return `
+                <div class="log-item">
+                    <span><strong>${log.type}</strong></span>
+                    <span>${dataFormatada}</span>
+                </div>
+            `;
+        }).join("");
     } catch (e) {
         container.innerHTML = `<p class="vazio">Erro de conexão com os logs da nuvem.</p>`;
     }
 }
+
 function ajustarMeta() {
     const novaMeta = prompt("Digite o novo valor da meta financeira (R$):", metaFinanceira);
     if (novaMeta && !isNaN(novaMeta)) {
@@ -391,7 +395,7 @@ async function limparLogsGlobalSupabase() {
         return;
     }
 
-    const primeiraConf = confirm("⚠️ ATENÇÃO: Isso apagará permanentemente os logs de ponto de TODOS OS USUÁRIOS conectados à nuvem. Deseja continuar?");
+    const primeiraConf = confirm("⚠️️ ATENÇÃO: Isso apagará permanentemente os logs de ponto de TODOS OS USUÁRIOS conectados à nuvem. Deseja continuar?");
     if (!primeiraConf) return;
 
     const segundaConf = confirm("🚨 ÚLTIMA CHANCE: Tem certeza ABSOLUTA que deseja zerar os logs globais de todos os aparelhos?");
