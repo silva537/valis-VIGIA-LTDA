@@ -297,21 +297,85 @@ function renderizar() {
 }
 
 function toggleMenuDev() {
-    const dropdown = document.getElementById("devDropdown");
-    if (dropdown) {
-        dropdown.classList.toggle("show");
-    }
+    const devDropdown = document.getElementById("devDropdown");
+    const sisDropdown = document.getElementById("sistemaDropdown");
+    if (sisDropdown) sisDropdown.classList.remove("show");
+    if (devDropdown) devDropdown.classList.toggle("show");
+}
+
+function toggleMenuSistema() {
+    const sisDropdown = document.getElementById("sistemaDropdown");
+    const devDropdown = document.getElementById("devDropdown");
+    if (devDropdown) devDropdown.classList.remove("show");
+    if (sisDropdown) sisDropdown.classList.toggle("show");
 }
 
 document.addEventListener("click", (event) => {
-    const wrapper = document.querySelector(".dev-menu-wrapper");
-    const dropdown = document.getElementById("devDropdown");
-    if (wrapper && dropdown && !wrapper.contains(event.target)) {
-        dropdown.classList.remove("show");
+    const wrappers = document.querySelectorAll(".dev-menu-wrapper");
+    let clickInside = false;
+    wrappers.forEach(w => {
+        if (w.contains(event.target)) clickInside = true;
+    });
+
+    if (!clickInside) {
+        const devDropdown = document.getElementById("devDropdown");
+        const sisDropdown = document.getElementById("sistemaDropdown");
+        if (devDropdown) devDropdown.classList.remove("show");
+        if (sisDropdown) sisDropdown.classList.remove("show");
     }
 });
 
-// TERMOS DE USO E DIRETRIZES TECNOLÓGICAS (PADRÃO LGPD - Lei nº 13.709/2018)
+function exportarBackupJSON() {
+    const dados = {
+        plantoes: JSON.parse(localStorage.getItem("plantoes")) || [],
+        logsPonto: JSON.parse(localStorage.getItem("logsPonto")) || [],
+        metaFinanceira: localStorage.getItem("metaFinanceira") || 1000,
+        temaPonto: localStorage.getItem("temaPonto") || "dark"
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `vales_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+}
+
+function importarBackupJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const dados = JSON.parse(e.target.result);
+            if (dados.plantoes) localStorage.setItem("plantoes", JSON.stringify(dados.plantoes));
+            if (dados.logsPonto) localStorage.setItem("logsPonto", JSON.stringify(dados.logsPonto));
+            if (dados.metaFinanceira) localStorage.setItem("metaFinanceira", dados.metaFinanceira);
+            if (dados.temaPonto) localStorage.setItem("temaPonto", dados.temaPonto);
+
+            alert("✅ Backup restaurado com sucesso! O app será reiniciado.");
+            location.reload();
+        } catch (err) {
+            alert("❌ Erro ao processar arquivo JSON.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function gerarDadosTeste() {
+    const plantoesExemplo = [
+        { id: Date.now() - 86400000 * 2, data: "2026-09-26", turno: "Manhã", horaInicio: "06:00", horaFim: "18:00", sono: 7, valor: 100, horasExtras: 0, colega: "", obs: "Plantão tranquilo (Teste Automático)" },
+        { id: Date.now() - 86400000, data: "2026-09-27", turno: "Noturno", horaInicio: "18:00", horaFim: "06:00", sono: 6, valor: 100, horasExtras: 2, colega: "Vigilante Teste", obs: "Cobertura (Teste Automático)" }
+    ];
+
+    const atuais = buscarPlantoes();
+    salvarStorage([...atuais, ...plantoesExemplo]);
+    renderizar();
+    alert("🧪 Dados de teste inseridos com sucesso!");
+}
+
 function exibirTermosUso() {
     alert(
         "📜 TERMOS DE USO E POLÍTICA DE PRIVACIDADE (LGPD - Lei nº 13.709/2018)\n\n" +
@@ -322,7 +386,6 @@ function exibirTermosUso() {
     );
 }
 
-// GESTÃO E ATUALIZAÇÃO AUTOMÁTICA DO SERVICE WORKER (PWA)
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then((registration) => {
         registration.update();
@@ -338,7 +401,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// 🔄 FUNÇÃO DE FORÇAR VERIFICAÇÃO MANUAL
 function forcarVerificacaoAtualizacao() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then((registration) => {
@@ -351,7 +413,6 @@ function forcarVerificacaoAtualizacao() {
     }
 }
 
-// 🧹 LIMPEZA FORÇADA DE CACHE E RECARREGAMENTO COMPLETO
 function limparCacheERecarregar() {
     if (confirm("Isso apagará o cache local das páginas e recarregará a versão mais recente do servidor. Deseja continuar?")) {
         if ('caches' in window) {

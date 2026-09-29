@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ponto-pwa-v1.0.3'; // Incrementado para atualizar no dispositivo
+const CACHE_NAME = 'ponto-pwa-v1.0.4';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -11,9 +11,7 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Nova versão detectada, instalando e assumindo imediatamente...');
   self.skipWaiting();
-
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -28,13 +26,11 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Limpando caches antigos...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[SW] Apagando cache antigo:', cache);
             return caches.delete(cache);
           }
         })

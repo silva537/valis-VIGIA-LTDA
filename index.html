@@ -26,29 +26,59 @@
             <span class="status-dot online"></span>
             <h1>🇧🇷 VALES NATURALIDADE LTDA</h1>
         </div>
-        <div class="header-badges">
+        <div class="header-badges" style="display: flex; gap: 8px; align-items: center;">
             <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
             <span class="badge version">v3.3 Cloud</span>
             
+            <!-- ⚙️ MENU SISTEMA (Atualizações e Cache) -->
             <div class="dev-menu-wrapper">
-                <button class="dev-menu-btn" onclick="toggleMenuDev()" title="Menu Developer">☰</button>
-                <div class="dev-dropdown" id="devDropdown">
+                <button class="dev-menu-btn" onclick="toggleMenuSistema()" title="Menu Sistema">⚙️</button>
+                <div class="dev-dropdown" id="sistemaDropdown">
                     <div class="card-header">
-                        <h2>🛠️ MENU DEV / SYNC</h2>
-                        <span class="status-tag dev-tag">SISTEMA</span>
+                        <h2>⚙️ MENU SISTEMA</h2>
+                        <span class="status-tag active">APP</span>
                     </div>
                     <p class="dev-description">
-                        Módulo Push Server ativo via OneSignal Web SDK. Notificações automáticas sem custo adicional.
+                        Módulo Push Server OneSignal ativo.<br>Gerenciamento de cache e versão.
                     </p>
                     <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
                     <button class="btn btn-warning full-btn" onclick="forcarVerificacaoAtualizacao()" style="margin-top: 0; font-size: 0.75rem;">
-                        🔄 Resincronizar App / Buscar Update
+                        🔄 Buscar Atualização do App
                     </button>
                     <button class="btn btn-danger full-btn" onclick="limparCacheERecarregar()" style="margin-top: 6px; font-size: 0.75rem;">
                         🧹 Limpar Cache & Forçar Reload
                     </button>
                 </div>
             </div>
+
+            <!-- 🛠️ MENU DEV (Testes e Backup) -->
+            <div class="dev-menu-wrapper">
+                <button class="dev-menu-btn" onclick="toggleMenuDev()" title="Menu Developer">🛠️</button>
+                <div class="dev-dropdown" id="devDropdown">
+                    <div class="card-header">
+                        <h2>🛠️ MENU DEV</h2>
+                        <span class="status-tag dev-tag">DEV</span>
+                    </div>
+                    <p class="dev-description">
+                        Ferramentas exclusivas para manutenção e testes de dados locais.
+                    </p>
+                    <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
+                    
+                    <button class="btn btn-outline full-btn" onclick="exportarBackupJSON()" style="margin-top: 0; font-size: 0.75rem;">
+                        💾 Exportar Backup (JSON)
+                    </button>
+                    
+                    <label for="importJsonInput" class="btn btn-outline full-btn" style="font-size: 0.75rem; text-align: center; cursor: pointer; margin-top: 6px; display: block;">
+                        📂 Importar Backup (JSON)
+                    </label>
+                    <input type="file" id="importJsonInput" accept=".json" onchange="importarBackupJSON(event)" style="display: none;">
+                    
+                    <button class="btn btn-warning full-btn" onclick="gerarDadosTeste()" style="margin-top: 6px; font-size: 0.75rem;">
+                        🧪 Gerar Plantões de Teste
+                    </button>
+                </div>
+            </div>
+
         </div>
     </header>
 
@@ -224,7 +254,6 @@
 
             <h3 class="section-title">Ferramentas & Sincronização</h3>
             <button class="btn btn-outline full-btn" onclick="exportarExcel()">📊 Exportar Dados para Excel (CSV Discriminado)</button>
-            <button class="btn btn-outline full-btn" onclick="forcarVerificacaoAtualizacao()" style="margin-top: 8px;">🔄 Buscar Atualizações Manualmente</button>
         </section>
 
     </main>
