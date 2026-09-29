@@ -1,3 +1,9 @@
+// --- CONFIGURAÇÃO DO SUPABASE ---
+const SUPABASE_URL = 'https://sxrthryhzodryrzndveg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_3FDSO7qfonD0BLRTzPT6bA_7a7jUarD';
+
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const VALORES_TURNO = {
     "Manhã": 100.00,
     "Noturno": 100.00,
@@ -20,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
+    renderizarLogs(); // Carrega os logs da nuvem ao iniciar
 });
 
 function enviarNotificacaoLocal(titulo, mensagem) {
@@ -85,15 +92,23 @@ function carregarTemaSalvo() {
     }
 }
 
-function registrarPonto(tipo) {
-    const logs = JSON.parse(localStorage.getItem("logsPonto")) || [];
+// --- REGISTRAR PONTO DIRETO NA NUVEM (SUPABASE) ---
+async function registrarPonto(tipo) {
     const agora = new Date();
     const horaStr = agora.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
     const dataIso = agora.toISOString().split('T')[0];
     const dataHoraStr = agora.toLocaleDateString("pt-BR") + " às " + horaStr;
 
-    logs.push({ tipo, dataHora: dataHoraStr });
-    localStorage.setItem("logsPonto", JSON.stringify(logs));
+    // Envia o log para a tabela logs_ponto no Supabase
+    const { error } = await _supabase
+        .from('logs_ponto')
+        .insert([{ id: Date.now(), tipo: tipo, data_hora: dataHoraStr }]);
+
+    if (error) {
+        console.error("Erro ao sincronizar log com a nuvem:", error);
+        alert("❌ Erro ao enviar log para a nuvem.");
+        return;
+    }
 
     const tag = document.getElementById("statusPlantaoTag");
     const txt = document.getElementById("statusPlantaoTexto");
@@ -132,6 +147,7 @@ function registrarPonto(tipo) {
         document.getElementById("obs").value = "";
 
         renderizar();
+        renderizarLogs();
         
         enviarNotificacaoLocal("🔴 Plantão Encerrado", `Check-out registrado às ${horaStr}. Extrato atualizado!`);
         alert("🟢 Plantão fechado com sucesso! Registrado na tabela abaixo.");
@@ -203,21 +219,31 @@ function formatarData(dataIso) {
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
-function renderizarLogs() {
-    const logs = JSON.parse(localStorage.getItem("logsPonto")) || [];
+// --- RENDERIZAR LOGS DIRETO DO SUPABASE ---
+async function renderizarLogs() {
     const container = document.getElementById("logsCheckin");
-
     if (!container) return;
 
-    if (logs.length === 0) {
+    const { data: logs, error } = await _supabase
+        .from('logs_ponto')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        console.error("Erro ao buscar logs do Supabase:", error);
+        container.innerHTML = `<p class="vazio">Erro ao carregar logs da nuvem.</p>`;
+        return;
+    }
+
+    if (!logs || logs.length === 0) {
         container.innerHTML = `<p class="vazio">Nenhum log de ponto registrado.</p>`;
         return;
     }
 
-    container.innerHTML = logs.slice().reverse().map(log => `
+    container.innerHTML = logs.map(log => `
         <div class="log-item">
             <span><strong>${log.tipo}</strong></span>
-            <span>${log.dataHora}</span>
+            <span>${log.data_hora}</span>
         </div>
     `).join("");
 }
@@ -296,11 +322,83 @@ function renderizar() {
     renderizarLogs();
 }
 
-function toggleMenuDev() {
+/* --- SISTEMA DE SENHA E SEGURANÇA DO MENU DEV --- */
+function tentarAbrirMenuDev() {
     const devDropdown = document.getElementById("devDropdown");
     const sisDropdown = document.getElementById("sistemaDropdown");
     if (sisDropdown) sisDropdown.classList.remove("show");
-    if (devDropdown) devDropdown.classList.toggle("show");
+
+    const jaAutenticado = sessionStorage.getItem("devUnlocked") === "true";
+
+    if (!jaAutenticado) {
+        const senhaInformada = prompt("🔒 Área Restrita: Digite a senha de Desenvolvedor:");
+        if (senhaInformada === "valis2026") {
+            sessionStorage.setItem("devUnlocked", "true");
+            const tag = document.getElementById("statusDevTag");
+            if(tag) {
+                tag.className = "status-tag active";
+                tag.innerText = "AUTORIZADO";
+            }
+            alert("🔓 Acesso liberado ao Menu Dev!");
+        } else if (senhaInformada !== null) {
+            alert("❌ Senha incorreta!");
+            return;
+        } else {
+            return; 
+        }
+    }
+
+    if (devDropdown) {
+        devDropdown.classList.toggle("show");
+    }
+}
+
+function bloquearMenuDev() {
+    sessionStorage.removeItem("devUnlocked");
+    const devDropdown = document.getElementById("devDropdown");
+    if (devDropdown) devDropdown.classList.remove("show");
+    const tag = document.getElementById("statusDevTag");
+    if(tag) {
+        tag.className = "status-tag dev-tag";
+        tag.innerText = "PROTEGIDO";
+    }
+    alert("🔒 Menu Dev bloqueado com sucesso.");
+}
+
+// --- FUNÇÃO GLOBAL DE LIMPEZA DE LOGS NO SUPABASE (COM DUPLA SEGURANÇA) ---
+async function limparLogsGlobalSupabase() {
+    // 1ª Confirmação de Segurança
+    const primeiraConf = confirm("⚠️ ATENÇÃO: Isso apagará permanentemente os logs de ponto de TODOS OS USUÁRIOS conectados à nuvem. Deseja continuar?");
+    if (!primeiraConf) return;
+
+    // 2ª Confirmação de Segurança (Anti-clique acidental)
+    const segundaConf = confirm("🚨 ÚLTIMA CHANCE: Tem certeza ABSOLUTA que deseja zerar os logs globais de todos os aparelhos?");
+    if (!segundaConf) return;
+
+    const { error } = await _supabase
+        .from('logs_ponto')
+        .delete()
+        .neq('id', 0); // Remove todos os registros da tabela
+
+    if (error) {
+        alert("❌ Erro ao limpar logs globais na nuvem.");
+        console.error(error);
+    } else {
+        alert("🧹 Sucesso! Todos os logs globais foram apagados da nuvem.");
+        renderizarLogs(); // Atualiza a tela imediatamente
+    }
+}
+
+function dumpLocalStorage() {
+    const dadosGerais = {
+        plantoes: JSON.parse(localStorage.getItem("plantoes")) || [],
+        metaFinanceira: localStorage.getItem("metaFinanceira") || 1000,
+        temaPonto: localStorage.getItem("temaPonto") || "dark"
+    };
+    console.group("🖥️ [VALIS DEV STATE INSPECTOR]");
+    console.log("Dados Atuais:", dadosGerais);
+    console.groupEnd();
+    alert("💻 Estado atual do localStorage impresso no Console do Navegador (F12)!");
 }
 
 function toggleMenuSistema() {
@@ -320,7 +418,6 @@ document.addEventListener("click", (event) => {
     if (!clickInside) {
         const devDropdown = document.getElementById("devDropdown");
         const sisDropdown = document.getElementById("sistemaDropdown");
-        if (devDropdown) devDropdown.classList.remove("show");
         if (sisDropdown) sisDropdown.classList.remove("show");
     }
 });
@@ -328,7 +425,6 @@ document.addEventListener("click", (event) => {
 function exportarBackupJSON() {
     const dados = {
         plantoes: JSON.parse(localStorage.getItem("plantoes")) || [],
-        logsPonto: JSON.parse(localStorage.getItem("logsPonto")) || [],
         metaFinanceira: localStorage.getItem("metaFinanceira") || 1000,
         temaPonto: localStorage.getItem("temaPonto") || "dark"
     };
@@ -351,7 +447,6 @@ function importarBackupJSON(event) {
         try {
             const dados = JSON.parse(e.target.result);
             if (dados.plantoes) localStorage.setItem("plantoes", JSON.stringify(dados.plantoes));
-            if (dados.logsPonto) localStorage.setItem("logsPonto", JSON.stringify(dados.logsPonto));
             if (dados.metaFinanceira) localStorage.setItem("metaFinanceira", dados.metaFinanceira);
             if (dados.temaPonto) localStorage.setItem("temaPonto", dados.temaPonto);
 
