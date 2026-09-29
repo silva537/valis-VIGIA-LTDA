@@ -27,12 +27,14 @@
 
 <body>
 
-    <header class="main-header">
-        <div class="logo-area">
+    <!-- CABEÇALHO CENTRALIZADO E MODERNO -->
+    <header class="main-header" style="justify-content: center; flex-direction: column; gap: 10px; text-align: center; padding: 20px 15px;">
+        <div class="logo-area" style="justify-content: center;">
             <span class="status-dot online"></span>
-            <h1>🇧🇷 VALIS NATURALIDADE LTDA</h1>
+            <h1 style="font-size: 1.25rem; margin: 0;">🇧🇷 VALIS NATURALIDADE LTDA</h1>
         </div>
-        <div class="header-badges" style="display: flex; gap: 8px; align-items: center;">
+        
+        <div class="header-badges" style="display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;">
             <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
             <span class="badge version">v3.8 Cloud Ponto</span>
             
@@ -79,7 +81,7 @@
                     </button>
 
                     <button class="btn btn-outline full-btn" onclick="mostrarConsoleLocal()" style="margin-top: 6px; font-size: 0.75rem; border-color: #00ffcc;">
-                        🖥️ Exibir Console na Tela
+                        🖥️️ Exibir Console na Tela
                     </button>
 
                     <button class="btn btn-outline full-btn" onclick="toggleCSSOutline()" style="margin-top: 6px; font-size: 0.75rem;">
@@ -126,38 +128,44 @@
                     </button>
                 </div>
             </div>
-
         </div>
     </header>
 
-    <main class="container">
+    <!-- CONTAINER CENTRALIZADO COM MAX-WIDTH -->
+    <main class="container" style="max-width: 650px; margin: 0 auto; padding: 15px;">
 
         <!-- MODO PLANTÃO ATIVO -->
-        <section class="card border-rgb">
-            <div class="card-header">
+        <section class="card border-rgb" style="text-align: center;">
+            <div class="card-header" style="justify-content: center;">
                 <h2>⚡ MODO PLANTÃO ATIVO</h2>
                 <span class="status-tag inactive" id="statusPlantaoTag">INATIVO</span>
             </div>
 
-            <div class="ponto-status-box" id="pontoStatusBox">
+            <div class="ponto-status-box" id="pontoStatusBox" style="margin: 15px 0;">
                 <p class="subtitle" id="statusPlantaoTexto">Nenhum plantão em andamento no momento.</p>
-                <div class="live-info" id="liveInfo" style="display: none;">
+                <div class="live-info" id="liveInfo" style="display: none; justify-content: center; gap: 10px; margin-top: 8px;">
                     <div class="info-badge">Último evento: <strong id="lastEvent">--</strong></div>
                     <div class="info-badge">Registrado às: <strong id="lastTime">--</strong></div>
                 </div>
             </div>
 
-            <div class="ponto-buttons">
+            <!-- Botões de Ponto Principais -->
+            <div class="ponto-buttons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <button class="btn btn-success" onclick="registrarPonto('Check-in (Entrada)')">🟢 Check-in (Entrada)</button>
                 <button class="btn btn-danger" onclick="registrarPonto('Check-out (Saída)')">🔴 Check-out (Fim)</button>
             </div>
-            <button class="btn btn-warning full-btn" onclick="registrarPonto('Saída/Retorno Almoço')">🍔 Saída / Retorno Almoço</button>
+            
+            <!-- Botões de Almoço Separados -->
+            <div class="ponto-buttons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <button class="btn btn-warning" onclick="registrarSaidaAlmoco()">🍔 Saída Almoço</button>
+                <button class="btn btn-success" onclick="registrarRetornoAlmoco()">🔙 Voltei Almoço</button>
+            </div>
         </section>
 
         <!-- NOVO REGISTRO DE PLANTÃO -->
         <section class="card">
             <div class="card-header">
-                <h2>NOVO REGISTRO</h2>
+                <h2>📝 NOVO REGISTRO</h2>
                 <span class="status-tag active">AUTO-SAVE ATIVO</span>
             </div>
 
@@ -202,22 +210,25 @@
                 </div>
             </div>
 
-            <div class="form-group full-width">
+            <!-- PAINEL DE ALERTA INTELIGENTE DE FADIGA -->
+            <div id="painelAlertaFadiga" style="display: none; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.85rem; font-weight: bold;"></div>
+
+            <div class="form-group full-width" style="margin-top: 10px;">
                 <label>Cobriu folga de (Opcional - Carona Solidária)</label>
                 <input type="text" id="colega" placeholder="Nome do colega / Anunciar troca">
             </div>
 
-            <div class="form-group full-width">
+            <div class="form-group full-width" style="margin-top: 10px;">
                 <label>Observação</label>
                 <textarea id="obs" rows="2" placeholder="Detalhes ou anotações..."></textarea>
             </div>
 
-            <button class="btn btn-primary full-btn" onclick="salvarPlantao()">Salvar Plantão</button>
+            <button class="btn btn-primary full-btn" onclick="salvarPlantao()" style="margin-top: 15px;">Salvar Plantão</button>
         </section>
 
         <!-- VISÃO GERAL & SAÚDE -->
         <section class="card">
-            <h2>VISÃO GERAL & SAÚDE</h2>
+            <h2 style="text-align: center; margin-bottom: 15px;">📊 VISÃO GERAL & SAÚDE</h2>
 
             <div class="meta-container">
                 <div class="meta-header">
@@ -227,12 +238,14 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="metaProgressBar" style="width: 0%;"></div>
                 </div>
-                <button class="btn-link" onclick="ajustarMeta()">⚙ Ajustar Meta</button>
+                <div style="text-align: center; margin-top: 8px;">
+                    <button class="btn-link" onclick="ajustarMeta()">⚙ Ajustar Meta</button>
+                </div>
             </div>
 
-            <!-- GRÁFICO DE DESEMPENHO (Opção 4) -->
+            <!-- GRÁFICO DE DESEMPENHO -->
             <div class="meta-container" style="margin-top: 15px;">
-                <h3 class="section-title" style="margin-top: 0;">Distribuição de Turnos</h3>
+                <h3 class="section-title" style="margin-top: 0; text-align: center; font-size: 0.95rem;">Distribuição de Turnos</h3>
                 <div style="position: relative; height: 180px; width: 100%;">
                     <canvas id="graficoDesempenho"></canvas>
                 </div>
@@ -240,13 +253,13 @@
 
             <div class="stats-cards-grid" style="margin-top: 15px;">
                 <div class="stat-card">
-                    <small>Previsão Cash</small>
-                    <strong class="warning-text">Falta 1 dia</strong>
+                    <small>Previsão Cash (Recebimento)</small>
+                    <strong class="warning-text" id="lblDiaRecebimento">Dia 05</strong>
                 </div>
 
                 <div class="stat-card alert-border">
-                    <small>Fechamento RH</small>
-                    <strong class="danger-text">Falta 1 dia!</strong>
+                    <small>Fechamento RH (Folha)</small>
+                    <strong class="danger-text" id="lblDiaFechamento">Dia 25</strong>
                 </div>
 
                 <div class="stat-card">
@@ -270,12 +283,16 @@
                 </div>
             </div>
 
-            <button class="btn btn-fechar-folha full-btn" onclick="fecharFolha()">✔ Recebi / Fechar Folha Atual</button>
+            <!-- Botões de Configuração e Fechamento -->
+            <div style="text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn-link" onclick="configurarDatasFolha()">⚙ Configurar Dias de Fechamento e Recebimento</button>
+                <button class="btn btn-fechar-folha full-btn" onclick="fecharFolha()">✔ Recebi / Fechar Folha Atual</button>
+            </div>
         </section>
 
         <!-- EXTRATOS E ARQUIVOS -->
         <section class="card">
-            <h2>EXTRATOS E ARQUIVOS</h2>
+            <h2 style="text-align: center; margin-bottom: 15px;">📁 EXTRATOS E ARQUIVOS</h2>
 
             <div class="table-responsive">
                 <table>
@@ -300,24 +317,25 @@
 
             <!-- LOGS EXPANSÍVEIS -->
             <details class="logs-accordion" style="margin-top: 15px;">
-                <summary class="section-title" style="cursor: pointer; font-weight: bold; user-select: none;">
-                    📋 LOGS DE CHECK-IN / INTERVALOS (clique para expandir/recolher)
+                <summary class="section-title" style="cursor: pointer; font-weight: bold; user-select: none; text-align: center;">
+                    📋 LOGS DE CHECK-IN / INTERVALOS
                 </summary>
                 <div id="logsCheckin" class="logs-container" style="margin-top: 8px;">
-                    <p class="vazio">Nenhum log de ponto registrado.</p>
+                    <p class="vazio" style="text-align: center;">Nenhum log de ponto registrado.</p>
                 </div>
             </details>
 
-            <h3 class="section-title">Ferramentas & Sincronização</h3>
+            <h3 class="section-title" style="text-align: center; margin-top: 20px;">Ferramentas & Sincronização</h3>
             <button class="btn btn-outline full-btn" onclick="exportarExcel()">📊 Exportar Dados para Excel (CSV Discriminado)</button>
         </section>
 
     </main>
 
-    <main class="main-footer">
+    <!-- RODAPÉ CENTRALIZADO -->
+    <main class="main-footer" style="text-align: center; padding: 20px; margin-top: 20px;">
         <p><strong>Valis Naturalidade LTDA</strong></p>
         <p class="sub-footer">CNPJ Registrado • Sistema Ponto Vigias</p>
-        <p><a href="#" onclick="exibirTermosUso()">📜 Termos de Uso & Diretrizes Tecnológicas (LGPD)</a></p>
+        <p style="margin: 8px 0;"><a href="#" onclick="exibirTermosUso()">📜 Termos de Uso & Diretrizes Tecnológicas (LGPD)</a></p>
         <p class="dev-by">Desenvolvido por <strong>Vitor Silva</strong> 🇧🇷</p>
     </main>
 
