@@ -26,7 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
-    renderizarLogs(); // Carrega os logs da nuvem ao iniciar
+    renderizarLogs();
+    renderizarAvisos(); // Carrega os avisos da nuvem ao iniciar
 });
 
 function enviarNotificacaoLocal(titulo, mensagem) {
@@ -99,7 +100,6 @@ async function registrarPonto(tipo) {
     const dataIso = agora.toISOString().split('T')[0];
     const dataHoraStr = agora.toLocaleDateString("pt-BR") + " às " + horaStr;
 
-    // Envia o log para a tabela logs_ponto no Supabase
     const { error } = await _supabase
         .from('logs_ponto')
         .insert([{ id: Date.now(), tipo: tipo, data_hora: dataHoraStr }]);
@@ -219,7 +219,6 @@ function formatarData(dataIso) {
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
-// --- RENDERIZAR LOGS DIRETO DO SUPABASE ---
 async function renderizarLogs() {
     const container = document.getElementById("logsCheckin");
     if (!container) return;
@@ -248,6 +247,53 @@ async function renderizarLogs() {
     `).join("");
 }
 
+async function renderizarAvisos() {
+    const container = document.getElementById("muralAvisos");
+    if (!container) return;
+
+    const { data: avisos, error } = await _supabase
+        .from('avisos_equipe')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        console.error("Erro ao buscar avisos:", error);
+        container.innerHTML = `<p class="vazio">Erro ao carregar avisos.</p>`;
+        return;
+    }
+
+    if (!avisos || avisos.length === 0) {
+        container.innerHTML = `<p class="vazio">Nenhum aviso geral no momento.</p>`;
+        return;
+    }
+
+    container.innerHTML = avisos.map(aviso => `
+        <div class="log-item" style="flex-direction: column; align-items: flex-start; gap: 2px;">
+            <span style="color: #00ffcc; font-weight: bold;">📢 ${aviso.titulo}</span>
+            <span>${aviso.mensagem}</span>
+        </div>
+    `).join("");
+}
+
+async function promptCriarAviso() {
+    const titulo = prompt("Digite o Título do Aviso Geral:");
+    if (!titulo) return;
+
+    const mensagem = prompt("Digite a Mensagem do Aviso:");
+    if (!mensagem) return;
+
+    const { error } = await _supabase
+        .from('avisos_equipe')
+        .insert([{ id: Date.now(), titulo: titulo, mensagem: mensagem }]);
+
+    if (error) {
+        alert("❌ Erro ao publicar aviso na nuvem.");
+        console.error(error);
+    } else {
+        alert("📢 Aviso publicado com sucesso para toda a equipe!");
+        renderizarAvisos();
+    }
+}
 function ajustarMeta() {
     const novaMeta = prompt("Digite o novo valor da meta financeira (R$):", metaFinanceira);
     if (novaMeta && !isNaN(novaMeta)) {
@@ -322,7 +368,6 @@ function renderizar() {
     renderizarLogs();
 }
 
-/* --- SISTEMA DE SENHA E SEGURANÇA DO MENU DEV --- */
 function tentarAbrirMenuDev() {
     const devDropdown = document.getElementById("devDropdown");
     const sisDropdown = document.getElementById("sistemaDropdown");
@@ -365,27 +410,24 @@ function bloquearMenuDev() {
     alert("🔒 Menu Dev bloqueado com sucesso.");
 }
 
-// --- FUNÇÃO GLOBAL DE LIMPEZA DE LOGS NO SUPABASE (COM DUPLA SEGURANÇA) ---
 async function limparLogsGlobalSupabase() {
-    // 1ª Confirmação de Segurança
     const primeiraConf = confirm("⚠️ ATENÇÃO: Isso apagará permanentemente os logs de ponto de TODOS OS USUÁRIOS conectados à nuvem. Deseja continuar?");
     if (!primeiraConf) return;
 
-    // 2ª Confirmação de Segurança (Anti-clique acidental)
     const segundaConf = confirm("🚨 ÚLTIMA CHANCE: Tem certeza ABSOLUTA que deseja zerar os logs globais de todos os aparelhos?");
     if (!segundaConf) return;
 
     const { error } = await _supabase
         .from('logs_ponto')
         .delete()
-        .neq('id', 0); // Remove todos os registros da tabela
+        .neq('id', 0);
 
     if (error) {
         alert("❌ Erro ao limpar logs globais na nuvem.");
         console.error(error);
     } else {
         alert("🧹 Sucesso! Todos os logs globais foram apagados da nuvem.");
-        renderizarLogs(); // Atualiza a tela imediatamente
+        renderizarLogs();
     }
 }
 

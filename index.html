@@ -31,7 +31,7 @@
         </div>
         <div class="header-badges" style="display: flex; gap: 8px; align-items: center;">
             <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
-            <span class="badge version">v3.5 Cloud Supabase</span>
+            <span class="badge version">v3.6 Cloud Avisos</span>
             
             <!-- ⚙️ MENU SISTEMA (Atualizações e Cache) -->
             <div class="dev-menu-wrapper">
@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <!-- 🛠️ MENU DEV (Com Senha e Limpeza Global via Supabase) -->
+            <!-- 🛠️ MENU DEV (Com Senha, Limpeza Global e Gestão de Avisos) -->
             <div class="dev-menu-wrapper">
                 <button class="dev-menu-btn" onclick="tentarAbrirMenuDev()" title="Menu Developer">🛠️</button>
                 <div class="dev-dropdown" id="devDropdown">
@@ -84,6 +84,10 @@
                         🖥️ Inspecionar State (Console)
                     </button>
 
+                    <button class="btn btn-primary full-btn" onclick="promptCriarAviso()" style="margin-top: 6px; font-size: 0.75rem;">
+                        📢 Publicar Aviso Geral
+                    </button>
+
                     <button class="btn btn-danger full-btn" onclick="limparLogsGlobalSupabase()" style="margin-top: 6px; font-size: 0.75rem;">
                         ☁️ Limpar Todos os Logs (Nuvem)
                     </button>
@@ -98,6 +102,17 @@
     </header>
 
     <main class="container">
+
+        <!-- MURAL DE AVISOS DA EQUIPE -->
+        <section class="card">
+            <div class="card-header">
+                <h2>📢 AVISOS DA EQUIPE</h2>
+                <span class="status-tag active">AO VIVO</span>
+            </div>
+            <div id="muralAvisos" class="logs-container" style="margin-top: 10px; max-height: 120px;">
+                <p class="vazio">Carregando avisos da nuvem...</p>
+            </div>
+        </section>
 
         <!-- MODO PLANTÃO ATIVO -->
         <section class="card border-rgb">
