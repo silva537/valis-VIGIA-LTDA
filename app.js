@@ -26,8 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
-    renderizarLogs();
-    renderizarAvisos();
+    renderizarLogs(); // Carrega os logs da nuvem ao iniciar
 });
 
 function enviarNotificacaoLocal(titulo, mensagem) {
@@ -92,6 +91,7 @@ function carregarTemaSalvo() {
         themeBtn.innerText = temaSalvo === "dark" ? "☀️ Tema Claro" : "🌙 Tema Escuro";
     }
 }
+
 // --- REGISTRAR PONTO DIRETO NA NUVEM (SUPABASE) ---
 async function registrarPonto(tipo) {
     const agora = new Date();
@@ -245,55 +245,6 @@ async function renderizarLogs() {
         </div>
     `).join("");
 }
-
-async function renderizarAvisos() {
-    const container = document.getElementById("muralAvisos");
-    if (!container) return;
-
-    const { data: avisos, error } = await _supabase
-        .from('avisos_equipe')
-        .select('*')
-        .order('id', { ascending: false });
-
-    if (error) {
-        console.error("Erro ao buscar avisos:", error);
-        container.innerHTML = `<p class="vazio">Erro ao carregar avisos.</p>`;
-        return;
-    }
-
-    if (!avisos || avisos.length === 0) {
-        container.innerHTML = `<p class="vazio">Nenhum aviso geral no momento.</p>`;
-        return;
-    }
-
-    container.innerHTML = avisos.map(aviso => `
-        <div class="log-item" style="flex-direction: column; align-items: flex-start; gap: 2px;">
-            <span style="color: #00ffcc; font-weight: bold;">📢 ${aviso.titulo}</span>
-            <span>${aviso.mensagem}</span>
-        </div>
-    `).join("");
-}
-
-async function promptCriarAviso() {
-    const titulo = prompt("Digite o Título do Aviso Geral:");
-    if (!titulo) return;
-
-    const mensagem = prompt("Digite a Mensagem do Aviso:");
-    if (!mensagem) return;
-
-    const { error } = await _supabase
-        .from('avisos_equipe')
-        .insert([{ id: Date.now(), titulo: titulo, mensagem: mensagem }]);
-
-    if (error) {
-        alert("❌ Erro ao publicar aviso na nuvem.");
-        console.error(error);
-    } else {
-        alert("📢 Aviso publicado com sucesso para toda a equipe!");
-        renderizarAvisos();
-    }
-}
-
 function ajustarMeta() {
     const novaMeta = prompt("Digite o novo valor da meta financeira (R$):", metaFinanceira);
     if (novaMeta && !isNaN(novaMeta)) {
@@ -437,14 +388,10 @@ function dumpLocalStorage() {
         metaFinanceira: localStorage.getItem("metaFinanceira") || 1000,
         temaPonto: localStorage.getItem("temaPonto") || "dark"
     };
-    
-    const textoFormatado = JSON.stringify(dadosGerais, null, 2);
-    
     console.group("🖥️ [VALIS DEV STATE INSPECTOR]");
     console.log("Dados Atuais:", dadosGerais);
     console.groupEnd();
-
-    alert("🖥️ ESTADO ATUAL DO LOCALSTORAGE:\n\n" + textoFormatado);
+    alert("💻 Estado atual do localStorage impresso no Console do Navegador (F12)!");
 }
 
 function toggleMenuSistema() {
