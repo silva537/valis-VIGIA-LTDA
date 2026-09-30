@@ -3,8 +3,8 @@
    ========================================================================== */
 
 // 1. CREDENCIAIS DO SUPABASE
-const SUPABASE_URL = "https://SEU_PROJETO.supabase.co"; // Insira a URL do seu Supabase aqui
-const SUPABASE_ANON_KEY = "SUA_CHAVE_ANON_AQUI";        // Insira a chave pública (anon key) aqui
+const SUPABASE_URL = "https://sxrthryhzodryrzndveg.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_3FDSO7qfonD0BLRTzPT6bA_7a7jUarD";        // Insira a chave pública (anon key) aqui
 
 // Inicialização do cliente Supabase
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -312,7 +312,16 @@ function hardResetDev() {
   }
 }
 
-// 10. EVENT LISTENERS E INICIALIZAÇÃO GERAL
+// 10. EXPOSIÇÃO EXPLICITA DE FUNÇÕES AO ESCOPO GLOBAL (HTML ONCLICK)
+window.baterPonto = baterPonto;
+window.abrirMenuDev = abrirMenuDev;
+window.testarConexaoDev = testarConexaoDev;
+window.exportarBackupDev = exportarBackupDev;
+window.hardResetDev = hardResetDev;
+window.verificarGeofencingUsinas = verificarGeofencingUsinas;
+window.SistemaNotificacoes = SistemaNotificacoes;
+
+// 11. EVENT LISTENERS E INICIALIZAÇÃO GERAL
 window.addEventListener("online", () => {
   SistemaNotificacoes.enviar("Conexão Restabelecida", "Você está online novamente.", "success");
   sincronizarFilaOffline();
