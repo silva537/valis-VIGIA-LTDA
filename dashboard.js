@@ -55,13 +55,12 @@ function atualizarDashboard() {
     const metaProgressBarEl = document.getElementById("metaProgressBar");
     if (metaProgressBarEl) metaProgressBarEl.style.width = `${percentual}%`;
 
-    // Atualizar Gráfico Chart.js no Dashboard
     renderizarGrafico(turnosContagem);
 }
 
 function renderizarGrafico(dadosTurnos) {
     const ctx = document.getElementById('graficoDesempenho');
-    if (!ctx) return;
+    if (!ctx || typeof Chart === 'undefined') return;
 
     if (meuGraficoInstancia) {
         meuGraficoInstancia.destroy();

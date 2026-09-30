@@ -1,4 +1,4 @@
-// Pedir permissão ao carregar
+l// Pedir permissão ao carregar
 async function solicitarPermissaoNotificacao() {
   if ('Notification' in window && Notification.permission === 'default') {
     await Notification.requestPermission();
@@ -28,26 +28,37 @@ function exibirBannerTopo(mensagem, tipo = 'info') {
   banner.innerText = mensagem;
 }
 
-// Atualize a função de buscar para chamar o banner
+// Buscar notificações ativas da nuvem
 async function buscarNotificacoes() {
-  const { data, error } = await supabase
-    .from('notificacao')
-    .select('*')
-    .eq('ativa', true)
-    .order('created_at', { ascending: false })
-    .limit(1);
+  if (typeof _supabase === 'undefined' || !_supabase) return;
 
-  if (error || !data || data.length === 0) return;
+  try {
+    const { data, error } = await _supabase
+      .from('notificacao')
+      .select('*')
+      .eq('ativa', true)
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-  const ultimaNotificacao = data[0];
-  exibirBannerTopo(ultimaNotificacao.mensagem, ultimaNotificacao.tipo);
+    if (error || !data || data.length === 0) return;
+
+    const ultimaNotificacao = data[0];
+    exibirBannerTopo(ultimaNotificacao.mensagem, ultimaNotificacao.tipo);
+  } catch (e) {
+    console.warn("Erro ao buscar notificações do Supabase:", e);
+  }
 }
 
 // Inicializar
 solicitarPermissaoNotificacao();
 buscarNotificacoes();
+
 async function criarNotificacaoDev(titulo, mensagem, tipo = 'info') {
-  const { data, error } = await supabase
+  if (typeof _supabase === 'undefined' || !_supabase) {
+    alert("Supabase indisponível!");
+    return;
+  }
+  const { error } = await _supabase
     .from('notificacao')
     .insert([
       {

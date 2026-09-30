@@ -2,19 +2,24 @@
 const SUPABASE_URL = 'https://sxrthryhzodryrzndveg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_3FDSO7qfonD0BLRTzPT6bA_7a7jUarD';
 
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Garantia da Instância Única
+if (typeof _supabase === 'undefined' || !_supabase) {
+    var _supabase = (window.supabase && window.supabase.createClient) 
+        ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+        : null;
+}
 
 const VALORES_TURNO = {
     "Manhã": 100.00,
     "Noturno": 100.00,
-    "24h": 250.00
+    "24h": 200.00
 };
 
 let metaFinanceira = parseFloat(localStorage.getItem("metaFinanceira")) || 1000.00;
 
 document.addEventListener("DOMContentLoaded", () => {
     const dataInput = document.getElementById("data");
-    if (dataInput) {
+    if (dataInput && !dataInput.value) {
         dataInput.valueAsDate = new Date();
     }
     
@@ -25,20 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     atualizarCamposTurno();
     carregarTemaSalvo();
-    renderizar();
-    renderizarLogs();
-    renderizarAvisos();
+    if (typeof renderizar === 'function') renderizar();
+    if (typeof renderizarLogs === 'function') renderizarLogs();
+    if (typeof renderizarAvisos === 'function') renderizarAvisos();
 });
 
 function enviarNotificacaoLocal(titulo, mensagem) {
-    if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-        navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification(titulo, {
-                body: mensagem,
-                icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                vibrate: [200, 100, 200]
-            });
-        });
+    if (typeof SistemaNotificacoes !== 'undefined') {
+        SistemaNotificacoes.enviar(titulo, mensagem, "info");
     }
 }
 

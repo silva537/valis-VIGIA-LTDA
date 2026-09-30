@@ -39,12 +39,12 @@
             <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
             <span class="badge version">v3.8 Cloud Ponto</span>
             
-            <!-- ⚙️ MENU SISTEMA -->
+            <!-- ⚙ MENU SISTEMA -->
             <div class="dev-menu-wrapper">
-                <button class="dev-menu-btn" onclick="toggleMenuSistema()" title="Menu Sistema">⚙</button>
+                <button class="dev-menu-btn" title="Menu Sistema">⚙</button>
                 <div class="dev-dropdown" id="sistemaDropdown">
                     <div class="card-header">
-                        <h2>⚙️️ MENU SISTEMA</h2>
+                        <h2>⚙ MENU SISTEMA</h2>
                         <span class="status-tag active">APP</span>
                     </div>
                     <p class="dev-description">
@@ -62,7 +62,7 @@
 
             <!-- 🛠️ MENU DEV -->
             <div class="dev-menu-wrapper">
-                <button class="dev-menu-btn" onclick="tentarAbrirMenuDev()" title="Menu Developer">🛠️</button>
+                <button class="dev-menu-btn" title="Menu Developer">🛠️</button>
                 <div class="dev-dropdown" id="devDropdown">
                     <div class="card-header">
                         <h2>🛠 MENU DEV</h2>
@@ -97,13 +97,18 @@
                         ⚡ Testar Ping / Latência Nuvem
                     </button>
 
-                    <button class="btn btn-danger full-btn" onclick="hardResetLocal()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🔥 Hard Reset (Zerar LocalStorage)
+                    <!-- 📢 NOVO BOTÃO: DISPARO DE NOTIFICAÇÃO VIA SUPABASE -->
+                    <button class="btn btn-warning full-btn" onclick="enviarNotificacaoSupabase()" style="margin-top: 6px; font-size: 0.75rem; background: #3b82f6; color: white; border: none;">
+                        📢 Enviar Notificação (Supabase Broadcast)
+                    </button>
+
+                    <button class="btn btn-danger full-btn" onclick="hardResetDev()" style="margin-top: 6px; font-size: 0.75rem;">
+                        🔥 Hard Reset (Zerar Local & Storage)
                     </button>
 
                     <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
 
-                    <button class="btn btn-outline full-btn" onclick="exportarBackupJSON()" style="margin-top: 0; font-size: 0.75rem;">
+                    <button class="btn btn-outline full-btn" onclick="exportarBackupDev()" style="margin-top: 0; font-size: 0.75rem;">
                         💾 Exportar Backup (JSON)
                     </button>
                     
@@ -111,18 +116,6 @@
                         📂 Importar Backup (JSON)
                     </label>
                     <input type="file" id="importJsonInput" accept=".json" onchange="importarBackupJSON(event)" style="display: none;">
-                    
-                    <button class="btn btn-warning full-btn" onclick="gerarDadosTeste()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🧪 Gerar Plantões de Teste
-                    </button>
-
-                    <button class="btn btn-outline full-btn" onclick="dumpLocalStorage()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🖥 Inspecionar State (Console)
-                    </button>
-
-                    <button class="btn btn-danger full-btn" onclick="limparLogsGlobalSupabase()" style="margin-top: 6px; font-size: 0.75rem;">
-                        ☁️ Limpar Todos os Logs (Nuvem)
-                    </button>
 
                     <button class="btn btn-danger full-btn" onclick="bloquearMenuDev()" style="margin-top: 10px; font-size: 0.75rem; background: linear-gradient(135deg, #475569, #334155);">
                         🔒 Bloquear / Sair do Menu Dev
@@ -342,6 +335,38 @@
             <button class="btn btn-outline full-btn" onclick="exportarExcel()">📊 Exportar Dados para Excel (CSV Discriminado)</button>
         </section>
 
+        <!-- 🔔 CARD DE NOTIFICAÇÕES & ALERTAS EM TEMPO REAL (SUPABASE & ONESIGNAL) -->
+        <section class="card">
+            <div class="card-header">
+                <h2>🔔 NOTIFICAÇÕES & ALERTAS</h2>
+                <span class="status-tag active" id="statusNotifTag">SUPABASE REALTIME</span>
+            </div>
+
+            <p class="dev-description" style="margin-bottom: 15px;">
+                Gerenciamento de alertas push e sincronização em tempo real entre dispositivos conectados.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn btn-primary full-btn" onclick="solicitarPermissaoNotificacao()">
+                    🔔 Ativar Permissão de Notificação Push
+                </button>
+
+                <button class="btn btn-warning full-btn" onclick="enviarNotificacaoSupabase()" style="background: #3b82f6; color: white; border: none;">
+                    📢 Disparar Alerta para a Rede (Supabase)
+                </button>
+            </div>
+
+            <!-- LOGS DE NOTIFICAÇÕES RECEBIDAS -->
+            <details class="logs-accordion" style="margin-top: 15px;">
+                <summary class="section-title" style="cursor: pointer; font-weight: bold; user-select: none; text-align: center;">
+                    📬 CENTRAL DE ALERTAS RECEBIDOS
+                </summary>
+                <div id="logsNotificacoes" class="logs-container" style="margin-top: 8px;">
+                    <p class="vazio" style="text-align: center;">Nenhum alerta recebido na sessão atual.</p>
+                </div>
+            </details>
+        </section>
+
     </main>
 
     <!-- RODAPÉ CENTRALIZADO -->
@@ -362,13 +387,106 @@
 
     <!-- CARREGAMENTO DOS SCRIPTS DA APLICAÇÃO -->
     <script src="storage.js"></script>
+    <script src="app_core.js"></script>
     <script src="dashboard.js"></script>
-    <script src="app-part1.js"></script>
-    <script src="app-part2.js"></script>
-    <script src="app-part3.js"></script>
-
-    <!-- NOVO SCRIPT (Acrescentado para contagem de dispositivos) -->
+    <script src="app_actions.js"></script>
+    <script src="app.js"></script>
     <script src="contador_dispositivos.js"></script>
+    <script src="notificações.js"></script>
+<!-- BLOCO 1: SCRIPT DE EMERGÊNCIA - MENU SISTEMA -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnSistema = document.querySelector('.dev-menu-btn[title="Menu Sistema"]');
+    if (btnSistema) {
+      btnSistema.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const menuSistema = document.getElementById('sistemaDropdown');
+        const menuDev = document.getElementById('devDropdown');
+        
+        if (menuDev) menuDev.classList.remove('show');
+        if (menuSistema) menuSistema.classList.toggle('show');
+      });
+    }
+  });
+</script>
+
+<!-- BLOCO 2: SCRIPT DE EMERGÊNCIA - MENU DEV (SENHA "valis2026") & FUNÇÃO BROADCAST NOTIFICAÇÃO -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnDev = document.querySelector('.dev-menu-btn[title="Menu Developer"]');
+    if (btnDev) {
+      btnDev.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const menuDev = document.getElementById('devDropdown');
+        const menuSistema = document.getElementById('sistemaDropdown');
+
+        if (menuSistema) menuSistema.classList.remove('show');
+
+        if (menuDev && menuDev.classList.contains('show')) {
+          menuDev.classList.remove('show');
+          return;
+        }
+
+        if (sessionStorage.getItem('dev_unlocked') === 'true') {
+          if (menuDev) menuDev.classList.add('show');
+          return;
+        }
+
+        const senha = prompt('Digite a palavra-passe do Menu Developer:');
+        if (senha === 'valis2026') {
+          sessionStorage.setItem('dev_unlocked', 'true');
+          if (menuDev) menuDev.classList.add('show');
+          const tag = document.getElementById('statusDevTag');
+          if (tag) {
+            tag.innerText = 'LIBERADO';
+            tag.className = 'status-tag active';
+          }
+        } else if (senha !== null) {
+          alert('Palavra-passe incorreta!');
+        }
+      });
+    }
+
+    document.addEventListener('click', function() {
+      const menuSistema = document.getElementById('sistemaDropdown');
+      const menuDev = document.getElementById('devDropdown');
+      if (menuSistema) menuSistema.classList.remove('show');
+      if (menuDev) menuDev.classList.remove('show');
+    });
+  });
+
+  // Função Global para Disparar Notificação para a Rede via Supabase
+  async function enviarNotificacaoSupabase() {
+    const mensagem = prompt('Digite o texto da notificação/alerta para enviar a todos os aparelhos:');
+    if (!mensagem || mensagem.trim() === '') return;
+
+    if (typeof window.enviarAlertaGeral === 'function') {
+      await window.enviarAlertaGeral(mensagem);
+    } else if (window.supabase) {
+      try {
+        const channel = window.supabase.channel('alertas-ponto');
+        
+        // Inscreve no canal antes de realizar o disparo
+        channel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await channel.send({
+              type: 'broadcast',
+              event: 'notificacao',
+              payload: { mensagem: mensagem, autor: 'Desenvolvedor' }
+            });
+            alert('📢 Notificação enviada com sucesso para a rede Supabase!');
+          }
+        });
+      } catch (err) {
+        console.error('Erro ao transmitir via Supabase:', err);
+        alert('Erro ao enviar notificação via Supabase.');
+      }
+    } else {
+      alert('Sincronização Supabase não detectada no arquivo notificações.js.');
+    }
+  }
+</script>
+
 </body>
 
 </html>
