@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valis Naturalidade LTDA • Sistema Ponto</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
 
     <!-- SDK OFICIAL DO SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- SDK CHART.JS PARA GRÁFICOS (Opção 4) -->
+    <!-- SDK CHART.JS PARA GRÁFICOS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS (100% GRATUITO) -->
+    <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -40,7 +41,7 @@
             
             <!-- ⚙️ MENU SISTEMA -->
             <div class="dev-menu-wrapper">
-                <button class="dev-menu-btn" onclick="toggleMenuSistema()" title="Menu Sistema">⚙️</button>
+                <button class="dev-menu-btn" onclick="toggleMenuSistema()" title="Menu Sistema">⚙</button>
                 <div class="dev-dropdown" id="sistemaDropdown">
                     <div class="card-header">
                         <h2>⚙️ MENU SISTEMA</h2>
@@ -64,7 +65,7 @@
                 <button class="dev-menu-btn" onclick="tentarAbrirMenuDev()" title="Menu Developer">🛠️</button>
                 <div class="dev-dropdown" id="devDropdown">
                     <div class="card-header">
-                        <h2>🛠️ MENU DEV</h2>
+                        <h2>🛠 MENU DEV</h2>
                         <span class="status-tag dev-tag" id="statusDevTag">PROTEGIDO</span>
                     </div>
                     <p class="dev-description">
@@ -81,7 +82,7 @@
                     </button>
 
                     <button class="btn btn-outline full-btn" onclick="mostrarConsoleLocal()" style="margin-top: 6px; font-size: 0.75rem; border-color: #00ffcc;">
-                        🖥️️ Exibir Console na Tela
+                        🖥 Exibir Console na Tela
                     </button>
 
                     <button class="btn btn-outline full-btn" onclick="toggleCSSOutline()" style="margin-top: 6px; font-size: 0.75rem;">
@@ -116,7 +117,7 @@
                     </button>
 
                     <button class="btn btn-outline full-btn" onclick="dumpLocalStorage()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🖥️ Inspecionar State (Console)
+                        🖥 Inspecionar State (Console)
                     </button>
 
                     <button class="btn btn-danger full-btn" onclick="limparLogsGlobalSupabase()" style="margin-top: 6px; font-size: 0.75rem;">
@@ -281,11 +282,23 @@
                     <small>Média de Sono</small>
                     <strong id="mediaSono">0.0h</strong>
                 </div>
+
+                <!-- CARDS DE DISPOSITIVOS ATIVOS / EM TEMPO REAL -->
+                <div class="stat-card">
+                    <small>App Instalados / Registrados</small>
+                    <strong id="qtdDispositivosTotais" class="info-text">0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <small>Dispositivos Ativos Agora</small>
+                    <strong id="qtdDispositivosOnline" class="success-text">0</strong>
+                </div>
             </div>
 
             <!-- Botões de Configuração e Fechamento -->
             <div style="text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
                 <button class="btn-link" onclick="configurarDatasFolha()">⚙ Configurar Dias de Fechamento e Recebimento</button>
+                <button class="btn btn-outline full-btn" onclick="gerarResumoMensalAutomatico()" style="border-color: #f59e0b; color: #f59e0b;">📊 Gerar Resumo Mensal Automático</button>
                 <button class="btn btn-fechar-folha full-btn" onclick="fecharFolha()">✔ Recebi / Fechar Folha Atual</button>
             </div>
         </section>
@@ -332,16 +345,19 @@
     </main>
 
     <!-- RODAPÉ CENTRALIZADO -->
-    <main class="main-footer" style="text-align: center; padding: 20px; margin-top: 20px;">
+    <footer class="main-footer" style="text-align: center; padding: 20px; margin-top: 20px;">
         <p><strong>Valis Naturalidade LTDA</strong></p>
         <p class="sub-footer">CNPJ Registrado • Sistema Ponto Vigias</p>
         <p style="margin: 8px 0;"><a href="#" onclick="exibirTermosUso()">📜 Termos de Uso & Diretrizes Tecnológicas (LGPD)</a></p>
         <p class="dev-by">Desenvolvido por <strong>Vitor Silva</strong> 🇧🇷</p>
-    </main>
+    </footer>
 
+    <!-- CARREGAMENTO DOS SCRIPTS DA APLICAÇÃO -->
     <script src="storage.js"></script>
     <script src="dashboard.js"></script>
-    <script src="app.js"></script>
+    <script src="app-part1.js"></script>
+    <script src="app-part2.js"></script>
+    <script src="app-part3.js"></script>
 
     <!-- Banner de Atualização Pendente -->
     <div id="updateBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #007bff; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; text-align: center; font-family: sans-serif; max-width: 90%; align-items: center; gap: 10px;">

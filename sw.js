@@ -1,12 +1,14 @@
-const CACHE_NAME = 'ponto-pwa-v1.0.4';
+lconst CACHE_NAME = 'ponto-pwa-v1.0.5';
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
-  './app.js',
-  './dashboard.js',
   './storage.js',
+  './dashboard.js',
+  './app_part1.js',
+  './app_part2.js',
+  './app_part3.js',
   './manifest.json'
 ];
 

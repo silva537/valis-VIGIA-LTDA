@@ -1,10 +1,25 @@
-// --- PARTE 1/3: SUPABASE, INDEXEDDB, CONFIG DE DATAS, REDE, GPS E BACKUP ---
+// ============================================================================
+// CONFIGURAÇÕES INICIAIS, SUPABASE, GEOFENCING, OFFLINE E DISPOSITIVOS ATIVOS
+// ============================================================================
+
 const SUPABASE_URL = 'https://sxrthryhzodryrzndveg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cnRocnloem9kcnlyem5kdmVnIiwicm9sZSI6InFub24iLCJpYXQiOjE3OTA2MzQ1NDksImV4cCI6MjEwNjIxMDU0OX0.83mFWcQ9LZvklAxPIH9vtWytIvZkW7_ZFXZXKmFzZdo';
 
 let _supabase = null;
 window.modoOfflineSimulado = false; 
 let dbOffline = null;
+
+// GERAÇÃO / RECUPERAÇÃO DE ID ÚNICO DO DISPOSITIVO
+function obterOuGerarDeviceId() {
+    let id = localStorage.getItem("valis_device_id");
+    if (!id) {
+        id = 'dev_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+        localStorage.setItem("valis_device_id", id);
+    }
+    return id;
+}
+
+const DEVICE_ID = obterOuGerarDeviceId();
 
 let configDatas = JSON.parse(localStorage.getItem("valis_config_datas")) || {
     diaFechamento: "15",
@@ -90,6 +105,7 @@ async function verificarGeofencingUsinas() {
 window.addEventListener('online', () => {
     atualizarIndicadorRede(true);
     sincronizarFilaOffline(); 
+    registrarPresencaDispositivo();
 });
 
 window.addEventListener('offline', () => {
@@ -116,45 +132,47 @@ function atualizarIndicadorRede(isOnline) {
     }
 }
 
-function executarBackupAutomatico() {
+/* --- MONITORAÇÃO DE DISPOSITIVOS ATIVOS / INSTALADOS --- */
+async function registrarPresencaDispositivo() {
+    if (!_supabase || window.modoOfflineSimulado || !navigator.onLine) return;
+
     try {
-        const dadosBackup = {
-            versao: "1.0",
-            dataBackup: new Date().toISOString(),
-            plantoes: buscarPlantoes(),
-            meta: metaFinanceira
-        };
-        localStorage.setItem("valis_auto_backup", JSON.stringify(dadosBackup));
+        await _supabase.from('dispositivos_ativos').upsert({
+            device_id: DEVICE_ID,
+            visto_em: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        }, { onConflict: 'device_id' });
     } catch (e) {
-        console.warn("Falha no backup automático:", e);
+        console.warn("Falha ao registrar presença do dispositivo:", e);
     }
 }
 
-function buscarPlantoes() {
+async function obterEstatísticasDispositivos() {
+    if (!_supabase || window.modoOfflineSimulado) return { total: 0, online: 0 };
+
     try {
-        return JSON.parse(localStorage.getItem("plantoes")) || [];
+        const { data, error } = await _supabase.from('dispositivos_ativos').select('device_id, visto_em');
+        if (error || !data) return { total: 0, online: 0 };
+
+        const agora = new Date().getTime();
+        const limiteOnlineMs = 2 * 60 * 1000; // Considera ativo/online nos últimos 2 minutos
+
+        const total = data.length;
+        const online = data.filter(d => (agora - new Date(d.visto_em).getTime()) <= limiteOnlineMs).length;
+
+        return { total, online };
     } catch (e) {
-        return [];
+        return { total: 0, online: 0 };
     }
 }
 
-function salvarStorage(plantoes) {
-    localStorage.setItem("plantoes", JSON.stringify(plantoes));
-    executarBackupAutomatico(); 
-}
+async function atualizarPainelDispositivosUI() {
+    const elTotal = document.getElementById("qtdDispositivosTotais");
+    const elOnline = document.getElementById("qtdDispositivosOnline");
 
-function atualizarDashboard() {
-    const plantoes = buscarPlantoes();
-    let totalRecebido = plantoes.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
-    
-    const elTotal = document.getElementById("totalRecebido");
-    if (elTotal) elTotal.innerText = `R$ ${totalRecebido.toFixed(2)}`;
-
-    const elMeta = document.getElementById("metaProgresso");
-    if (elMeta && metaFinanceira > 0) {
-        let prog = (totalRecebido / metaFinanceira) * 100;
-        elMeta.style.width = `${Math.min(prog, 100)}%`;
-    }
+    const stats = await obterEstatísticasDispositivos();
+    if (elTotal) elTotal.innerText = stats.total;
+    if (elOnline) elOnline.innerText = stats.online;
 }
 
 function inicializarIndexedDB() {
@@ -216,7 +234,10 @@ try {
 } catch (e) {
     console.error("Erro ao inicializar Supabase:", e);
 }
-// --- PARTE 2/3: TURNOS, HORAS EXTRAS, ALMOÇO E REGISTO DE PONTO ---
+// ============================================================================
+// REGISTRO DE PONTO, CÁLCULOS DE JORNADA E MONITORAMENTO DE FADIGA
+// ============================================================================
+
 const VALORES_TURNO = { "Manhã": 100.00, "Noturno": 100.00, "24h": 200.00 };
 let metaFinanceira = parseFloat(localStorage.getItem("metaFinanceira")) || 1000.00;
 
@@ -224,8 +245,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     await inicializarIndexedDB();
     sincronizarFilaOffline();
     setInterval(sincronizarFilaOffline, 30000);
-    atualizarIndicadorRede(navigator.onLine);
 
+    // Registrar batimento do dispositivo e atualizar painel em tempo real
+    registrarPresencaDispositivo();
+    atualizarPainelDispositivosUI();
+    setInterval(() => {
+        registrarPresencaDispositivo();
+        atualizarPainelDispositivosUI();
+    }, 30000);
+
+    atualizarIndicadorRede(navigator.onLine);
     renderizarConfigDatasUI();
 
     const dataInput = document.getElementById("data");
@@ -239,11 +268,49 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (inicioInput) inicioInput.addEventListener("input", calcularHorasExtrasAutomatico);
     if (fimInput) fimInput.addEventListener("input", calcularHorasExtrasAutomatico);
 
+    /* --- EVENT LISTENERS PARA FADIGA --- */
+    const sonoInput = document.getElementById("sono");
+    if (sonoInput) sonoInput.addEventListener("input", monitorarFadigaCampos);
+    if (turnoSelect) turnoSelect.addEventListener("change", monitorarFadigaCampos);
+
     atualizarCamposTurno();
     carregarTemaSalvo();
     renderizar();
     renderizarLogs(); 
 });
+
+/* --- VERIFICAÇÃO INTELIGENTE DE FADIGA --- */
+function verificarAlertaFadiga(sono, turno) {
+    const painel = document.getElementById("painelAlertaFadiga");
+    if (!painel) return;
+
+    let mensagem = "";
+    let corFundo = "";
+    let corTexto = "#ffffff";
+
+    if (sono < 5 && (turno === "Noturno" || turno === "24h")) {
+        mensagem = "⚠️️ ALERTA CRÍTICO DE FADIGA: Menos de 5 horas de sono para um turno noturno ou de 24h representa um alto risco operacional!";
+        corFundo = "#ef4444"; 
+    } else if (sono < 6) {
+        mensagem = "⚡ ATENÇÃO: Sono reduzido. Mantenha o estado de alerta reforçado durante o plantão.";
+        corFundo = "#f59e0b"; 
+    }
+
+    if (mensagem) {
+        painel.innerText = mensagem;
+        painel.style.backgroundColor = corFundo;
+        painel.style.color = corTexto;
+        painel.style.display = "block";
+    } else {
+        painel.style.display = "none";
+    }
+}
+
+function monitorarFadigaCampos() {
+    const sonoVal = parseFloat(document.getElementById("sono").value) || 0;
+    const turnoVal = document.getElementById("turno").value;
+    verificarAlertaFadiga(sonoVal, turnoVal);
+}
 
 function obterGPS() {
     return new Promise((resolve) => {
@@ -354,7 +421,8 @@ async function registrarPonto(tipo) {
     const payloadLog = {  
         type: `${tipo} (${geoStatus.status})`, 
         lat: coords ? coords.lat : null, 
-        lng: coords ? coords.lng : null 
+        lng: coords ? coords.lng : null,
+        device_id: DEVICE_ID
     };
 
     if (_supabase && !window.modoOfflineSimulado) {
@@ -413,7 +481,10 @@ async function registrarPonto(tipo) {
         enviarNotificacaoLocal("🟢 Ponto Registrado", `${tipo} efetuado às ${horaStr}. ${geoStatus.msg}`);
     }
 }
-// --- PARTE 3/3: GESTÃO, CRUD, RESUMO MENSAL, FERRAMENTAS E DEV ---
+// ============================================================================
+// GESTÃO DE PLANTÕES, RESUMO MENSAL, EXPORTAÇÃO E FERRAMENTAS DEV
+// ============================================================================
+
 function gerarResumoMensalAutomatico() {
     const plantoes = buscarPlantoes();
     if (plantoes.length === 0) {
@@ -455,20 +526,25 @@ function gerarResumoMensalAutomatico() {
 function salvarPlantao() {
     const dataVal = document.getElementById("data").value;
     const valorVal = parseFloat(document.getElementById("valor").value);
+    const sonoVal = parseFloat(document.getElementById("sono").value) || 0;
+    const turnoVal = document.getElementById("turno").value;
 
     if (!dataVal || isNaN(valorVal)) {
         alert("Informe pelo menos a data e o valor base.");
         return;
     }
 
+    /* --- VERIFICAÇÃO DE FADIGA AO SALVAR --- */
+    verificarAlertaFadiga(sonoVal, turnoVal);
+
     const plantoes = buscarPlantoes();
     const novo = {
         id: Date.now(),
         data: dataVal,
-        turno: document.getElementById("turno").value,
+        turno: turnoVal,
         horaInicio: document.getElementById("horaInicio").value,
         horaFim: document.getElementById("horaFim").value,
-        sono: parseFloat(document.getElementById("sono").value) || 0,
+        sono: sonoVal,
         valor: valorVal,
         horasExtras: parseFloat(document.getElementById("horasExtras").value) || 0,
         colega: document.getElementById("colega").value.trim(),
@@ -806,7 +882,7 @@ async function limparLogsGlobalSupabase() {
         try {
             const { error } = await _supabase.from('logs_ponto').delete().gte('id', 0);
             if (error) {
-                alert("⚠️ Erro ao limpar logs na nuvem: " + error.message);
+                alert("⚠ Erro ao limpar logs na nuvem: " + error.message);
             } else {
                 alert("☁️ Todos os logs da nuvem foram limpos!");
                 renderizarLogs();
@@ -824,7 +900,7 @@ function forcarVerificacaoAtualizacao() {
                 reg.update();
                 alert("🔄 A verificar atualizações no Service Worker...");
             } else {
-                alert("⚠️ Nenhum Service Worker registado.");
+                alert("⚠ Nenhum Service Worker registado.");
             }
         });
     } else {
@@ -846,40 +922,4 @@ function limparCacheERecarregar() {
 
 function exibirTermosUso() {
     alert("📜 Termos de Uso & Diretrizes Tecnológicas (LGPD)\n\nSistema exclusivo para controlo de plantões e jornadas de vigilantes. Dados armazenados com segurança local e sincronização opcional via nuvem.");
-}
-function salvarPlantao() {
-    const dataVal = document.getElementById("data").value;
-    const valorVal = parseFloat(document.getElementById("valor").value);
-    const sonoVal = parseFloat(document.getElementById("sono").value) || 0;
-    const turnoVal = document.getElementById("turno").value;
-
-    if (!dataVal || isNaN(valorVal)) {
-        alert("Informe pelo menos a data e o valor base.");
-        return;
-    }
-
-    // Executa a verificação inteligente de fadiga
-    verificarAlertaFadiga(sonoVal, turnoVal);
-
-    const plantoes = buscarPlantoes();
-    const novo = {
-        id: Date.now(),
-        data: dataVal,
-        turno: turnoVal,
-        horaInicio: document.getElementById("horaInicio").value,
-        horaFim: document.getElementById("horaFim").value,
-        sono: sonoVal,
-        valor: valorVal,
-        horasExtras: parseFloat(document.getElementById("horasExtras").value) || 0,
-        colega: document.getElementById("colega").value.trim(),
-        obs: document.getElementById("obs").value.trim(),
-        gps: "Manual"
-    };
-
-    plantoes.push(novo);
-    salvarStorage(plantoes);
-    document.getElementById("colega").value = "";
-    document.getElementById("obs").value = "";
-    renderizar();
-    enviarNotificacaoLocal("📋 Plantão Salvo", "Plantão gravado com sucesso.");
 }
