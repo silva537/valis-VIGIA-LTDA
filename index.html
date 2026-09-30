@@ -1,492 +1,814 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
-
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valis Naturalidade LTDA • Sistema Ponto</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Valis Vigia - Sistema Integrado Automático</title>
+  <style>
+    :root {
+      --bg-main: #0B0E14;
+      --bg-card: #121824;
+      --bg-card-border: #1E293B;
+      --bg-input: #171F2E;
+      --border-input: #232E42;
+      
+      --text-main: #F1F5F9;
+      --text-muted: #64748B;
+      --text-sub: #94A3B8;
 
-    <!-- SDK OFICIAL DO SUPABASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      --color-green: #10B981;
+      --color-green-btn: #0D9488;
+      --color-red: #EF4444;
+      --color-yellow: #D97706;
+      --color-orange: #F59E0B;
+      --color-purple: #8B5CF6;
+      --color-blue: #3B82F6;
 
-    <!-- SDK CHART.JS PARA GRÁFICOS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-    <!-- INTEGRACAO ONESIGNAL PUSH NOTIFICATIONS -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "820d6cd6-724a-40c0-889f-7e75f016aff1",
-        });
-      });
-    </script>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-main);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: #172554;
+      border: 1px solid #1E40AF;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-green);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    #notification-toast {
+      margin: 8px 16px 0 16px;
+      padding: 10px 14px;
+      background-color: #064E3B;
+      border: 1px solid #047857;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #A7F3D0;
+      transition: all 0.3s ease;
+    }
+
+    #notification-toast.hidden { display: none; }
+
+    .toast-icon {
+      width: 18px;
+      height: 18px;
+      background: var(--color-green);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px 85px 16px;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .status-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-badge.inativo { background: #334155; color: #94A3B8; }
+    .status-badge.ativo { background: #064E3B; color: #34D399; }
+    .status-badge.almoco { background: #78350F; color: #FBBF24; }
+    .status-badge.supervisao { background: #1E1B4B; color: #818CF8; }
+    .status-badge.dev { background: #311042; color: #C084FC; }
+
+    /* Modais */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .timer-display {
+      font-size: 40px;
+      font-weight: 800;
+      text-align: center;
+      margin: 4px 0;
+    }
+
+    .timer-date {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: capitalize;
+    }
+
+    .location-info {
+      text-align: center;
+      font-size: 11px;
+      color: var(--color-orange);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: #1E1911;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #451A03;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn-green { background-color: #0D9488; color: #FFF; }
+    .btn-red { background-color: #EF4444; color: #FFF; }
+    .btn-yellow { background-color: #D97706; color: #FFF; }
+    .btn-purple { background-color: #7C3AED; color: #FFF; }
+    .btn-blue { background-color: #2563EB; color: #FFF; }
+    .btn-dark { background-color: #1E293B; color: #94A3B8; border: 1px solid #334155; }
+    .btn-disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+    .log-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #1E293B;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-title { font-size: 12px; font-weight: 600; }
+    .log-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .log-time { font-size: 11px; color: var(--text-sub); font-weight: 600; }
+
+    .form-group { margin-bottom: 10px; }
+    .form-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 4px; }
+    .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; padding: 9px; color: var(--text-main); font-size: 12px; outline: none; }
+    .form-row { display: flex; gap: 8px; }
+    .form-row .form-group { flex: 1; }
+
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background-color: #0F172A;
+      border-top: 1px solid #1E293B;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 10px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none; border: none;
+      color: var(--text-muted);
+      font-size: 8px; font-weight: 700;
+      cursor: pointer; width: 14%;
+    }
+    .nav-item.active { color: var(--color-green); }
+    .nav-icon { width: 18px; height: 18px; }
+  </style>
 </head>
-
 <body>
 
-    <!-- CABEÇALHO CENTRALIZADO E MODERNO -->
-    <header class="main-header" style="justify-content: center; flex-direction: column; gap: 10px; text-align: center; padding: 20px 15px;">
-        <div class="logo-area" style="justify-content: center;">
-            <span class="status-dot online"></span>
-            <h1 style="font-size: 1.25rem; margin: 0;">🇧🇷 VALIS NATURALIDADE LTDA</h1>
-        </div>
-        
-        <div class="header-badges" style="display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;">
-            <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTema()">☀️ Tema Claro</button>
-            <span class="badge version">v3.8 Cloud Ponto</span>
-            
-            <!-- ⚙ MENU SISTEMA -->
-            <div class="dev-menu-wrapper">
-                <button class="dev-menu-btn" title="Menu Sistema">⚙</button>
-                <div class="dev-dropdown" id="sistemaDropdown">
-                    <div class="card-header">
-                        <h2>⚙ MENU SISTEMA</h2>
-                        <span class="status-tag active">APP</span>
-                    </div>
-                    <p class="dev-description">
-                        Módulo Push Server OneSignal ativo.<br>Gerenciamento de cache e versão.
-                    </p>
-                    <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
-                    <button class="btn btn-warning full-btn" onclick="forcarVerificacaoAtualizacao()" style="margin-top: 0; font-size: 0.75rem;">
-                        🔄 Buscar Atualização do App
-                    </button>
-                    <button class="btn btn-danger full-btn" onclick="limparCacheERecarregar()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🧹 Limpar Cache & Forçar Reload
-                    </button>
-                </div>
-            </div>
-
-            <!-- 🛠️ MENU DEV -->
-            <div class="dev-menu-wrapper">
-                <button class="dev-menu-btn" title="Menu Developer">🛠️</button>
-                <div class="dev-dropdown" id="devDropdown">
-                    <div class="card-header">
-                        <h2>🛠 MENU DEV</h2>
-                        <span class="status-tag dev-tag" id="statusDevTag">PROTEGIDO</span>
-                    </div>
-                    <p class="dev-description">
-                        Ferramentas avançadas, banco em nuvem e fila offline.
-                    </p>
-                    <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
-                    
-                    <button class="btn btn-primary full-btn" onclick="injetarDadosTeste()" style="margin-top: 0; font-size: 0.75rem;">
-                        📝 Preencher Auto (Mock Data)
-                    </button>
-
-                    <button class="btn btn-outline full-btn" id="btnModoOffline" onclick="alternarModoOffline()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🌐 Modo Offline Simulado: <strong style="color:#10b981">OFF</strong>
-                    </button>
-
-                    <button class="btn btn-outline full-btn" onclick="mostrarConsoleLocal()" style="margin-top: 6px; font-size: 0.75rem; border-color: #00ffcc;">
-                        🖥 Exibir Console na Tela
-                    </button>
-
-                    <button class="btn btn-outline full-btn" onclick="toggleCSSOutline()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🔳 Debugger Visual (CSS Outline)
-                    </button>
-
-                    <button class="btn btn-outline full-btn" onclick="testarVibracao()" style="margin-top: 6px; font-size: 0.75rem;">
-                        📳 Testar Vibração (Haptic)
-                    </button>
-
-                    <button class="btn btn-outline full-btn" onclick="testarPingSupabase()" style="margin-top: 6px; font-size: 0.75rem;">
-                        ⚡ Testar Ping / Latência Nuvem
-                    </button>
-
-                    <!-- 📢 NOVO BOTÃO: DISPARO DE NOTIFICAÇÃO VIA SUPABASE -->
-                    <button class="btn btn-warning full-btn" onclick="enviarNotificacaoSupabase()" style="margin-top: 6px; font-size: 0.75rem; background: #3b82f6; color: white; border: none;">
-                        📢 Enviar Notificação (Supabase Broadcast)
-                    </button>
-
-                    <button class="btn btn-danger full-btn" onclick="hardResetDev()" style="margin-top: 6px; font-size: 0.75rem;">
-                        🔥 Hard Reset (Zerar Local & Storage)
-                    </button>
-
-                    <hr style="border: 0; border-top: 1px dashed var(--input-border); margin: 10px 0;">
-
-                    <button class="btn btn-outline full-btn" onclick="exportarBackupDev()" style="margin-top: 0; font-size: 0.75rem;">
-                        💾 Exportar Backup (JSON)
-                    </button>
-                    
-                    <label for="importJsonInput" class="btn btn-outline full-btn" style="font-size: 0.75rem; text-align: center; cursor: pointer; margin-top: 6px; display: block;">
-                        📂 Importar Backup (JSON)
-                    </label>
-                    <input type="file" id="importJsonInput" accept=".json" onchange="importarBackupJSON(event)" style="display: none;">
-
-                    <button class="btn btn-danger full-btn" onclick="bloquearMenuDev()" style="margin-top: 10px; font-size: 0.75rem; background: linear-gradient(135deg, #475569, #334155);">
-                        🔒 Bloquear / Sair do Menu Dev
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- CONTAINER CENTRALIZADO COM MAX-WIDTH -->
-    <main class="container" style="max-width: 650px; margin: 0 auto; padding: 15px;">
-
-        <!-- MODO PLANTÃO ATIVO -->
-        <section class="card border-rgb" style="text-align: center;">
-            <div class="card-header" style="justify-content: center;">
-                <h2>⚡ MODO PLANTÃO ATIVO</h2>
-                <span class="status-tag inactive" id="statusPlantaoTag">INATIVO</span>
-            </div>
-
-            <div class="ponto-status-box" id="pontoStatusBox" style="margin: 15px 0;">
-                <p class="subtitle" id="statusPlantaoTexto">Nenhum plantão em andamento no momento.</p>
-                <div class="live-info" id="liveInfo" style="display: none; justify-content: center; gap: 10px; margin-top: 8px;">
-                    <div class="info-badge">Último evento: <strong id="lastEvent">--</strong></div>
-                    <div class="info-badge">Registrado às: <strong id="lastTime">--</strong></div>
-                </div>
-            </div>
-
-            <!-- Botões de Ponto Principais -->
-            <div class="ponto-buttons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="btn btn-success" onclick="registrarPonto('Check-in (Entrada)')">🟢 Check-in (Entrada)</button>
-                <button class="btn btn-danger" onclick="registrarPonto('Check-out (Saída)')">🔴 Check-out (Fim)</button>
-            </div>
-            
-            <!-- Botões de Almoço Separados -->
-            <div class="ponto-buttons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                <button class="btn btn-warning" onclick="registrarSaidaAlmoco()">🍔 Saída Almoço</button>
-                <button class="btn btn-success" onclick="registrarRetornoAlmoco()">🔙 Voltei Almoço</button>
-            </div>
-        </section>
-
-        <!-- NOVO REGISTRO DE PLANTÃO -->
-        <section class="card">
-            <div class="card-header">
-                <h2>📝 NOVO REGISTRO</h2>
-                <span class="status-tag active">AUTO-SAVE ATIVO</span>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Data</label>
-                    <input type="date" id="data">
-                </div>
-
-                <div class="form-group">
-                    <label>Turno</label>
-                    <select id="turno">
-                        <option value="Manhã">Manhã (06:00 - 18:00)</option>
-                        <option value="Noturno">Noturno (18:00 - 06:00)</option>
-                        <option value="24h">24h</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Início</label>
-                    <input type="time" id="horaInicio" value="06:00">
-                </div>
-
-                <div class="form-group">
-                    <label>Fim</label>
-                    <input type="time" id="horaFim" value="18:00">
-                </div>
-
-                <div class="form-group">
-                    <label>Sono Prévio (h)</label>
-                    <input type="number" id="sono" value="0" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label>Valor Base (R$)</label>
-                    <input type="number" id="valor" value="100.00" step="0.01">
-                </div>
-
-                <div class="form-group full-width">
-                    <label>Horas Extras (Opcional)</label>
-                    <input type="number" id="horasExtras" value="0" min="0">
-                </div>
-            </div>
-
-            <!-- PAINEL DE ALERTA INTELIGENTE DE FADIGA -->
-            <div id="painelAlertaFadiga" style="display: none; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.85rem; font-weight: bold;"></div>
-
-            <div class="form-group full-width" style="margin-top: 10px;">
-                <label>Cobriu folga de (Opcional - Carona Solidária)</label>
-                <input type="text" id="colega" placeholder="Nome do colega / Anunciar troca">
-            </div>
-
-            <div class="form-group full-width" style="margin-top: 10px;">
-                <label>Observação</label>
-                <textarea id="obs" rows="2" placeholder="Detalhes ou anotações..."></textarea>
-            </div>
-
-            <button class="btn btn-primary full-btn" onclick="salvarPlantao()" style="margin-top: 15px;">Salvar Plantão</button>
-        </section>
-
-        <!-- VISÃO GERAL & SAÚDE -->
-        <section class="card">
-            <h2 style="text-align: center; margin-bottom: 15px;">📊 VISÃO GERAL & SAÚDE</h2>
-
-            <div class="meta-container">
-                <div class="meta-header">
-                    <span>Meta: <strong id="metaValorText">R$ 1000.00</strong></span>
-                    <span id="metaPercentText">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="metaProgressBar" style="width: 0%;"></div>
-                </div>
-                <div style="text-align: center; margin-top: 8px;">
-                    <button class="btn-link" onclick="ajustarMeta()">⚙ Ajustar Meta</button>
-                </div>
-            </div>
-
-            <!-- GRÁFICO DE DESEMPENHO -->
-            <div class="meta-container" style="margin-top: 15px;">
-                <h3 class="section-title" style="margin-top: 0; text-align: center; font-size: 0.95rem;">Distribuição de Turnos</h3>
-                <div style="position: relative; height: 180px; width: 100%;">
-                    <canvas id="graficoDesempenho"></canvas>
-                </div>
-            </div>
-
-            <div class="stats-cards-grid" style="margin-top: 15px;">
-                <div class="stat-card">
-                    <small>Previsão Cash (Recebimento)</small>
-                    <strong class="warning-text" id="lblDiaRecebimento">Dia 05</strong>
-                </div>
-
-                <div class="stat-card alert-border">
-                    <small>Fechamento RH (Folha)</small>
-                    <strong class="danger-text" id="lblDiaFechamento">Dia 25</strong>
-                </div>
-
-                <div class="stat-card">
-                    <small>Total Plantões</small>
-                    <strong id="totalPlantoes">0</strong>
-                </div>
-
-                <div class="stat-card">
-                    <small>Próprios / Coberturas</small>
-                    <strong id="propriosCoberturas">0 / 0</strong>
-                </div>
-
-                <div class="stat-card">
-                    <small>Média por Plantão</small>
-                    <strong id="mediaPorPlantao" class="info-text">R$ 0.00</strong>
-                </div>
-
-                <div class="stat-card">
-                    <small>Média de Sono</small>
-                    <strong id="mediaSono">0.0h</strong>
-                </div>
-
-                <!-- CARDS DE DISPOSITIVOS ATIVOS / EM TEMPO REAL -->
-                <div class="stat-card">
-                    <small>Dispositivos com Registros</small>
-                    <strong id="qtdDispositivosLogados" class="info-text">Conectando...</strong>
-                </div>
-
-                <div class="stat-card">
-                    <small>Dispositivos Ativos Agora</small>
-                    <strong id="qtdDispositivosOnline" class="success-text">0</strong>
-                </div>
-            </div>
-
-            <!-- Botões de Configuração e Fechamento -->
-            <div style="text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn-link" onclick="configurarDatasFolha()">⚙ Configurar Dias de Fechamento e Recebimento</button>
-                <button class="btn btn-outline full-btn" onclick="gerarResumoMensalAutomatico()" style="border-color: #f59e0b; color: #f59e0b;">📊 Gerar Resumo Mensal Automático</button>
-                <button class="btn btn-fechar-folha full-btn" onclick="fecharFolha()">✔ Recebi / Fechar Folha Atual</button>
-            </div>
-        </section>
-
-        <!-- EXTRATOS E ARQUIVOS -->
-        <section class="card">
-            <h2 style="text-align: center; margin-bottom: 15px;">📁 EXTRATOS E ARQUIVOS</h2>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Detalhes</th>
-                            <th>Turno / Horário</th>
-                            <th>Valor Total</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaExtrato">
-                        <!-- Conteúdo via JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="total-bar">
-                <span>Total Filtrado:</span>
-                <strong id="totalFiltrado" class="success-text">R$ 0.00</strong>
-            </div>
-
-            <!-- LOGS EXPANSÍVEIS -->
-            <details class="logs-accordion" style="margin-top: 15px;">
-                <summary class="section-title" style="cursor: pointer; font-weight: bold; user-select: none; text-align: center;">
-                    📋 LOGS DE CHECK-IN / INTERVALOS
-                </summary>
-                <div id="logsCheckin" class="logs-container" style="margin-top: 8px;">
-                    <p class="vazio" style="text-align: center;">Nenhum log de ponto registrado.</p>
-                </div>
-            </details>
-
-            <h3 class="section-title" style="text-align: center; margin-top: 20px;">Ferramentas & Sincronização</h3>
-            <button class="btn btn-outline full-btn" onclick="exportarExcel()">📊 Exportar Dados para Excel (CSV Discriminado)</button>
-        </section>
-
-        <!-- 🔔 CARD DE NOTIFICAÇÕES & ALERTAS EM TEMPO REAL (SUPABASE & ONESIGNAL) -->
-        <section class="card">
-            <div class="card-header">
-                <h2>🔔 NOTIFICAÇÕES & ALERTAS</h2>
-                <span class="status-tag active" id="statusNotifTag">SUPABASE REALTIME</span>
-            </div>
-
-            <p class="dev-description" style="margin-bottom: 15px;">
-                Gerenciamento de alertas push e sincronização em tempo real entre dispositivos conectados.
-            </p>
-
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn btn-primary full-btn" onclick="solicitarPermissaoNotificacao()">
-                    🔔 Ativar Permissão de Notificação Push
-                </button>
-
-                <button class="btn btn-warning full-btn" onclick="enviarNotificacaoSupabase()" style="background: #3b82f6; color: white; border: none;">
-                    📢 Disparar Alerta para a Rede (Supabase)
-                </button>
-            </div>
-
-            <!-- LOGS DE NOTIFICAÇÕES RECEBIDAS -->
-            <details class="logs-accordion" style="margin-top: 15px;">
-                <summary class="section-title" style="cursor: pointer; font-weight: bold; user-select: none; text-align: center;">
-                    📬 CENTRAL DE ALERTAS RECEBIDOS
-                </summary>
-                <div id="logsNotificacoes" class="logs-container" style="margin-top: 8px;">
-                    <p class="vazio" style="text-align: center;">Nenhum alerta recebido na sessão atual.</p>
-                </div>
-            </details>
-        </section>
-
-    </main>
-
-    <!-- RODAPÉ CENTRALIZADO -->
-    <footer class="main-footer" style="text-align: center; padding: 20px; margin-top: 20px;">
-        <p><strong>Valis Naturalidade LTDA</strong></p>
-        <p class="sub-footer">CNPJ Registrado • Sistema Ponto Vigias</p>
-        <p style="margin: 8px 0;"><a href="#" onclick="exibirTermosUso()">📜 Termos de Uso & Diretrizes Tecnológicas (LGPD)</a></p>
-        <p class="dev-by">Desenvolvido por <strong>Vitor Silva</strong> 🇧🇷</p>
-    </footer>
-
-    <!-- Banner de Atualização Pendente -->
-    <div id="updateBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #007bff; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; text-align: center; font-family: sans-serif; max-width: 90%; align-items: center; gap: 10px;">
-      <span>🔄 Nova atualização disponível!</span>
-      <button id="btnReloadApp" style="background-color: white; color: #007bff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">
-        Reiniciar App
-      </button>
+  <!-- MODAL DE AUTENTICAÇÃO DEV / SUPERVISÃO -->
+  <div id="modal-auth" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" id="auth-modal-title" style="margin-bottom:10px;">ACESSO RESTRITO</div>
+      <p style="font-size:11px; color: var(--text-muted); margin-bottom: 12px;" id="auth-modal-desc">Informe a senha para acessar as configurações avançadas.</p>
+      <input type="password" id="auth-password" class="form-control" placeholder="Digite a senha..." style="margin-bottom: 12px;">
+      <div class="form-row">
+        <button class="btn btn-dark" style="flex:1" onclick="fecharModalAuth()">Cancelar</button>
+        <button class="btn btn-purple" style="flex:1" onclick="validarAcessoAuth()">Acessar</button>
+      </div>
     </div>
+  </div>
 
-    <!-- CARREGAMENTO DOS SCRIPTS DA APLICAÇÃO -->
-    <script src="storage.js"></script>
-    <script src="app_core.js"></script>
-    <script src="dashboard.js"></script>
-    <script src="app_actions.js"></script>
-    <script src="app.js"></script>
-    <script src="contador_dispositivos.js"></script>
-    <script src="notificações.js"></script>
-<!-- BLOCO 1: SCRIPT DE EMERGÊNCIA - MENU SISTEMA -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const btnSistema = document.querySelector('.dev-menu-btn[title="Menu Sistema"]');
-    if (btnSistema) {
-      btnSistema.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const menuSistema = document.getElementById('sistemaDropdown');
-        const menuDev = document.getElementById('devDropdown');
+  <header>
+    <div class="brand-container">
+      <div class="brand-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">VALIS VIGIA</div>
+        <div class="brand-subtitle">Automação & Controle Operacional</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="abrirAuthModal('supervisao')" title="Painel da Supervisão">👮‍♂️</button>
+      <button class="icon-btn" onclick="abrirAuthModal('dev')" title="Menu Desenvolvedor">💻</button>
+    </div>
+  </header>
+
+  <div id="notification-toast">
+    <div class="toast-icon">✓</div>
+    <div id="toast-message">Sistema carregado e pronto para operação.</div>
+  </div>
+
+  <main>
+    <!-- 1. ABA PONTO -->
+    <section id="tab-ponto" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">PLANTÃO TEMPO REAL</span>
+          <span class="status-badge inativo" id="plantao-status-badge">INATIVO</span>
+        </div>
+
+        <div class="timer-display" id="clock-display">00:00:00</div>
+        <div class="timer-date" id="date-display">...</div>
+
+        <div class="location-info">
+          <span>📡</span>
+          <span id="location-text">Obtendo geolocalização automática...</span>
+        </div>
+
+        <div class="action-grid">
+          <button class="btn btn-green btn-disabled" id="btn-checkin" onclick="handleCheckIn()">➔] Check-in</button>
+          <button class="btn btn-red btn-disabled" id="btn-checkout" onclick="handleCheckOut()">[➔ Check-out</button>
+          <button class="btn btn-yellow btn-disabled" id="btn-saida-almoco" onclick="handleSaidaAlmoco()">🍽 Saída Almoço</button>
+          <button class="btn btn-dark btn-disabled" id="btn-volta-almoco" onclick="handleVoltaAlmoco()">🛠 Volta Almoço</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">REGISTROS RECENTES</span>
+          <span style="font-size: 10px; color: var(--text-muted);" id="logs-count">0 registros</span>
+        </div>
+        <div id="recent-logs-list"></div>
+      </div>
+    </section>
+
+    <!-- 2. ABA REGISTRO -->
+    <section id="tab-registro" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">NOVO REGISTRO AUTOMÁTICO</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">DATA</label>
+            <input type="date" id="reg-data" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">TURNO</label>
+            <select id="reg-turno" class="form-control" onchange="autoCalcularPlantao()">
+              <option value="12h">12 Horas</option>
+              <option value="24h" selected>24 Horas</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">INÍCIO</label>
+            <input type="time" id="reg-inicio" class="form-control" value="06:00" onchange="autoCalcularPlantao()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">FIM ESTIMADO</label>
+            <input type="time" id="reg-fim" class="form-control" value="06:00" onchange="autoCalcularPlantao()">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">TOTAL HORAS</label>
+            <input type="text" id="reg-horas-calc" class="form-control" value="24 hrs" readonly style="color:var(--color-green); font-weight:bold;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">VALOR A RECEBER (R$)</label>
+            <input type="number" id="reg-valor" class="form-control" value="200">
+          </div>
+        </div>
+
+        <button class="btn btn-green" style="width: 100%; margin-top: 6px;" onclick="salvarRegistroManual()">💾 Gravar Plantão</button>
+      </div>
+    </section>
+
+    <!-- 3. ABA PAINEL -->
+    <section id="tab-painel" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">RESUMO ACUMULADO</span>
+        </div>
+        <div style="font-size: 22px; font-weight: bold;" id="dash-total-val">R$ 0,00</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="dash-total-horas">0 Horas registradas</div>
+      </div>
+    </section>
+
+    <!-- 4. ABA EXTRATO -->
+    <section id="tab-extrato" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">HISTÓRICO COMPLETO</span>
+        </div>
+        <div id="extrato-lista"></div>
+      </div>
+    </section>
+
+    <!-- 5. ABA AJUSTES -->
+    <section id="tab-ajustes" class="tab-content">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px;">CONFIGURAÇÕES DO GPS DO POSTO</div>
+        <div class="form-group">
+          <label class="form-label">LATITUDE DO POSTO</label>
+          <input type="text" id="cfg-lat" class="form-control" value="-22.7500">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">LONGITUDE DO POSTO</label>
+            <input type="text" id="cfg-lng" class="form-control" value="-43.7000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">RAIO PERMITIDO (M)</label>
+            <input type="number" id="cfg-raio" class="form-control" value="500">
+          </div>
+        </div>
+        <button class="btn btn-dark" style="width: 100%;" onclick="salvarGpsConfig()">💾 Salvar Posto</button>
+      </div>
+    </section>
+
+    <!-- 6. ABA SUPERVISÃO (NOVA) -->
+    <section id="tab-supervisao" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">PAINEL DA SUPERVISÃO</span>
+          <span class="status-badge supervisao">GESTOR</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Auditoria e controle direto de equipes em campo.</p>
         
-        if (menuDev) menuDev.classList.remove('show');
-        if (menuSistema) menuSistema.classList.toggle('show');
-      });
+        <div class="form-group">
+          <label class="form-label">ENVIAR AVISO PARA O VIGIA</label>
+          <input type="text" id="sup-alerta-msg" class="form-control" placeholder="Ex: Ronda obrigatória às 02:00">
+        </div>
+        <button class="btn btn-blue" style="width: 100%; margin-bottom: 12px;" onclick="enviarAlertaSupervisao()">📢 Transmitir Comunicado</button>
+
+        <div class="card-title" style="margin-top: 10px; margin-bottom: 8px;">OPÇÕES DE AUDITORIA</div>
+        <button class="btn btn-dark" style="width:100%; margin-bottom:6px;" onclick="alert('Relatório de folha exportado para a supervisão!')">📄 Exportar Relatório em PDF</button>
+      </div>
+    </section>
+
+    <!-- 7. ABA DESENVOLVEDOR (NOVA) -->
+    <section id="tab-dev" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">CONSOLE DE DESENVOLVIMENTO</span>
+          <span class="status-badge dev">DEV MODE</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Ferramentas de teste e diagnóstico do aplicativo.</p>
+
+        <div class="form-group">
+          <label class="form-label">SIMULADOR DE GPS</label>
+          <div class="form-row">
+            <button class="btn btn-purple" style="flex:1" onclick="simularGps(true)">📍 Simular No Posto</button>
+            <button class="btn btn-dark" style="flex:1" onclick="simularGps(false)">🚫 Simular Fora</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">ALTERAR SENHA DE ACESSO</label>
+          <input type="text" id="dev-nova-senha" class="form-control" placeholder="Nova senha dev/supervisão">
+          <button class="btn btn-dark" style="width: 100%; margin-top: 6px;" onclick="alterarSenhaDev()">🔑 Alterar Senha</button>
+        </div>
+
+        <button class="btn btn-red" style="width: 100%; margin-top: 12px;" onclick="zerarTudoDev()">⚠️ Redefinir Sistema Completo</button>
+      </div>
+    </section>
+  </main>
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('ponto', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      PONTO
+    </button>
+    <button class="nav-item" onclick="switchTab('registro', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      REGISTRO
+    </button>
+    <button class="nav-item" onclick="switchTab('painel', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      PAINEL
+    </button>
+    <button class="nav-item" onclick="switchTab('extrato', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      EXTRATO
+    </button>
+    <button class="nav-item" onclick="switchTab('ajustes', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      AJUSTES
+    </button>
+  </nav>
+
+  <script>
+    // ESTADO E CONFIGURAÇÕES DO SISTEMA
+    let appState = {
+      status: 'INATIVO', // 'INATIVO' | 'ATIVO' | 'ALMOCO'
+      passDev: 'dev123',
+      targetLat: -22.7500,
+      targetLng: -43.7000,
+      maxRadius: 500, // metros
+      noPosto: false,
+      distanciaAtual: 9999,
+      checkInTime: null,
+      targetAuthTab: '',
+      logs: [],
+      registros: []
+    };
+
+    // RELÓGIO EM TEMPO REAL
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock-display').textContent = now.toTimeString().split(' ')[0];
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      const str = now.toLocaleDateString('pt-BR', options);
+      document.getElementById('date-display').textContent = str.charAt(0).toUpperCase() + str.slice(1);
     }
-  });
-</script>
+    setInterval(updateClock, 1000);
+    updateClock();
 
-<!-- BLOCO 2: SCRIPT DE EMERGÊNCIA - MENU DEV (SENHA "valis2026") & FUNÇÃO BROADCAST NOTIFICAÇÃO -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const btnDev = document.querySelector('.dev-menu-btn[title="Menu Developer"]');
-    if (btnDev) {
-      btnDev.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const menuDev = document.getElementById('devDropdown');
-        const menuSistema = document.getElementById('sistemaDropdown');
-
-        if (menuSistema) menuSistema.classList.remove('show');
-
-        if (menuDev && menuDev.classList.contains('show')) {
-          menuDev.classList.remove('show');
-          return;
-        }
-
-        if (sessionStorage.getItem('dev_unlocked') === 'true') {
-          if (menuDev) menuDev.classList.add('show');
-          return;
-        }
-
-        const senha = prompt('Digite a palavra-passe do Menu Developer:');
-        if (senha === 'valis2026') {
-          sessionStorage.setItem('dev_unlocked', 'true');
-          if (menuDev) menuDev.classList.add('show');
-          const tag = document.getElementById('statusDevTag');
-          if (tag) {
-            tag.innerText = 'LIBERADO';
-            tag.className = 'status-tag active';
-          }
-        } else if (senha !== null) {
-          alert('Palavra-passe incorreta!');
-        }
-      });
+    // CÁLCULO DE DISTÂNCIA GPS (FÓRMULA DE HAVERSINE)
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Metros
+      const rad = Math.PI / 180;
+      const dLat = (lat2 - lat1) * rad;
+      const dLon = (lon2 - lon1) * rad;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1*rad) * Math.cos(lat2*rad) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return Math.round(R * c);
     }
 
-    document.addEventListener('click', function() {
-      const menuSistema = document.getElementById('sistemaDropdown');
-      const menuDev = document.getElementById('devDropdown');
-      if (menuSistema) menuSistema.classList.remove('show');
-      if (menuDev) menuDev.classList.remove('show');
-    });
-  });
-
-  // Função Global para Disparar Notificação para a Rede via Supabase
-  async function enviarNotificacaoSupabase() {
-    const mensagem = prompt('Digite o texto da notificação/alerta para enviar a todos os aparelhos:');
-    if (!mensagem || mensagem.trim() === '') return;
-
-    if (typeof window.enviarAlertaGeral === 'function') {
-      await window.enviarAlertaGeral(mensagem);
-    } else if (window.supabase) {
-      try {
-        const channel = window.supabase.channel('alertas-ponto');
-        
-        // Inscreve no canal antes de realizar o disparo
-        channel.subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.send({
-              type: 'broadcast',
-              event: 'notificacao',
-              payload: { mensagem: mensagem, autor: 'Desenvolvedor' }
-            });
-            alert('📢 Notificação enviada com sucesso para a rede Supabase!');
-          }
-        });
-      } catch (err) {
-        console.error('Erro ao transmitir via Supabase:', err);
-        alert('Erro ao enviar notificação via Supabase.');
+    // MONITORAMENTO AUTOMÁTICO DE GEOLOCALIZAÇÃO
+    function initGpsTracker() {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.watchPosition(
+          (pos) => {
+            const dist = calcularDistancia(pos.coords.latitude, pos.coords.longitude, appState.targetLat, appState.targetLng);
+            appState.distanciaAtual = dist;
+            appState.noPosto = dist <= appState.maxRadius;
+            atualizarStatusGpsUI();
+          },
+          (err) => {
+            document.getElementById('location-text').textContent = "Erro ao ler GPS. Utilize o simulador Dev.";
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
       }
-    } else {
-      alert('Sincronização Supabase não detectada no arquivo notificações.js.');
     }
-  }
-</script>
+    initGpsTracker();
 
+    function atualizarStatusGpsUI() {
+      const locText = document.getElementById('location-text');
+      if (appState.noPosto) {
+        locText.style.color = "var(--color-green)";
+        locText.textContent = `No Posto Principal (${appState.distanciaAtual}m de distância)`;
+      } else {
+        locText.style.color = "var(--color-orange)";
+        locText.textContent = `Fora do posto — ${appState.distanciaAtual}m do Posto Principal`;
+      }
+      updateUIState();
+    }
+    // GERENCIAMENTO DE NAVEGAÇÃO E MODAIS DE SENHA
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+      document.getElementById('tab-' + tabId).classList.add('active');
+      if(el) el.classList.add('active');
+    }
+
+    function abrirAuthModal(tipo) {
+      appState.targetAuthTab = tipo;
+      document.getElementById('auth-modal-title').textContent = tipo === 'dev' ? 'ACESSO DESENVOLVEDOR' : 'ACESSO SUPERVISÃO';
+      document.getElementById('modal-auth').classList.remove('hidden');
+      document.getElementById('auth-password').value = '';
+      document.getElementById('auth-password').focus();
+    }
+
+    function fecharModalAuth() {
+      document.getElementById('modal-auth').classList.add('hidden');
+    }
+
+    function validarAcessoAuth() {
+      const pass = document.getElementById('auth-password').value;
+      if (pass === appState.passDev) {
+        fecharModalAuth();
+        switchTab(appState.targetAuthTab, null);
+        showNotification(`Acesso autorizado para ${appState.targetAuthTab.toUpperCase()}`);
+      } else {
+        alert('Senha incorreta!');
+      }
+    }
+
+    // CONTROLE DE ESTADO DO PLANTÃO E BOTÕES
+    function updateUIState() {
+      const badge = document.getElementById('plantao-status-badge');
+      const btnCheckin = document.getElementById('btn-checkin');
+      const btnCheckout = document.getElementById('btn-checkout');
+      const btnSaida = document.getElementById('btn-saida-almoco');
+      const btnVolta = document.getElementById('btn-volta-almoco');
+
+      if (appState.status === 'INATIVO') {
+        badge.className = 'status-badge inativo';
+        badge.textContent = 'INATIVO';
+        
+        // Só habilita check-in se estiver DENTRO do raio do posto
+        if (appState.noPosto) {
+          btnCheckin.classList.remove('btn-disabled');
+        } else {
+          btnCheckin.classList.add('btn-disabled');
+        }
+        btnCheckout.classList.add('btn-disabled');
+        btnSaida.classList.add('btn-disabled');
+        btnVolta.classList.add('btn-disabled');
+
+      } else if (appState.status === 'ATIVO') {
+        badge.className = 'status-badge ativo';
+        badge.textContent = 'EM PLANTÃO';
+
+        btnCheckin.classList.add('btn-disabled');
+        btnCheckout.classList.remove('btn-disabled');
+        btnSaida.classList.remove('btn-disabled');
+        btnVolta.classList.add('btn-disabled');
+
+      } else if (appState.status === 'ALMOCO') {
+        badge.className = 'status-badge almoco';
+        badge.textContent = 'EM PAUSA/ALMOÇO';
+
+        btnCheckin.classList.add('btn-disabled');
+        btnCheckout.classList.add('btn-disabled');
+        btnSaida.classList.add('btn-disabled');
+        btnVolta.classList.remove('btn-disabled');
+      }
+    }
+
+    function showNotification(msg) {
+      const toast = document.getElementById('notification-toast');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('hidden');
+    }
+
+    function registrarLog(acao) {
+      const hora = new Date().toLocaleTimeString().slice(0, 5);
+      const log = { acao, hora, loc: document.getElementById('location-text').textContent };
+      appState.logs.unshift(log);
+
+      const list = document.getElementById('recent-logs-list');
+      list.innerHTML = `
+        <div class="log-item">
+          <div>
+            <div class="log-title">${acao}</div>
+            <div class="log-sub">${log.loc}</div>
+          </div>
+          <div class="log-time">${hora}</div>
+        </div>
+      ` + list.innerHTML;
+      document.getElementById('logs-count').textContent = appState.logs.length + " registros";
+    }
+
+    // AÇÕES DO PLANTÃO
+    function handleCheckIn() {
+      appState.status = 'ATIVO';
+      registrarLog('Check-in (Entrada)');
+      showNotification('Plantão iniciado com sucesso no posto.');
+      updateUIState();
+    }
+
+    function handleCheckOut() {
+      appState.status = 'INATIVO';
+      registrarLog('Check-out (Saída)');
+      showNotification('Plantão encerrado.');
+      updateUIState();
+    }
+
+    function handleSaidaAlmoco() {
+      appState.status = 'ALMOCO';
+      registrarLog('Saída para Almoço');
+      showNotification('Pausa de almoço iniciada.');
+      updateUIState();
+    }
+
+    function handleVoltaAlmoco() {
+      appState.status = 'ATIVO';
+      registrarLog('Retorno do Almoço');
+      showNotification('Retorno ao plantão registrado.');
+      updateUIState();
+    }
+
+    // AUTOMATIZAÇÃO DE CÁLCULOS NO FORMULÁRIO DE REGISTRO
+    function autoCalcularPlantao() {
+      const turno = document.getElementById('reg-turno').value;
+      const horasInput = document.getElementById('reg-horas-calc');
+      const valorInput = document.getElementById('reg-valor');
+
+      if (turno === '24h') {
+        horasInput.value = '24 hrs';
+        valorInput.value = 200;
+      } else {
+        horasInput.value = '12 hrs';
+        valorInput.value = 100;
+      }
+    }
+
+    function salvarRegistroManual() {
+      const data = document.getElementById('reg-data').value;
+      const val = parseFloat(document.getElementById('reg-valor').value) || 0;
+      const horas = document.getElementById('reg-horas-calc').value;
+
+      appState.registros.unshift({ data, val, horas });
+
+      // Atualiza Extrato e Painel
+      const lista = document.getElementById('extrato-lista');
+      lista.innerHTML = `
+        <div class="log-item">
+          <div>
+            <div class="log-title">${data} · ${horas}</div>
+            <div class="log-sub">Lançamento de Plantão</div>
+          </div>
+          <div style="font-weight:bold; color:#FFF;">R$ ${val.toFixed(2)}</div>
+        </div>
+      ` + lista.innerHTML;
+
+      let totalVal = appState.registros.reduce((acc, curr) => acc + curr.val, 0);
+      document.getElementById('dash-total-val').textContent = `R$ ${totalVal.toFixed(2)}`;
+      document.getElementById('dash-total-horas').textContent = `${appState.registros.length * 24} Horas registradas`;
+
+      showNotification('Plantão registrado e acumulado no painel!');
+    }
+
+    // FUNÇÕES DA SUPERVISÃO E DEV
+    function enviarAlertaSupervisao() {
+      const msg = document.getElementById('sup-alerta-msg').value;
+      if (msg) {
+        showNotification(`📢 ALERTA SUPERVISÃO: ${msg}`);
+        document.getElementById('sup-alerta-msg').value = '';
+      }
+    }
+
+    function simularGps(noPosto) {
+      appState.noPosto = noPosto;
+      appState.distanciaAtual = noPosto ? 50 : 1200;
+      atualizarStatusGpsUI();
+      showNotification(noPosto ? "Simulação: Vigia DENTRO do posto" : "Simulação: Vigia FORA do posto");
+    }
+
+    function alterarSenhaDev() {
+      const nova = document.getElementById('dev-nova-senha').value;
+      if (nova) {
+        appState.passDev = nova;
+        alert('Senha alterada com sucesso!');
+        document.getElementById('dev-nova-senha').value = '';
+      }
+    }
+
+    function salvarGpsConfig() {
+      appState.targetLat = parseFloat(document.getElementById('cfg-lat').value);
+      appState.targetLng = parseFloat(document.getElementById('cfg-lng').value);
+      appState.maxRadius = parseInt(document.getElementById('cfg-raio').value);
+      showNotification('Coordenadas do posto atualizadas!');
+    }
+
+    function zerarTudoDev() {
+      if (confirm('Deseja zerar completamente as configurações do app?')) {
+        location.reload();
+      }
+    }
+
+    // Configura data atual no campo
+    document.getElementById('reg-data').valueAsDate = new Date();
+  </script>
 </body>
-
 </html>
