@@ -289,7 +289,7 @@ function verificarAlertaFadiga(sono, turno) {
     let corTexto = "#ffffff";
 
     if (sono < 5 && (turno === "Noturno" || turno === "24h")) {
-        mensagem = "⚠️️ ALERTA CRÍTICO DE FADIGA: Menos de 5 horas de sono para um turno noturno ou de 24h representa um alto risco operacional!";
+        mensagem = "⚠ ALERTA CRÍTICO DE FADIGA: Menos de 5 horas de sono para um turno noturno ou de 24h representa um alto risco operacional!";
         corFundo = "#ef4444"; 
     } else if (sono < 6) {
         mensagem = "⚡ ATENÇÃO: Sono reduzido. Mantenha o estado de alerta reforçado durante o plantão.";
@@ -598,10 +598,19 @@ async function renderizarLogs() {
 
         container.innerHTML = logs.map(log => {
             const dataFormatada = log.created_at ? new Date(log.created_at).toLocaleString("pt-BR") : "";
-            const gpsInfo = log.lat ? ` 📍 (${log.lat.toFixed(3)}, ${log.lng.toFixed(3)})` : "";
+            
+            // Suporta tanto o campo 'type' quanto 'Tipo'
+            const tipoTexto = log.type || log.Tipo || "Sem tipo";
+            
+            const latVal = log.lat !== undefined && log.lat !== null ? parseFloat(log.lat) : null;
+            const lngVal = log.lng !== undefined && log.lng !== null ? parseFloat(log.lng) : null;
+            const gpsInfo = (latVal !== null && lngVal !== null && !isNaN(latVal) && !isNaN(lngVal)) 
+                ? ` 📍 (${latVal.toFixed(3)}, ${lngVal.toFixed(3)})` 
+                : "";
+
             return `
                 <div class="log-item">
-                    <span><strong>${log.type}</strong>${gpsInfo}</span>
+                    <span><strong>${tipoTexto}</strong>${gpsInfo}</span>
                     <span>${dataFormatada}</span>
                 </div>
             `;
@@ -922,4 +931,23 @@ function limparCacheERecarregar() {
 
 function exibirTermosUso() {
     alert("📜 Termos de Uso & Diretrizes Tecnológicas (LGPD)\n\nSistema exclusivo para controlo de plantões e jornadas de vigilantes. Dados armazenados com segurança local e sincronização opcional via nuvem.");
+}
+
+// ============================================================================
+// FUNÇÕES AUXILIARES DE MEMÓRIA E DASHBOARD (CORREÇÃO DOS LOGS)
+// ============================================================================
+
+function buscarPlantoes() {
+    return JSON.parse(localStorage.getItem("plantoes")) || [];
+}
+
+function salvarStorage(plantoes) {
+    localStorage.setItem("plantoes", JSON.stringify(plantoes));
+}
+
+// Garante que se o painel de dashboard não existir no HTML, o script não quebra
+function atualizarDashboard() {
+    if (typeof calcularDashboard === 'function') {
+        calcularDashboard();
+    }
 }

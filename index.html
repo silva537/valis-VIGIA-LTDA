@@ -44,7 +44,7 @@
                 <button class="dev-menu-btn" onclick="toggleMenuSistema()" title="Menu Sistema">⚙</button>
                 <div class="dev-dropdown" id="sistemaDropdown">
                     <div class="card-header">
-                        <h2>⚙️ MENU SISTEMA</h2>
+                        <h2>⚙️️ MENU SISTEMA</h2>
                         <span class="status-tag active">APP</span>
                     </div>
                     <p class="dev-description">
@@ -285,8 +285,8 @@
 
                 <!-- CARDS DE DISPOSITIVOS ATIVOS / EM TEMPO REAL -->
                 <div class="stat-card">
-                    <small>App Instalados / Registrados</small>
-                    <strong id="qtdDispositivosTotais" class="info-text">0</strong>
+                    <small>Dispositivos com Registros</small>
+                    <strong id="qtdDispositivosLogados" class="info-text">Conectando...</strong>
                 </div>
 
                 <div class="stat-card">
@@ -352,13 +352,6 @@
         <p class="dev-by">Desenvolvido por <strong>Vitor Silva</strong> 🇧🇷</p>
     </footer>
 
-    <!-- CARREGAMENTO DOS SCRIPTS DA APLICAÇÃO -->
-    <script src="storage.js"></script>
-    <script src="dashboard.js"></script>
-    <script src="app-part1.js"></script>
-    <script src="app-part2.js"></script>
-    <script src="app-part3.js"></script>
-
     <!-- Banner de Atualização Pendente -->
     <div id="updateBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #007bff; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; text-align: center; font-family: sans-serif; max-width: 90%; align-items: center; gap: 10px;">
       <span>🔄 Nova atualização disponível!</span>
@@ -366,15 +359,16 @@
         Reiniciar App
       </button>
     </div>
-      <!-- Seus scripts já existentes (sem mexer em nada neles) -->
+
+    <!-- CARREGAMENTO DOS SCRIPTS DA APLICAÇÃO -->
+    <script src="storage.js"></script>
+    <script src="dashboard.js"></script>
     <script src="app-part1.js"></script>
     <script src="app-part2.js"></script>
     <script src="app-part3.js"></script>
 
-    <!-- NOVO SCRIPT (Apenas acrescentado aqui) -->
+    <!-- NOVO SCRIPT (Acrescentado para contagem de dispositivos) -->
     <script src="contador_dispositivos.js"></script>
-</body>
-
 </body>
 
 </html>
