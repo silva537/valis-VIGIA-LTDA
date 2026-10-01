@@ -4,118 +4,1618 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0D1117">
-  <title>Valis Vigia - Manutenção de Segurança</title>
+  <title>Valis Vigia - Sistema Operacional Integrado</title>
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlZhbGlzIFZpZ2lhIiwKICAic2hvcnRfbmFtZSI6ICJWYWxpcyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMEYxMDIwIiwKICAidGhlbWVfY29sb3IiOiAiIzBGMTEyMCIKfQ==">
   <style>
     :root {
-      --bg-main: #090D12;
-      --bg-card: #121820;
-      --bg-card-border: #1F2937;
-      --text-main: #F3F4F6;
-      --text-muted: #9CA3AF;
-      --color-red: #EF4444;
-      --color-yellow: #F59E0B;
+      --bg-main: #090D12; --bg-card: #121820; --bg-card-border: #1F2937;
+      --bg-input: #1A222D; --border-input: #374151; --text-main: #F3F4F6;
+      --text-muted: #9CA3AF; --text-sub: #D1D5DB; --color-green: #059669;
+      --color-green-bright: #10B981; --color-accent-red: #881337;
+      --color-accent-red-hover: #9F1239; --color-red-panic: #E11D48;
+      --color-yellow: #D97706; --color-purple: #7C3AED; --color-blue: #2563EB;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); }
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-      text-align: center;
+    body.light-theme {
+      --bg-main: #F3F4F6; --bg-card: #FFFFFF; --bg-card-border: #E5E7EB;
+      --bg-input: #F9FAFB; --border-input: #D1D5DB; --text-main: #111827;
+      --text-muted: #6B7280; --text-sub: #374151; --color-green: #059669;
+      --color-green-bright: #059669; --color-accent-red: #9F1239;
     }
-    .maintenance-card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--bg-card-border);
-      border-radius: 16px;
-      padding: 30px 20px;
-      max-width: 420px;
-      width: 100%;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; overflow: hidden; user-select: none; }
+
+    header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-card); border-bottom: 1px solid var(--bg-card-border); }
+    .brand-container { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 38px; height: 38px; background: var(--bg-main); border: 1px solid var(--border-input); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--color-green-bright); font-size: 18px; }
+    .brand-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
+    .brand-subtitle { font-size: 11px; color: var(--text-muted); }
+    .header-actions { display: flex; gap: 8px; }
+    .icon-btn { width: 36px; height: 36px; background: var(--bg-main); border: 1px solid var(--bg-card-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-sub); cursor: pointer; font-size: 15px; }
+    .btn-panic { background: var(--color-accent-red) !important; color: #FFF !important; font-weight: 900; }
+
+    .rgb-border { position: relative; border-radius: 12px; z-index: 1; background-color: var(--bg-card); border: 1px solid transparent; }
+    .rgb-border::before {
+      content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bbf, #7a00ff, #ff00c8, #ff0000);
+      background-size: 400%; z-index: -2; filter: blur(4px); border-radius: 14px; opacity: 0.85;
+      animation: rgb-glow 20s linear infinite;
+    }
+    .rgb-border::after { content: ''; position: absolute; inset: 0; background: var(--bg-card); border-radius: 12px; z-index: -1; }
+    @keyframes rgb-glow { 0% { background-position: 0 0; } 50% { background-position: 400% 0; } 100% { background-position: 0 0; } }
+
+    #notification-toast {
+      margin: 8px 14px 0 14px; padding: 10px 14px; background-color: var(--bg-card);
+      border: 1px solid var(--color-green-bright); border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-main); transition: opacity 0.4s ease;
+    }
+    #notification-toast.hidden { opacity: 0; pointer-events: none; display: none; }
+    #toast-timer { font-size: 10px; font-weight: 800; background: var(--bg-main); padding: 2px 6px; border-radius: 4px; color: var(--color-green-bright); border: 1px solid var(--border-input); }
+
+    main { flex: 1; overflow-y: auto; padding: 12px 14px 100px 14px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card { background-color: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .card-title { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-main); }
+    .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase; }
+    .status-badge.inativo { background: #374151; color: #D1D5DB; }
+    .status-badge.ativo { background: #065F46; color: #34D399; }
+    .status-badge.almoco { background: #92400E; color: #FBBF24; }
+    .status-badge.supervisao { background: #1E3A8A; color: #93C5FD; }
+
+    .timer-display { font-size: 38px; font-weight: 800; text-align: center; margin: 4px 0; font-family: monospace; }
+    .timer-date { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 12px; text-transform: capitalize; }
+    .location-info { text-align: center; font-size: 11px; color: var(--color-green-bright); margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--bg-main); padding: 8px; border-radius: 8px; border: 1px solid var(--bg-card-border); }
+
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn { padding: 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn:active { transform: scale(0.97); }
+    .btn-green { background-color: var(--color-green); color: #FFF; }
+    .btn-red { background-color: var(--color-accent-red); color: #FFF; }
+    .btn-yellow { background-color: var(--color-yellow); color: #FFF; }
+    .btn-purple { background-color: var(--color-purple); color: #FFF; }
+    .btn-blue { background-color: var(--color-blue); color: #FFF; }
+    .btn-dark { background-color: var(--bg-main); color: var(--text-sub); border: 1px solid var(--border-input); }
+    .btn-disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+    .form-group { margin-bottom: 10px; }
+    .form-label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; padding: 10px; color: var(--text-main); font-size: 12px; outline: none; }
+    .form-row { display: flex; gap: 8px; }
+    .form-row .form-group { flex: 1; }
+
+    .registro-details-card { background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; margin-bottom: 8px; padding: 10px 12px; }
+    .registro-details-card summary { cursor: pointer; font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; outline: none; list-style: none; }
+    .registro-details-card summary::-webkit-details-marker { display: none; }
+    .registro-details-content { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-input); font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 16px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-box { background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: 12px; padding: 18px; width: 100%; max-width: 360px; }
+
+    nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background-color: var(--bg-card); border-top: 2px solid var(--bg-card-border); display: flex; justify-content: space-around; padding: 8px 0 12px 0; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 9px; font-weight: 800; cursor: pointer; width: 14%; }
+    .nav-item.active { color: var(--color-green-bright); }
+    .nav-icon { width: 18px; height: 18px; }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 11px; margin-top: 10px; }
+    .day-cell { padding: 8px 4px; border-radius: 6px; background: var(--bg-input); cursor: pointer; border: 1px solid var(--bg-card-border); }
+    .day-trabalho { background: var(--color-green); color: #FFF; font-weight: bold; border-color: var(--color-green-bright); }
+    .day-folga { background: var(--bg-main); color: var(--text-muted); }
+    .day-custom-marcado { background: var(--color-purple); color: #FFF; font-weight: bold; border-color: #9333EA; }
+
+    .info-box { background: var(--bg-main); border: 1px solid var(--bg-card-border); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 12px; }
+    .info-box strong { color: var(--color-green-bright); }
+    .dev-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .device-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #064E3B; color: #6EE7B7; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .device-dot {
+      width: 8px; height: 8px; background: #34D399; border-radius: 50%;
+      animation: pulse-dot 1.5s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Modo Manutenção */
+    #maintenance-screen {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg-main);
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px; text-align: center;
+    }
+    #maintenance-screen.active { display: flex; }
+    .maint-card {
+      background: var(--bg-card); border: 1px solid var(--bg-card-border);
+      border-radius: 16px; padding: 30px 20px; max-width: 420px; width: 100%;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .icon-container {
-      font-size: 42px;
-      margin-bottom: 16px;
-      animation: pulse 2s infinite;
+    .maint-icon { font-size: 42px; margin-bottom: 16px; animation: pulse-dot 2s infinite; }
+    .maint-badge {
+      display: inline-block; background: rgba(239,68,68,0.15); color: #EF4444;
+      border: 1px solid rgba(239,68,68,0.3); padding: 6px 12px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;
     }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
+    .maint-card h1 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .maint-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+    .maint-alert {
+      background: rgba(245,158,11,0.1); border-left: 3px solid #F59E0B;
+      padding: 10px 12px; text-align: left; font-size: 12px; color: var(--text-muted);
+      border-radius: 4px; margin-bottom: 16px;
     }
-    h1 {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      color: var(--text-main);
-    }
-    p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    .badge-status {
-      display: inline-block;
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--color-red);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-    .security-alert {
-      background: rgba(245, 158, 11, 0.1);
-      border-left: 3px solid var(--color-yellow);
-      padding: 10px 12px;
-      text-align: left;
-      font-size: 12px;
-      color: var(--text-muted);
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    .security-alert strong {
-      color: var(--text-main);
-    }
-    .footer-info {
-      font-size: 11px;
-      color: var(--text-muted);
-      border-top: 1px solid var(--bg-card-border);
-      padding-top: 16px;
-      margin-top: 10px;
-    }
-    .developer-name {
-      color: var(--text-main);
-      font-weight: 600;
-    }
+    .maint-alert strong { color: var(--text-main); }
+    .maint-footer { font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--bg-card-border); padding-top: 16px; margin-top: 10px; }
+    .maint-unlock { margin-top: 16px; display: none; }
+    .maint-unlock.visible { display: block; }
   </style>
 </head>
 <body>
 
-  <div class="maintenance-card">
-    <div class="icon-container">🛡️</div>
-    <div class="badge-status">Protocolo de Segurança Ativo</div>
-    <h1>VALIS VIGIA</h1>
-    <p>O sistema encontra-se temporariamente bloqueado para auditoria e reforço das defesas digitais.</p>
-    
-    <div class="security-alert">
-      <strong>Aviso da Administração:</strong> Estamos a implementar melhorias e correções estruturais críticas após uma tentativa recente de intrusão/hack na nossa plataforma.
-    </div>
-
-    <p style="font-size: 12px; margin-bottom: 0;">Agradecemos a compreensão. O acesso normalizado será retornado em breve.</p>
-    
-    <div class="footer-info">
-      Responsável Técnico: <span class="developer-name">Vitor Silva</span><br>Valis Vigia - Sistema Operacional
+  <!-- TELA DE MANUTENÇÃO -->
+  <div id="maintenance-screen">
+    <div class="maint-card">
+      <div class="maint-icon">🛡️</div>
+      <div class="maint-badge">Protocolo de Segurança Ativo</div>
+      <h1>VALIS VIGIA</h1>
+      <p>O sistema encontra-se temporariamente bloqueado para auditoria e reforço das defesas digitais.</p>
+      <div class="maint-alert">
+        <strong>Aviso da Administração:</strong> Estamos a implementar melhorias e correções estruturais críticas após uma tentativa recente de intrusão/hack na nossa plataforma.
+      </div>
+      <p style="font-size:12px;margin-bottom:0;">Agradecemos a compreensão. O acesso normalizado será retornado em breve.</p>
+      <div class="maint-footer">
+        Responsável Técnico: <span style="color:var(--text-main);font-weight:600;">Vitor Silva</span><br>
+        Valis Vigia - Sistema Operacional
+      </div>
+      <div style="margin-top:18px;">
+        <button class="btn btn-dark" style="width:100%;font-size:11px;" onclick="document.getElementById('maint-unlock-box').classList.toggle('visible')">Desbloqueio Administrativo</button>
+      </div>
+      <div id="maint-unlock-box" class="maint-unlock">
+        <input type="password" id="maint-password" class="form-control" placeholder="Senha de administrador..." style="margin:10px 0;" onkeydown="if(event.key==='Enter')desativarManutencao()">
+        <button class="btn btn-purple" style="width:100%;" onclick="desativarManutencao()">Desativar Manutenção</button>
+      </div>
     </div>
   </div>
 
+  <!-- MODAIS -->
+  <div id="modal-auth" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:10px;">ACESSO RESTRITO</div>
+      <input type="password" id="auth-password" class="form-control" placeholder="Senha..." style="margin-bottom: 12px;" onkeydown="if(event.key==='Enter')validarAcessoAuth()">
+      <div class="form-row">
+        <button class="btn btn-dark" style="flex:1" onclick="fecharModalAuth()">Cancelar</button>
+        <button class="btn btn-purple" style="flex:1" onclick="validarAcessoAuth()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-bastao" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:10px;">TROCA DE BASTÃO</div>
+      <div class="form-group"><label class="form-label">EQUIPAMENTOS</label><input type="text" id="bastao-equip" class="form-control" value="Tudo Ok"></div>
+      <div class="form-group"><label class="form-label">OBSERVAÇÃO</label><textarea id="bastao-obs" class="form-control" rows="2" placeholder="Obs..."></textarea></div>
+      <div class="form-row">
+        <button class="btn btn-dark" style="flex:1" onclick="fecharBastao()">Cancelar</button>
+        <button class="btn btn-red" style="flex:1" onclick="confirmarCheckOut()">Check-out</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-aviso-sup" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:10px;">📢 ENVIAR AVISO</div>
+      <div class="form-group">
+        <label class="form-label">MENSAGEM</label>
+        <textarea id="aviso-sup-msg" class="form-control" rows="3" placeholder="Digite o aviso..."></textarea>
+      </div>
+      <div class="form-row">
+        <button class="btn btn-dark" style="flex:1" onclick="fecharAvisoSup()">Cancelar</button>
+        <button class="btn btn-yellow" style="flex:1" onclick="enviarAvisoSupervisao()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="brand-container">
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <div class="brand-title">VALIS VIGIA</div>
+        <div class="brand-subtitle" id="header-modo-str">Sistema Operacional</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="alternarTemaGeral()" title="Tema">🌓</button>
+      <button class="icon-btn btn-panic" onclick="dispararPanico()" title="Pânico">🚨</button>
+      <button class="icon-btn" onclick="abrirAuthModal('supervisao')" title="Supervisão">👮‍♂️</button>
+      <button class="icon-btn" onclick="abrirAuthModal('dev')" title="Dev">💻</button>
+    </div>
+  </header>
+
+  <div id="notification-toast" class="hidden">
+    <div id="toast-message">Valis Vigia Online</div>
+    <div id="toast-timer">10s</div>
+  </div>
+
+  <main>
+    <!-- ABA PONTO -->
+    <section id="tab-ponto" class="tab-content active">
+      <div class="card rgb-border">
+        <div class="card-header">
+          <span class="card-title">PLANTÃO EM TEMPO REAL</span>
+          <span class="status-badge inativo" id="plantao-status-badge">INATIVO</span>
+        </div>
+        <div class="timer-display" id="clock-display">00:00:00</div>
+        <div class="timer-date" id="date-display">...</div>
+        <div class="location-info"><span>🔓</span><span id="location-text">Ponto Desbloqueado. GPS Ativo.</span></div>
+        <div class="action-grid">
+          <button class="btn btn-green" id="btn-checkin" onclick="handleCheckIn()">➔] Check-in</button>
+          <button class="btn btn-red btn-disabled" id="btn-checkout" onclick="abrirPassagemTurno()">[➔ Check-out</button>
+          <button class="btn btn-yellow btn-disabled" id="btn-saida-almoco" onclick="handleSaidaAlmoco()">🍽 Refeição</button>
+          <button class="btn btn-dark btn-disabled" id="btn-volta-almoco" onclick="handleVoltaAlmoco()">🛠 Retorno</button>
+        </div>
+      </div>
+
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">🔔 ALERTAS DE RONDA</span></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">INTERVALO</label>
+            <select id="cfg-intervalo-ronda" class="form-control" onchange="configurarAlertaRonda()">
+              <option value="0">Desativado</option>
+              <option value="30">30 minutos</option>
+              <option value="60" selected>60 minutos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">TESTE</label>
+            <button class="btn btn-dark" style="width:100%" onclick="testarBipSonoro()">🔊 Testar Bip</button>
+          </div>
+        </div>
+        <div style="margin-top: 12px; text-align: center; background: var(--bg-input); padding: 10px; border-radius: 8px; border: 1px solid var(--border-input);">
+          <div class="form-label" style="margin-bottom: 2px;">PRÓXIMA RONDA EM</div>
+          <div id="ronda-countdown-display" style="font-size: 24px; font-weight: 800; font-family: monospace; color: var(--color-green-bright);">60:00</div>
+          <button class="btn btn-dark" style="width:100%; margin-top:8px; font-size:11px;" onclick="resetarTimerRonda()">🔄 Resetar Temporizador</button>
+        </div>
+      </div>
+
+      <div class="card rgb-border">
+        <details>
+          <summary class="card-header" style="cursor: pointer; margin-bottom: 0; list-style: none;">
+            <span class="card-title">REGISTROS</span>
+            <span style="font-size: 10px; color: var(--text-muted);" id="logs-count">0 itens</span>
+          </summary>
+          <div id="recent-logs-list" style="margin-top: 12px;"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ABA RONDA -->
+    <section id="tab-ronda" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">VALIDAÇÃO DE RONDA</span></div>
+        <div class="form-group">
+          <label class="form-label">PONTO / LOCAL</label>
+          <input type="text" id="ronda-ponto-nome" class="form-control" placeholder="Ex: Portão Principal, Perímetro Norte...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">FOTO DA RONDA</label>
+          <input type="file" id="ronda-foto" accept="image/*" capture="environment" class="form-control">
+        </div>
+        <button class="btn btn-blue" style="width:100%; margin-bottom: 12px;" onclick="registrarRondaComFoto()">📷 Registrar Ronda com Foto</button>
+        <div id="ronda-historico"></div>
+      </div>
+    </section>
+
+    <!-- ABA OCORRÊNCIAS -->
+    <section id="tab-ocorrencias" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">DIÁRIO DE BORDO</span></div>
+        <div class="form-group">
+          <label class="form-label">TIPO</label>
+          <select id="ocorr-tipo" class="form-control">
+            <option value="Ronda Normal">Ronda Rotina</option>
+            <option value="Anormalidade">Anormalidade</option>
+            <option value="Visitante">Visitante</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">DESCRIÇÃO</label>
+          <textarea id="ocorr-desc" class="form-control" rows="3" placeholder="Detalhes..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">FOTO</label>
+          <input type="file" id="ocorr-foto" accept="image/*" capture="environment" class="form-control">
+        </div>
+        <button class="btn btn-green" style="width:100%;" onclick="salvarOcorrencia()">💾 Salvar</button>
+      </div>
+      <div class="card rgb-border"><div id="ocorrencias-lista"></div></div>
+    </section>
+
+    <!-- ABA ESCALA -->
+    <section id="tab-escala" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">PROJEÇÃO DE ESCALA & FOLGUISTA</span></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">TIPO DE ESCALA</label>
+            <select id="escala-tipo" class="form-control" onchange="gerarCalendarioEscala()">
+              <option value="12x36">12x36 (Trab. 1 / Folga 1)</option>
+              <option value="24x72">24x72 (Trab. 1 / Folga 3)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">FUNÇÃO</label>
+            <select id="escala-funcao" class="form-control" onchange="gerarCalendarioEscala()">
+              <option value="titular" selected>Titular (Fixo)</option>
+              <option value="folguista">Folguista (Manual)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">DATA DE INÍCIO</label>
+          <input type="date" id="escala-data-inicio" class="form-control" onchange="gerarCalendarioEscala()">
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px;">※ Titular automático. Se folguista, toque nos dias para marcar.</div>
+        <div id="calendario-escala" class="calendar-grid"></div>
+      </div>
+    </section>
+
+    <!-- ABA REGISTRO -->
+        <section id="tab-registro" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">LANÇAMENTO DE PLANTÃO</span></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">DATA</label>
+            <input type="date" id="reg-data" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">TURNO</label>
+            <select id="reg-turno" class="form-control" onchange="aplicarTurnoRegistro()">
+              <option value="diurno">Diurno (06:00–18:00)</option>
+              <option value="noturno">Noturno (18:00–06:00)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">INÍCIO</label>
+            <input type="time" id="reg-hora-inicio" class="form-control" value="06:00" onchange="calcularHorasRegistro()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">FIM</label>
+            <input type="time" id="reg-hora-fim" class="form-control" value="18:00" onchange="calcularHorasRegistro()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">TIPO</label>
+            <select id="reg-tipo-plantao" class="form-control" onchange="toggleNomeCobertura()">
+              <option value="proprio" selected>Plantão Próprio</option>
+              <option value="cobertura_folga">Cobriu Folga de Alguém</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">VALOR (R$)</label>
+            <input type="number" id="reg-valor" class="form-control" value="100" step="0.01">
+          </div>
+        </div>
+        <div class="form-group" id="reg-nome-box" style="display:none;">
+          <label class="form-label">NOME DO COLEGA (quem cobriu)</label>
+          <input type="text" id="reg-nome-coleaga" class="form-control" placeholder="Ex: Matheus, Grisalho, Evandro...">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">TOTAL HORAS</label>
+            <input type="text" id="reg-horas-calc" class="form-control" value="12 hrs" readonly style="color:var(--color-green-bright); font-weight:bold;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">SONO PRÉVIO (h)</label>
+            <input type="number" id="reg-sono" class="form-control" value="0" step="0.5" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">OBSERVAÇÃO</label>
+          <textarea id="reg-obs" class="form-control" rows="2" placeholder="Detalhes ou anotações..."></textarea>
+        </div>
+        <button class="btn btn-green" style="width: 100%; margin-top: 6px;" onclick="salvarRegistroManual()">💾 Salvar Plantão</button>
+      </div>
+    </section>
+
+    <!-- ABA EXTRATO -->
+        <section id="tab-extrato" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header">
+          <span class="card-title">EXTRATO & FOLHA</span>
+          <button class="btn btn-dark" style="padding: 4px 8px; font-size:10px;" onclick="exportarCSV()">📊 CSV</button>
+        </div>
+        <div class="info-box" id="extrato-resumo">
+          <div><strong>Total folha atual:</strong> <span id="extrato-total">R$ 0,00</span></div>
+          <div><strong>Plantões:</strong> <span id="extrato-qtd">0</span></div>
+        </div>
+        <button class="btn btn-green" style="width:100%; margin-bottom:12px;" onclick="fecharFolhaAtual()">✅ Recebi / Fechar Folha Atual</button>
+        <div id="extrato-lista"></div>
+      </div>
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">FOLHAS ANTERIORES ARQUIVADAS</span></div>
+        <div id="folhas-arquivadas"></div>
+      </div>
+    </section>
+
+    <!-- ABA AJUSTES -->
+    <section id="tab-ajustes" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-title" style="margin-bottom:10px;">CONFIGURAÇÕES</div>
+        <div class="form-group">
+          <label class="form-label">POSTO</label>
+          <input type="text" id="cfg-nome-posto" class="form-control" value="Posto Principal Valis">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WHATSAPP SUPERVISOR</label>
+          <input type="text" id="cfg-tel-sup" class="form-control" placeholder="5521999999999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">NOTIFICAÇÕES</label>
+          <button class="btn btn-blue" style="width:100%;" onclick="solicitarPermissaoNotificacao()">🔔 Ativar Notificações</button>
+          <div id="notif-status" style="font-size:11px; color:var(--text-muted); margin-top:6px; text-align:center;">Status: Verificando...</div>
+        </div>
+        <button class="btn btn-dark" style="width:100%; margin-top:8px;" onclick="salvarGpsConfig()">💾 Salvar</button>
+      </div>
+    </section>
+
+    <!-- ABA SUPERVISÃO -->
+    <section id="tab-supervisao" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header">
+          <span class="card-title">SUPERVISÃO</span>
+          <span class="status-badge supervisao">GESTOR</span>
+        </div>
+
+        <div class="info-box">
+          <div><strong>Status:</strong> <span id="sup-status">—</span></div>
+          <div><strong>Posto:</strong> <span id="sup-posto">—</span></div>
+          <div><strong>Logs:</strong> <span id="sup-logs">0</span></div>
+          <div><strong>Ocorrências:</strong> <span id="sup-ocorr">0</span></div>
+        </div>
+
+        <div class="info-box" id="sup-rondas-status">
+          <div id="sup-rondas-pendentes-status">Verificando rondas...</div>
+        </div>
+
+        <div class="info-box" id="sup-produtividade">
+          <div id="sup-produtividade-resumo">—</div>
+        </div>
+
+        <div class="action-grid" style="margin-bottom:12px;">
+          <button class="btn btn-blue" onclick="window.print()">📄 Relatório</button>
+          <button class="btn btn-yellow" onclick="forcarCheckoutSupervisao()">⏹ Forçar Checkout</button>
+        </div>
+
+        <div class="action-grid" style="margin-bottom:12px;">
+          <button class="btn btn-purple" style="grid-column: 1 / -1;" onclick="abrirModalAvisoSup()">📢 Enviar Aviso</button>
+        </div>
+
+        <div class="action-grid" style="margin-bottom:12px;">
+          <button class="btn btn-green" style="grid-column: 1 / -1;" onclick="enviarRelatorioWhatsAppSupervisor()">📱 Relatório WhatsApp</button>
+        </div>
+
+        <div class="action-grid">
+          <button class="btn btn-dark" onclick="limparLogsSupervisao()">🗑 Limpar Logs</button>
+          <button class="btn btn-dark" onclick="limparOcorrenciasSupervisao()">🗑 Limpar Ocorrências</button>
+        </div>
+      </div>
+
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">ÚLTIMOS REGISTROS</span></div>
+        <div id="sup-lista-logs" style="max-height:200px; overflow-y:auto;"></div>
+      </div>
+    </section>
+
+    <!-- ABA DEV -->
+    <section id="tab-dev" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header">
+          <span class="card-title">PAINEL DESENVOLVEDOR</span>
+          <span class="status-badge" style="background:#4C1D95;color:#C4B5FD;">DEV</span>
+        </div>
+
+        <div class="info-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>DISPOSITIVOS ATIVOS</strong>
+            <span class="device-badge"><span class="device-dot"></span> <span id="dev-devices-count">1</span></span>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">
+            • Abas neste navegador: <strong id="dev-tabs-count">1</strong><br>
+            • Simulado: <strong id="dev-sim-count">0</strong>
+          </div>
+          <div class="dev-actions">
+            <button class="btn btn-dark" onclick="simularDispositivo(+1)">+1</button>
+            <button class="btn btn-dark" onclick="simularDispositivo(-1)">−1</button>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div><strong>Storage:</strong> <span id="dev-storage-size">—</span></div>
+          <div><strong>Status:</strong> <span id="dev-status">—</span></div>
+          <div><strong>Notificações:</strong> <span id="dev-notif-perm">—</span></div>
+          <div><strong>Backend:</strong> <span id="dev-backend-mode">localStorage</span></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ALTERAR SENHA</label>
+          <input type="password" id="dev-nova-senha" class="form-control" placeholder="Nova senha...">
+          <button class="btn btn-purple" style="width:100%; margin-top:6px;" onclick="alterarSenhaDev()">🔑 Salvar</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">FORÇAR STATUS</label>
+          <div class="dev-actions">
+            <button class="btn btn-dark" onclick="forcarStatus('INATIVO')">INATIVO</button>
+            <button class="btn btn-green" onclick="forcarStatus('ATIVO')">ATIVO</button>
+            <button class="btn btn-yellow" onclick="forcarStatus('ALMOCO')">ALMOÇO</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">DADOS</label>
+          <div class="dev-actions">
+            <button class="btn btn-blue" onclick="exportarDados()">📤 Exportar</button>
+            <button class="btn btn-blue" onclick="importarDados()">📥 Importar</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">TESTES</label>
+          <div class="dev-actions">
+            <button class="btn btn-dark" onclick="testarNotificacaoLocal()">🔔 Notif</button>
+            <button class="btn btn-dark" onclick="testarBroadcast()">📡 Broadcast</button>
+            <button class="btn btn-dark" onclick="devInjetorMockData()">⚡ Mock</button>
+            <button class="btn btn-dark" onclick="devSimularRecarregamento()">🔄 Reload</button>
+          </div>
+        </div>
+
+        
+        <div class="form-group">
+          <label class="form-label">MODO MANUTENÇÃO</label>
+          <div class="info-box" style="margin-bottom:8px;">
+            <div><strong>Status:</strong> <span id="dev-maint-status">Desativado</span></div>
+          </div>
+          <button class="btn btn-red" style="width:100%;" id="dev-btn-maint" onclick="alternarModoManutencao()">🔒 Ativar Modo Manutenção</button>
+        </div>
+
+        <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR BANCO</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('ponto', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>PONTO
+    </button>
+    <button class="nav-item" onclick="switchTab('ronda', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>RONDA
+    </button>
+    <button class="nav-item" onclick="switchTab('ocorrencias', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>DIÁRIO
+    </button>
+    <button class="nav-item" onclick="switchTab('escala', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>ESCALA
+    </button>
+    <button class="nav-item" onclick="switchTab('registro', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>REGISTRO
+    </button>
+    <button class="nav-item" onclick="switchTab('extrato', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>EXTRATO
+    </button>
+    <button class="nav-item" onclick="switchTab('ajustes', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>AJUSTES
+    </button>
+  </nav>
+
+  <script>
+    /* ============================================================
+       VALIS VIGIA - PREPARAÇÃO PARA FIREBASE
+       ------------------------------------------------------------
+       Quando for conectar o Firebase:
+       1. Crie um projeto no console.firebase.google.com
+       2. Ative Authentication + Firestore (ou Realtime Database)
+       3. Ative Cloud Messaging (FCM) para push real
+       4. Substitua o objeto FIREBASE_CONFIG abaixo
+       5. Inclua os SDKs do Firebase (modular v9+)
+       6. Troque DataService.save / DataService.load pelas
+          funções que gravam/leem no Firestore
+       7. Use messaging() para push entre dispositivos reais
+       ============================================================ */
+    const FIREBASE_CONFIG = {
+      // Cole aqui as chaves do seu projeto Firebase
+      apiKey: "SUA_API_KEY",
+      authDomain: "seu-projeto.firebaseapp.com",
+      projectId: "seu-projeto",
+      storageBucket: "seu-projeto.appspot.com",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:xxxxxxxxxxxx"
+    };
+
+    // Camada de dados abstrata (hoje = localStorage | futuro = Firebase)
+    const DataService = {
+      mode: 'localStorage', // mude para 'firebase' quando conectar
+
+      async save(key, data) {
+        if (this.mode === 'firebase') {
+          // TODO: await setDoc(doc(db, 'valis', key), data);
+          console.warn('Firebase ainda não conectado. Salvando em localStorage.');
+        }
+        localStorage.setItem(key, JSON.stringify(data));
+      },
+
+      async load(key) {
+        if (this.mode === 'firebase') {
+          // TODO: const snap = await getDoc(doc(db, 'valis', key));
+          // return snap.exists() ? snap.data() : null;
+          console.warn('Firebase ainda não conectado. Lendo de localStorage.');
+        }
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      },
+
+      async remove(key) {
+        if (this.mode === 'firebase') {
+          // TODO: await deleteDoc(doc(db, 'valis', key));
+        }
+        localStorage.removeItem(key);
+      }
+    };
+
+    // Service Worker mínimo (preparado para push futuro)
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+        self.addEventListener('notificationclick', e => {
+          e.notification.close();
+          e.waitUntil(clients.matchAll({type:'window'}).then(list => {
+            for (const c of list) { if ('focus' in c) return c.focus(); }
+            if (clients.openWindow) return clients.openWindow('./');
+          }));
+        });
+        // Quando conectar FCM, o push event virá daqui
+        self.addEventListener('push', e => {
+          const data = e.data ? e.data.json() : { title: 'Valis Vigia', body: 'Nova notificação' };
+          e.waitUntil(self.registration.showNotification(data.title || 'Valis Vigia', {
+            body: data.body || '',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🛡️</text></svg>',
+            tag: 'valis-vigia'
+          }));
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+
+    // ==================== ESTADO ====================
+    let appState = {
+      status: 'INATIVO',
+      passDev: 'dev123',
+      nomePosto: 'Posto Principal Valis',
+      telSup: '',
+      coordsFormatadas: 'GPS Ativo',
+      logs: [],
+      rondas: [],
+      ocorrencias: [],
+      registros: [],
+      diasFolguistaMarcados: {},
+      dispositivosSimulados: 0,
+      modoManutencao: false,
+      folhasArquivadas: [],
+      rondaDeadline: null,
+      ultimaRondaTimestamp: Date.now()
+    };
+
+    const deviceId = 'dev_' + Math.random().toString(36).substr(2, 9);
+    let activeTabs = new Set([deviceId]);
+    const bc = new BroadcastChannel('valis_vigia_channel');
+
+    bc.onmessage = (event) => {
+      const { type, payload } = event.data || {};
+      if (type === 'ping') bc.postMessage({ type: 'pong', payload: { id: deviceId } });
+      if (type === 'pong' && payload?.id) { activeTabs.add(payload.id); atualizarContadorDispositivos(); }
+      if (type === 'aviso_supervisao') mostrarAvisoRecebido(payload.msg, payload.from);
+      if (type === 'maintenance') {
+        appState.modoManutencao = !!payload?.active;
+        aplicarModoManutencao();
+      }
+      if (type === 'force_checkout') {
+        if (appState.status !== 'INATIVO') {
+          appState.status = 'INATIVO';
+          registrarLog('Check-out FORÇADO (remoto)');
+          updateUIState();
+          showNotification('Check-out forçado pela Supervisão');
+          enviarNotificacaoSistema('Supervisão', 'Seu plantão foi finalizado remotamente.');
+        }
+      }
+    };
+
+    setInterval(() => {
+      activeTabs = new Set([deviceId]);
+      bc.postMessage({ type: 'ping' });
+      setTimeout(atualizarContadorDispositivos, 400);
+    }, 5000);
+
+    // ==================== PERSISTÊNCIA ====================
+    async function carregarDadosSalvos() {
+      try {
+        const data = await DataService.load('valis_vigia_v3_data');
+        if (data) {
+          appState = { ...appState, ...data };
+          document.getElementById('cfg-nome-posto').value = appState.nomePosto || 'Posto Principal Valis';
+          document.getElementById('cfg-tel-sup').value = appState.telSup || '';
+          renderizarLogs(); renderizarExtrato(); renderizarOcorrencias();
+          renderizarRondas(); updateUIState();
+          atualizarPainelSupervisao(); atualizarPainelDev();
+          aplicarModoManutencao();
+          configurarAlertaRonda(false);
+          renderizarExtrato();
+        }
+      } catch (e) { console.warn('Erro ao carregar:', e); }
+    }
+
+    async function salvarEstado() {
+      await DataService.save('valis_vigia_v3_data', {
+        status: appState.status,
+        passDev: appState.passDev,
+        nomePosto: appState.nomePosto,
+        telSup: appState.telSup,
+        logs: appState.logs,
+        rondas: appState.rondas,
+        ocorrencias: appState.ocorrencias,
+        registros: appState.registros,
+        diasFolguistaMarcados: appState.diasFolguistaMarcados,
+        dispositivosSimulados: appState.dispositivosSimulados || 0,
+        ultimaRondaTimestamp: appState.ultimaRondaTimestamp || Date.now(),
+        modoManutencao: !!appState.modoManutencao,
+        folhasArquivadas: appState.folhasArquivadas || [],
+        rondaDeadline: appState.rondaDeadline || null
+      });
+      atualizarPainelSupervisao();
+      atualizarPainelDev();
+    }
+
+    // ==================== NOTIFICAÇÕES ====================
+    async function solicitarPermissaoNotificacao() {
+      if (!('Notification' in window)) { alert('Navegador não suporta notificações.'); return; }
+      const perm = await Notification.requestPermission();
+      atualizarStatusNotificacao();
+      if (perm === 'granted') {
+        showNotification('Notificações ativadas!');
+        enviarNotificacaoSistema('Valis Vigia', 'Notificações prontas.');
+      } else showNotification('Permissão negada.');
+    }
+
+    function atualizarStatusNotificacao() {
+      const el = document.getElementById('notif-status');
+      const devEl = document.getElementById('dev-notif-perm');
+      if (!('Notification' in window)) {
+        if (el) el.textContent = 'Status: Não suportado';
+        if (devEl) devEl.textContent = 'Não suportado';
+        return;
+      }
+      const map = { granted: '✅ Ativadas', denied: '❌ Negadas', default: '⏳ Pendente' };
+      if (el) el.textContent = 'Status: ' + (map[Notification.permission] || Notification.permission);
+      if (devEl) devEl.textContent = map[Notification.permission] || Notification.permission;
+    }
+
+    function enviarNotificacaoSistema(titulo, corpo) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try {
+        new Notification(titulo, {
+          body: corpo,
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🛡️</text></svg>',
+          tag: 'valis-vigia-' + Date.now()
+        });
+      } catch (e) {}
+    }
+
+    function testarNotificacaoLocal() {
+      enviarNotificacaoSistema('Valis Vigia - Teste', 'Notificação local de teste.');
+      showNotification('Notificação de teste enviada');
+    }
+
+    function testarBroadcast() {
+      bc.postMessage({ type: 'aviso_supervisao', payload: { msg: 'Teste de broadcast (abas do mesmo navegador)', from: 'Dev' } });
+      showNotification('Broadcast enviado');
+    }
+
+    function mostrarAvisoRecebido(msg, from) {
+      showNotification('📢 Aviso de ' + (from || 'Supervisão') + ': ' + msg);
+      enviarNotificacaoSistema('📢 Aviso da Supervisão', msg);
+      testarBipSonoro();
+    }
+
+    // ==================== DISPOSITIVOS ====================
+    function atualizarContadorDispositivos() {
+      const tabs = activeTabs.size;
+      const sim = appState.dispositivosSimulados || 0;
+      const elTotal = document.getElementById('dev-devices-count');
+      const elTabs = document.getElementById('dev-tabs-count');
+      const elSim = document.getElementById('dev-sim-count');
+      if (elTotal) elTotal.textContent = tabs + sim;
+      if (elTabs) elTabs.textContent = tabs;
+      if (elSim) elSim.textContent = sim;
+    }
+
+    function simularDispositivo(delta) {
+      appState.dispositivosSimulados = Math.max(0, (appState.dispositivosSimulados || 0) + delta);
+      salvarEstado();
+      atualizarContadorDispositivos();
+      showNotification(delta > 0 ? 'Dispositivo simulado +1' : 'Dispositivo simulado −1');
+    }
+
+    // ==================== SUPERVISÃO ====================
+    function abrirModalAvisoSup() {
+      document.getElementById('modal-aviso-sup').classList.remove('hidden');
+      document.getElementById('aviso-sup-msg').value = '';
+      document.getElementById('aviso-sup-msg').focus();
+    }
+    function fecharAvisoSup() { document.getElementById('modal-aviso-sup').classList.add('hidden'); }
+
+    function enviarAvisoSupervisao() {
+      const msg = document.getElementById('aviso-sup-msg').value.trim();
+      if (!msg) { alert('Digite uma mensagem.'); return; }
+      bc.postMessage({ type: 'aviso_supervisao', payload: { msg, from: 'Supervisão' } });
+      enviarNotificacaoSistema('📢 Aviso da Supervisão', msg);
+      showNotification('Aviso enviado!');
+      fecharAvisoSup();
+      registrarLog('Aviso Supervisão: ' + msg.substring(0, 40));
+    }
+
+    function checarRondasPendentesSupervisor() {
+      const el = document.getElementById('sup-rondas-pendentes-status');
+      if (!el) return;
+      const intervaloMin = parseInt(document.getElementById('cfg-intervalo-ronda')?.value) || 60;
+      const diffMin = Math.floor((Date.now() - (appState.ultimaRondaTimestamp || Date.now())) / 60000);
+      if (intervaloMin > 0 && diffMin > intervaloMin) {
+        el.innerHTML = '<span style="color:var(--color-accent-red);font-weight:bold;">⚠️ Ronda atrasada em ' + (diffMin - intervaloMin) + ' min</span>';
+      } else {
+        el.innerHTML = '<span style="color:var(--color-green-bright);">✅ Rondas em dia (última há ' + diffMin + ' min)</span>';
+      }
+    }
+
+    function calcularProdutividadeSupervisor() {
+      const el = document.getElementById('sup-produtividade-resumo');
+      if (!el) return;
+      const total = appState.registros.length;
+      const valor = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
+      el.innerHTML = '<strong>Plantões:</strong> ' + total + ' | <strong>Acumulado:</strong> R$ ' + valor.toFixed(2);
+    }
+
+    function enviarRelatorioWhatsAppSupervisor() {
+      const tel = (appState.telSup || '').replace(/\D/g, '');
+      if (!tel) { alert('Configure o WhatsApp do supervisor em Ajustes.'); return; }
+      const valor = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
+      const msg = encodeURIComponent(
+        '📊 *Relatório Valis Vigia*\n' +
+        'Posto: ' + appState.nomePosto + '\n' +
+        'Status: ' + appState.status + '\n' +
+        'Plantões: ' + appState.registros.length + '\n' +
+        'Acumulado: R$ ' + valor.toFixed(2)
+      );
+      window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + msg, '_blank');
+    }
+
+    function atualizarPainelSupervisao() {
+      const statusEl = document.getElementById('sup-status');
+      if (!statusEl) return;
+      statusEl.textContent = appState.status;
+      document.getElementById('sup-posto').textContent = appState.nomePosto;
+      document.getElementById('sup-logs').textContent = appState.logs.length;
+      document.getElementById('sup-ocorr').textContent = appState.ocorrencias.length;
+      document.getElementById('sup-lista-logs').innerHTML = appState.logs.slice(0, 10).map(log =>
+        '<div style="font-size:11px;padding:6px 0;border-bottom:1px solid var(--border-input);"><strong>' + log.hora + '</strong> — ' + log.acao + '<br><small style="color:var(--color-green-bright);">📍 ' + (log.loc || 'GPS') + '</small></div>'
+      ).join('') || '<div style="font-size:11px;color:var(--text-muted);">Nenhum registro</div>';
+      checarRondasPendentesSupervisor();
+      calcularProdutividadeSupervisor();
+    }
+
+    function forcarCheckoutSupervisao() {
+      if (appState.status === 'INATIVO') { showNotification('Já está inativo.'); return; }
+      if (confirm('Forçar check-out?')) {
+        appState.status = 'INATIVO';
+        registrarLog('Check-out FORÇADO pela Supervisão');
+        updateUIState();
+        bc.postMessage({ type: 'force_checkout' });
+        showNotification('Check-out forçado.');
+      }
+    }
+
+    function limparLogsSupervisao() {
+      if (confirm('Limpar logs?')) { appState.logs = []; salvarEstado(); renderizarLogs(); showNotification('Logs limpos.'); }
+    }
+    function limparOcorrenciasSupervisao() {
+      if (confirm('Limpar ocorrências?')) { appState.ocorrencias = []; salvarEstado(); renderizarOcorrencias(); showNotification('Ocorrências limpas.'); }
+    }
+
+    // ==================== DEV ====================
+    function atualizarPainelDev() {
+      const sizeEl = document.getElementById('dev-storage-size');
+      if (!sizeEl) return;
+      const data = localStorage.getItem('valis_vigia_v3_data') || '';
+      sizeEl.textContent = (data.length / 1024).toFixed(1) + ' KB';
+      document.getElementById('dev-status').textContent = appState.status;
+      const modeEl = document.getElementById('dev-backend-mode');
+      if (modeEl) modeEl.textContent = DataService.mode;
+      atualizarContadorDispositivos();
+      atualizarStatusNotificacao();
+      atualizarStatusManutencaoDev();
+    }
+
+    function alterarSenhaDev() {
+      const nova = document.getElementById('dev-nova-senha').value.trim();
+      if (!nova || nova.length < 4) { alert('Mínimo 4 caracteres.'); return; }
+      appState.passDev = nova;
+      salvarEstado();
+      document.getElementById('dev-nova-senha').value = '';
+      showNotification('Senha alterada!');
+    }
+
+    function forcarStatus(s) { appState.status = s; updateUIState(); showNotification('Status: ' + s); }
+
+    function exportarDados() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'valis_vigia_backup_' + getLocalDateKey() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification('Backup exportado!');
+    }
+
+    function importarDados() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (confirm('Importar e sobrescrever dados?')) {
+              appState = { ...appState, ...data };
+              salvarEstado();
+              location.reload();
+            }
+          } catch (err) { alert('JSON inválido.'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function devInjetorMockData() {
+      if (!confirm('Injetar dados de teste?')) return;
+      appState.logs = [
+        { acao: 'Check-in', hora: '06:00', loc: 'Lat: -22.75, Lng: -43.70' },
+        { acao: 'Pausa / Refeição', hora: '12:00', loc: 'Lat: -22.75, Lng: -43.70' }
+      ];
+      appState.rondas = [
+        { ponto: 'Perímetro Norte', hora: '08:00', data: new Date().toLocaleDateString('pt-BR') },
+        { ponto: 'Portão Principal', hora: '10:00', data: new Date().toLocaleDateString('pt-BR') }
+      ];
+      appState.ocorrencias = [
+        { tipo: 'Visitante', desc: 'Prestador autorizado.', foto: null, hora: '09:30', data: new Date().toLocaleDateString('pt-BR') }
+      ];
+      appState.registros = [
+        { data: getLocalDateKey(), val: 200, horas: '24 hrs', turno: 'Plantão Próprio' }
+      ];
+      appState.ultimaRondaTimestamp = Date.now();
+      salvarEstado();
+      renderizarLogs(); renderizarExtrato(); renderizarOcorrencias(); renderizarRondas();
+      showNotification('Mock data injetado!');
+      atualizarPainelDev();
+    }
+
+    function devSimularRecarregamento() {
+      showNotification('Recarregando...');
+      setTimeout(() => location.reload(), 1000);
+    }
+
+    function zerarTudoDev() {
+      if (confirm('Zerar TODO o banco local?')) {
+        DataService.remove('valis_vigia_v3_data');
+        location.reload();
+      }
+    }
+
+    // ==================== UTILITÁRIOS ====================
+    function getLocalDateKey(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + d;
+    }
+
+    function showNotification(msg) {
+      const toast = document.getElementById('notification-toast');
+      const timerDisplay = document.getElementById('toast-timer');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('hidden');
+      if (window.toastTimeout) clearTimeout(window.toastTimeout);
+      if (window.toastInterval) clearInterval(window.toastInterval);
+      let timeLeft = 10;
+      timerDisplay.textContent = timeLeft + 's';
+      window.toastInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = (timeLeft > 0 ? timeLeft : 0) + 's';
+        if (timeLeft <= 0) clearInterval(window.toastInterval);
+      }, 1000);
+      window.toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+        if (window.toastInterval) clearInterval(window.toastInterval);
+      }, 10000);
+    }
+
+    function alternarTemaGeral() {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('header-modo-str').textContent = isLight ? 'Modo Claro' : 'Modo Escuro (RGB)';
+      showNotification(isLight ? 'Tema Claro' : 'Tema Escuro');
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock-display').textContent = now.toTimeString().split(' ')[0];
+      const str = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('date-display').textContent = str.charAt(0).toUpperCase() + str.slice(1);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function testarBipSonoro() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    // ==================== RONDA ====================
+    let timerRonda = null, rondaCountdownInterval = null;
+
+    function getRondaSecondsLeft() {
+      if (!appState.rondaDeadline) return 0;
+      return Math.max(0, Math.floor((appState.rondaDeadline - Date.now()) / 1000));
+    }
+
+    function atualizarDisplayRonda() {
+      const display = document.getElementById('ronda-countdown-display');
+      if (!display) return;
+      const sec = getRondaSecondsLeft();
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      if (sec <= 0 && appState.rondaDeadline) {
+        // Tempo esgotado
+        const min = parseInt(document.getElementById('cfg-intervalo-ronda')?.value) || 0;
+        if (min > 0) {
+          testarBipSonoro();
+          showNotification('⏰ Hora da Ronda!');
+          enviarNotificacaoSistema('Valis Vigia - Ronda', 'Hora de realizar a ronda.');
+          // Reagenda próximo ciclo a partir de agora
+          appState.rondaDeadline = Date.now() + min * 60 * 1000;
+          salvarEstado();
+        }
+      }
+    }
+
+    function configurarAlertaRonda(forceNew) {
+      if (timerRonda) clearInterval(timerRonda);
+      if (rondaCountdownInterval) clearInterval(rondaCountdownInterval);
+      const min = parseInt(document.getElementById('cfg-intervalo-ronda').value);
+      const display = document.getElementById('ronda-countdown-display');
+      if (min > 0) {
+        // Se não tem deadline ou force, cria novo
+        if (forceNew || !appState.rondaDeadline || appState.rondaDeadline < Date.now() - min * 60 * 1000) {
+          appState.rondaDeadline = Date.now() + min * 60 * 1000;
+          salvarEstado();
+        }
+        rondaCountdownInterval = setInterval(atualizarDisplayRonda, 1000);
+        atualizarDisplayRonda();
+        if (forceNew) showNotification('Ronda a cada ' + min + ' min');
+      } else {
+        appState.rondaDeadline = null;
+        salvarEstado();
+        if (display) display.textContent = '00:00';
+        if (forceNew) showNotification('Ronda desativada');
+      }
+    }
+
+    function resetarTimerRonda() {
+      const min = parseInt(document.getElementById('cfg-intervalo-ronda').value);
+      if (min <= 0) { showNotification('Ative um intervalo primeiro'); return; }
+      appState.rondaDeadline = Date.now() + min * 60 * 1000;
+      salvarEstado();
+      atualizarDisplayRonda();
+      showNotification('Temporizador de ronda resetado');
+    }
+
+    function dispararPanico() {
+      if (confirm('⚠️ Disparar Pânico?')) {
+        testarBipSonoro();
+        enviarNotificacaoSistema('🚨 PÂNICO', 'Emergência no posto!');
+        const msg = encodeURIComponent('🚨 EMERGÊNCIA!\nPosto: ' + appState.nomePosto + '\nHora: ' + new Date().toLocaleTimeString());
+        const tel = (appState.telSup || '').replace(/\D/g, '');
+        window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + msg, '_blank');
+      }
+    }
+
+    function registrarRondaComFoto() {
+      const ponto = (document.getElementById('ronda-ponto-nome')?.value || '').trim() || 'Ponto não informado';
+      const fileInput = document.getElementById('ronda-foto');
+      const hora = new Date().toLocaleTimeString().slice(0, 5);
+      const data = new Date().toLocaleDateString('pt-BR');
+
+      const salvar = (foto) => {
+        appState.rondas.unshift({ ponto, hora, data, foto: foto || null });
+        appState.ultimaRondaTimestamp = Date.now();
+        // Reset timer ao registrar ronda
+        const min = parseInt(document.getElementById('cfg-intervalo-ronda')?.value) || 0;
+        if (min > 0) {
+          appState.rondaDeadline = Date.now() + min * 60 * 1000;
+        }
+        salvarEstado();
+        renderizarRondas();
+        atualizarDisplayRonda();
+        if (document.getElementById('ronda-ponto-nome')) document.getElementById('ronda-ponto-nome').value = '';
+        if (fileInput) fileInput.value = '';
+        showNotification('✅ Ronda registrada: ' + ponto);
+      };
+
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => salvar(e.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        if (!confirm('Registrar ronda sem foto?')) return;
+        salvar(null);
+      }
+    }
+
+    function renderizarRondas() {
+      document.getElementById('ronda-historico').innerHTML = appState.rondas.map(r =>
+        '<div class="registro-details-card"><div style="display:flex;justify-content:space-between;"><div><strong>📍 ' + r.ponto + '</strong><br><small>' + r.data + '</small></div><div>' + r.hora + '</div></div>' +
+        (r.foto ? '<img src="' + r.foto + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;">' : '') +
+        '</div>'
+      ).join('');
+    }
+
+    // ==================== OCORRÊNCIAS ====================
+    function salvarOcorrencia() {
+      const tipo = document.getElementById('ocorr-tipo').value;
+      const desc = document.getElementById('ocorr-desc').value.trim();
+      const fileInput = document.getElementById('ocorr-foto');
+      if (!desc) { alert('Digite uma descrição.'); return; }
+      const processar = (foto) => {
+        appState.ocorrencias.unshift({
+          tipo, desc, foto,
+          hora: new Date().toLocaleTimeString().slice(0, 5),
+          data: new Date().toLocaleDateString('pt-BR')
+        });
+        salvarEstado();
+        renderizarOcorrencias();
+        document.getElementById('ocorr-desc').value = '';
+        document.getElementById('ocorr-foto').value = '';
+        showNotification('Diário atualizado!');
+      };
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => processar(e.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+      } else processar(null);
+    }
+
+    function renderizarOcorrencias() {
+      document.getElementById('ocorrencias-lista').innerHTML = appState.ocorrencias.map(o =>
+        '<div class="registro-details-card"><div style="display:flex;justify-content:space-between;width:100%;"><span style="color:var(--color-yellow);font-weight:600;">⚠️ ' + o.tipo + '</span><span>' + o.data + ' ' + o.hora + '</span></div><div style="margin-top:6px;color:var(--text-main);">' + o.desc + '</div>' + (o.foto ? '<img src="' + o.foto + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;">' : '') + '</div>'
+      ).join('');
+    }
+
+    // ==================== ESCALA ====================
+    function gerarCalendarioEscala() {
+      const tipo = document.getElementById('escala-tipo').value;
+      const funcao = document.getElementById('escala-funcao').value;
+      const container = document.getElementById('calendario-escala');
+      container.innerHTML = '';
+      ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(d => {
+        container.innerHTML += '<div style="font-weight:bold;color:var(--text-muted);">' + d + '</div>';
+      });
+      const inicioStr = document.getElementById('escala-data-inicio')?.value;
+      let base = new Date();
+      if (inicioStr) {
+        const parts = inicioStr.split('-').map(Number);
+        base = new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      for (let i = 0; i < 28; i++) {
+        const diaObj = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+        const dataKey = getLocalDateKey(diaObj);
+        if (funcao === 'titular') {
+          const eTrabalho = (tipo === '12x36') ? (i % 2 === 0) : (i % 4 === 0);
+          container.innerHTML += '<div class="day-cell ' + (eTrabalho ? 'day-trabalho' : 'day-folga') + '">' + diaObj.getDate() + '<br><span style="font-size:7px;">' + (eTrabalho ? 'PLANTÃO' : 'FOLGA') + '</span></div>';
+        } else {
+          const marcado = !!appState.diasFolguistaMarcados[dataKey];
+          const cell = document.createElement('div');
+          cell.className = 'day-cell ' + (marcado ? 'day-custom-marcado' : 'day-folga');
+          cell.innerHTML = diaObj.getDate() + '<br><span style="font-size:7px;">' + (marcado ? 'TRABALHO' : '') + '</span>';
+          cell.onclick = () => {
+            appState.diasFolguistaMarcados[dataKey] = !appState.diasFolguistaMarcados[dataKey];
+            salvarEstado();
+            gerarCalendarioEscala();
+            showNotification(appState.diasFolguistaMarcados[dataKey] ? 'Plantão marcado!' : 'Data limpa.');
+          };
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    // ==================== CHECK-IN / OUT ====================
+    function abrirPassagemTurno() { document.getElementById('modal-bastao').classList.remove('hidden'); }
+    function fecharBastao() { document.getElementById('modal-bastao').classList.add('hidden'); }
+
+    function confirmarCheckOut() {
+      const eq = document.getElementById('bastao-equip').value;
+      fecharBastao();
+      appState.status = 'INATIVO';
+      registrarLog('Check-out / Bastão (' + eq + ')');
+      showNotification('Plantão encerrado!');
+      updateUIState();
+    }
+
+    function handleCheckIn() {
+      appState.status = 'ATIVO';
+      registrarLog('Check-in');
+      showNotification('Plantão iniciado!');
+      updateUIState();
+    }
+    function handleSaidaAlmoco() {
+      appState.status = 'ALMOCO';
+      registrarLog('Pausa / Refeição');
+      showNotification('Saída para refeição.');
+      updateUIState();
+    }
+    function handleVoltaAlmoco() {
+      appState.status = 'ATIVO';
+      registrarLog('Retorno da Pausa');
+      showNotification('Retorno registrado.');
+      updateUIState();
+    }
+
+    function updateUIState() {
+      const badge = document.getElementById('plantao-status-badge');
+      const btnCheckin = document.getElementById('btn-checkin');
+      const btnCheckout = document.getElementById('btn-checkout');
+      const btnSaida = document.getElementById('btn-saida-almoco');
+      const btnVolta = document.getElementById('btn-volta-almoco');
+
+      if (appState.status === 'INATIVO') {
+        badge.className = 'status-badge inativo'; badge.textContent = 'INATIVO';
+        btnCheckin.classList.remove('btn-disabled');
+        btnCheckout.classList.add('btn-disabled');
+        btnSaida.classList.add('btn-disabled');
+        btnVolta.classList.add('btn-disabled');
+      } else if (appState.status === 'ATIVO') {
+        badge.className = 'status-badge ativo'; badge.textContent = 'EM PLANTÃO';
+        btnCheckin.classList.add('btn-disabled');
+        btnCheckout.classList.remove('btn-disabled');
+        btnSaida.classList.remove('btn-disabled');
+        btnVolta.classList.add('btn-disabled');
+      } else if (appState.status === 'ALMOCO') {
+        badge.className = 'status-badge almoco'; badge.textContent = 'EM PAUSA';
+        btnCheckin.classList.add('btn-disabled');
+        btnCheckout.classList.add('btn-disabled');
+        btnSaida.classList.add('btn-disabled');
+        btnVolta.classList.remove('btn-disabled');
+      }
+      salvarEstado();
+    }
+
+    function registrarLog(acao) {
+      const hora = new Date().toLocaleTimeString().slice(0, 5);
+      appState.logs.unshift({ acao, hora, loc: appState.coordsFormatadas });
+      salvarEstado();
+      renderizarLogs();
+    }
+
+    function renderizarLogs() {
+      document.getElementById('recent-logs-list').innerHTML = appState.logs.map(log =>
+        '<details class="registro-details-card"><summary><span>📌 ' + log.acao + '</span><span>' + log.hora + '</span></summary><div class="registro-details-content"><div><strong>Local:</strong> ' + log.loc + '</div><div><strong>Status:</strong> Sucesso</div></div></details>'
+      ).join('');
+      document.getElementById('logs-count').textContent = appState.logs.length + ' itens';
+    }
+
+    // ==================== REGISTRO / EXTRATO ====================
+    function aplicarTurnoRegistro() {
+      const t = document.getElementById('reg-turno')?.value;
+      if (t === 'noturno') {
+        document.getElementById('reg-hora-inicio').value = '18:00';
+        document.getElementById('reg-hora-fim').value = '06:00';
+      } else {
+        document.getElementById('reg-hora-inicio').value = '06:00';
+        document.getElementById('reg-hora-fim').value = '18:00';
+      }
+      calcularHorasRegistro();
+    }
+
+    function toggleNomeCobertura() {
+      const tipo = document.getElementById('reg-tipo-plantao')?.value;
+      const box = document.getElementById('reg-nome-box');
+      if (box) box.style.display = (tipo === 'cobertura_folga') ? 'block' : 'none';
+    }
+
+    function calcularHorasRegistro() {
+      const ini = document.getElementById('reg-hora-inicio').value;
+      const fim = document.getElementById('reg-hora-fim').value;
+      if (!ini || !fim) return;
+      let [h1, m1] = ini.split(':').map(Number);
+      let [h2, m2] = fim.split(':').map(Number);
+      let min1 = h1 * 60 + m1;
+      let min2 = h2 * 60 + m2;
+      if (min2 <= min1) min2 += 24 * 60;
+      const diff = (min2 - min1) / 60;
+      document.getElementById('reg-horas-calc').value = diff + ' hrs';
+      // não sobrescreve valor se usuário já digitou; só sugere se vazio ou padrão
+      const valEl = document.getElementById('reg-valor');
+      if (valEl && (valEl.value === '' || valEl.value === '0' || valEl.value === '200' || valEl.value === '100')) {
+        valEl.value = (diff >= 24) ? 200 : 100;
+      }
+    }
+
+    function salvarRegistroManual() {
+      const data = document.getElementById('reg-data').value;
+      if (!data) { alert('Informe a data.'); return; }
+      const tipo = document.getElementById('reg-tipo-plantao').value;
+      const turno = document.getElementById('reg-turno')?.value || 'diurno';
+      const val = parseFloat(document.getElementById('reg-valor').value) || 0;
+      const horas = document.getElementById('reg-horas-calc').value;
+      const ini = document.getElementById('reg-hora-inicio').value;
+      const fim = document.getElementById('reg-hora-fim').value;
+      const nome = (document.getElementById('reg-nome-coleaga')?.value || '').trim();
+      const sono = parseFloat(document.getElementById('reg-sono')?.value) || 0;
+      const obs = (document.getElementById('reg-obs')?.value || '').trim();
+
+      if (tipo === 'cobertura_folga' && !nome) {
+        alert('Informe o nome do colega cuja folga foi coberta.');
+        return;
+      }
+
+      appState.registros.unshift({
+        id: 'reg_' + Date.now(),
+        data, val, horas, ini, fim,
+        turnoPeriodo: turno === 'noturno' ? 'Noturno' : 'Diurno',
+        tipo: tipo === 'proprio' ? 'Plantão Próprio' : 'Cobertura de Folga',
+        nomeColega: nome || null,
+        sono, obs,
+        horarioLabel: (turno === 'noturno' ? '18:00 - 06:00' : '06:00 - 18:00')
+      });
+      salvarEstado();
+      renderizarExtrato();
+      // limpa campos opcionais
+      if (document.getElementById('reg-obs')) document.getElementById('reg-obs').value = '';
+      if (document.getElementById('reg-nome-coleaga')) document.getElementById('reg-nome-coleaga').value = '';
+      if (document.getElementById('reg-sono')) document.getElementById('reg-sono').value = '0';
+      showNotification('Plantão salvo!');
+    }
+
+    function excluirRegistro(id) {
+      if (!confirm('Excluir este plantão?')) return;
+      appState.registros = appState.registros.filter(r => r.id !== id);
+      salvarEstado();
+      renderizarExtrato();
+      showNotification('Plantão excluído');
+    }
+
+    function renderizarExtrato() {
+      const lista = document.getElementById('extrato-lista');
+      const totalEl = document.getElementById('extrato-total');
+      const qtdEl = document.getElementById('extrato-qtd');
+      const total = appState.registros.reduce((a, r) => a + (Number(r.val) || 0), 0);
+      if (totalEl) totalEl.textContent = 'R$ ' + total.toFixed(2);
+      if (qtdEl) qtdEl.textContent = appState.registros.length;
+
+      if (!lista) return;
+      lista.innerHTML = appState.registros.map(reg => {
+        const cobriu = reg.nomeColega ? ('<span style="color:var(--color-yellow);">Cobriu: ' + reg.nomeColega + '</span><br>') : '';
+        const sono = reg.sono ? ('💤 ' + reg.sono + 'h sono<br>') : '';
+        const obs = reg.obs ? ('Obs: ' + reg.obs + '<br>') : '';
+        const id = reg.id || '';
+        return '<div class="registro-details-card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+          '<div style="flex:1;font-size:12px;">' +
+          '<strong>' + reg.data + '</strong><br>' +
+          cobriu + sono + obs +
+          '<span style="color:var(--text-muted);">' + (reg.turnoPeriodo || '') + ' · ' + (reg.horarioLabel || reg.horas || '') + '</span>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+          '<div style="color:var(--color-green-bright);font-weight:700;">R$ ' + Number(reg.val).toFixed(2) + '</div>' +
+          (id ? '<button class="btn btn-red" style="padding:4px 8px;font-size:10px;margin-top:6px;" onclick="excluirRegistro(\'' + id + '\')">Excluir</button>' : '') +
+          '</div></div></div>';
+      }).join('') || '<div style="font-size:12px;color:var(--text-muted);">Nenhum plantão na folha atual</div>';
+
+      renderizarFolhasArquivadas();
+    }
+
+    function renderizarFolhasArquivadas() {
+      const el = document.getElementById('folhas-arquivadas');
+      if (!el) return;
+      const folhas = appState.folhasArquivadas || [];
+      if (!folhas.length) {
+        el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Nenhuma folha arquivada</div>';
+        return;
+      }
+      el.innerHTML = folhas.map(f => {
+        const itens = (f.itens || []).map(r =>
+          '• ' + r.data + ' (' + (r.turnoPeriodo || r.turno || '') + ') - R$ ' + Number(r.val).toFixed(2)
+        ).join('<br>');
+        return '<div class="registro-details-card">' +
+          '<strong>Fechado em: ' + f.fechadoEm + '</strong> | <span style="color:var(--color-green-bright);">Total: R$ ' + Number(f.total).toFixed(2) + '</span>' +
+          '<div style="margin-top:8px;font-size:11px;color:var(--text-muted);">' + itens + '</div></div>';
+      }).join('');
+    }
+
+    function fecharFolhaAtual() {
+      if (!appState.registros.length) { alert('Não há plantões para fechar.'); return; }
+      if (!confirm('Fechar e arquivar a folha atual? Os plantões sairão da lista ativa.')) return;
+      const total = appState.registros.reduce((a, r) => a + (Number(r.val) || 0), 0);
+      appState.folhasArquivadas = appState.folhasArquivadas || [];
+      appState.folhasArquivadas.unshift({
+        fechadoEm: new Date().toLocaleDateString('pt-BR'),
+        total,
+        itens: [...appState.registros]
+      });
+      appState.registros = [];
+      salvarEstado();
+      renderizarExtrato();
+      showNotification('Folha fechada e arquivada!');
+    }
+
+    function exportarCSV() {
+      if (!appState.registros.length) { alert('Sem dados para exportar.'); return; }
+      const header = 'Data;Turno;Horário;Tipo;Colega;Sono;Valor;Observação\n';
+      const rows = appState.registros.map(r =>
+        [r.data, r.turnoPeriodo || '', r.horarioLabel || r.horas || '', r.tipo || '', r.nomeColega || '', r.sono || 0, Number(r.val).toFixed(2), (r.obs || '').replace(/;/g, ',')].join(';')
+      ).join('\n');
+      const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'valis_folha_' + getLocalDateKey() + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification('CSV exportado!');
+    }
+
+    function salvarGpsConfig() {
+      appState.nomePosto = document.getElementById('cfg-nome-posto').value.trim() || 'Posto Principal Valis';
+      appState.telSup = document.getElementById('cfg-tel-sup').value.trim();
+      salvarEstado();
+      showNotification('Configurações salvas!');
+    }
+
+    // ==================== NAV / AUTH ====================
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      if (el) el.classList.add('active');
+      if (tabId === 'supervisao') atualizarPainelSupervisao();
+      if (tabId === 'dev') atualizarPainelDev();
+      if (tabId === 'ajustes') atualizarStatusNotificacao();
+    }
+
+    function abrirAuthModal(tipo) {
+      appState.targetAuthTab = tipo;
+      document.getElementById('modal-auth').classList.remove('hidden');
+      document.getElementById('auth-password').value = '';
+      setTimeout(() => document.getElementById('auth-password').focus(), 100);
+    }
+    function fecharModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
+    function validarAcessoAuth() {
+      if (document.getElementById('auth-password').value === appState.passDev) {
+        fecharModalAuth();
+        switchTab(appState.targetAuthTab, null);
+      } else alert('Senha incorreta!');
+    }
+
+
+    // ==================== MODO MANUTENÇÃO ====================
+    function aplicarModoManutencao() {
+      const screen = document.getElementById('maintenance-screen');
+      if (!screen) return;
+      if (appState.modoManutencao) {
+        screen.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      } else {
+        screen.classList.remove('active');
+        document.body.style.overflow = '';
+        const unlock = document.getElementById('maint-unlock-box');
+        if (unlock) unlock.classList.remove('visible');
+        const pwd = document.getElementById('maint-password');
+        if (pwd) pwd.value = '';
+      }
+      atualizarStatusManutencaoDev();
+    }
+
+    function atualizarStatusManutencaoDev() {
+      const st = document.getElementById('dev-maint-status');
+      const btn = document.getElementById('dev-btn-maint');
+      if (st) {
+        st.textContent = appState.modoManutencao ? 'ATIVO 🔒' : 'Desativado';
+        st.style.color = appState.modoManutencao ? 'var(--color-accent-red)' : 'var(--color-green-bright)';
+      }
+      if (btn) {
+        btn.textContent = appState.modoManutencao ? '🔓 Desativar Modo Manutenção' : '🔒 Ativar Modo Manutenção';
+        btn.className = appState.modoManutencao ? 'btn btn-green' : 'btn btn-red';
+        btn.style.width = '100%';
+      }
+    }
+
+    function alternarModoManutencao() {
+      if (!appState.modoManutencao) {
+        if (!confirm('Ativar MODO MANUTENÇÃO?\n\nO aplicativo será bloqueado para todos neste dispositivo até que a senha de administrador seja usada para desbloquear.\n\n(Quando o Firebase estiver conectado, isso afetará todos os dispositivos.)')) return;
+        appState.modoManutencao = true;
+        salvarEstado();
+        aplicarModoManutencao();
+        showNotification('Modo Manutenção ATIVADO');
+        // Broadcast para outras abas
+        try { bc.postMessage({ type: 'maintenance', payload: { active: true } }); } catch(e) {}
+      } else {
+        desativarManutencaoConfirmado();
+      }
+    }
+
+    function desativarManutencao() {
+      const pwd = document.getElementById('maint-password');
+      const val = pwd ? pwd.value : '';
+      if (val !== appState.passDev) {
+        alert('Senha incorreta!');
+        return;
+      }
+      desativarManutencaoConfirmado();
+    }
+
+    function desativarManutencaoConfirmado() {
+      appState.modoManutencao = false;
+      salvarEstado();
+      aplicarModoManutencao();
+      showNotification('Modo Manutenção DESATIVADO');
+      try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
+    }
+
+    // ==================== INIT ====================
+    document.getElementById('reg-data').valueAsDate = new Date();
+    const inputEscala = document.getElementById('escala-data-inicio');
+    if (inputEscala) inputEscala.value = getLocalDateKey();
+
+    carregarDadosSalvos().then(() => {
+      aplicarModoManutencao();
+    });
+    gerarCalendarioEscala();
+    configurarAlertaRonda(false);
+    if (typeof aplicarTurnoRegistro === "function") aplicarTurnoRegistro();
+    atualizarStatusNotificacao();
+    atualizarContadorDispositivos();
+    bc.postMessage({ type: 'ping' });
+  </script>
 </body>
 </html>
