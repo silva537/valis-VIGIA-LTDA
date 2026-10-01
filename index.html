@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- ==================== BLOCO 1: HEAD + CSS BASE ==================== -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0D1117">
@@ -25,7 +24,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; overflow: hidden; user-select: none; }
-    /* ==================== BLOCO 2: CSS COMPONENTES ==================== -->
+
     header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-card); border-bottom: 1px solid var(--bg-card-border); }
     .brand-container { display: flex; align-items: center; gap: 10px; }
     .brand-icon { width: 38px; height: 38px; background: var(--bg-main); border: 1px solid var(--border-input); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--color-green-bright); font-size: 18px; }
@@ -34,6 +33,7 @@
     .header-actions { display: flex; gap: 8px; }
     .icon-btn { width: 36px; height: 36px; background: var(--bg-main); border: 1px solid var(--bg-card-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-sub); cursor: pointer; font-size: 15px; }
     .btn-panic { background: var(--color-accent-red) !important; color: #FFF !important; font-weight: 900; }
+
     .rgb-border { position: relative; border-radius: 12px; z-index: 1; background-color: var(--bg-card); border: 1px solid transparent; }
     .rgb-border::before {
       content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
@@ -43,7 +43,7 @@
     }
     .rgb-border::after { content: ''; position: absolute; inset: 0; background: var(--bg-card); border-radius: 12px; z-index: -1; }
     @keyframes rgb-glow { 0% { background-position: 0 0; } 50% { background-position: 400% 0; } 100% { background-position: 0 0; } }
-    /* ==================== BLOCO 3: UI E TOAST ==================== -->
+
     #notification-toast {
       margin: 8px 14px 0 14px; padding: 10px 14px; background-color: var(--bg-card);
       border: 1px solid var(--color-green-bright); border-radius: 8px;
@@ -52,6 +52,7 @@
     }
     #notification-toast.hidden { opacity: 0; pointer-events: none; display: none; }
     #toast-timer { font-size: 10px; font-weight: 800; background: var(--bg-main); padding: 2px 6px; border-radius: 4px; color: var(--color-green-bright); border: 1px solid var(--border-input); }
+
     main { flex: 1; overflow-y: auto; padding: 12px 14px 100px 14px; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -63,10 +64,11 @@
     .status-badge.ativo { background: #065F46; color: #34D399; }
     .status-badge.almoco { background: #92400E; color: #FBBF24; }
     .status-badge.supervisao { background: #1E3A8A; color: #93C5FD; }
-    /* ==================== BLOCO 4: FORMULÁRIOS E MODAIS ==================== -->
+
     .timer-display { font-size: 38px; font-weight: 800; text-align: center; margin: 4px 0; font-family: monospace; }
     .timer-date { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 12px; text-transform: capitalize; }
     .location-info { text-align: center; font-size: 11px; color: var(--color-green-bright); margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--bg-main); padding: 8px; border-radius: 8px; border: 1px solid var(--bg-card-border); }
+
     .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .btn { padding: 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn:active { transform: scale(0.97); }
@@ -77,35 +79,54 @@
     .btn-blue { background-color: var(--color-blue); color: #FFF; }
     .btn-dark { background-color: var(--bg-main); color: var(--text-sub); border: 1px solid var(--border-input); }
     .btn-disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
     .form-group { margin-bottom: 10px; }
     .form-label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
     .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; padding: 10px; color: var(--text-main); font-size: 12px; outline: none; }
     .form-row { display: flex; gap: 8px; }
     .form-row .form-group { flex: 1; }
+
     .registro-details-card { background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; margin-bottom: 8px; padding: 10px 12px; }
     .registro-details-card summary { cursor: pointer; font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; outline: none; list-style: none; }
     .registro-details-card summary::-webkit-details-marker { display: none; }
     .registro-details-content { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-input); font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 16px; }
     .modal-overlay.hidden { display: none; }
     .modal-box { background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: 12px; padding: 18px; width: 100%; max-width: 360px; }
-    /* ==================== BLOCO 5: NAVEGAÇÃO CSS ==================== -->
+
     nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background-color: var(--bg-card); border-top: 2px solid var(--bg-card-border); display: flex; justify-content: space-around; padding: 8px 0 12px 0; z-index: 100; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 9px; font-weight: 800; cursor: pointer; width: 14%; }
     .nav-item.active { color: var(--color-green-bright); }
     .nav-icon { width: 18px; height: 18px; }
+
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 11px; margin-top: 10px; }
     .day-cell { padding: 8px 4px; border-radius: 6px; background: var(--bg-input); cursor: pointer; border: 1px solid var(--bg-card-border); }
     .day-trabalho { background: var(--color-green); color: #FFF; font-weight: bold; border-color: var(--color-green-bright); }
     .day-folga { background: var(--bg-main); color: var(--text-muted); }
     .day-custom-marcado { background: var(--color-purple); color: #FFF; font-weight: bold; border-color: #9333EA; }
+
     .info-box { background: var(--bg-main); border: 1px solid var(--bg-card-border); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 12px; }
     .info-box strong { color: var(--color-green-bright); }
     .dev-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .device-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #064E3B; color: #6EE7B7; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .device-dot {
+      width: 8px; height: 8px; background: #34D399; border-radius: 50%;
+      animation: pulse-dot 1.5s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
   </style>
 </head>
 <body>
-  <!-- ==================== BLOCO 5: MODAIS & HEADER ==================== -->
+  <!-- MODAIS -->
   <div id="modal-auth" class="modal-overlay hidden">
     <div class="modal-box">
       <div class="card-title" style="margin-bottom:10px;">ACESSO RESTRITO</div>
@@ -129,10 +150,27 @@
     </div>
   </div>
 
+  <div id="modal-aviso-sup" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:10px;">📢 ENVIAR AVISO</div>
+      <div class="form-group">
+        <label class="form-label">MENSAGEM</label>
+        <textarea id="aviso-sup-msg" class="form-control" rows="3" placeholder="Digite o aviso..."></textarea>
+      </div>
+      <div class="form-row">
+        <button class="btn btn-dark" style="flex:1" onclick="fecharAvisoSup()">Cancelar</button>
+        <button class="btn btn-yellow" style="flex:1" onclick="enviarAvisoSupervisao()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
   <header>
     <div class="brand-container">
       <div class="brand-icon">🛡️</div>
-      <div><div class="brand-title">VALIS VIGIA</div><div class="brand-subtitle" id="header-modo-str">Sistema Operacional</div></div>
+      <div>
+        <div class="brand-title">VALIS VIGIA</div>
+        <div class="brand-subtitle" id="header-modo-str">Sistema Operacional</div>
+      </div>
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="alternarTemaGeral()" title="Tema">🌓</button>
@@ -141,12 +179,20 @@
       <button class="icon-btn" onclick="abrirAuthModal('dev')" title="Dev">💻</button>
     </div>
   </header>
-  <div id="notification-toast" class="hidden"><div id="toast-message">Valis Vigia Online</div><div id="toast-timer">10s</div></div>
+
+  <div id="notification-toast" class="hidden">
+    <div id="toast-message">Valis Vigia Online</div>
+    <div id="toast-timer">10s</div>
+  </div>
+
   <main>
-    <!-- ==================== BLOCO 6: ABA PONTO ==================== -->
+    <!-- ABA PONTO -->
     <section id="tab-ponto" class="tab-content active">
       <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">PLANTÃO EM TEMPO REAL</span><span class="status-badge inativo" id="plantao-status-badge">INATIVO</span></div>
+        <div class="card-header">
+          <span class="card-title">PLANTÃO EM TEMPO REAL</span>
+          <span class="status-badge inativo" id="plantao-status-badge">INATIVO</span>
+        </div>
         <div class="timer-display" id="clock-display">00:00:00</div>
         <div class="timer-date" id="date-display">...</div>
         <div class="location-info"><span>🔓</span><span id="location-text">Ponto Desbloqueado. GPS Ativo.</span></div>
@@ -190,7 +236,8 @@
         </details>
       </div>
     </section>
-    <!-- ==================== BLOCO 7: ABAS RONDA + DIÁRIO ==================== -->
+
+    <!-- ABA RONDA -->
     <section id="tab-ronda" class="tab-content">
       <div class="card rgb-border">
         <div class="card-header"><span class="card-title">VALIDAÇÃO DE RONDA</span></div>
@@ -199,52 +246,68 @@
       </div>
     </section>
 
+    <!-- ABA OCORRÊNCIAS -->
     <section id="tab-ocorrencias" class="tab-content">
       <div class="card rgb-border">
         <div class="card-header"><span class="card-title">DIÁRIO DE BORDO</span></div>
-        <div class="form-group"><label class="form-label">TIPO</label>
+        <div class="form-group">
+          <label class="form-label">TIPO</label>
           <select id="ocorr-tipo" class="form-control">
             <option value="Ronda Normal">Ronda Rotina</option>
             <option value="Anormalidade">Anormalidade</option>
             <option value="Visitante">Visitante</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">DESCRIÇÃO</label><textarea id="ocorr-desc" class="form-control" rows="3" placeholder="Detalhes..."></textarea></div>
-        <div class="form-group"><label class="form-label">FOTO</label><input type="file" id="ocorr-foto" accept="image/*" capture="environment" class="form-control"></div>
+        <div class="form-group">
+          <label class="form-label">DESCRIÇÃO</label>
+          <textarea id="ocorr-desc" class="form-control" rows="3" placeholder="Detalhes..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">FOTO</label>
+          <input type="file" id="ocorr-foto" accept="image/*" capture="environment" class="form-control">
+        </div>
         <button class="btn btn-green" style="width:100%;" onclick="salvarOcorrencia()">💾 Salvar</button>
       </div>
       <div class="card rgb-border"><div id="ocorrencias-lista"></div></div>
     </section>
-    <!-- ==================== BLOCO 8: ESCALA, REGISTRO, EXTRATO & AJUSTES ==================== -->
+
+    <!-- ABA ESCALA -->
     <section id="tab-escala" class="tab-content">
       <div class="card rgb-border">
         <div class="card-header"><span class="card-title">PROJEÇÃO DE ESCALA & FOLGUISTA</span></div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">TIPO DE ESCALA</label>
+          <div class="form-group">
+            <label class="form-label">TIPO DE ESCALA</label>
             <select id="escala-tipo" class="form-control" onchange="gerarCalendarioEscala()">
               <option value="12x36">12x36 (Trab. 1 / Folga 1)</option>
               <option value="24x72">24x72 (Trab. 1 / Folga 3)</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label">FUNÇÃO</label>
+          <div class="form-group">
+            <label class="form-label">FUNÇÃO</label>
             <select id="escala-funcao" class="form-control" onchange="gerarCalendarioEscala()">
               <option value="titular" selected>Titular (Fixo)</option>
               <option value="folguista">Folguista (Manual)</option>
             </select>
           </div>
         </div>
-        <div class="form-group"><label class="form-label">DATA DE INÍCIO</label><input type="date" id="escala-data-inicio" class="form-control" onchange="gerarCalendarioEscala()"></div>
-        <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px;" id="escala-instrucao">※ Titular automático. Se folguista, toque nos dias para marcar seus plantões.</div>
+        <div class="form-group">
+          <label class="form-label">DATA DE INÍCIO</label>
+          <input type="date" id="escala-data-inicio" class="form-control" onchange="gerarCalendarioEscala()">
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px;">※ Titular automático. Se folguista, toque nos dias para marcar.</div>
         <div id="calendario-escala" class="calendar-grid"></div>
       </div>
     </section>
 
+    <!-- ABA REGISTRO -->
     <section id="tab-registro" class="tab-content">
       <div class="card rgb-border">
         <div class="card-header"><span class="card-title">LANÇAMENTO DE PLANTÃO</span></div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">DATA</label><input type="date" id="reg-data" class="form-control"></div>
-          <div class="form-group"><label class="form-label">TIPO</label>
+          <div class="form-group">
+            <label class="form-label">TIPO</label>
             <select id="reg-tipo-plantao" class="form-control">
               <option value="proprio" selected>Plantão Próprio</option>
               <option value="cobertura_folga">Cobriu Folga</option>
@@ -263,179 +326,586 @@
       </div>
     </section>
 
+    <!-- ABA EXTRATO -->
     <section id="tab-extrato" class="tab-content">
       <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">EXTRATO & FOLHA</span><button class="btn btn-dark" style="padding: 4px 8px; font-size:10px;" onclick="window.print()">🖨️ PDF</button></div>
+        <div class="card-header">
+          <span class="card-title">EXTRATO & FOLHA</span>
+          <button class="btn btn-dark" style="padding: 4px 8px; font-size:10px;" onclick="window.print()">🖨️ PDF</button>
+        </div>
         <div id="extrato-lista"></div>
       </div>
     </section>
 
+    <!-- ABA AJUSTES -->
     <section id="tab-ajustes" class="tab-content">
       <div class="card rgb-border">
         <div class="card-title" style="margin-bottom:10px;">CONFIGURAÇÕES</div>
-        <div class="form-group"><label class="form-label">POSTO</label><input type="text" id="cfg-nome-posto" class="form-control" value="Posto Principal Valis"></div>
-        <div class="form-group"><label class="form-label">WHATSAPP SUPERVISOR</label><input type="text" id="cfg-tel-sup" class="form-control" placeholder="5521999999999"></div>
+        <div class="form-group">
+          <label class="form-label">POSTO</label>
+          <input type="text" id="cfg-nome-posto" class="form-control" value="Posto Principal Valis">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WHATSAPP SUPERVISOR</label>
+          <input type="text" id="cfg-tel-sup" class="form-control" placeholder="5521999999999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">NOTIFICAÇÕES</label>
+          <button class="btn btn-blue" style="width:100%;" onclick="solicitarPermissaoNotificacao()">🔔 Ativar Notificações</button>
+          <div id="notif-status" style="font-size:11px; color:var(--text-muted); margin-top:6px; text-align:center;">Status: Verificando...</div>
+        </div>
         <button class="btn btn-dark" style="width:100%; margin-top:8px;" onclick="salvarGpsConfig()">💾 Salvar</button>
       </div>
     </section>
-    <!-- ==================== BLOCO 9: SUPERVISÃO, DEV & NAVEGAÇÃO ==================== -->
+
+    <!-- ABA SUPERVISÃO -->
     <section id="tab-supervisao" class="tab-content">
       <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">SUPERVISÃO</span><span class="status-badge supervisao">GESTOR</span></div>
+        <div class="card-header">
+          <span class="card-title">SUPERVISÃO</span>
+          <span class="status-badge supervisao">GESTOR</span>
+        </div>
+
         <div class="info-box">
           <div><strong>Status:</strong> <span id="sup-status">—</span></div>
           <div><strong>Posto:</strong> <span id="sup-posto">—</span></div>
           <div><strong>Logs:</strong> <span id="sup-logs">0</span></div>
           <div><strong>Ocorrências:</strong> <span id="sup-ocorr">0</span></div>
         </div>
-        
-        <!-- Novas Ferramentas Supervisor -->
-        <div class="form-group">
-          <label class="form-label">Enviar Alerta Push ao Vigia</label>
-          <div class="form-row">
-            <input type="text" id="sup-push-msg" class="form-control" placeholder="Ex: Atenção ao perímetro norte">
-            <button class="btn btn-blue" onclick="enviarAlertaPushSupervisor()">Enviar</button>
-          </div>
+
+        <div class="info-box" id="sup-rondas-status">
+          <div id="sup-rondas-pendentes-status">Verificando rondas...</div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Status de Rondas Pendentes</label>
-          <div id="sup-rondas-pendentes-status" style="font-size: 11px; padding: 8px; background: var(--bg-input); border-radius: 6px; border: 1px solid var(--border-input);">Monitorando rondas...</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Produtividade e Folha (Resumo Mês)</label>
-          <div id="sup-produtividade-resumo" style="font-size: 11px; padding: 8px; background: var(--bg-input); border-radius: 6px; border: 1px solid var(--border-input);">Calculando horas...</div>
+
+        <div class="info-box" id="sup-produtividade">
+          <div id="sup-produtividade-resumo">—</div>
         </div>
 
         <div class="action-grid" style="margin-bottom:12px;">
-          <button class="btn btn-blue" onclick="enviarRelatorioWhatsAppSupervisor()">💬 Enviar Relatório WhatsApp</button>
+          <button class="btn btn-blue" onclick="window.print()">📄 Relatório</button>
           <button class="btn btn-yellow" onclick="forcarCheckoutSupervisao()">⏹ Forçar Checkout</button>
         </div>
+
+        <div class="action-grid" style="margin-bottom:12px;">
+          <button class="btn btn-purple" style="grid-column: 1 / -1;" onclick="abrirModalAvisoSup()">📢 Enviar Aviso</button>
+        </div>
+
+        <div class="action-grid" style="margin-bottom:12px;">
+          <button class="btn btn-green" style="grid-column: 1 / -1;" onclick="enviarRelatorioWhatsAppSupervisor()">📱 Relatório WhatsApp</button>
+        </div>
+
         <div class="action-grid">
           <button class="btn btn-dark" onclick="limparLogsSupervisao()">🗑 Limpar Logs</button>
           <button class="btn btn-dark" onclick="limparOcorrenciasSupervisao()">🗑 Limpar Ocorrências</button>
         </div>
       </div>
+
       <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">HISTÓRICO GEOLOCALIZADO DE CHECK-INS</span></div>
+        <div class="card-header"><span class="card-title">ÚLTIMOS REGISTROS</span></div>
         <div id="sup-lista-logs" style="max-height:200px; overflow-y:auto;"></div>
       </div>
     </section>
 
+    <!-- ABA DEV -->
     <section id="tab-dev" class="tab-content">
       <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">PAINEL DESENVOLVEDOR</span><span class="status-badge" style="background:#4C1D95;color:#C4B5FD;">DEV</span></div>
+        <div class="card-header">
+          <span class="card-title">PAINEL DESENVOLVEDOR</span>
+          <span class="status-badge" style="background:#4C1D95;color:#C4B5FD;">DEV</span>
+        </div>
+
+        <div class="info-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>DISPOSITIVOS ATIVOS</strong>
+            <span class="device-badge"><span class="device-dot"></span> <span id="dev-devices-count">1</span></span>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">
+            • Abas neste navegador: <strong id="dev-tabs-count">1</strong><br>
+            • Simulado: <strong id="dev-sim-count">0</strong>
+          </div>
+          <div class="dev-actions">
+            <button class="btn btn-dark" onclick="simularDispositivo(+1)">+1</button>
+            <button class="btn btn-dark" onclick="simularDispositivo(-1)">−1</button>
+          </div>
+        </div>
+
         <div class="info-box">
           <div><strong>Storage:</strong> <span id="dev-storage-size">—</span></div>
           <div><strong>Status:</strong> <span id="dev-status">—</span></div>
-          <div><strong>Conexão Simulada:</strong> <span id="dev-conexao-status" style="color:var(--color-green-bright);">Online</span></div>
+          <div><strong>Notificações:</strong> <span id="dev-notif-perm">—</span></div>
+          <div><strong>Backend:</strong> <span id="dev-backend-mode">localStorage</span></div>
         </div>
 
-        <!-- Novas Ferramentas Dev -->
         <div class="form-group">
-          <label class="form-label">Simulador de Queda de Conexão</label>
-          <button class="btn btn-dark" id="dev-btn-toggle-offline" style="width:100%" onclick="devAlternarModoOffline()">Alternar para Modo Offline</button>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Injetor de Dados de Teste (Mock)</label>
-          <button class="btn btn-purple" style="width:100%" onclick="devInjetorMockData()">⚡ Injetar Mock Data</button>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Console Tracker de Erros (window.onerror)</label>
-          <textarea id="dev-console-tracker" class="form-control" rows="3" readonly style="font-family:monospace; font-size:10px; color:#EF4444;" placeholder="Nenhum erro capturado."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Editor de Configurações Brutas (JSON appState)</label>
-          <textarea id="dev-json-editor" class="form-control" rows="4" style="font-family:monospace; font-size:10px;"></textarea>
-          <button class="btn btn-blue" style="width:100%; margin-top:4px;" onclick="devSalvarJsonEditor()">Aplicar JSON Bruto</button>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Teste de Stress / Lifecycle</label>
-          <button class="btn btn-yellow" style="width:100%" onclick="devSimularRecarregamentoStresse()">🔄 Simular Lifecycle Recarregamento</button>
+          <label class="form-label">ALTERAR SENHA</label>
+          <input type="password" id="dev-nova-senha" class="form-control" placeholder="Nova senha...">
+          <button class="btn btn-purple" style="width:100%; margin-top:6px;" onclick="alterarSenhaDev()">🔑 Salvar</button>
         </div>
 
-        <div class="form-group"><label class="form-label">ALTERAR SENHA</label><input type="password" id="dev-nova-senha" class="form-control" placeholder="Nova senha...">
-          <button class="btn btn-purple" style="width:100%; margin-top:6px;" onclick="alterarSenhaDev()">🔑 Salvar Nova Senha</button>
-        </div>
-        <div class="form-group"><label class="form-label">FORÇAR STATUS</label>
+        <div class="form-group">
+          <label class="form-label">FORÇAR STATUS</label>
           <div class="dev-actions">
             <button class="btn btn-dark" onclick="forcarStatus('INATIVO')">INATIVO</button>
             <button class="btn btn-green" onclick="forcarStatus('ATIVO')">ATIVO</button>
             <button class="btn btn-yellow" onclick="forcarStatus('ALMOCO')">ALMOÇO</button>
           </div>
         </div>
-        <div class="form-group"><label class="form-label">DADOS</label>
+
+        <div class="form-group">
+          <label class="form-label">DADOS</label>
           <div class="dev-actions">
             <button class="btn btn-blue" onclick="exportarDados()">📤 Exportar</button>
             <button class="btn btn-blue" onclick="importarDados()">📥 Importar</button>
           </div>
         </div>
-        <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR TODO O BANCO</button>
+
+        <div class="form-group">
+          <label class="form-label">TESTES</label>
+          <div class="dev-actions">
+            <button class="btn btn-dark" onclick="testarNotificacaoLocal()">🔔 Notif</button>
+            <button class="btn btn-dark" onclick="testarBroadcast()">📡 Broadcast</button>
+            <button class="btn btn-dark" onclick="devInjetorMockData()">⚡ Mock</button>
+            <button class="btn btn-dark" onclick="devSimularRecarregamento()">🔄 Reload</button>
+          </div>
+        </div>
+
+        <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR BANCO</button>
       </div>
     </section>
   </main>
-  <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('ponto', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>PONTO</button>
-    <button class="nav-item" onclick="switchTab('ronda', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>RONDA</button>
-    <button class="nav-item" onclick="switchTab('ocorrencias', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>DIÁRIO</button>
-    <button class="nav-item" onclick="switchTab('escala', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>ESCALA</button>
-    <button class="nav-item" onclick="switchTab('registro', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>REGISTRO</button>
-    <button class="nav-item" onclick="switchTab('extrato', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>EXTRATO</button>
-    <button class="nav-item" onclick="switchTab('ajustes', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>AJUSTES</button>
-  </nav>
-  <!-- ==================== BLOCO 11: JAVASCRIPT CORE ==================== -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      const swCode = `self.addEventListener('fetch', function(e) {});`;
-      const blob = new Blob([swCode], {type: 'application/javascript'});
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-    }
 
-    let appState = {
-      status: 'INATIVO', passDev: 'dev123', nomePosto: 'Posto Principal Valis',
-      telSup: '', coordsFormatadas: 'Lat: -22.75, Lng: -43.70 (Precisão: 5m)', logs: [], rondas: [],
-      ocorrencias: [], registros: [], diasFolguistaMarcados: {}, devModoOffline: false, ultimaRondaTimestamp: Date.now()
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('ponto', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>PONTO
+    </button>
+    <button class="nav-item" onclick="switchTab('ronda', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>RONDA
+    </button>
+    <button class="nav-item" onclick="switchTab('ocorrencias', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>DIÁRIO
+    </button>
+    <button class="nav-item" onclick="switchTab('escala', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>ESCALA
+    </button>
+    <button class="nav-item" onclick="switchTab('registro', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>REGISTRO
+    </button>
+    <button class="nav-item" onclick="switchTab('extrato', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>EXTRATO
+    </button>
+    <button class="nav-item" onclick="switchTab('ajustes', this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>AJUSTES
+    </button>
+  </nav>
+
+  <script>
+    /* ============================================================
+       VALIS VIGIA - PREPARAÇÃO PARA FIREBASE
+       ------------------------------------------------------------
+       Quando for conectar o Firebase:
+       1. Crie um projeto no console.firebase.google.com
+       2. Ative Authentication + Firestore (ou Realtime Database)
+       3. Ative Cloud Messaging (FCM) para push real
+       4. Substitua o objeto FIREBASE_CONFIG abaixo
+       5. Inclua os SDKs do Firebase (modular v9+)
+       6. Troque DataService.save / DataService.load pelas
+          funções que gravam/leem no Firestore
+       7. Use messaging() para push entre dispositivos reais
+       ============================================================ */
+    const FIREBASE_CONFIG = {
+      // Cole aqui as chaves do seu projeto Firebase
+      apiKey: "SUA_API_KEY",
+      authDomain: "seu-projeto.firebaseapp.com",
+      projectId: "seu-projeto",
+      storageBucket: "seu-projeto.appspot.com",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:xxxxxxxxxxxx"
     };
 
-    // Console Tracker Interno para captura de erros JS
-    window.onerror = function(msg, url, line) {
-      const tracker = document.getElementById('dev-console-tracker');
-      if (tracker) {
-        tracker.value += `[${new Date().toLocaleTimeString()}] ${msg} (Linha: ${line})\n`;
+    // Camada de dados abstrata (hoje = localStorage | futuro = Firebase)
+    const DataService = {
+      mode: 'localStorage', // mude para 'firebase' quando conectar
+
+      async save(key, data) {
+        if (this.mode === 'firebase') {
+          // TODO: await setDoc(doc(db, 'valis', key), data);
+          console.warn('Firebase ainda não conectado. Salvando em localStorage.');
+        }
+        localStorage.setItem(key, JSON.stringify(data));
+      },
+
+      async load(key) {
+        if (this.mode === 'firebase') {
+          // TODO: const snap = await getDoc(doc(db, 'valis', key));
+          // return snap.exists() ? snap.data() : null;
+          console.warn('Firebase ainda não conectado. Lendo de localStorage.');
+        }
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      },
+
+      async remove(key) {
+        if (this.mode === 'firebase') {
+          // TODO: await deleteDoc(doc(db, 'valis', key));
+        }
+        localStorage.removeItem(key);
       }
     };
 
-    function carregarDadosSalvos() {
-      const saved = localStorage.getItem('valis_vigia_v3_data');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
+    // Service Worker mínimo (preparado para push futuro)
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+        self.addEventListener('notificationclick', e => {
+          e.notification.close();
+          e.waitUntil(clients.matchAll({type:'window'}).then(list => {
+            for (const c of list) { if ('focus' in c) return c.focus(); }
+            if (clients.openWindow) return clients.openWindow('./');
+          }));
+        });
+        // Quando conectar FCM, o push event virá daqui
+        self.addEventListener('push', e => {
+          const data = e.data ? e.data.json() : { title: 'Valis Vigia', body: 'Nova notificação' };
+          e.waitUntil(self.registration.showNotification(data.title || 'Valis Vigia', {
+            body: data.body || '',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🛡️</text></svg>',
+            tag: 'valis-vigia'
+          }));
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+
+    // ==================== ESTADO ====================
+    let appState = {
+      status: 'INATIVO',
+      passDev: 'dev123',
+      nomePosto: 'Posto Principal Valis',
+      telSup: '',
+      coordsFormatadas: 'GPS Ativo',
+      logs: [],
+      rondas: [],
+      ocorrencias: [],
+      registros: [],
+      diasFolguistaMarcados: {},
+      dispositivosSimulados: 0,
+      ultimaRondaTimestamp: Date.now()
+    };
+
+    const deviceId = 'dev_' + Math.random().toString(36).substr(2, 9);
+    let activeTabs = new Set([deviceId]);
+    const bc = new BroadcastChannel('valis_vigia_channel');
+
+    bc.onmessage = (event) => {
+      const { type, payload } = event.data || {};
+      if (type === 'ping') bc.postMessage({ type: 'pong', payload: { id: deviceId } });
+      if (type === 'pong' && payload?.id) { activeTabs.add(payload.id); atualizarContadorDispositivos(); }
+      if (type === 'aviso_supervisao') mostrarAvisoRecebido(payload.msg, payload.from);
+      if (type === 'force_checkout') {
+        if (appState.status !== 'INATIVO') {
+          appState.status = 'INATIVO';
+          registrarLog('Check-out FORÇADO (remoto)');
+          updateUIState();
+          showNotification('Check-out forçado pela Supervisão');
+          enviarNotificacaoSistema('Supervisão', 'Seu plantão foi finalizado remotamente.');
+        }
+      }
+    };
+
+    setInterval(() => {
+      activeTabs = new Set([deviceId]);
+      bc.postMessage({ type: 'ping' });
+      setTimeout(atualizarContadorDispositivos, 400);
+    }, 5000);
+
+    // ==================== PERSISTÊNCIA ====================
+    async function carregarDadosSalvos() {
+      try {
+        const data = await DataService.load('valis_vigia_v3_data');
+        if (data) {
           appState = { ...appState, ...data };
           document.getElementById('cfg-nome-posto').value = appState.nomePosto || 'Posto Principal Valis';
           document.getElementById('cfg-tel-sup').value = appState.telSup || '';
           renderizarLogs(); renderizarExtrato(); renderizarOcorrencias();
-          renderizarRondas(); updateUIState(); atualizarPainelSupervisao(); atualizarPainelDev();
-        } catch(e) {}
+          renderizarRondas(); updateUIState();
+          atualizarPainelSupervisao(); atualizarPainelDev();
+        }
+      } catch (e) { console.warn('Erro ao carregar:', e); }
+    }
+
+    async function salvarEstado() {
+      await DataService.save('valis_vigia_v3_data', {
+        status: appState.status,
+        passDev: appState.passDev,
+        nomePosto: appState.nomePosto,
+        telSup: appState.telSup,
+        logs: appState.logs,
+        rondas: appState.rondas,
+        ocorrencias: appState.ocorrencias,
+        registros: appState.registros,
+        diasFolguistaMarcados: appState.diasFolguistaMarcados,
+        dispositivosSimulados: appState.dispositivosSimulados || 0,
+        ultimaRondaTimestamp: appState.ultimaRondaTimestamp || Date.now()
+      });
+      atualizarPainelSupervisao();
+      atualizarPainelDev();
+    }
+
+    // ==================== NOTIFICAÇÕES ====================
+    async function solicitarPermissaoNotificacao() {
+      if (!('Notification' in window)) { alert('Navegador não suporta notificações.'); return; }
+      const perm = await Notification.requestPermission();
+      atualizarStatusNotificacao();
+      if (perm === 'granted') {
+        showNotification('Notificações ativadas!');
+        enviarNotificacaoSistema('Valis Vigia', 'Notificações prontas.');
+      } else showNotification('Permissão negada.');
+    }
+
+    function atualizarStatusNotificacao() {
+      const el = document.getElementById('notif-status');
+      const devEl = document.getElementById('dev-notif-perm');
+      if (!('Notification' in window)) {
+        if (el) el.textContent = 'Status: Não suportado';
+        if (devEl) devEl.textContent = 'Não suportado';
+        return;
+      }
+      const map = { granted: '✅ Ativadas', denied: '❌ Negadas', default: '⏳ Pendente' };
+      if (el) el.textContent = 'Status: ' + (map[Notification.permission] || Notification.permission);
+      if (devEl) devEl.textContent = map[Notification.permission] || Notification.permission;
+    }
+
+    function enviarNotificacaoSistema(titulo, corpo) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try {
+        new Notification(titulo, {
+          body: corpo,
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🛡️</text></svg>',
+          tag: 'valis-vigia-' + Date.now()
+        });
+      } catch (e) {}
+    }
+
+    function testarNotificacaoLocal() {
+      enviarNotificacaoSistema('Valis Vigia - Teste', 'Notificação local de teste.');
+      showNotification('Notificação de teste enviada');
+    }
+
+    function testarBroadcast() {
+      bc.postMessage({ type: 'aviso_supervisao', payload: { msg: 'Teste de broadcast (abas do mesmo navegador)', from: 'Dev' } });
+      showNotification('Broadcast enviado');
+    }
+
+    function mostrarAvisoRecebido(msg, from) {
+      showNotification('📢 Aviso de ' + (from || 'Supervisão') + ': ' + msg);
+      enviarNotificacaoSistema('📢 Aviso da Supervisão', msg);
+      testarBipSonoro();
+    }
+
+    // ==================== DISPOSITIVOS ====================
+    function atualizarContadorDispositivos() {
+      const tabs = activeTabs.size;
+      const sim = appState.dispositivosSimulados || 0;
+      const elTotal = document.getElementById('dev-devices-count');
+      const elTabs = document.getElementById('dev-tabs-count');
+      const elSim = document.getElementById('dev-sim-count');
+      if (elTotal) elTotal.textContent = tabs + sim;
+      if (elTabs) elTabs.textContent = tabs;
+      if (elSim) elSim.textContent = sim;
+    }
+
+    function simularDispositivo(delta) {
+      appState.dispositivosSimulados = Math.max(0, (appState.dispositivosSimulados || 0) + delta);
+      salvarEstado();
+      atualizarContadorDispositivos();
+      showNotification(delta > 0 ? 'Dispositivo simulado +1' : 'Dispositivo simulado −1');
+    }
+
+    // ==================== SUPERVISÃO ====================
+    function abrirModalAvisoSup() {
+      document.getElementById('modal-aviso-sup').classList.remove('hidden');
+      document.getElementById('aviso-sup-msg').value = '';
+      document.getElementById('aviso-sup-msg').focus();
+    }
+    function fecharAvisoSup() { document.getElementById('modal-aviso-sup').classList.add('hidden'); }
+
+    function enviarAvisoSupervisao() {
+      const msg = document.getElementById('aviso-sup-msg').value.trim();
+      if (!msg) { alert('Digite uma mensagem.'); return; }
+      bc.postMessage({ type: 'aviso_supervisao', payload: { msg, from: 'Supervisão' } });
+      enviarNotificacaoSistema('📢 Aviso da Supervisão', msg);
+      showNotification('Aviso enviado!');
+      fecharAvisoSup();
+      registrarLog('Aviso Supervisão: ' + msg.substring(0, 40));
+    }
+
+    function checarRondasPendentesSupervisor() {
+      const el = document.getElementById('sup-rondas-pendentes-status');
+      if (!el) return;
+      const intervaloMin = parseInt(document.getElementById('cfg-intervalo-ronda')?.value) || 60;
+      const diffMin = Math.floor((Date.now() - (appState.ultimaRondaTimestamp || Date.now())) / 60000);
+      if (intervaloMin > 0 && diffMin > intervaloMin) {
+        el.innerHTML = '<span style="color:var(--color-accent-red);font-weight:bold;">⚠️ Ronda atrasada em ' + (diffMin - intervaloMin) + ' min</span>';
+      } else {
+        el.innerHTML = '<span style="color:var(--color-green-bright);">✅ Rondas em dia (última há ' + diffMin + ' min)</span>';
       }
     }
 
-    function salvarEstado() {
-      if (appState.devModoOffline) {
-        showNotification("⚠️ Modo Offline ativo: Dados salvos apenas na sessão local.");
-      }
-      localStorage.setItem('valis_vigia_v3_data', JSON.stringify({
-        status: appState.status, passDev: appState.passDev, nomePosto: appState.nomePosto,
-        telSup: appState.telSup, logs: appState.logs, rondas: appState.rondas,
-        ocorrencias: appState.ocorrencias, registros: appState.registros,
-        diasFolguistaMarcados: appState.diasFolguistaMarcados, ultimaRondaTimestamp: appState.ultimaRondaTimestamp
-      }));
-      atualizarPainelSupervisao(); atualizarPainelDev();
+    function calcularProdutividadeSupervisor() {
+      const el = document.getElementById('sup-produtividade-resumo');
+      if (!el) return;
+      const total = appState.registros.length;
+      const valor = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
+      el.innerHTML = '<strong>Plantões:</strong> ' + total + ' | <strong>Acumulado:</strong> R$ ' + valor.toFixed(2);
     }
 
+    function enviarRelatorioWhatsAppSupervisor() {
+      const tel = (appState.telSup || '').replace(/\D/g, '');
+      if (!tel) { alert('Configure o WhatsApp do supervisor em Ajustes.'); return; }
+      const valor = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
+      const msg = encodeURIComponent(
+        '📊 *Relatório Valis Vigia*\n' +
+        'Posto: ' + appState.nomePosto + '\n' +
+        'Status: ' + appState.status + '\n' +
+        'Plantões: ' + appState.registros.length + '\n' +
+        'Acumulado: R$ ' + valor.toFixed(2)
+      );
+      window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + msg, '_blank');
+    }
+
+    function atualizarPainelSupervisao() {
+      const statusEl = document.getElementById('sup-status');
+      if (!statusEl) return;
+      statusEl.textContent = appState.status;
+      document.getElementById('sup-posto').textContent = appState.nomePosto;
+      document.getElementById('sup-logs').textContent = appState.logs.length;
+      document.getElementById('sup-ocorr').textContent = appState.ocorrencias.length;
+      document.getElementById('sup-lista-logs').innerHTML = appState.logs.slice(0, 10).map(log =>
+        '<div style="font-size:11px;padding:6px 0;border-bottom:1px solid var(--border-input);"><strong>' + log.hora + '</strong> — ' + log.acao + '<br><small style="color:var(--color-green-bright);">📍 ' + (log.loc || 'GPS') + '</small></div>'
+      ).join('') || '<div style="font-size:11px;color:var(--text-muted);">Nenhum registro</div>';
+      checarRondasPendentesSupervisor();
+      calcularProdutividadeSupervisor();
+    }
+
+    function forcarCheckoutSupervisao() {
+      if (appState.status === 'INATIVO') { showNotification('Já está inativo.'); return; }
+      if (confirm('Forçar check-out?')) {
+        appState.status = 'INATIVO';
+        registrarLog('Check-out FORÇADO pela Supervisão');
+        updateUIState();
+        bc.postMessage({ type: 'force_checkout' });
+        showNotification('Check-out forçado.');
+      }
+    }
+
+    function limparLogsSupervisao() {
+      if (confirm('Limpar logs?')) { appState.logs = []; salvarEstado(); renderizarLogs(); showNotification('Logs limpos.'); }
+    }
+    function limparOcorrenciasSupervisao() {
+      if (confirm('Limpar ocorrências?')) { appState.ocorrencias = []; salvarEstado(); renderizarOcorrencias(); showNotification('Ocorrências limpas.'); }
+    }
+
+    // ==================== DEV ====================
+    function atualizarPainelDev() {
+      const sizeEl = document.getElementById('dev-storage-size');
+      if (!sizeEl) return;
+      const data = localStorage.getItem('valis_vigia_v3_data') || '';
+      sizeEl.textContent = (data.length / 1024).toFixed(1) + ' KB';
+      document.getElementById('dev-status').textContent = appState.status;
+      const modeEl = document.getElementById('dev-backend-mode');
+      if (modeEl) modeEl.textContent = DataService.mode;
+      atualizarContadorDispositivos();
+      atualizarStatusNotificacao();
+    }
+
+    function alterarSenhaDev() {
+      const nova = document.getElementById('dev-nova-senha').value.trim();
+      if (!nova || nova.length < 4) { alert('Mínimo 4 caracteres.'); return; }
+      appState.passDev = nova;
+      salvarEstado();
+      document.getElementById('dev-nova-senha').value = '';
+      showNotification('Senha alterada!');
+    }
+
+    function forcarStatus(s) { appState.status = s; updateUIState(); showNotification('Status: ' + s); }
+
+    function exportarDados() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'valis_vigia_backup_' + getLocalDateKey() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification('Backup exportado!');
+    }
+
+    function importarDados() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (confirm('Importar e sobrescrever dados?')) {
+              appState = { ...appState, ...data };
+              salvarEstado();
+              location.reload();
+            }
+          } catch (err) { alert('JSON inválido.'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function devInjetorMockData() {
+      if (!confirm('Injetar dados de teste?')) return;
+      appState.logs = [
+        { acao: 'Check-in', hora: '06:00', loc: 'Lat: -22.75, Lng: -43.70' },
+        { acao: 'Pausa / Refeição', hora: '12:00', loc: 'Lat: -22.75, Lng: -43.70' }
+      ];
+      appState.rondas = [
+        { ponto: 'Perímetro Norte', hora: '08:00', data: new Date().toLocaleDateString('pt-BR') },
+        { ponto: 'Portão Principal', hora: '10:00', data: new Date().toLocaleDateString('pt-BR') }
+      ];
+      appState.ocorrencias = [
+        { tipo: 'Visitante', desc: 'Prestador autorizado.', foto: null, hora: '09:30', data: new Date().toLocaleDateString('pt-BR') }
+      ];
+      appState.registros = [
+        { data: getLocalDateKey(), val: 200, horas: '24 hrs', turno: 'Plantão Próprio' }
+      ];
+      appState.ultimaRondaTimestamp = Date.now();
+      salvarEstado();
+      renderizarLogs(); renderizarExtrato(); renderizarOcorrencias(); renderizarRondas();
+      showNotification('Mock data injetado!');
+      atualizarPainelDev();
+    }
+
+    function devSimularRecarregamento() {
+      showNotification('Recarregando...');
+      setTimeout(() => location.reload(), 1000);
+    }
+
+    function zerarTudoDev() {
+      if (confirm('Zerar TODO o banco local?')) {
+        DataService.remove('valis_vigia_v3_data');
+        location.reload();
+      }
+    }
+
+    // ==================== UTILITÁRIOS ====================
     function getLocalDateKey(date = new Date()) {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
       const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      return y + '-' + m + '-' + d;
     }
 
     function showNotification(msg) {
@@ -446,10 +916,10 @@
       if (window.toastTimeout) clearTimeout(window.toastTimeout);
       if (window.toastInterval) clearInterval(window.toastInterval);
       let timeLeft = 10;
-      timerDisplay.textContent = timeLeft + "s";
+      timerDisplay.textContent = timeLeft + 's';
       window.toastInterval = setInterval(() => {
         timeLeft--;
-        timerDisplay.textContent = (timeLeft > 0 ? timeLeft : 0) + "s";
+        timerDisplay.textContent = (timeLeft > 0 ? timeLeft : 0) + 's';
         if (timeLeft <= 0) clearInterval(window.toastInterval);
       }, 1000);
       window.toastTimeout = setTimeout(() => {
@@ -461,15 +931,14 @@
     function alternarTemaGeral() {
       document.body.classList.toggle('light-theme');
       const isLight = document.body.classList.contains('light-theme');
-      document.getElementById('header-modo-str').textContent = isLight ? "Modo Claro" : "Modo Escuro (RGB)";
-      showNotification(isLight ? "Tema Claro Ativado" : "Tema Escuro Ativado");
+      document.getElementById('header-modo-str').textContent = isLight ? 'Modo Claro' : 'Modo Escuro (RGB)';
+      showNotification(isLight ? 'Tema Claro' : 'Tema Escuro');
     }
 
     function updateClock() {
       const now = new Date();
       document.getElementById('clock-display').textContent = now.toTimeString().split(' ')[0];
-      const options = { weekday: 'long', day: 'numeric', month: 'long' };
-      const str = now.toLocaleDateString('pt-BR', options);
+      const str = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
       document.getElementById('date-display').textContent = str.charAt(0).toUpperCase() + str.slice(1);
     }
     setInterval(updateClock, 1000);
@@ -484,150 +953,189 @@
         osc.type = 'sine'; osc.frequency.value = 880;
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
         osc.start(); osc.stop(ctx.currentTime + 0.3);
-      } catch(e) {}
+      } catch (e) {}
     }
-let timerRonda = null, rondaCountdownInterval = null, rondaSecondsLeft = 0;
+
+    // ==================== RONDA ====================
+    let timerRonda = null, rondaCountdownInterval = null, rondaSecondsLeft = 0;
+
     function configurarAlertaRonda() {
       if (timerRonda) clearInterval(timerRonda);
       if (rondaCountdownInterval) clearInterval(rondaCountdownInterval);
       const min = parseInt(document.getElementById('cfg-intervalo-ronda').value);
-      const countdownDisplay = document.getElementById('ronda-countdown-display');
+      const display = document.getElementById('ronda-countdown-display');
       if (min > 0) {
         rondaSecondsLeft = min * 60;
         timerRonda = setInterval(() => {
           testarBipSonoro();
-          showNotification("⏰ ATENÇÃO: Hora de realizar a Ronda do Posto!");
+          showNotification('⏰ Hora da Ronda!');
+          enviarNotificacaoSistema('Valis Vigia - Ronda', 'Hora de realizar a ronda.');
           rondaSecondsLeft = min * 60;
-          appState.ultimaRondaTimestamp = Date.now();
         }, min * 60 * 1000);
         rondaCountdownInterval = setInterval(() => {
           if (rondaSecondsLeft > 0) {
             rondaSecondsLeft--;
             const m = Math.floor(rondaSecondsLeft / 60);
             const s = rondaSecondsLeft % 60;
-            countdownDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
           }
         }, 1000);
-        showNotification(`Lembrete de ronda ativado (${min} min)`);
+        showNotification('Ronda a cada ' + min + ' min');
       } else {
-        countdownDisplay.textContent = "00:00";
-        showNotification("Lembrete de ronda desativado");
+        display.textContent = '00:00';
+        showNotification('Ronda desativada');
       }
     }
-    configurarAlertaRonda();
 
     function dispararPanico() {
-      if (confirm('⚠️ Disparar Pânico Silencioso para a Supervisão?')) {
+      if (confirm('⚠️ Disparar Pânico?')) {
         testarBipSonoro();
-        const msg = encodeURIComponent(`🚨 EMERGÊNCIA NO POSTO!\nPosto: ${appState.nomePosto}\nHora: ${new Date().toLocaleTimeString()}`);
-        const tel = (appState.telSup || '').replace(/\D/g,'');
-        window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${msg}`, '_blank');
+        enviarNotificacaoSistema('🚨 PÂNICO', 'Emergência no posto!');
+        const msg = encodeURIComponent('🚨 EMERGÊNCIA!\nPosto: ' + appState.nomePosto + '\nHora: ' + new Date().toLocaleTimeString());
+        const tel = (appState.telSup || '').replace(/\D/g, '');
+        window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + msg, '_blank');
       }
     }
 
     function simularLeituraQR() {
-      const pontos = ["Portão Principal", "Perímetro Norte", "Almoxarifado", "Galpão"];
-      const pontoSorteado = pontos[Math.floor(Math.random() * pontos.length)];
-      const hora = new Date().toLocaleTimeString().slice(0,5);
-      appState.rondas.unshift({ ponto: pontoSorteado, hora, data: new Date().toLocaleDateString('pt-BR') });
+      const pontos = ['Portão Principal', 'Perímetro Norte', 'Almoxarifado', 'Galpão'];
+      const ponto = pontos[Math.floor(Math.random() * pontos.length)];
+      const hora = new Date().toLocaleTimeString().slice(0, 5);
+      appState.rondas.unshift({ ponto, hora, data: new Date().toLocaleDateString('pt-BR') });
       appState.ultimaRondaTimestamp = Date.now();
       const min = parseInt(document.getElementById('cfg-intervalo-ronda').value);
       if (min > 0) rondaSecondsLeft = min * 60;
-      salvarEstado(); renderizarRondas();
-      showNotification(`✅ Ronda registrada: ${pontoSorteado}`);
+      salvarEstado();
+      renderizarRondas();
+      showNotification('✅ Ronda: ' + ponto);
     }
 
     function renderizarRondas() {
-      document.getElementById('ronda-historico').innerHTML = appState.rondas.map(r => `
-        <div class="registro-details-card"><div style="display:flex; justify-content:space-between;">
-          <div><strong>📍 ${r.ponto}</strong><br><small>QR Code · ${r.data}</small></div><div>${r.hora}</div>
-        </div></div>
-      `).join('');
+      document.getElementById('ronda-historico').innerHTML = appState.rondas.map(r =>
+        '<div class="registro-details-card"><div style="display:flex;justify-content:space-between;"><div><strong>📍 ' + r.ponto + '</strong><br><small>QR · ' + r.data + '</small></div><div>' + r.hora + '</div></div></div>'
+      ).join('');
     }
 
+    // ==================== OCORRÊNCIAS ====================
     function salvarOcorrencia() {
       const tipo = document.getElementById('ocorr-tipo').value;
       const desc = document.getElementById('ocorr-desc').value.trim();
       const fileInput = document.getElementById('ocorr-foto');
       if (!desc) { alert('Digite uma descrição.'); return; }
-      const processarSalvamento = (fotoBase64) => {
-        appState.ocorrencias.unshift({ tipo, desc, foto: fotoBase64, hora: new Date().toLocaleTimeString().slice(0,5), data: new Date().toLocaleDateString('pt-BR') });
-        salvarEstado(); renderizarOcorrencias();
-        document.getElementById('ocorr-desc').value = ''; document.getElementById('ocorr-foto').value = '';
+      const processar = (foto) => {
+        appState.ocorrencias.unshift({
+          tipo, desc, foto,
+          hora: new Date().toLocaleTimeString().slice(0, 5),
+          data: new Date().toLocaleDateString('pt-BR')
+        });
+        salvarEstado();
+        renderizarOcorrencias();
+        document.getElementById('ocorr-desc').value = '';
+        document.getElementById('ocorr-foto').value = '';
         showNotification('Diário atualizado!');
       };
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = e => processarSalvamento(e.target.result);
+        reader.onload = e => processar(e.target.result);
         reader.readAsDataURL(fileInput.files[0]);
-      } else { processarSalvamento(null); }
+      } else processar(null);
     }
 
     function renderizarOcorrencias() {
-      document.getElementById('ocorrencias-lista').innerHTML = appState.ocorrencias.map(o => `
-        <div class="registro-details-card">
-          <div style="display:flex; justify-content:space-between; width:100%;"><span style="color:var(--color-yellow); font-weight:600;">⚠️️ ${o.tipo}</span><span>${o.data} ${o.hora}</span></div>
-          <div style="margin-top:6px; color:var(--text-main);">${o.desc}</div>
-          ${o.foto ? `<img src="${o.foto}" style="width:100%; max-height:140px; object-fit:cover; border-radius:8px; margin-top:8px;">` : ''}
-        </div>
-      `).join('');
+      document.getElementById('ocorrencias-lista').innerHTML = appState.ocorrencias.map(o =>
+        '<div class="registro-details-card"><div style="display:flex;justify-content:space-between;width:100%;"><span style="color:var(--color-yellow);font-weight:600;">⚠️ ' + o.tipo + '</span><span>' + o.data + ' ' + o.hora + '</span></div><div style="margin-top:6px;color:var(--text-main);">' + o.desc + '</div>' + (o.foto ? '<img src="' + o.foto + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;">' : '') + '</div>'
+      ).join('');
     }
 
+    // ==================== ESCALA ====================
     function gerarCalendarioEscala() {
       const tipo = document.getElementById('escala-tipo').value;
       const funcao = document.getElementById('escala-funcao').value;
       const container = document.getElementById('calendario-escala');
       container.innerHTML = '';
       ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(d => {
-        container.innerHTML += `<div style="font-weight:bold; color:var(--text-muted);">${d}</div>`;
+        container.innerHTML += '<div style="font-weight:bold;color:var(--text-muted);">' + d + '</div>';
       });
       const hoje = new Date();
       for (let i = 0; i < 28; i++) {
         const diaObj = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + i);
         const dataKey = getLocalDateKey(diaObj);
         if (funcao === 'titular') {
-          let eTrabalho = (tipo === '12x36') ? (i % 2 === 0) : (i % 4 === 0);
-          container.innerHTML += `<div class="day-cell ${eTrabalho ? 'day-trabalho' : 'day-folga'}">${diaObj.getDate()}<br><span style="font-size:7px;">${eTrabalho ? 'PLANTÃO' : 'FOLGA'}</span></div>`;
+          const eTrabalho = (tipo === '12x36') ? (i % 2 === 0) : (i % 4 === 0);
+          container.innerHTML += '<div class="day-cell ' + (eTrabalho ? 'day-trabalho' : 'day-folga') + '">' + diaObj.getDate() + '<br><span style="font-size:7px;">' + (eTrabalho ? 'PLANTÃO' : 'FOLGA') + '</span></div>';
         } else {
           const marcado = !!appState.diasFolguistaMarcados[dataKey];
           const cell = document.createElement('div');
-          cell.className = `day-cell ${marcado ? 'day-custom-marcado' : 'day-folga'}`;
-          cell.innerHTML = `${diaObj.getDate()}<br><span style="font-size:7px;">${marcado ? 'TRABALHO' : ''}</span>`;
+          cell.className = 'day-cell ' + (marcado ? 'day-custom-marcado' : 'day-folga');
+          cell.innerHTML = diaObj.getDate() + '<br><span style="font-size:7px;">' + (marcado ? 'TRABALHO' : '') + '</span>';
           cell.onclick = () => {
             appState.diasFolguistaMarcados[dataKey] = !appState.diasFolguistaMarcados[dataKey];
-            salvarEstado(); gerarCalendarioEscala();
-            showNotification(appState.diasFolguistaMarcados[dataKey] ? "Plantão marcado!" : "Data limpa.");
+            salvarEstado();
+            gerarCalendarioEscala();
+            showNotification(appState.diasFolguistaMarcados[dataKey] ? 'Plantão marcado!' : 'Data limpa.');
           };
           container.appendChild(cell);
         }
       }
     }
+
+    // ==================== CHECK-IN / OUT ====================
     function abrirPassagemTurno() { document.getElementById('modal-bastao').classList.remove('hidden'); }
     function fecharBastao() { document.getElementById('modal-bastao').classList.add('hidden'); }
+
     function confirmarCheckOut() {
       const eq = document.getElementById('bastao-equip').value;
-      fecharBastao(); appState.status = 'INATIVO';
-      registrarLog(`Check-out / Bastão (${eq})`);
-      showNotification('Plantão encerrado!'); updateUIState();
+      fecharBastao();
+      appState.status = 'INATIVO';
+      registrarLog('Check-out / Bastão (' + eq + ')');
+      showNotification('Plantão encerrado!');
+      updateUIState();
     }
 
-    function handleCheckIn() { appState.status = 'ATIVO'; registrarLog('Check-in'); showNotification('Plantão iniciado!'); updateUIState(); }
-    function handleSaidaAlmoco() { appState.status = 'ALMOCO'; registrarLog('Pausa / Refeição'); showNotification('Saída para refeição.'); updateUIState(); }
-    function handleVoltaAlmoco() { appState.status = 'ATIVO'; registrarLog('Retorno da Pausa'); showNotification('Retorno registrado.'); updateUIState(); }
+    function handleCheckIn() {
+      appState.status = 'ATIVO';
+      registrarLog('Check-in');
+      showNotification('Plantão iniciado!');
+      updateUIState();
+    }
+    function handleSaidaAlmoco() {
+      appState.status = 'ALMOCO';
+      registrarLog('Pausa / Refeição');
+      showNotification('Saída para refeição.');
+      updateUIState();
+    }
+    function handleVoltaAlmoco() {
+      appState.status = 'ATIVO';
+      registrarLog('Retorno da Pausa');
+      showNotification('Retorno registrado.');
+      updateUIState();
+    }
 
     function updateUIState() {
       const badge = document.getElementById('plantao-status-badge');
-      const btnCheckin = document.getElementById('btn-checkin'), btnCheckout = document.getElementById('btn-checkout');
-      const btnSaida = document.getElementById('btn-saida-almoco'), btnVolta = document.getElementById('btn-volta-almoco');
+      const btnCheckin = document.getElementById('btn-checkin');
+      const btnCheckout = document.getElementById('btn-checkout');
+      const btnSaida = document.getElementById('btn-saida-almoco');
+      const btnVolta = document.getElementById('btn-volta-almoco');
+
       if (appState.status === 'INATIVO') {
         badge.className = 'status-badge inativo'; badge.textContent = 'INATIVO';
-        btnCheckin.classList.remove('btn-disabled'); btnCheckout.classList.add('btn-disabled'); btnSaida.classList.add('btn-disabled'); btnVolta.classList.add('btn-disabled');
+        btnCheckin.classList.remove('btn-disabled');
+        btnCheckout.classList.add('btn-disabled');
+        btnSaida.classList.add('btn-disabled');
+        btnVolta.classList.add('btn-disabled');
       } else if (appState.status === 'ATIVO') {
         badge.className = 'status-badge ativo'; badge.textContent = 'EM PLANTÃO';
-        btnCheckin.classList.add('btn-disabled'); btnCheckout.classList.remove('btn-disabled'); btnSaida.classList.remove('btn-disabled'); btnVolta.classList.add('btn-disabled');
+        btnCheckin.classList.add('btn-disabled');
+        btnCheckout.classList.remove('btn-disabled');
+        btnSaida.classList.remove('btn-disabled');
+        btnVolta.classList.add('btn-disabled');
       } else if (appState.status === 'ALMOCO') {
         badge.className = 'status-badge almoco'; badge.textContent = 'EM PAUSA';
-        btnCheckin.classList.add('btn-disabled'); btnCheckout.classList.add('btn-disabled'); btnSaida.classList.add('btn-disabled'); btnVolta.classList.remove('btn-disabled');
+        btnCheckin.classList.add('btn-disabled');
+        btnCheckout.classList.add('btn-disabled');
+        btnSaida.classList.add('btn-disabled');
+        btnVolta.classList.remove('btn-disabled');
       }
       salvarEstado();
     }
@@ -635,243 +1143,61 @@ let timerRonda = null, rondaCountdownInterval = null, rondaSecondsLeft = 0;
     function registrarLog(acao) {
       const hora = new Date().toLocaleTimeString().slice(0, 5);
       appState.logs.unshift({ acao, hora, loc: appState.coordsFormatadas });
-      salvarEstado(); renderizarLogs();
+      salvarEstado();
+      renderizarLogs();
     }
 
     function renderizarLogs() {
-      document.getElementById('recent-logs-list').innerHTML = appState.logs.map(log => `
-        <details class="registro-details-card">
-          <summary><span>📌 ${log.acao}</span><span>${log.hora}</span></summary>
-          <div class="registro-details-content"><div><strong>Local:</strong> ${log.loc}</div><div><strong>Status:</strong> Sucesso</div></div>
-        </details>
-      `).join('');
-      document.getElementById('logs-count').textContent = appState.logs.length + " itens";
+      document.getElementById('recent-logs-list').innerHTML = appState.logs.map(log =>
+        '<details class="registro-details-card"><summary><span>📌 ' + log.acao + '</span><span>' + log.hora + '</span></summary><div class="registro-details-content"><div><strong>Local:</strong> ' + log.loc + '</div><div><strong>Status:</strong> Sucesso</div></div></details>'
+      ).join('');
+      document.getElementById('logs-count').textContent = appState.logs.length + ' itens';
     }
 
+    // ==================== REGISTRO / EXTRATO ====================
     function calcularHorasRegistro() {
-      const ini = document.getElementById('reg-hora-inicio').value, fim = document.getElementById('reg-hora-fim').value;
+      const ini = document.getElementById('reg-hora-inicio').value;
+      const fim = document.getElementById('reg-hora-fim').value;
       if (!ini || !fim) return;
-      let [h1, m1] = ini.split(':').map(Number), [h2, m2] = fim.split(':').map(Number);
-      let minutos1 = h1 * 60 + m1, minutos2 = h2 * 60 + m2;
-      if (minutos2 <= minutos1) minutos2 += 24 * 60;
-      const diffHoras = (minutos2 - minutos1) / 60;
-      document.getElementById('reg-horas-calc').value = diffHoras + " hrs";
-      document.getElementById('reg-valor').value = (diffHoras >= 24) ? 200 : 100;
+      let [h1, m1] = ini.split(':').map(Number);
+      let [h2, m2] = fim.split(':').map(Number);
+      let min1 = h1 * 60 + m1;
+      let min2 = h2 * 60 + m2;
+      if (min2 <= min1) min2 += 24 * 60;
+      const diff = (min2 - min1) / 60;
+      document.getElementById('reg-horas-calc').value = diff + ' hrs';
+      document.getElementById('reg-valor').value = (diff >= 24) ? 200 : 100;
     }
 
     function salvarRegistroManual() {
       const data = document.getElementById('reg-data').value;
       if (!data) { alert('Informe a data.'); return; }
-      const tipoPlantao = document.getElementById('reg-tipo-plantao').value;
+      const tipo = document.getElementById('reg-tipo-plantao').value;
       const val = parseFloat(document.getElementById('reg-valor').value) || 0;
       const horas = document.getElementById('reg-horas-calc').value;
-      appState.registros.unshift({ data, val, horas, turno: tipoPlantao === 'proprio' ? 'Plantão Próprio' : 'Cobertura de Folga' });
-      salvarEstado(); renderizarExtrato(); showNotification('Plantão salvo!');
+      appState.registros.unshift({
+        data, val, horas,
+        turno: tipo === 'proprio' ? 'Plantão Próprio' : 'Cobertura de Folga'
+      });
+      salvarEstado();
+      renderizarExtrato();
+      showNotification('Plantão salvo!');
     }
 
     function renderizarExtrato() {
-      document.getElementById('extrato-lista').innerHTML = appState.registros.map(reg => `
-        <details class="registro-details-card">
-          <summary><span>📅 ${reg.data} · <strong>${reg.horas}</strong></span><span style="color:var(--color-green-bright);">R$ ${Number(reg.val).toFixed(2)}</span></summary>
-          <div class="registro-details-content"><div><strong>Tipo:</strong> ${reg.turno}</div><div><strong>Posto:</strong> ${appState.nomePosto}</div></div>
-        </details>
-      `).join('');
+      document.getElementById('extrato-lista').innerHTML = appState.registros.map(reg =>
+        '<details class="registro-details-card"><summary><span>📅 ' + reg.data + ' · <strong>' + reg.horas + '</strong></span><span style="color:var(--color-green-bright);">R$ ' + Number(reg.val).toFixed(2) + '</span></summary><div class="registro-details-content"><div><strong>Tipo:</strong> ' + reg.turno + '</div><div><strong>Posto:</strong> ' + appState.nomePosto + '</div></div></details>'
+      ).join('');
     }
 
     function salvarGpsConfig() {
       appState.nomePosto = document.getElementById('cfg-nome-posto').value.trim() || 'Posto Principal Valis';
       appState.telSup = document.getElementById('cfg-tel-sup').value.trim();
-      salvarEstado(); showNotification('Configurações salvas!');
-    }
-  // ==================== IMPLEMENTAÇÃO DAS 10 IDEIAS (SUPERVISOR & DEV) ====================
-
-    // 1. Envio de Alerta Geral / Mensagem Push
-    function enviarAlertaPushSupervisor() {
-      const txt = document.getElementById('sup-push-msg').value.trim();
-      if (!txt) { alert('Digite a mensagem do alerta.'); return; }
-      testarBipSonoro();
-      showNotification(`🚨 ALERTA DA SUPERVISÃO: ${txt}`);
-      document.getElementById('sup-push-msg').value = '';
-    }
-
-    // 3. Controle de Rondas Pendentes / Atrasadas
-    function checarRondasPendentesSupervisor() {
-      const el = document.getElementById('sup-rondas-pendentes-status');
-      if (!el) return;
-      const intervaloMin = parseInt(document.getElementById('cfg-intervalo-ronda').value) || 60;
-      const diffMin = Math.floor((Date.now() - (appState.ultimaRondaTimestamp || Date.now())) / 60000);
-      if (intervaloMin > 0 && diffMin > intervaloMin) {
-        el.innerHTML = `<span style="color:var(--color-accent-red); font-weight:bold;">⚠️ Alerta: Ronda atrasada em ${diffMin - intervaloMin} minutos!</span>`;
-      } else {
-        el.innerHTML = `<span style="color:var(--color-green-bright);">✅ Rondas em dia (Última há ${diffMin} min).</span>`;
-      }
-    }
-
-    // 4. Relatório de Produtividade Diária/Semanal (Fechamento de Folha)
-    function calcularProdutividadeSupervisor() {
-      const el = document.getElementById('sup-produtividade-resumo');
-      if (!el) return;
-      const totalPlantoes = appState.registros.length;
-      const totalAcumulado = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
-      el.innerHTML = `<strong>Plantões no Mês:</strong> ${totalPlantoes} | <strong>Total Acumulado:</strong> R$ ${totalAcumulado.toFixed(2)}`;
-    }
-
-    // 5. Chamada Direta via WhatsApp com Mensagem Pronta
-    function enviarRelatorioWhatsAppSupervisor() {
-      const tel = (appState.telSup || '').replace(/\D/g,'');
-      if (!tel) { alert('Configure o telefone do supervisor em Ajustes.'); return; }
-      const totalAcumulado = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
-      const msg = encodeURIComponent(`📊 *Relatório Operacional - Valis Vigia*\nPosto: ${appState.nomePosto}\nStatus Atual: ${appState.status}\nTotal de Plantões: ${appState.registros.length}\nValor Acumulado: R$ ${totalAcumulado.toFixed(2)}`);
-      window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${msg}`, '_blank');
-    }
-
-    function atualizarPainelSupervisao() {
-      const statusEl = document.getElementById('sup-status');
-      if (!statusEl) return;
-      statusEl.textContent = appState.status;
-      document.getElementById('sup-posto').textContent = appState.nomePosto;
-      document.getElementById('sup-logs').textContent = appState.logs.length;
-      document.getElementById('sup-ocorr').textContent = appState.ocorrencias.length;
-      
-      // Renderiza Histórico Geolocalizado (2. Histórico de Check-ins com precisão de GPS)
-      document.getElementById('sup-lista-logs').innerHTML = appState.logs.map(log => `
-        <div style="font-size:11px; padding:6px 0; border-bottom:1px solid var(--border-input);">
-          <strong>${log.hora}</strong> — ${log.acao}<br>
-          <small style="color:var(--color-green-bright);">📍 ${log.loc || 'GPS Ativo'}</small>
-        </div>
-      `).join('') || '<div style="font-size:11px; color:var(--text-muted);">Nenhum registro</div>';
-
-      checarRondasPendentesSupervisor();
-      calcularProdutividadeSupervisor();
-    }
-
-    function forcarCheckoutSupervisao() {
-      if (appState.status === 'INATIVO') { showNotification('Já está inativo.'); return; }
-      if (confirm('Forçar check-out?')) {
-        appState.status = 'INATIVO'; registrarLog('Check-out FORÇADO pela Supervisão');
-        updateUIState(); showNotification('Check-out forçado.');
-      }
-    }
-
-    function limparLogsSupervisao() { if (confirm('Limpar logs?')) { appState.logs = []; salvarEstado(); renderizarLogs(); showNotification('Logs limpos.'); } }
-    function limparOcorrenciasSupervisao() { if (confirm('Limpar ocorrências?')) { appState.ocorrencias = []; salvarEstado(); renderizarOcorrencias(); showNotification('Ocorrências limpas.'); } }
-
-    // 6. Simulador de Queda de Conexão (Modo Offline / Online)
-    function devAlternarModoOffline() {
-      appState.devModoOffline = !appState.devModoOffline;
-      const btn = document.getElementById('dev-btn-toggle-offline');
-      const lbl = document.getElementById('dev-conexao-status');
-      if (appState.devModoOffline) {
-        btn.textContent = "Voltar para Modo Online";
-        btn.className = "btn btn-green";
-        lbl.textContent = "Offline (Simulado)";
-        lbl.style.color = "var(--color-accent-red)";
-        showNotification("Modo Offline ativado para testes.");
-      } else {
-        btn.textContent = "Alternar para Modo Offline";
-        btn.className = "btn btn-dark";
-        lbl.textContent = "Online";
-        lbl.style.color = "var(--color-green-bright)";
-        showNotification("Modo Online restaurado.");
-      }
-    }
-
-    // 7. Injetor de Dados de Teste (Mock Data Generator)
-    function devInjetorMockData() {
-      if (!confirm('Deseja injetar dados de teste (plantões, rondas e ocorrências)?')) return;
-      appState.logs = [
-        { acao: 'Check-in', hora: '06:00', loc: 'Lat: -22.75, Lng: -43.70 (Precisão: 3m)' },
-        { acao: 'Pausa / Refeição', hora: '12:00', loc: 'Lat: -22.75, Lng: -43.70 (Precisão: 4m)' }
-      ];
-      appState.rondas = [
-        { ponto: 'Perímetro Norte', hora: '08:00', data: '30/09/2026' },
-        { ponto: 'Portão Principal', hora: '10:00', data: '30/09/2026' }
-      ];
-      appState.ocorrencias = [
-        { tipo: 'Visitante', desc: 'Entrada de prestador de serviços autorizado.', foto: null, hora: '09:30', data: '30/09/2026' }
-      ];
-      appState.registros = [
-        { data: '2026-09-28', val: 200, horas: '24 hrs', turno: 'Plantão Próprio' },
-        { data: '2026-09-26', val: 200, horas: '24 hrs', turno: 'Plantão Próprio' }
-      ];
       salvarEstado();
-      renderizarLogs(); renderizarExtrato(); renderizarOcorrencias(); renderizarRondas();
-      showNotification('⚡ Mock data injetado com sucesso!');
-      atualizarPainelDev();
-    }
-    // 9. Editor de Configurações Brutas (JSON Viewer / Editor)
-    function atualizarJsonEditor() {
-      const ed = document.getElementById('dev-json-editor');
-      if (ed) ed.value = JSON.stringify(appState, null, 2);
+      showNotification('Configurações salvas!');
     }
 
-    function devSalvarJsonEditor() {
-      try {
-        const parsed = JSON.parse(document.getElementById('dev-json-editor').value);
-        appState = parsed;
-        salvarEstado();
-        location.reload();
-      } catch(err) {
-        alert('JSON inválido. Corrija a sintaxe antes de aplicar.');
-      }
-    }
-
-    // 10. Bloqueio de Tela por Inatividade / Teste de Stress
-    function devSimularRecarregamentoStresse() {
-      showNotification('🔄 Simulando ciclo de vida (Lifecycle / Recarga)...');
-      setTimeout(() => {
-        location.reload();
-      }, 1200);
-    }
-
-    function atualizarPainelDev() {
-      const sizeEl = document.getElementById('dev-storage-size');
-      if (!sizeEl) return;
-      const data = localStorage.getItem('valis_vigia_v3_data') || '';
-      sizeEl.textContent = (data.length / 1024).toFixed(1) + ' KB';
-      document.getElementById('dev-status').textContent = appState.status;
-      atualizarJsonEditor();
-    }
-
-    function alterarSenhaDev() {
-      const nova = document.getElementById('dev-nova-senha').value.trim();
-      if (!nova || nova.length < 4) { alert('Mínimo de 4 caracteres.'); return; }
-      appState.passDev = nova; salvarEstado();
-      document.getElementById('dev-nova-senha').value = ''; showNotification('Senha alterada!');
-    }
-
-    function forcarStatus(novoStatus) { appState.status = novoStatus; updateUIState(); showNotification('Status: ' + novoStatus); }
-
-    function exportarDados() {
-      const dataStr = JSON.stringify(appState, null, 2);
-      const blob = new Blob([dataStr], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
-      a.download = 'valis_vigia_backup_' + getLocalDateKey() + '.json'; a.click();
-      URL.revokeObjectURL(url); showNotification('Backup exportado!');
-    }
-
-    function importarDados() {
-      const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          try {
-            const data = JSON.parse(ev.target.result);
-            if (confirm('Importar dados?')) { appState = { ...appState, ...data }; salvarEstado(); location.reload(); }
-          } catch(err) { alert('JSON inválido.'); }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    }
-
-    function zerarTudoDev() {
-      if (confirm('Zerar TODO o banco local?')) { localStorage.removeItem('valis_vigia_v3_data'); location.reload(); }
-    }
-
+    // ==================== NAV / AUTH ====================
     function switchTab(tabId, el) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -879,6 +1205,7 @@ let timerRonda = null, rondaCountdownInterval = null, rondaSecondsLeft = 0;
       if (el) el.classList.add('active');
       if (tabId === 'supervisao') atualizarPainelSupervisao();
       if (tabId === 'dev') atualizarPainelDev();
+      if (tabId === 'ajustes') atualizarStatusNotificacao();
     }
 
     function abrirAuthModal(tipo) {
@@ -890,16 +1217,22 @@ let timerRonda = null, rondaCountdownInterval = null, rondaSecondsLeft = 0;
     function fecharModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
     function validarAcessoAuth() {
       if (document.getElementById('auth-password').value === appState.passDev) {
-        fecharModalAuth(); switchTab(appState.targetAuthTab, null);
-      } else { alert('Senha incorreta!'); }
+        fecharModalAuth();
+        switchTab(appState.targetAuthTab, null);
+      } else alert('Senha incorreta!');
     }
 
+    // ==================== INIT ====================
     document.getElementById('reg-data').valueAsDate = new Date();
-    const inputEscalaData = document.getElementById('escala-data-inicio');
-    if (inputEscalaData) inputEscalaData.value = getLocalDateKey();
+    const inputEscala = document.getElementById('escala-data-inicio');
+    if (inputEscala) inputEscala.value = getLocalDateKey();
 
     carregarDadosSalvos();
     gerarCalendarioEscala();
+    configurarAlertaRonda();
+    atualizarStatusNotificacao();
+    atualizarContadorDispositivos();
+    bc.postMessage({ type: 'ping' });
   </script>
 </body>
 </html>
