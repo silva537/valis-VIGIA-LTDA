@@ -586,13 +586,18 @@
           <label class="form-label">MODO MANUTENÇÃO (GLOBAL)</label>
           <div class="info-box" style="margin-bottom:8px;">
             <div><strong>Efetivo:</strong> <span id="dev-maint-status">Desativado</span></div>
-            <div><strong>JSON remoto:</strong> <span id="dev-maint-remote">Verificando...</span></div>
+            <div><strong>Remoto:</strong> <span id="dev-maint-remote">Verificando...</span></div>
+            <div><strong>Firebase:</strong> <span id="dev-maint-firebase">...</span></div>
             <div style="font-size:10px;color:var(--text-muted);margin-top:6px;">
-              Para bloquear TODOS: no GitHub edite <code>manutencao.json</code> → <code>"ativo": true</code> e faça deploy na Vercel.
+              Use os botões abaixo para ligar/desligar para <strong>todos</strong> os aparelhos em tempo real (Firestore).
             </div>
           </div>
-          <button class="btn btn-dark" style="width:100%;margin-bottom:6px;" onclick="verificarManutencaoRemota()">🔄 Atualizar status remoto</button>
-          <button class="btn btn-red" style="width:100%;" id="dev-btn-maint" onclick="alternarModoManutencao()">🔒 Forçar manutenção local (teste)</button>
+          <div class="dev-actions" style="margin-bottom:6px;">
+            <button class="btn btn-red" id="dev-btn-fb-on" onclick="setManutencaoFirebase(true)">🔒 Ativar GLOBAL</button>
+            <button class="btn btn-green" id="dev-btn-fb-off" onclick="setManutencaoFirebase(false)">🔓 Desativar GLOBAL</button>
+          </div>
+          <button class="btn btn-dark" style="width:100%;margin-bottom:6px;" onclick="verificarManutencaoRemota()">🔄 Atualizar status</button>
+          <button class="btn btn-red" style="width:100%;" id="dev-btn-maint" onclick="alternarModoManutencao()">🔒 Forçar local (teste)</button>
         </div>
 
         <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR BANCO</button>
@@ -624,6 +629,8 @@
     </button>
   </nav>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script>
     /* ============================================================
        VALIS VIGIA - PREPARAÇÃO PARA FIREBASE
@@ -648,14 +655,30 @@
     }
 
     const FIREBASE_CONFIG = {
-      // Cole aqui as chaves do seu projeto Firebase
-      apiKey: "SUA_API_KEY",
-      authDomain: "seu-projeto.firebaseapp.com",
-      projectId: "seu-projeto",
-      storageBucket: "seu-projeto.appspot.com",
-      messagingSenderId: "000000000000",
-      appId: "1:000000000000:web:xxxxxxxxxxxx"
+      apiKey: "AIzaSyBpIuf5yokj51txTYgnER7T27IamB_pdLo",
+      authDomain: "valis-vigia-ltda-d0263.firebaseapp.com",
+      projectId: "valis-vigia-ltda-d0263",
+      storageBucket: "valis-vigia-ltda-d0263.firebasestorage.app",
+      messagingSenderId: "963853721440",
+      appId: "1:963853721440:web:d1d1453d053f064063c805",
+      measurementId: "G-RBQPJ49RWP"
     };
+
+    // Inicialização Firebase (manutenção em tempo real)
+    let fbApp = null;
+    let fbDb = null;
+    let fbManutencaoUnsub = null;
+    let firebasePronto = false;
+
+    try {
+      fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+      fbDb = firebase.firestore();
+      firebasePronto = true;
+      console.log('Firebase conectado:', FIREBASE_CONFIG.projectId);
+    } catch (e) {
+      console.warn('Firebase não inicializou:', e);
+      firebasePronto = false;
+    }
 
     // Camada de dados abstrata (hoje = localStorage | futuro = Firebase)
     const DataService = {
@@ -1554,8 +1577,7 @@
     }
 
 
-    // ==================== MODO MANUTENÇÃO (JSON REMOTO) ====================
-    // sessionUnlock: admin desbloqueou só nesta sessão (recarregar volta a respeitar o JSON)
+    // ==================== MODO MANUTENÇÃO (FIREBASE + JSON FALLBACK) ====================
     let sessionUnlockManutencao = false;
 
     function manutencaoAtiva() {
@@ -1570,7 +1592,6 @@
       if (ativo) {
         screen.classList.add('active');
         document.body.style.overflow = 'hidden';
-        // Atualiza mensagem se veio do JSON remoto
         const alertBox = screen.querySelector('.maint-alert');
         if (alertBox && appState.manutencaoMensagem) {
           alertBox.innerHTML = '<strong>Aviso da Administração:</strong> ' + appState.manutencaoMensagem;
@@ -1588,8 +1609,9 @@
 
     function atualizarStatusManutencaoDev() {
       const st = document.getElementById('dev-maint-status');
-      const btn = document.getElementById('dev-btn-maint');
+      const btnLocal = document.getElementById('dev-btn-maint');
       const remoteEl = document.getElementById('dev-maint-remote');
+      const fbEl = document.getElementById('dev-maint-firebase');
       const localOn = !!appState.modoManutencao;
       const remoteOn = !!appState.manutencaoRemota;
       const efetivo = manutencaoAtiva();
@@ -1599,52 +1621,115 @@
         st.style.color = efetivo ? 'var(--color-accent-red)' : 'var(--color-green-bright)';
       }
       if (remoteEl) {
-        remoteEl.textContent = remoteOn ? 'ATIVO no JSON remoto' : 'Inativo no JSON remoto';
+        remoteEl.textContent = remoteOn ? 'ATIVO (Firebase/JSON)' : 'Inativo';
         remoteEl.style.color = remoteOn ? 'var(--color-accent-red)' : 'var(--color-green-bright)';
       }
-      if (btn) {
-        btn.textContent = localOn ? '🔓 Desativar override local' : '🔒 Forçar manutenção local (teste)';
-        btn.className = localOn ? 'btn btn-green' : 'btn btn-red';
-        btn.style.width = '100%';
+      if (fbEl) {
+        fbEl.textContent = firebasePronto ? 'Conectado' : 'Offline / não iniciado';
+        fbEl.style.color = firebasePronto ? 'var(--color-green-bright)' : 'var(--color-yellow)';
+      }
+      if (btnLocal) {
+        btnLocal.textContent = localOn ? '🔓 Desativar override local' : '🔒 Forçar manutenção local (teste)';
+        btnLocal.className = localOn ? 'btn btn-green' : 'btn btn-red';
+        btnLocal.style.width = '100%';
+      }
+      const btnOn = document.getElementById('dev-btn-fb-on');
+      const btnOff = document.getElementById('dev-btn-fb-off');
+      if (btnOn) btnOn.disabled = !firebasePronto;
+      if (btnOff) btnOff.disabled = !firebasePronto;
+    }
+
+    /** Escuta em tempo real: config/manutencao no Firestore */
+    function iniciarListenerManutencaoFirebase() {
+      if (!firebasePronto || !fbDb) return;
+      try {
+        if (fbManutencaoUnsub) fbManutencaoUnsub();
+        fbManutencaoUnsub = fbDb.collection('config').doc('manutencao')
+          .onSnapshot((snap) => {
+            if (!snap.exists) {
+              console.warn('Documento config/manutencao ainda não existe no Firestore');
+              return;
+            }
+            const data = snap.data() || {};
+            appState.manutencaoRemota = !!(data.ativo === true || data.ativo === 'true' || data.ativo === 1);
+            if (data.mensagem) appState.manutencaoMensagem = String(data.mensagem);
+            // Se o remoto desligou, limpa unlock de sessão antiga
+            if (!appState.manutencaoRemota) sessionUnlockManutencao = false;
+            aplicarModoManutencao();
+          }, (err) => {
+            console.warn('Erro no listener Firestore:', err);
+            firebasePronto = false;
+            atualizarStatusManutencaoDev();
+            verificarManutencaoRemota(true); // fallback JSON
+          });
+      } catch (e) {
+        console.warn('Falha ao iniciar listener:', e);
+      }
+    }
+
+    /** Liga/desliga manutenção GLOBAL via Firebase (instantâneo para todos) */
+    async function setManutencaoFirebase(ativo) {
+      if (!firebasePronto || !fbDb) {
+        alert('Firebase não conectado. Use o manutencao.json ou verifique a conexão.');
+        return;
+      }
+      const msg = ativo
+        ? (appState.manutencaoMensagem || 'O sistema encontra-se temporariamente bloqueado para auditoria e reforço das defesas digitais.')
+        : (appState.manutencaoMensagem || 'Sistema operacional.');
+      try {
+        await fbDb.collection('config').doc('manutencao').set({
+          ativo: !!ativo,
+          mensagem: msg,
+          atualizadoEm: new Date().toISOString(),
+          atualizadoPor: 'dev-panel'
+        }, { merge: true });
+        sessionUnlockManutencao = false;
+        showNotification(ativo ? 'Manutenção GLOBAL ativada (Firebase)' : 'Manutenção GLOBAL desativada (Firebase)');
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao gravar no Firebase. Confira as regras do Firestore (allow write).\\n\\n' + (e.message || e));
       }
     }
 
     async function verificarManutencaoRemota(silent) {
+      // Preferência: se Firebase está escutando, só atualiza status na UI
+      if (firebasePronto && fbManutencaoUnsub) {
+        atualizarStatusManutencaoDev();
+        return appState.manutencaoRemota;
+      }
+      // Fallback: JSON no Vercel
       try {
         const res = await fetch(urlManutencao(), { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         appState.manutencaoRemota = !!(data && (data.ativo === true || data.ativo === 'true' || data.ativo === 1));
         if (data && data.mensagem) appState.manutencaoMensagem = String(data.mensagem);
-        else appState.manutencaoMensagem = null;
         aplicarModoManutencao();
-        if (!silent) showNotification(appState.manutencaoRemota ? 'Manutenção REMOTA ativa' : 'Manutenção remota inativa');
+        if (!silent) showNotification(appState.manutencaoRemota ? 'Manutenção (JSON) ativa' : 'Manutenção (JSON) inativa');
         return appState.manutencaoRemota;
       } catch (e) {
-        console.warn('Não foi possível ler manutencao.json:', e);
-        // Offline / arquivo ausente: mantém só o flag local
-        if (!silent) showNotification('JSON remoto indisponível (usando modo local)');
+        console.warn('JSON remoto indisponível:', e);
+        if (!silent) showNotification('Remoto indisponível (modo local)');
         aplicarModoManutencao();
         return false;
       }
     }
 
     function alternarModoManutencao() {
-      // Override local apenas para testes neste dispositivo
       if (!appState.modoManutencao) {
-        if (!confirm('Forçar MANUTENÇÃO LOCAL neste dispositivo?\n\nIsso é só para teste. Para bloquear TODOS os usuários, edite o arquivo manutencao.json no GitHub (\"ativo\": true) e faça deploy na Vercel.')) return;
+        if (!confirm('Forçar MANUTENÇÃO LOCAL só neste aparelho?\\n\\nPara TODOS os usuários, use os botões Firebase (Ativar/Desativar global).')) return;
         appState.modoManutencao = true;
         sessionUnlockManutencao = false;
         salvarEstado();
         aplicarModoManutencao();
         showNotification('Override local ATIVADO');
-        try { bc.postMessage({ type: 'maintenance', payload: { active: true } }); } catch(e) {}
+        try { bc.postMessage({ type: 'maintenance', payload: { active: true } }); } catch (e) {}
       } else {
         appState.modoManutencao = false;
         salvarEstado();
         aplicarModoManutencao();
         showNotification('Override local DESATIVADO');
-        try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
+        try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch (e) {}
       }
     }
 
@@ -1655,13 +1740,12 @@
         alert('Senha incorreta!');
         return;
       }
-      // Desbloqueio só desta sessão (se o JSON remoto continuar ativo, ao recarregar bloqueia de novo)
       sessionUnlockManutencao = true;
       appState.modoManutencao = false;
       salvarEstado();
       aplicarModoManutencao();
-      showNotification('Desbloqueado nesta sessão. Recarregar pode bloquear de novo se o JSON estiver ativo.');
-      try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
+      showNotification('Desbloqueado nesta sessão. Se o Firebase estiver ativo, ao recarregar pode bloquear de novo.');
+      try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch (e) {}
     }
 
     function desativarManutencaoConfirmado() {
@@ -1670,7 +1754,7 @@
       salvarEstado();
       aplicarModoManutencao();
       showNotification('Manutenção desativada (sessão)');
-      try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
+      try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch (e) {}
     }
 
     // ==================== INIT ====================
@@ -1680,10 +1764,13 @@
 
     carregarDadosSalvos().then(() => {
       aplicarModoManutencao();
-      verificarManutencaoRemota(true);
+      iniciarListenerManutencaoFirebase();
+      if (!firebasePronto) verificarManutencaoRemota(true);
     });
-    // Reconsulta o JSON a cada 60s (quem já está com o app aberto também recebe o bloqueio)
-    setInterval(() => verificarManutencaoRemota(true), 60000);
+    // Fallback JSON a cada 60s só se Firebase não estiver ativo
+    setInterval(() => {
+      if (!firebasePronto || !fbManutencaoUnsub) verificarManutencaoRemota(true);
+    }, 60000);
     gerarCalendarioEscala();
     configurarAlertaRonda(false);
     if (typeof aplicarTurnoRegistro === "function") aplicarTurnoRegistro();
