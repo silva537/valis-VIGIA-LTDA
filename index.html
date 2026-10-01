@@ -897,22 +897,112 @@
     }
 
     // ==================== SUPERVISÃO ====================
+    function toggleAvisoPosto() {
+      const dest = document.getElementById('aviso-destino')?.value;
+      const box = document.getElementById('aviso-posto-box');
+      if (box) box.style.display = dest === 'posto' ? 'block' : 'none';
+    }
+
     function abrirModalAvisoSup() {
       document.getElementById('modal-aviso-sup').classList.remove('hidden');
       document.getElementById('aviso-sup-msg').value = '';
-      document.getElementById('aviso-sup-msg').focus();
+      const dest = document.getElementById('aviso-destino');
+      if (dest) dest.value = 'todos';
+      toggleAvisoPosto();
+      const alvo = document.getElementById('aviso-posto-alvo');
+      if (alvo) alvo.value = '';
+      setTimeout(() => document.getElementById('aviso-sup-msg').focus(), 100);
     }
     function fecharAvisoSup() { document.getElementById('modal-aviso-sup').classList.add('hidden'); }
 
-    function enviarAvisoSupervisao() {
+    async function enviarAvisoSupervisao() {
       const msg = document.getElementById('aviso-sup-msg').value.trim();
       if (!msg) { alert('Digite uma mensagem.'); return; }
-      bc.postMessage({ type: 'aviso_supervisao', payload: { msg, from: 'Supervisão' } });
-      enviarNotificacaoSistema('📢 Aviso da Supervisão', msg);
-      showNotification('Aviso enviado!');
+      const dest = document.getElementById('aviso-destino')?.value || 'todos';
+      const postoAlvo = (document.getElementById('aviso-posto-alvo')?.value || '').trim();
+      if (dest === 'posto' && !postoAlvo) {
+        alert('Informe o nome do posto (igual ao cadastrado em Ajustes).');
+        return;
+      }
+
+      const payload = {
+        msg,
+        from: 'Supervisão',
+        destino: dest,
+        postoAlvo: dest === 'posto' ? postoAlvo : null,
+        ts: Date.now(),
+        id: 'av_' + Date.now()
+      };
+
+      // Firebase (global / por posto)
+      if (firebasePronto && fbDb) {
+        try {
+          await fbDb.collection('config').doc('aviso').set({
+            ...payload,
+            ativo: true,
+            atualizadoEm: new Date().toISOString()
+          }, { merge: true });
+          // histórico opcional
+          await fbDb.collection('avisos').add({
+            ...payload,
+            criadoEm: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('Falha Firebase aviso:', e);
+          alert('Nao foi possivel enviar pelo Firebase. Verifique as regras. ' + (e.message || e));
+        }
+      }
+
+      // Fallback local (abas do mesmo navegador)
+      try { bc.postMessage({ type: 'aviso_supervisao', payload }); } catch (e) {}
+
+      // Feedback local
+      mostrarAvisoRecebido(msg, 'Supervisão');
       fecharAvisoSup();
       registrarLog('Aviso Supervisão: ' + msg.substring(0, 40));
+      showNotification(dest === 'todos' ? 'Aviso enviado a TODOS' : ('Aviso enviado ao posto: ' + postoAlvo));
     }
+
+    let fbAvisoUnsub = null;
+    let ultimoAvisoIdLocal = localStorage.getItem('valis_ultimo_aviso_id') || '';
+
+    function avisoDestinadoAMim(data) {
+      if (!data) return false;
+      if (!data.destino || data.destino === 'todos') return true;
+      if (data.destino === 'posto') {
+        const meu = (appState.nomePosto || '').trim().toLowerCase();
+        const alvo = (data.postoAlvo || '').trim().toLowerCase();
+        return meu && alvo && meu === alvo;
+      }
+      return false;
+    }
+
+    function processarAvisoRemoto(data) {
+      if (!data || !data.msg) return;
+      if (!avisoDestinadoAMim(data)) return;
+      const id = data.id || String(data.ts || '');
+      if (id && id === ultimoAvisoIdLocal) return; // evita repetir
+      ultimoAvisoIdLocal = id;
+      try { localStorage.setItem('valis_ultimo_aviso_id', id); } catch (e) {}
+      mostrarAvisoRecebido(data.msg, data.from || 'Supervisão');
+    }
+
+    function iniciarListenerAvisoFirebase() {
+      if (!firebasePronto || !fbDb) return;
+      try {
+        if (fbAvisoUnsub) fbAvisoUnsub();
+        fbAvisoUnsub = fbDb.collection('config').doc('aviso')
+          .onSnapshot((snap) => {
+            if (!snap.exists) return;
+            const data = snap.data() || {};
+            if (data.ativo === false) return;
+            processarAvisoRemoto(data);
+          }, (err) => console.warn('Listener aviso:', err));
+      } catch (e) {
+        console.warn('Aviso listener:', e);
+      }
+    }
+
 
     function checarRondasPendentesSupervisor() {
       const el = document.getElementById('sup-rondas-pendentes-status');
@@ -1765,6 +1855,7 @@
     carregarDadosSalvos().then(() => {
       aplicarModoManutencao();
       iniciarListenerManutencaoFirebase();
+      iniciarListenerAvisoFirebase();
       if (!firebasePronto) verificarManutencaoRemota(true);
     });
     // Fallback JSON a cada 60s só se Firebase não estiver ativo
