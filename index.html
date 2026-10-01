@@ -583,11 +583,16 @@
 
         
         <div class="form-group">
-          <label class="form-label">MODO MANUTENÇÃO</label>
+          <label class="form-label">MODO MANUTENÇÃO (GLOBAL)</label>
           <div class="info-box" style="margin-bottom:8px;">
-            <div><strong>Status:</strong> <span id="dev-maint-status">Desativado</span></div>
+            <div><strong>Efetivo:</strong> <span id="dev-maint-status">Desativado</span></div>
+            <div><strong>JSON remoto:</strong> <span id="dev-maint-remote">Verificando...</span></div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:6px;">
+              Para bloquear TODOS: no GitHub edite <code>manutencao.json</code> → <code>"ativo": true</code> e faça deploy na Vercel.
+            </div>
           </div>
-          <button class="btn btn-red" style="width:100%;" id="dev-btn-maint" onclick="alternarModoManutencao()">🔒 Ativar Modo Manutenção</button>
+          <button class="btn btn-dark" style="width:100%;margin-bottom:6px;" onclick="verificarManutencaoRemota()">🔄 Atualizar status remoto</button>
+          <button class="btn btn-red" style="width:100%;" id="dev-btn-maint" onclick="alternarModoManutencao()">🔒 Forçar manutenção local (teste)</button>
         </div>
 
         <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR BANCO</button>
@@ -633,6 +638,15 @@
           funções que gravam/leem no Firestore
        7. Use messaging() para push entre dispositivos reais
        ============================================================ */
+
+    // URL do JSON de manutenção (mesmo domínio no Vercel/Webinto)
+    // Coloque o arquivo manutencao.json na raiz do repositório, ao lado do index.html
+    const MANUTENCAO_URL = './manutencao.json';
+    // Cache-bust automático para sempre buscar a versão mais nova
+    function urlManutencao() {
+      return MANUTENCAO_URL + (MANUTENCAO_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+    }
+
     const FIREBASE_CONFIG = {
       // Cole aqui as chaves do seu projeto Firebase
       apiKey: "SUA_API_KEY",
@@ -713,6 +727,8 @@
       diasFolguistaMarcados: {},
       dispositivosSimulados: 0,
       modoManutencao: false,
+      manutencaoRemota: false,
+      manutencaoMensagem: null,
       folhasArquivadas: [],
       rondaDeadline: null,
       ultimaRondaTimestamp: Date.now()
@@ -1538,13 +1554,27 @@
     }
 
 
-    // ==================== MODO MANUTENÇÃO ====================
+    // ==================== MODO MANUTENÇÃO (JSON REMOTO) ====================
+    // sessionUnlock: admin desbloqueou só nesta sessão (recarregar volta a respeitar o JSON)
+    let sessionUnlockManutencao = false;
+
+    function manutencaoAtiva() {
+      if (sessionUnlockManutencao) return false;
+      return !!(appState.manutencaoRemota || appState.modoManutencao);
+    }
+
     function aplicarModoManutencao() {
       const screen = document.getElementById('maintenance-screen');
       if (!screen) return;
-      if (appState.modoManutencao) {
+      const ativo = manutencaoAtiva();
+      if (ativo) {
         screen.classList.add('active');
         document.body.style.overflow = 'hidden';
+        // Atualiza mensagem se veio do JSON remoto
+        const alertBox = screen.querySelector('.maint-alert');
+        if (alertBox && appState.manutencaoMensagem) {
+          alertBox.innerHTML = '<strong>Aviso da Administração:</strong> ' + appState.manutencaoMensagem;
+        }
       } else {
         screen.classList.remove('active');
         document.body.style.overflow = '';
@@ -1559,28 +1589,62 @@
     function atualizarStatusManutencaoDev() {
       const st = document.getElementById('dev-maint-status');
       const btn = document.getElementById('dev-btn-maint');
+      const remoteEl = document.getElementById('dev-maint-remote');
+      const localOn = !!appState.modoManutencao;
+      const remoteOn = !!appState.manutencaoRemota;
+      const efetivo = manutencaoAtiva();
+
       if (st) {
-        st.textContent = appState.modoManutencao ? 'ATIVO 🔒' : 'Desativado';
-        st.style.color = appState.modoManutencao ? 'var(--color-accent-red)' : 'var(--color-green-bright)';
+        st.textContent = efetivo ? 'ATIVO 🔒' : 'Desativado';
+        st.style.color = efetivo ? 'var(--color-accent-red)' : 'var(--color-green-bright)';
+      }
+      if (remoteEl) {
+        remoteEl.textContent = remoteOn ? 'ATIVO no JSON remoto' : 'Inativo no JSON remoto';
+        remoteEl.style.color = remoteOn ? 'var(--color-accent-red)' : 'var(--color-green-bright)';
       }
       if (btn) {
-        btn.textContent = appState.modoManutencao ? '🔓 Desativar Modo Manutenção' : '🔒 Ativar Modo Manutenção';
-        btn.className = appState.modoManutencao ? 'btn btn-green' : 'btn btn-red';
+        btn.textContent = localOn ? '🔓 Desativar override local' : '🔒 Forçar manutenção local (teste)';
+        btn.className = localOn ? 'btn btn-green' : 'btn btn-red';
         btn.style.width = '100%';
       }
     }
 
+    async function verificarManutencaoRemota(silent) {
+      try {
+        const res = await fetch(urlManutencao(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        appState.manutencaoRemota = !!(data && (data.ativo === true || data.ativo === 'true' || data.ativo === 1));
+        if (data && data.mensagem) appState.manutencaoMensagem = String(data.mensagem);
+        else appState.manutencaoMensagem = null;
+        aplicarModoManutencao();
+        if (!silent) showNotification(appState.manutencaoRemota ? 'Manutenção REMOTA ativa' : 'Manutenção remota inativa');
+        return appState.manutencaoRemota;
+      } catch (e) {
+        console.warn('Não foi possível ler manutencao.json:', e);
+        // Offline / arquivo ausente: mantém só o flag local
+        if (!silent) showNotification('JSON remoto indisponível (usando modo local)');
+        aplicarModoManutencao();
+        return false;
+      }
+    }
+
     function alternarModoManutencao() {
+      // Override local apenas para testes neste dispositivo
       if (!appState.modoManutencao) {
-        if (!confirm('Ativar MODO MANUTENÇÃO?\n\nO aplicativo será bloqueado para todos neste dispositivo até que a senha de administrador seja usada para desbloquear.\n\n(Quando o Firebase estiver conectado, isso afetará todos os dispositivos.)')) return;
+        if (!confirm('Forçar MANUTENÇÃO LOCAL neste dispositivo?\n\nIsso é só para teste. Para bloquear TODOS os usuários, edite o arquivo manutencao.json no GitHub (\"ativo\": true) e faça deploy na Vercel.')) return;
         appState.modoManutencao = true;
+        sessionUnlockManutencao = false;
         salvarEstado();
         aplicarModoManutencao();
-        showNotification('Modo Manutenção ATIVADO');
-        // Broadcast para outras abas
+        showNotification('Override local ATIVADO');
         try { bc.postMessage({ type: 'maintenance', payload: { active: true } }); } catch(e) {}
       } else {
-        desativarManutencaoConfirmado();
+        appState.modoManutencao = false;
+        salvarEstado();
+        aplicarModoManutencao();
+        showNotification('Override local DESATIVADO');
+        try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
       }
     }
 
@@ -1591,14 +1655,21 @@
         alert('Senha incorreta!');
         return;
       }
-      desativarManutencaoConfirmado();
-    }
-
-    function desativarManutencaoConfirmado() {
+      // Desbloqueio só desta sessão (se o JSON remoto continuar ativo, ao recarregar bloqueia de novo)
+      sessionUnlockManutencao = true;
       appState.modoManutencao = false;
       salvarEstado();
       aplicarModoManutencao();
-      showNotification('Modo Manutenção DESATIVADO');
+      showNotification('Desbloqueado nesta sessão. Recarregar pode bloquear de novo se o JSON estiver ativo.');
+      try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
+    }
+
+    function desativarManutencaoConfirmado() {
+      sessionUnlockManutencao = true;
+      appState.modoManutencao = false;
+      salvarEstado();
+      aplicarModoManutencao();
+      showNotification('Manutenção desativada (sessão)');
       try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch(e) {}
     }
 
@@ -1609,7 +1680,10 @@
 
     carregarDadosSalvos().then(() => {
       aplicarModoManutencao();
+      verificarManutencaoRemota(true);
     });
+    // Reconsulta o JSON a cada 60s (quem já está com o app aberto também recebe o bloqueio)
+    setInterval(() => verificarManutencaoRemota(true), 60000);
     gerarCalendarioEscala();
     configurarAlertaRonda(false);
     if (typeof aplicarTurnoRegistro === "function") aplicarTurnoRegistro();
