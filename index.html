@@ -1,553 +1,470 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <!-- ==================== BLOCO 1: HEAD + CSS BASE ==================== -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Valis Vigia - Sistema Integrado Automático</title>
+  <meta name="theme-color" content="#0D1117">
+  <title>Valis Vigia - Sistema Operacional Integrado</title>
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlZhbGlzIFZpZ2lhIiwKICAic2hvcnRfbmFtZSI6ICJWYWxpcyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMEYxMDIwIiwKICAidGhlbWVfY29sb3IiOiAiIzBGMTEyMCIKfQ==">
   <style>
     :root {
-      --bg-main: #0B0E14;
-      --bg-card: #121824;
-      --bg-card-border: #1E293B;
-      --bg-input: #171F2E;
-      --border-input: #232E42;
-      
-      --text-main: #F1F5F9;
-      --text-muted: #64748B;
-      --text-sub: #94A3B8;
-
-      --color-green: #10B981;
-      --color-green-btn: #0D9488;
-      --color-red: #EF4444;
-      --color-yellow: #D97706;
-      --color-orange: #F59E0B;
-      --color-purple: #8B5CF6;
-      --color-blue: #3B82F6;
-
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-main: #090D12; --bg-card: #121820; --bg-card-border: #1F2937;
+      --bg-input: #1A222D; --border-input: #374151; --text-main: #F3F4F6;
+      --text-muted: #9CA3AF; --text-sub: #D1D5DB; --color-green: #059669;
+      --color-green-bright: #10B981; --color-accent-red: #881337;
+      --color-accent-red-hover: #9F1239; --color-red-panic: #E11D48;
+      --color-yellow: #D97706; --color-purple: #7C3AED; --color-blue: #2563EB;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-family);
-      -webkit-tap-highlight-color: transparent;
+    body.light-theme {
+      --bg-main: #F3F4F6; --bg-card: #FFFFFF; --bg-card-border: #E5E7EB;
+      --bg-input: #F9FAFB; --border-input: #D1D5DB; --text-main: #111827;
+      --text-muted: #6B7280; --text-sub: #374151; --color-green: #059669;
+      --color-green-bright: #059669; --color-accent-red: #9F1239;
     }
-
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      max-width: 480px;
-      margin: 0 auto;
-      overflow: hidden;
-      user-select: none;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; overflow: hidden; user-select: none; }
+    /* ==================== BLOCO 2: CSS COMPONENTES ==================== -->
+    header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-card); border-bottom: 1px solid var(--bg-card-border); }
+    .brand-container { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 38px; height: 38px; background: var(--bg-main); border: 1px solid var(--border-input); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--color-green-bright); font-size: 18px; }
+    .brand-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
+    .brand-subtitle { font-size: 11px; color: var(--text-muted); }
+    .header-actions { display: flex; gap: 8px; }
+    .icon-btn { width: 36px; height: 36px; background: var(--bg-main); border: 1px solid var(--bg-card-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-sub); cursor: pointer; font-size: 15px; }
+    .btn-panic { background: var(--color-accent-red) !important; color: #FFF !important; font-weight: 900; }
+    .rgb-border { position: relative; border-radius: 12px; z-index: 1; background-color: var(--bg-card); border: 1px solid transparent; }
+    .rgb-border::before {
+      content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bbf, #7a00ff, #ff00c8, #ff0000);
+      background-size: 400%; z-index: -2; filter: blur(4px); border-radius: 14px; opacity: 0.85;
+      animation: rgb-glow 20s linear infinite;
     }
-
-    header {
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--bg-main);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .brand-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      background: #172554;
-      border: 1px solid #1E40AF;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-green);
-    }
-
-    .brand-title {
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
-
-    .brand-subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .icon-btn {
-      width: 34px;
-      height: 34px;
-      background: var(--bg-card);
-      border: 1px solid var(--bg-card-border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-sub);
-      cursor: pointer;
-    }
-
+    .rgb-border::after { content: ''; position: absolute; inset: 0; background: var(--bg-card); border-radius: 12px; z-index: -1; }
+    @keyframes rgb-glow { 0% { background-position: 0 0; } 50% { background-position: 400% 0; } 100% { background-position: 0 0; } }
+    /* ==================== BLOCO 3: UI E TOAST ==================== -->
     #notification-toast {
-      margin: 8px 16px 0 16px;
-      padding: 10px 14px;
-      background-color: #064E3B;
-      border: 1px solid #047857;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      color: #A7F3D0;
-      transition: all 0.3s ease;
+      margin: 8px 14px 0 14px; padding: 10px 14px; background-color: var(--bg-card);
+      border: 1px solid var(--color-green-bright); border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-main); transition: opacity 0.4s ease;
     }
-
-    #notification-toast.hidden { display: none; }
-
-    .toast-icon {
-      width: 18px;
-      height: 18px;
-      background: var(--color-green);
-      color: #000;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 10px;
-      flex-shrink: 0;
-    }
-
-    main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 16px 85px 16px;
-    }
-
+    #notification-toast.hidden { opacity: 0; pointer-events: none; display: none; }
+    #toast-timer { font-size: 10px; font-weight: 800; background: var(--bg-main); padding: 2px 6px; border-radius: 4px; color: var(--color-green-bright); border: 1px solid var(--border-input); }
+    main { flex: 1; overflow-y: auto; padding: 12px 14px 100px 14px; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-
-    .card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--bg-card-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .card-title {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--text-main);
-    }
-
-    .status-badge {
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .status-badge.inativo { background: #334155; color: #94A3B8; }
-    .status-badge.ativo { background: #064E3B; color: #34D399; }
-    .status-badge.almoco { background: #78350F; color: #FBBF24; }
-    .status-badge.supervisao { background: #1E1B4B; color: #818CF8; }
-    .status-badge.dev { background: #311042; color: #C084FC; }
-
-    /* Modais */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      padding: 16px;
-    }
-    .modal-overlay.hidden { display: none; }
-    .modal-box {
-      background: var(--bg-card);
-      border: 1px solid var(--bg-card-border);
-      border-radius: 12px;
-      padding: 20px;
-      width: 100%;
-      max-width: 360px;
-    }
-    .timer-display {
-      font-size: 40px;
-      font-weight: 800;
-      text-align: center;
-      margin: 4px 0;
-    }
-
-    .timer-date {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: capitalize;
-    }
-
-    .location-info {
-      text-align: center;
-      font-size: 11px;
-      color: var(--color-orange);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      background: #1E1911;
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #451A03;
-    }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .btn {
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-
-    .btn:active { transform: scale(0.98); }
-    .btn-green { background-color: #0D9488; color: #FFF; }
-    .btn-red { background-color: #EF4444; color: #FFF; }
-    .btn-yellow { background-color: #D97706; color: #FFF; }
-    .btn-purple { background-color: #7C3AED; color: #FFF; }
-    .btn-blue { background-color: #2563EB; color: #FFF; }
-    .btn-dark { background-color: #1E293B; color: #94A3B8; border: 1px solid #334155; }
+    .card { background-color: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .card-title { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-main); }
+    .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase; }
+    .status-badge.inativo { background: #374151; color: #D1D5DB; }
+    .status-badge.ativo { background: #065F46; color: #34D399; }
+    .status-badge.almoco { background: #92400E; color: #FBBF24; }
+    .status-badge.supervisao { background: #1E3A8A; color: #93C5FD; }
+    /* ==================== BLOCO 4: FORMULÁRIOS E MODAIS ==================== -->
+    .timer-display { font-size: 38px; font-weight: 800; text-align: center; margin: 4px 0; font-family: monospace; }
+    .timer-date { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 12px; text-transform: capitalize; }
+    .location-info { text-align: center; font-size: 11px; color: var(--color-green-bright); margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--bg-main); padding: 8px; border-radius: 8px; border: 1px solid var(--bg-card-border); }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn { padding: 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn:active { transform: scale(0.97); }
+    .btn-green { background-color: var(--color-green); color: #FFF; }
+    .btn-red { background-color: var(--color-accent-red); color: #FFF; }
+    .btn-yellow { background-color: var(--color-yellow); color: #FFF; }
+    .btn-purple { background-color: var(--color-purple); color: #FFF; }
+    .btn-blue { background-color: var(--color-blue); color: #FFF; }
+    .btn-dark { background-color: var(--bg-main); color: var(--text-sub); border: 1px solid var(--border-input); }
     .btn-disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
-
-    .log-item {
-      padding: 10px 0;
-      border-bottom: 1px solid #1E293B;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .log-item:last-child { border-bottom: none; }
-    .log-title { font-size: 12px; font-weight: 600; }
-    .log-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-    .log-time { font-size: 11px; color: var(--text-sub); font-weight: 600; }
-
     .form-group { margin-bottom: 10px; }
-    .form-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 4px; }
-    .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-input); border-radius: 6px; padding: 9px; color: var(--text-main); font-size: 12px; outline: none; }
+    .form-label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; padding: 10px; color: var(--text-main); font-size: 12px; outline: none; }
     .form-row { display: flex; gap: 8px; }
     .form-row .form-group { flex: 1; }
-
-    nav.bottom-nav {
-      position: fixed;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 100%; max-width: 480px;
-      background-color: #0F172A;
-      border-top: 1px solid #1E293B;
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0 10px 0;
-      z-index: 100;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      background: none; border: none;
-      color: var(--text-muted);
-      font-size: 8px; font-weight: 700;
-      cursor: pointer; width: 14%;
-    }
-    .nav-item.active { color: var(--color-green); }
+    .registro-details-card { background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; margin-bottom: 8px; padding: 10px 12px; }
+    .registro-details-card summary { cursor: pointer; font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; outline: none; list-style: none; }
+    .registro-details-card summary::-webkit-details-marker { display: none; }
+    .registro-details-content { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-input); font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 16px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-box { background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: 12px; padding: 18px; width: 100%; max-width: 360px; }
+    /* ==================== BLOCO 5: NAVEGAÇÃO CSS ==================== -->
+    nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background-color: var(--bg-card); border-top: 2px solid var(--bg-card-border); display: flex; justify-content: space-around; padding: 8px 0 12px 0; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 9px; font-weight: 800; cursor: pointer; width: 14%; }
+    .nav-item.active { color: var(--color-green-bright); }
     .nav-icon { width: 18px; height: 18px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 11px; margin-top: 10px; }
+    .day-cell { padding: 8px 4px; border-radius: 6px; background: var(--bg-input); cursor: pointer; border: 1px solid var(--bg-card-border); }
+    .day-trabalho { background: var(--color-green); color: #FFF; font-weight: bold; border-color: var(--color-green-bright); }
+    .day-folga { background: var(--bg-main); color: var(--text-muted); }
+    .day-custom-marcado { background: var(--color-purple); color: #FFF; font-weight: bold; border-color: #9333EA; }
+    .info-box { background: var(--bg-main); border: 1px solid var(--bg-card-border); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 12px; }
+    .info-box strong { color: var(--color-green-bright); }
+    .dev-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   </style>
 </head>
 <body>
-
-  <!-- MODAL DE AUTENTICAÇÃO DEV / SUPERVISÃO -->
+  <!-- ==================== BLOCO 5: MODAIS & HEADER ==================== -->
   <div id="modal-auth" class="modal-overlay hidden">
     <div class="modal-box">
-      <div class="card-title" id="auth-modal-title" style="margin-bottom:10px;">ACESSO RESTRITO</div>
-      <p style="font-size:11px; color: var(--text-muted); margin-bottom: 12px;" id="auth-modal-desc">Informe a senha para acessar as configurações avançadas.</p>
-      <input type="password" id="auth-password" class="form-control" placeholder="Digite a senha..." style="margin-bottom: 12px;">
+      <div class="card-title" style="margin-bottom:10px;">ACESSO RESTRITO</div>
+      <input type="password" id="auth-password" class="form-control" placeholder="Senha..." style="margin-bottom: 12px;" onkeydown="if(event.key==='Enter')validarAcessoAuth()">
       <div class="form-row">
         <button class="btn btn-dark" style="flex:1" onclick="fecharModalAuth()">Cancelar</button>
-        <button class="btn btn-purple" style="flex:1" onclick="validarAcessoAuth()">Acessar</button>
+        <button class="btn btn-purple" style="flex:1" onclick="validarAcessoAuth()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-bastao" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:10px;">TROCA DE BASTÃO</div>
+      <div class="form-group"><label class="form-label">EQUIPAMENTOS</label><input type="text" id="bastao-equip" class="form-control" value="Tudo Ok"></div>
+      <div class="form-group"><label class="form-label">OBSERVAÇÃO</label><textarea id="bastao-obs" class="form-control" rows="2" placeholder="Obs..."></textarea></div>
+      <div class="form-row">
+        <button class="btn btn-dark" style="flex:1" onclick="fecharBastao()">Cancelar</button>
+        <button class="btn btn-red" style="flex:1" onclick="confirmarCheckOut()">Check-out</button>
       </div>
     </div>
   </div>
 
   <header>
     <div class="brand-container">
-      <div class="brand-icon">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-      </div>
-      <div>
-        <div class="brand-title">VALIS VIGIA</div>
-        <div class="brand-subtitle">Automação & Controle Operacional</div>
-      </div>
+      <div class="brand-icon">🛡️</div>
+      <div><div class="brand-title">VALIS VIGIA</div><div class="brand-subtitle" id="header-modo-str">Sistema Operacional</div></div>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" onclick="abrirAuthModal('supervisao')" title="Painel da Supervisão">👮‍♂️</button>
-      <button class="icon-btn" onclick="abrirAuthModal('dev')" title="Menu Desenvolvedor">💻</button>
+      <button class="icon-btn" onclick="alternarTemaGeral()" title="Tema">🌓</button>
+      <button class="icon-btn btn-panic" onclick="dispararPanico()" title="Pânico">🚨</button>
+      <button class="icon-btn" onclick="abrirAuthModal('supervisao')" title="Supervisão">👮‍♂️</button>
+      <button class="icon-btn" onclick="abrirAuthModal('dev')" title="Dev">💻</button>
     </div>
   </header>
-
-  <div id="notification-toast">
-    <div class="toast-icon">✓</div>
-    <div id="toast-message">Sistema carregado e pronto para operação.</div>
-  </div>
-
+  <div id="notification-toast" class="hidden"><div id="toast-message">Valis Vigia Online</div><div id="toast-timer">10s</div></div>
   <main>
-    <!-- 1. ABA PONTO -->
+    <!-- ==================== BLOCO 6: ABA PONTO ==================== -->
     <section id="tab-ponto" class="tab-content active">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">PLANTÃO TEMPO REAL</span>
-          <span class="status-badge inativo" id="plantao-status-badge">INATIVO</span>
-        </div>
-
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">PLANTÃO EM TEMPO REAL</span><span class="status-badge inativo" id="plantao-status-badge">INATIVO</span></div>
         <div class="timer-display" id="clock-display">00:00:00</div>
         <div class="timer-date" id="date-display">...</div>
-
-        <div class="location-info">
-          <span>📡</span>
-          <span id="location-text">Obtendo geolocalização automática...</span>
-        </div>
-
+        <div class="location-info"><span>🔓</span><span id="location-text">Ponto Desbloqueado. GPS Ativo.</span></div>
         <div class="action-grid">
-          <button class="btn btn-green btn-disabled" id="btn-checkin" onclick="handleCheckIn()">➔] Check-in</button>
-          <button class="btn btn-red btn-disabled" id="btn-checkout" onclick="handleCheckOut()">[➔ Check-out</button>
-          <button class="btn btn-yellow btn-disabled" id="btn-saida-almoco" onclick="handleSaidaAlmoco()">🍽 Saída Almoço</button>
-          <button class="btn btn-dark btn-disabled" id="btn-volta-almoco" onclick="handleVoltaAlmoco()">🛠 Volta Almoço</button>
+          <button class="btn btn-green" id="btn-checkin" onclick="handleCheckIn()">➔] Check-in</button>
+          <button class="btn btn-red btn-disabled" id="btn-checkout" onclick="abrirPassagemTurno()">[➔ Check-out</button>
+          <button class="btn btn-yellow btn-disabled" id="btn-saida-almoco" onclick="handleSaidaAlmoco()">🍽 Refeição</button>
+          <button class="btn btn-dark btn-disabled" id="btn-volta-almoco" onclick="handleVoltaAlmoco()">🛠 Retorno</button>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">REGISTROS RECENTES</span>
-          <span style="font-size: 10px; color: var(--text-muted);" id="logs-count">0 registros</span>
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">🔔 ALERTAS DE RONDA</span></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">INTERVALO</label>
+            <select id="cfg-intervalo-ronda" class="form-control" onchange="configurarAlertaRonda()">
+              <option value="0">Desativado</option>
+              <option value="30">30 minutos</option>
+              <option value="60" selected>60 minutos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">TESTE</label>
+            <button class="btn btn-dark" style="width:100%" onclick="testarBipSonoro()">🔊 Testar Bip</button>
+          </div>
         </div>
-        <div id="recent-logs-list"></div>
+        <div style="margin-top: 12px; text-align: center; background: var(--bg-input); padding: 10px; border-radius: 8px; border: 1px solid var(--border-input);">
+          <div class="form-label" style="margin-bottom: 2px;">PRÓXIMA RONDA EM</div>
+          <div id="ronda-countdown-display" style="font-size: 24px; font-weight: 800; font-family: monospace; color: var(--color-green-bright);">60:00</div>
+        </div>
+      </div>
+
+      <div class="card rgb-border">
+        <details>
+          <summary class="card-header" style="cursor: pointer; margin-bottom: 0; list-style: none;">
+            <span class="card-title">REGISTROS</span>
+            <span style="font-size: 10px; color: var(--text-muted);" id="logs-count">0 itens</span>
+          </summary>
+          <div id="recent-logs-list" style="margin-top: 12px;"></div>
+        </details>
+      </div>
+    </section>
+    <!-- ==================== BLOCO 7: ABAS RONDA + DIÁRIO ==================== -->
+    <section id="tab-ronda" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">VALIDAÇÃO DE RONDA</span></div>
+        <button class="btn btn-blue" style="width:100%; margin-bottom: 12px;" onclick="simularLeituraQR()">📷 Escanear QR Code</button>
+        <div id="ronda-historico"></div>
       </div>
     </section>
 
-    <!-- 2. ABA REGISTRO -->
-    <section id="tab-registro" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">NOVO REGISTRO AUTOMÁTICO</span>
+    <section id="tab-ocorrencias" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">DIÁRIO DE BORDO</span></div>
+        <div class="form-group"><label class="form-label">TIPO</label>
+          <select id="ocorr-tipo" class="form-control">
+            <option value="Ronda Normal">Ronda Rotina</option>
+            <option value="Anormalidade">Anormalidade</option>
+            <option value="Visitante">Visitante</option>
+          </select>
         </div>
+        <div class="form-group"><label class="form-label">DESCRIÇÃO</label><textarea id="ocorr-desc" class="form-control" rows="3" placeholder="Detalhes..."></textarea></div>
+        <div class="form-group"><label class="form-label">FOTO</label><input type="file" id="ocorr-foto" accept="image/*" capture="environment" class="form-control"></div>
+        <button class="btn btn-green" style="width:100%;" onclick="salvarOcorrencia()">💾 Salvar</button>
+      </div>
+      <div class="card rgb-border"><div id="ocorrencias-lista"></div></div>
+    </section>
+    <!-- ==================== BLOCO 8: ESCALA, REGISTRO, EXTRATO & AJUSTES ==================== -->
+    <section id="tab-escala" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">PROJEÇÃO DE ESCALA & FOLGUISTA</span></div>
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">DATA</label>
-            <input type="date" id="reg-data" class="form-control">
+          <div class="form-group"><label class="form-label">TIPO DE ESCALA</label>
+            <select id="escala-tipo" class="form-control" onchange="gerarCalendarioEscala()">
+              <option value="12x36">12x36 (Trab. 1 / Folga 1)</option>
+              <option value="24x72">24x72 (Trab. 1 / Folga 3)</option>
+            </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">TURNO</label>
-            <select id="reg-turno" class="form-control" onchange="autoCalcularPlantao()">
-              <option value="12h">12 Horas</option>
-              <option value="24h" selected>24 Horas</option>
+          <div class="form-group"><label class="form-label">FUNÇÃO</label>
+            <select id="escala-funcao" class="form-control" onchange="gerarCalendarioEscala()">
+              <option value="titular" selected>Titular (Fixo)</option>
+              <option value="folguista">Folguista (Manual)</option>
             </select>
           </div>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">INÍCIO</label>
-            <input type="time" id="reg-inicio" class="form-control" value="06:00" onchange="autoCalcularPlantao()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">FIM ESTIMADO</label>
-            <input type="time" id="reg-fim" class="form-control" value="06:00" onchange="autoCalcularPlantao()">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">TOTAL HORAS</label>
-            <input type="text" id="reg-horas-calc" class="form-control" value="24 hrs" readonly style="color:var(--color-green); font-weight:bold;">
-          </div>
-          <div class="form-group">
-            <label class="form-label">VALOR A RECEBER (R$)</label>
-            <input type="number" id="reg-valor" class="form-control" value="200">
-          </div>
-        </div>
-
-        <button class="btn btn-green" style="width: 100%; margin-top: 6px;" onclick="salvarRegistroManual()">💾 Gravar Plantão</button>
+        <div class="form-group"><label class="form-label">DATA DE INÍCIO</label><input type="date" id="escala-data-inicio" class="form-control" onchange="gerarCalendarioEscala()"></div>
+        <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px;" id="escala-instrucao">※ Titular automático. Se folguista, toque nos dias para marcar seus plantões.</div>
+        <div id="calendario-escala" class="calendar-grid"></div>
       </div>
     </section>
 
-    <!-- 3. ABA PAINEL -->
-    <section id="tab-painel" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">RESUMO ACUMULADO</span>
+    <section id="tab-registro" class="tab-content">
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">LANÇAMENTO DE PLANTÃO</span></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">DATA</label><input type="date" id="reg-data" class="form-control"></div>
+          <div class="form-group"><label class="form-label">TIPO</label>
+            <select id="reg-tipo-plantao" class="form-control">
+              <option value="proprio" selected>Plantão Próprio</option>
+              <option value="cobertura_folga">Cobriu Folga</option>
+            </select>
+          </div>
         </div>
-        <div style="font-size: 22px; font-weight: bold;" id="dash-total-val">R$ 0,00</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="dash-total-horas">0 Horas registradas</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">INÍCIO</label><input type="time" id="reg-hora-inicio" class="form-control" value="06:00" onchange="calcularHorasRegistro()"></div>
+          <div class="form-group"><label class="form-label">FIM</label><input type="time" id="reg-hora-fim" class="form-control" value="06:00" onchange="calcularHorasRegistro()"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">TOTAL HORAS</label><input type="text" id="reg-horas-calc" class="form-control" value="24 hrs" readonly style="color:var(--color-green-bright); font-weight:bold;"></div>
+          <div class="form-group"><label class="form-label">VALOR (R$)</label><input type="number" id="reg-valor" class="form-control" value="200"></div>
+        </div>
+        <button class="btn btn-green" style="width: 100%; margin-top: 6px;" onclick="salvarRegistroManual()">💾 Salvar Plantão</button>
       </div>
     </section>
 
-    <!-- 4. ABA EXTRATO -->
     <section id="tab-extrato" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">HISTÓRICO COMPLETO</span>
-        </div>
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">EXTRATO & FOLHA</span><button class="btn btn-dark" style="padding: 4px 8px; font-size:10px;" onclick="window.print()">🖨️ PDF</button></div>
         <div id="extrato-lista"></div>
       </div>
     </section>
 
-    <!-- 5. ABA AJUSTES -->
     <section id="tab-ajustes" class="tab-content">
-      <div class="card">
-        <div class="card-title" style="margin-bottom:10px;">CONFIGURAÇÕES DO GPS DO POSTO</div>
-        <div class="form-group">
-          <label class="form-label">LATITUDE DO POSTO</label>
-          <input type="text" id="cfg-lat" class="form-control" value="-22.7500">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">LONGITUDE DO POSTO</label>
-            <input type="text" id="cfg-lng" class="form-control" value="-43.7000">
-          </div>
-          <div class="form-group">
-            <label class="form-label">RAIO PERMITIDO (M)</label>
-            <input type="number" id="cfg-raio" class="form-control" value="500">
-          </div>
-        </div>
-        <button class="btn btn-dark" style="width: 100%;" onclick="salvarGpsConfig()">💾 Salvar Posto</button>
+      <div class="card rgb-border">
+        <div class="card-title" style="margin-bottom:10px;">CONFIGURAÇÕES</div>
+        <div class="form-group"><label class="form-label">POSTO</label><input type="text" id="cfg-nome-posto" class="form-control" value="Posto Principal Valis"></div>
+        <div class="form-group"><label class="form-label">WHATSAPP SUPERVISOR</label><input type="text" id="cfg-tel-sup" class="form-control" placeholder="5521999999999"></div>
+        <button class="btn btn-dark" style="width:100%; margin-top:8px;" onclick="salvarGpsConfig()">💾 Salvar</button>
       </div>
     </section>
-
-    <!-- 6. ABA SUPERVISÃO (NOVA) -->
+    <!-- ==================== BLOCO 9: SUPERVISÃO, DEV & NAVEGAÇÃO ==================== -->
     <section id="tab-supervisao" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">PAINEL DA SUPERVISÃO</span>
-          <span class="status-badge supervisao">GESTOR</span>
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">SUPERVISÃO</span><span class="status-badge supervisao">GESTOR</span></div>
+        <div class="info-box">
+          <div><strong>Status:</strong> <span id="sup-status">—</span></div>
+          <div><strong>Posto:</strong> <span id="sup-posto">—</span></div>
+          <div><strong>Logs:</strong> <span id="sup-logs">0</span></div>
+          <div><strong>Ocorrências:</strong> <span id="sup-ocorr">0</span></div>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Auditoria e controle direto de equipes em campo.</p>
         
+        <!-- Novas Ferramentas Supervisor -->
         <div class="form-group">
-          <label class="form-label">ENVIAR AVISO PARA O VIGIA</label>
-          <input type="text" id="sup-alerta-msg" class="form-control" placeholder="Ex: Ronda obrigatória às 02:00">
+          <label class="form-label">Enviar Alerta Push ao Vigia</label>
+          <div class="form-row">
+            <input type="text" id="sup-push-msg" class="form-control" placeholder="Ex: Atenção ao perímetro norte">
+            <button class="btn btn-blue" onclick="enviarAlertaPushSupervisor()">Enviar</button>
+          </div>
         </div>
-        <button class="btn btn-blue" style="width: 100%; margin-bottom: 12px;" onclick="enviarAlertaSupervisao()">📢 Transmitir Comunicado</button>
+        <div class="form-group">
+          <label class="form-label">Status de Rondas Pendentes</label>
+          <div id="sup-rondas-pendentes-status" style="font-size: 11px; padding: 8px; background: var(--bg-input); border-radius: 6px; border: 1px solid var(--border-input);">Monitorando rondas...</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Produtividade e Folha (Resumo Mês)</label>
+          <div id="sup-produtividade-resumo" style="font-size: 11px; padding: 8px; background: var(--bg-input); border-radius: 6px; border: 1px solid var(--border-input);">Calculando horas...</div>
+        </div>
 
-        <div class="card-title" style="margin-top: 10px; margin-bottom: 8px;">OPÇÕES DE AUDITORIA</div>
-        <button class="btn btn-dark" style="width:100%; margin-bottom:6px;" onclick="alert('Relatório de folha exportado para a supervisão!')">📄 Exportar Relatório em PDF</button>
+        <div class="action-grid" style="margin-bottom:12px;">
+          <button class="btn btn-blue" onclick="enviarRelatorioWhatsAppSupervisor()">💬 Enviar Relatório WhatsApp</button>
+          <button class="btn btn-yellow" onclick="forcarCheckoutSupervisao()">⏹ Forçar Checkout</button>
+        </div>
+        <div class="action-grid">
+          <button class="btn btn-dark" onclick="limparLogsSupervisao()">🗑 Limpar Logs</button>
+          <button class="btn btn-dark" onclick="limparOcorrenciasSupervisao()">🗑 Limpar Ocorrências</button>
+        </div>
+      </div>
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">HISTÓRICO GEOLOCALIZADO DE CHECK-INS</span></div>
+        <div id="sup-lista-logs" style="max-height:200px; overflow-y:auto;"></div>
       </div>
     </section>
 
-    <!-- 7. ABA DESENVOLVEDOR (NOVA) -->
     <section id="tab-dev" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">CONSOLE DE DESENVOLVIMENTO</span>
-          <span class="status-badge dev">DEV MODE</span>
+      <div class="card rgb-border">
+        <div class="card-header"><span class="card-title">PAINEL DESENVOLVEDOR</span><span class="status-badge" style="background:#4C1D95;color:#C4B5FD;">DEV</span></div>
+        <div class="info-box">
+          <div><strong>Storage:</strong> <span id="dev-storage-size">—</span></div>
+          <div><strong>Status:</strong> <span id="dev-status">—</span></div>
+          <div><strong>Conexão Simulada:</strong> <span id="dev-conexao-status" style="color:var(--color-green-bright);">Online</span></div>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Ferramentas de teste e diagnóstico do aplicativo.</p>
 
+        <!-- Novas Ferramentas Dev -->
         <div class="form-group">
-          <label class="form-label">SIMULADOR DE GPS</label>
-          <div class="form-row">
-            <button class="btn btn-purple" style="flex:1" onclick="simularGps(true)">📍 Simular No Posto</button>
-            <button class="btn btn-dark" style="flex:1" onclick="simularGps(false)">🚫 Simular Fora</button>
+          <label class="form-label">Simulador de Queda de Conexão</label>
+          <button class="btn btn-dark" id="dev-btn-toggle-offline" style="width:100%" onclick="devAlternarModoOffline()">Alternar para Modo Offline</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Injetor de Dados de Teste (Mock)</label>
+          <button class="btn btn-purple" style="width:100%" onclick="devInjetorMockData()">⚡ Injetar Mock Data</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Console Tracker de Erros (window.onerror)</label>
+          <textarea id="dev-console-tracker" class="form-control" rows="3" readonly style="font-family:monospace; font-size:10px; color:#EF4444;" placeholder="Nenhum erro capturado."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Editor de Configurações Brutas (JSON appState)</label>
+          <textarea id="dev-json-editor" class="form-control" rows="4" style="font-family:monospace; font-size:10px;"></textarea>
+          <button class="btn btn-blue" style="width:100%; margin-top:4px;" onclick="devSalvarJsonEditor()">Aplicar JSON Bruto</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teste de Stress / Lifecycle</label>
+          <button class="btn btn-yellow" style="width:100%" onclick="devSimularRecarregamentoStresse()">🔄 Simular Lifecycle Recarregamento</button>
+        </div>
+
+        <div class="form-group"><label class="form-label">ALTERAR SENHA</label><input type="password" id="dev-nova-senha" class="form-control" placeholder="Nova senha...">
+          <button class="btn btn-purple" style="width:100%; margin-top:6px;" onclick="alterarSenhaDev()">🔑 Salvar Nova Senha</button>
+        </div>
+        <div class="form-group"><label class="form-label">FORÇAR STATUS</label>
+          <div class="dev-actions">
+            <button class="btn btn-dark" onclick="forcarStatus('INATIVO')">INATIVO</button>
+            <button class="btn btn-green" onclick="forcarStatus('ATIVO')">ATIVO</button>
+            <button class="btn btn-yellow" onclick="forcarStatus('ALMOCO')">ALMOÇO</button>
           </div>
         </div>
-
-        <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">ALTERAR SENHA DE ACESSO</label>
-          <input type="text" id="dev-nova-senha" class="form-control" placeholder="Nova senha dev/supervisão">
-          <button class="btn btn-dark" style="width: 100%; margin-top: 6px;" onclick="alterarSenhaDev()">🔑 Alterar Senha</button>
+        <div class="form-group"><label class="form-label">DADOS</label>
+          <div class="dev-actions">
+            <button class="btn btn-blue" onclick="exportarDados()">📤 Exportar</button>
+            <button class="btn btn-blue" onclick="importarDados()">📥 Importar</button>
+          </div>
         </div>
-
-        <button class="btn btn-red" style="width: 100%; margin-top: 12px;" onclick="zerarTudoDev()">⚠️ Redefinir Sistema Completo</button>
+        <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR TODO O BANCO</button>
       </div>
     </section>
   </main>
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('ponto', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      PONTO
-    </button>
-    <button class="nav-item" onclick="switchTab('registro', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-      REGISTRO
-    </button>
-    <button class="nav-item" onclick="switchTab('painel', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-      PAINEL
-    </button>
-    <button class="nav-item" onclick="switchTab('extrato', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      EXTRATO
-    </button>
-    <button class="nav-item" onclick="switchTab('ajustes', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      AJUSTES
-    </button>
+    <button class="nav-item active" onclick="switchTab('ponto', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>PONTO</button>
+    <button class="nav-item" onclick="switchTab('ronda', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>RONDA</button>
+    <button class="nav-item" onclick="switchTab('ocorrencias', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>DIÁRIO</button>
+    <button class="nav-item" onclick="switchTab('escala', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>ESCALA</button>
+    <button class="nav-item" onclick="switchTab('registro', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>REGISTRO</button>
+    <button class="nav-item" onclick="switchTab('extrato', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>EXTRATO</button>
+    <button class="nav-item" onclick="switchTab('ajustes', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>AJUSTES</button>
   </nav>
-
+  <!-- ==================== BLOCO 11: JAVASCRIPT CORE ==================== -->
   <script>
-    // ESTADO E CONFIGURAÇÕES DO SISTEMA
+    if ('serviceWorker' in navigator) {
+      const swCode = `self.addEventListener('fetch', function(e) {});`;
+      const blob = new Blob([swCode], {type: 'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+    }
+
     let appState = {
-      status: 'INATIVO', // 'INATIVO' | 'ATIVO' | 'ALMOCO'
-      passDev: 'dev123',
-      targetLat: -22.7500,
-      targetLng: -43.7000,
-      maxRadius: 500, // metros
-      noPosto: false,
-      distanciaAtual: 9999,
-      checkInTime: null,
-      targetAuthTab: '',
-      logs: [],
-      registros: []
+      status: 'INATIVO', passDev: 'dev123', nomePosto: 'Posto Principal Valis',
+      telSup: '', coordsFormatadas: 'Lat: -22.75, Lng: -43.70 (Precisão: 5m)', logs: [], rondas: [],
+      ocorrencias: [], registros: [], diasFolguistaMarcados: {}, devModoOffline: false, ultimaRondaTimestamp: Date.now()
     };
 
-    // RELÓGIO EM TEMPO REAL
+    // Console Tracker Interno para captura de erros JS
+    window.onerror = function(msg, url, line) {
+      const tracker = document.getElementById('dev-console-tracker');
+      if (tracker) {
+        tracker.value += `[${new Date().toLocaleTimeString()}] ${msg} (Linha: ${line})\n`;
+      }
+    };
+
+    function carregarDadosSalvos() {
+      const saved = localStorage.getItem('valis_vigia_v3_data');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          appState = { ...appState, ...data };
+          document.getElementById('cfg-nome-posto').value = appState.nomePosto || 'Posto Principal Valis';
+          document.getElementById('cfg-tel-sup').value = appState.telSup || '';
+          renderizarLogs(); renderizarExtrato(); renderizarOcorrencias();
+          renderizarRondas(); updateUIState(); atualizarPainelSupervisao(); atualizarPainelDev();
+        } catch(e) {}
+      }
+    }
+
+    function salvarEstado() {
+      if (appState.devModoOffline) {
+        showNotification("⚠️ Modo Offline ativo: Dados salvos apenas na sessão local.");
+      }
+      localStorage.setItem('valis_vigia_v3_data', JSON.stringify({
+        status: appState.status, passDev: appState.passDev, nomePosto: appState.nomePosto,
+        telSup: appState.telSup, logs: appState.logs, rondas: appState.rondas,
+        ocorrencias: appState.ocorrencias, registros: appState.registros,
+        diasFolguistaMarcados: appState.diasFolguistaMarcados, ultimaRondaTimestamp: appState.ultimaRondaTimestamp
+      }));
+      atualizarPainelSupervisao(); atualizarPainelDev();
+    }
+
+    function getLocalDateKey(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function showNotification(msg) {
+      const toast = document.getElementById('notification-toast');
+      const timerDisplay = document.getElementById('toast-timer');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('hidden');
+      if (window.toastTimeout) clearTimeout(window.toastTimeout);
+      if (window.toastInterval) clearInterval(window.toastInterval);
+      let timeLeft = 10;
+      timerDisplay.textContent = timeLeft + "s";
+      window.toastInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = (timeLeft > 0 ? timeLeft : 0) + "s";
+        if (timeLeft <= 0) clearInterval(window.toastInterval);
+      }, 1000);
+      window.toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+        if (window.toastInterval) clearInterval(window.toastInterval);
+      }, 10000);
+    }
+
+    function alternarTemaGeral() {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('header-modo-str').textContent = isLight ? "Modo Claro" : "Modo Escuro (RGB)";
+      showNotification(isLight ? "Tema Claro Ativado" : "Tema Escuro Ativado");
+    }
+
     function updateClock() {
       const now = new Date();
       document.getElementById('clock-display').textContent = now.toTimeString().split(' ')[0];
@@ -558,257 +475,431 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // CÁLCULO DE DISTÂNCIA GPS (FÓRMULA DE HAVERSINE)
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // Metros
-      const rad = Math.PI / 180;
-      const dLat = (lat2 - lat1) * rad;
-      const dLon = (lon2 - lon1) * rad;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1*rad) * Math.cos(lat2*rad) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return Math.round(R * c);
+    function testarBipSonoro() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } catch(e) {}
     }
-
-    // MONITORAMENTO AUTOMÁTICO DE GEOLOCALIZAÇÃO
-    function initGpsTracker() {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.watchPosition(
-          (pos) => {
-            const dist = calcularDistancia(pos.coords.latitude, pos.coords.longitude, appState.targetLat, appState.targetLng);
-            appState.distanciaAtual = dist;
-            appState.noPosto = dist <= appState.maxRadius;
-            atualizarStatusGpsUI();
-          },
-          (err) => {
-            document.getElementById('location-text').textContent = "Erro ao ler GPS. Utilize o simulador Dev.";
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      }
-    }
-    initGpsTracker();
-
-    function atualizarStatusGpsUI() {
-      const locText = document.getElementById('location-text');
-      if (appState.noPosto) {
-        locText.style.color = "var(--color-green)";
-        locText.textContent = `No Posto Principal (${appState.distanciaAtual}m de distância)`;
+let timerRonda = null, rondaCountdownInterval = null, rondaSecondsLeft = 0;
+    function configurarAlertaRonda() {
+      if (timerRonda) clearInterval(timerRonda);
+      if (rondaCountdownInterval) clearInterval(rondaCountdownInterval);
+      const min = parseInt(document.getElementById('cfg-intervalo-ronda').value);
+      const countdownDisplay = document.getElementById('ronda-countdown-display');
+      if (min > 0) {
+        rondaSecondsLeft = min * 60;
+        timerRonda = setInterval(() => {
+          testarBipSonoro();
+          showNotification("⏰ ATENÇÃO: Hora de realizar a Ronda do Posto!");
+          rondaSecondsLeft = min * 60;
+          appState.ultimaRondaTimestamp = Date.now();
+        }, min * 60 * 1000);
+        rondaCountdownInterval = setInterval(() => {
+          if (rondaSecondsLeft > 0) {
+            rondaSecondsLeft--;
+            const m = Math.floor(rondaSecondsLeft / 60);
+            const s = rondaSecondsLeft % 60;
+            countdownDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+          }
+        }, 1000);
+        showNotification(`Lembrete de ronda ativado (${min} min)`);
       } else {
-        locText.style.color = "var(--color-orange)";
-        locText.textContent = `Fora do posto — ${appState.distanciaAtual}m do Posto Principal`;
+        countdownDisplay.textContent = "00:00";
+        showNotification("Lembrete de ronda desativado");
       }
-      updateUIState();
     }
-    // GERENCIAMENTO DE NAVEGAÇÃO E MODAIS DE SENHA
-    function switchTab(tabId, el) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    configurarAlertaRonda();
 
-      document.getElementById('tab-' + tabId).classList.add('active');
-      if(el) el.classList.add('active');
-    }
-
-    function abrirAuthModal(tipo) {
-      appState.targetAuthTab = tipo;
-      document.getElementById('auth-modal-title').textContent = tipo === 'dev' ? 'ACESSO DESENVOLVEDOR' : 'ACESSO SUPERVISÃO';
-      document.getElementById('modal-auth').classList.remove('hidden');
-      document.getElementById('auth-password').value = '';
-      document.getElementById('auth-password').focus();
-    }
-
-    function fecharModalAuth() {
-      document.getElementById('modal-auth').classList.add('hidden');
-    }
-
-    function validarAcessoAuth() {
-      const pass = document.getElementById('auth-password').value;
-      if (pass === appState.passDev) {
-        fecharModalAuth();
-        switchTab(appState.targetAuthTab, null);
-        showNotification(`Acesso autorizado para ${appState.targetAuthTab.toUpperCase()}`);
-      } else {
-        alert('Senha incorreta!');
+    function dispararPanico() {
+      if (confirm('⚠️ Disparar Pânico Silencioso para a Supervisão?')) {
+        testarBipSonoro();
+        const msg = encodeURIComponent(`🚨 EMERGÊNCIA NO POSTO!\nPosto: ${appState.nomePosto}\nHora: ${new Date().toLocaleTimeString()}`);
+        const tel = (appState.telSup || '').replace(/\D/g,'');
+        window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${msg}`, '_blank');
       }
     }
 
-    // CONTROLE DE ESTADO DO PLANTÃO E BOTÕES
+    function simularLeituraQR() {
+      const pontos = ["Portão Principal", "Perímetro Norte", "Almoxarifado", "Galpão"];
+      const pontoSorteado = pontos[Math.floor(Math.random() * pontos.length)];
+      const hora = new Date().toLocaleTimeString().slice(0,5);
+      appState.rondas.unshift({ ponto: pontoSorteado, hora, data: new Date().toLocaleDateString('pt-BR') });
+      appState.ultimaRondaTimestamp = Date.now();
+      const min = parseInt(document.getElementById('cfg-intervalo-ronda').value);
+      if (min > 0) rondaSecondsLeft = min * 60;
+      salvarEstado(); renderizarRondas();
+      showNotification(`✅ Ronda registrada: ${pontoSorteado}`);
+    }
+
+    function renderizarRondas() {
+      document.getElementById('ronda-historico').innerHTML = appState.rondas.map(r => `
+        <div class="registro-details-card"><div style="display:flex; justify-content:space-between;">
+          <div><strong>📍 ${r.ponto}</strong><br><small>QR Code · ${r.data}</small></div><div>${r.hora}</div>
+        </div></div>
+      `).join('');
+    }
+
+    function salvarOcorrencia() {
+      const tipo = document.getElementById('ocorr-tipo').value;
+      const desc = document.getElementById('ocorr-desc').value.trim();
+      const fileInput = document.getElementById('ocorr-foto');
+      if (!desc) { alert('Digite uma descrição.'); return; }
+      const processarSalvamento = (fotoBase64) => {
+        appState.ocorrencias.unshift({ tipo, desc, foto: fotoBase64, hora: new Date().toLocaleTimeString().slice(0,5), data: new Date().toLocaleDateString('pt-BR') });
+        salvarEstado(); renderizarOcorrencias();
+        document.getElementById('ocorr-desc').value = ''; document.getElementById('ocorr-foto').value = '';
+        showNotification('Diário atualizado!');
+      };
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => processarSalvamento(e.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+      } else { processarSalvamento(null); }
+    }
+
+    function renderizarOcorrencias() {
+      document.getElementById('ocorrencias-lista').innerHTML = appState.ocorrencias.map(o => `
+        <div class="registro-details-card">
+          <div style="display:flex; justify-content:space-between; width:100%;"><span style="color:var(--color-yellow); font-weight:600;">⚠️️ ${o.tipo}</span><span>${o.data} ${o.hora}</span></div>
+          <div style="margin-top:6px; color:var(--text-main);">${o.desc}</div>
+          ${o.foto ? `<img src="${o.foto}" style="width:100%; max-height:140px; object-fit:cover; border-radius:8px; margin-top:8px;">` : ''}
+        </div>
+      `).join('');
+    }
+
+    function gerarCalendarioEscala() {
+      const tipo = document.getElementById('escala-tipo').value;
+      const funcao = document.getElementById('escala-funcao').value;
+      const container = document.getElementById('calendario-escala');
+      container.innerHTML = '';
+      ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(d => {
+        container.innerHTML += `<div style="font-weight:bold; color:var(--text-muted);">${d}</div>`;
+      });
+      const hoje = new Date();
+      for (let i = 0; i < 28; i++) {
+        const diaObj = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + i);
+        const dataKey = getLocalDateKey(diaObj);
+        if (funcao === 'titular') {
+          let eTrabalho = (tipo === '12x36') ? (i % 2 === 0) : (i % 4 === 0);
+          container.innerHTML += `<div class="day-cell ${eTrabalho ? 'day-trabalho' : 'day-folga'}">${diaObj.getDate()}<br><span style="font-size:7px;">${eTrabalho ? 'PLANTÃO' : 'FOLGA'}</span></div>`;
+        } else {
+          const marcado = !!appState.diasFolguistaMarcados[dataKey];
+          const cell = document.createElement('div');
+          cell.className = `day-cell ${marcado ? 'day-custom-marcado' : 'day-folga'}`;
+          cell.innerHTML = `${diaObj.getDate()}<br><span style="font-size:7px;">${marcado ? 'TRABALHO' : ''}</span>`;
+          cell.onclick = () => {
+            appState.diasFolguistaMarcados[dataKey] = !appState.diasFolguistaMarcados[dataKey];
+            salvarEstado(); gerarCalendarioEscala();
+            showNotification(appState.diasFolguistaMarcados[dataKey] ? "Plantão marcado!" : "Data limpa.");
+          };
+          container.appendChild(cell);
+        }
+      }
+    }
+    function abrirPassagemTurno() { document.getElementById('modal-bastao').classList.remove('hidden'); }
+    function fecharBastao() { document.getElementById('modal-bastao').classList.add('hidden'); }
+    function confirmarCheckOut() {
+      const eq = document.getElementById('bastao-equip').value;
+      fecharBastao(); appState.status = 'INATIVO';
+      registrarLog(`Check-out / Bastão (${eq})`);
+      showNotification('Plantão encerrado!'); updateUIState();
+    }
+
+    function handleCheckIn() { appState.status = 'ATIVO'; registrarLog('Check-in'); showNotification('Plantão iniciado!'); updateUIState(); }
+    function handleSaidaAlmoco() { appState.status = 'ALMOCO'; registrarLog('Pausa / Refeição'); showNotification('Saída para refeição.'); updateUIState(); }
+    function handleVoltaAlmoco() { appState.status = 'ATIVO'; registrarLog('Retorno da Pausa'); showNotification('Retorno registrado.'); updateUIState(); }
+
     function updateUIState() {
       const badge = document.getElementById('plantao-status-badge');
-      const btnCheckin = document.getElementById('btn-checkin');
-      const btnCheckout = document.getElementById('btn-checkout');
-      const btnSaida = document.getElementById('btn-saida-almoco');
-      const btnVolta = document.getElementById('btn-volta-almoco');
-
+      const btnCheckin = document.getElementById('btn-checkin'), btnCheckout = document.getElementById('btn-checkout');
+      const btnSaida = document.getElementById('btn-saida-almoco'), btnVolta = document.getElementById('btn-volta-almoco');
       if (appState.status === 'INATIVO') {
-        badge.className = 'status-badge inativo';
-        badge.textContent = 'INATIVO';
-        
-        // Só habilita check-in se estiver DENTRO do raio do posto
-        if (appState.noPosto) {
-          btnCheckin.classList.remove('btn-disabled');
-        } else {
-          btnCheckin.classList.add('btn-disabled');
-        }
-        btnCheckout.classList.add('btn-disabled');
-        btnSaida.classList.add('btn-disabled');
-        btnVolta.classList.add('btn-disabled');
-
+        badge.className = 'status-badge inativo'; badge.textContent = 'INATIVO';
+        btnCheckin.classList.remove('btn-disabled'); btnCheckout.classList.add('btn-disabled'); btnSaida.classList.add('btn-disabled'); btnVolta.classList.add('btn-disabled');
       } else if (appState.status === 'ATIVO') {
-        badge.className = 'status-badge ativo';
-        badge.textContent = 'EM PLANTÃO';
-
-        btnCheckin.classList.add('btn-disabled');
-        btnCheckout.classList.remove('btn-disabled');
-        btnSaida.classList.remove('btn-disabled');
-        btnVolta.classList.add('btn-disabled');
-
+        badge.className = 'status-badge ativo'; badge.textContent = 'EM PLANTÃO';
+        btnCheckin.classList.add('btn-disabled'); btnCheckout.classList.remove('btn-disabled'); btnSaida.classList.remove('btn-disabled'); btnVolta.classList.add('btn-disabled');
       } else if (appState.status === 'ALMOCO') {
-        badge.className = 'status-badge almoco';
-        badge.textContent = 'EM PAUSA/ALMOÇO';
-
-        btnCheckin.classList.add('btn-disabled');
-        btnCheckout.classList.add('btn-disabled');
-        btnSaida.classList.add('btn-disabled');
-        btnVolta.classList.remove('btn-disabled');
+        badge.className = 'status-badge almoco'; badge.textContent = 'EM PAUSA';
+        btnCheckin.classList.add('btn-disabled'); btnCheckout.classList.add('btn-disabled'); btnSaida.classList.add('btn-disabled'); btnVolta.classList.remove('btn-disabled');
       }
-    }
-
-    function showNotification(msg) {
-      const toast = document.getElementById('notification-toast');
-      document.getElementById('toast-message').textContent = msg;
-      toast.classList.remove('hidden');
+      salvarEstado();
     }
 
     function registrarLog(acao) {
       const hora = new Date().toLocaleTimeString().slice(0, 5);
-      const log = { acao, hora, loc: document.getElementById('location-text').textContent };
-      appState.logs.unshift(log);
-
-      const list = document.getElementById('recent-logs-list');
-      list.innerHTML = `
-        <div class="log-item">
-          <div>
-            <div class="log-title">${acao}</div>
-            <div class="log-sub">${log.loc}</div>
-          </div>
-          <div class="log-time">${hora}</div>
-        </div>
-      ` + list.innerHTML;
-      document.getElementById('logs-count').textContent = appState.logs.length + " registros";
+      appState.logs.unshift({ acao, hora, loc: appState.coordsFormatadas });
+      salvarEstado(); renderizarLogs();
     }
 
-    // AÇÕES DO PLANTÃO
-    function handleCheckIn() {
-      appState.status = 'ATIVO';
-      registrarLog('Check-in (Entrada)');
-      showNotification('Plantão iniciado com sucesso no posto.');
-      updateUIState();
+    function renderizarLogs() {
+      document.getElementById('recent-logs-list').innerHTML = appState.logs.map(log => `
+        <details class="registro-details-card">
+          <summary><span>📌 ${log.acao}</span><span>${log.hora}</span></summary>
+          <div class="registro-details-content"><div><strong>Local:</strong> ${log.loc}</div><div><strong>Status:</strong> Sucesso</div></div>
+        </details>
+      `).join('');
+      document.getElementById('logs-count').textContent = appState.logs.length + " itens";
     }
 
-    function handleCheckOut() {
-      appState.status = 'INATIVO';
-      registrarLog('Check-out (Saída)');
-      showNotification('Plantão encerrado.');
-      updateUIState();
-    }
-
-    function handleSaidaAlmoco() {
-      appState.status = 'ALMOCO';
-      registrarLog('Saída para Almoço');
-      showNotification('Pausa de almoço iniciada.');
-      updateUIState();
-    }
-
-    function handleVoltaAlmoco() {
-      appState.status = 'ATIVO';
-      registrarLog('Retorno do Almoço');
-      showNotification('Retorno ao plantão registrado.');
-      updateUIState();
-    }
-
-    // AUTOMATIZAÇÃO DE CÁLCULOS NO FORMULÁRIO DE REGISTRO
-    function autoCalcularPlantao() {
-      const turno = document.getElementById('reg-turno').value;
-      const horasInput = document.getElementById('reg-horas-calc');
-      const valorInput = document.getElementById('reg-valor');
-
-      if (turno === '24h') {
-        horasInput.value = '24 hrs';
-        valorInput.value = 200;
-      } else {
-        horasInput.value = '12 hrs';
-        valorInput.value = 100;
-      }
+    function calcularHorasRegistro() {
+      const ini = document.getElementById('reg-hora-inicio').value, fim = document.getElementById('reg-hora-fim').value;
+      if (!ini || !fim) return;
+      let [h1, m1] = ini.split(':').map(Number), [h2, m2] = fim.split(':').map(Number);
+      let minutos1 = h1 * 60 + m1, minutos2 = h2 * 60 + m2;
+      if (minutos2 <= minutos1) minutos2 += 24 * 60;
+      const diffHoras = (minutos2 - minutos1) / 60;
+      document.getElementById('reg-horas-calc').value = diffHoras + " hrs";
+      document.getElementById('reg-valor').value = (diffHoras >= 24) ? 200 : 100;
     }
 
     function salvarRegistroManual() {
       const data = document.getElementById('reg-data').value;
+      if (!data) { alert('Informe a data.'); return; }
+      const tipoPlantao = document.getElementById('reg-tipo-plantao').value;
       const val = parseFloat(document.getElementById('reg-valor').value) || 0;
       const horas = document.getElementById('reg-horas-calc').value;
-
-      appState.registros.unshift({ data, val, horas });
-
-      // Atualiza Extrato e Painel
-      const lista = document.getElementById('extrato-lista');
-      lista.innerHTML = `
-        <div class="log-item">
-          <div>
-            <div class="log-title">${data} · ${horas}</div>
-            <div class="log-sub">Lançamento de Plantão</div>
-          </div>
-          <div style="font-weight:bold; color:#FFF;">R$ ${val.toFixed(2)}</div>
-        </div>
-      ` + lista.innerHTML;
-
-      let totalVal = appState.registros.reduce((acc, curr) => acc + curr.val, 0);
-      document.getElementById('dash-total-val').textContent = `R$ ${totalVal.toFixed(2)}`;
-      document.getElementById('dash-total-horas').textContent = `${appState.registros.length * 24} Horas registradas`;
-
-      showNotification('Plantão registrado e acumulado no painel!');
+      appState.registros.unshift({ data, val, horas, turno: tipoPlantao === 'proprio' ? 'Plantão Próprio' : 'Cobertura de Folga' });
+      salvarEstado(); renderizarExtrato(); showNotification('Plantão salvo!');
     }
 
-    // FUNÇÕES DA SUPERVISÃO E DEV
-    function enviarAlertaSupervisao() {
-      const msg = document.getElementById('sup-alerta-msg').value;
-      if (msg) {
-        showNotification(`📢 ALERTA SUPERVISÃO: ${msg}`);
-        document.getElementById('sup-alerta-msg').value = '';
-      }
-    }
-
-    function simularGps(noPosto) {
-      appState.noPosto = noPosto;
-      appState.distanciaAtual = noPosto ? 50 : 1200;
-      atualizarStatusGpsUI();
-      showNotification(noPosto ? "Simulação: Vigia DENTRO do posto" : "Simulação: Vigia FORA do posto");
-    }
-
-    function alterarSenhaDev() {
-      const nova = document.getElementById('dev-nova-senha').value;
-      if (nova) {
-        appState.passDev = nova;
-        alert('Senha alterada com sucesso!');
-        document.getElementById('dev-nova-senha').value = '';
-      }
+    function renderizarExtrato() {
+      document.getElementById('extrato-lista').innerHTML = appState.registros.map(reg => `
+        <details class="registro-details-card">
+          <summary><span>📅 ${reg.data} · <strong>${reg.horas}</strong></span><span style="color:var(--color-green-bright);">R$ ${Number(reg.val).toFixed(2)}</span></summary>
+          <div class="registro-details-content"><div><strong>Tipo:</strong> ${reg.turno}</div><div><strong>Posto:</strong> ${appState.nomePosto}</div></div>
+        </details>
+      `).join('');
     }
 
     function salvarGpsConfig() {
-      appState.targetLat = parseFloat(document.getElementById('cfg-lat').value);
-      appState.targetLng = parseFloat(document.getElementById('cfg-lng').value);
-      appState.maxRadius = parseInt(document.getElementById('cfg-raio').value);
-      showNotification('Coordenadas do posto atualizadas!');
+      appState.nomePosto = document.getElementById('cfg-nome-posto').value.trim() || 'Posto Principal Valis';
+      appState.telSup = document.getElementById('cfg-tel-sup').value.trim();
+      salvarEstado(); showNotification('Configurações salvas!');
+    }
+  // ==================== IMPLEMENTAÇÃO DAS 10 IDEIAS (SUPERVISOR & DEV) ====================
+
+    // 1. Envio de Alerta Geral / Mensagem Push
+    function enviarAlertaPushSupervisor() {
+      const txt = document.getElementById('sup-push-msg').value.trim();
+      if (!txt) { alert('Digite a mensagem do alerta.'); return; }
+      testarBipSonoro();
+      showNotification(`🚨 ALERTA DA SUPERVISÃO: ${txt}`);
+      document.getElementById('sup-push-msg').value = '';
     }
 
-    function zerarTudoDev() {
-      if (confirm('Deseja zerar completamente as configurações do app?')) {
-        location.reload();
+    // 3. Controle de Rondas Pendentes / Atrasadas
+    function checarRondasPendentesSupervisor() {
+      const el = document.getElementById('sup-rondas-pendentes-status');
+      if (!el) return;
+      const intervaloMin = parseInt(document.getElementById('cfg-intervalo-ronda').value) || 60;
+      const diffMin = Math.floor((Date.now() - (appState.ultimaRondaTimestamp || Date.now())) / 60000);
+      if (intervaloMin > 0 && diffMin > intervaloMin) {
+        el.innerHTML = `<span style="color:var(--color-accent-red); font-weight:bold;">⚠️ Alerta: Ronda atrasada em ${diffMin - intervaloMin} minutos!</span>`;
+      } else {
+        el.innerHTML = `<span style="color:var(--color-green-bright);">✅ Rondas em dia (Última há ${diffMin} min).</span>`;
       }
     }
 
-    // Configura data atual no campo
+    // 4. Relatório de Produtividade Diária/Semanal (Fechamento de Folha)
+    function calcularProdutividadeSupervisor() {
+      const el = document.getElementById('sup-produtividade-resumo');
+      if (!el) return;
+      const totalPlantoes = appState.registros.length;
+      const totalAcumulado = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
+      el.innerHTML = `<strong>Plantões no Mês:</strong> ${totalPlantoes} | <strong>Total Acumulado:</strong> R$ ${totalAcumulado.toFixed(2)}`;
+    }
+
+    // 5. Chamada Direta via WhatsApp com Mensagem Pronta
+    function enviarRelatorioWhatsAppSupervisor() {
+      const tel = (appState.telSup || '').replace(/\D/g,'');
+      if (!tel) { alert('Configure o telefone do supervisor em Ajustes.'); return; }
+      const totalAcumulado = appState.registros.reduce((acc, r) => acc + (Number(r.val) || 0), 0);
+      const msg = encodeURIComponent(`📊 *Relatório Operacional - Valis Vigia*\nPosto: ${appState.nomePosto}\nStatus Atual: ${appState.status}\nTotal de Plantões: ${appState.registros.length}\nValor Acumulado: R$ ${totalAcumulado.toFixed(2)}`);
+      window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${msg}`, '_blank');
+    }
+
+    function atualizarPainelSupervisao() {
+      const statusEl = document.getElementById('sup-status');
+      if (!statusEl) return;
+      statusEl.textContent = appState.status;
+      document.getElementById('sup-posto').textContent = appState.nomePosto;
+      document.getElementById('sup-logs').textContent = appState.logs.length;
+      document.getElementById('sup-ocorr').textContent = appState.ocorrencias.length;
+      
+      // Renderiza Histórico Geolocalizado (2. Histórico de Check-ins com precisão de GPS)
+      document.getElementById('sup-lista-logs').innerHTML = appState.logs.map(log => `
+        <div style="font-size:11px; padding:6px 0; border-bottom:1px solid var(--border-input);">
+          <strong>${log.hora}</strong> — ${log.acao}<br>
+          <small style="color:var(--color-green-bright);">📍 ${log.loc || 'GPS Ativo'}</small>
+        </div>
+      `).join('') || '<div style="font-size:11px; color:var(--text-muted);">Nenhum registro</div>';
+
+      checarRondasPendentesSupervisor();
+      calcularProdutividadeSupervisor();
+    }
+
+    function forcarCheckoutSupervisao() {
+      if (appState.status === 'INATIVO') { showNotification('Já está inativo.'); return; }
+      if (confirm('Forçar check-out?')) {
+        appState.status = 'INATIVO'; registrarLog('Check-out FORÇADO pela Supervisão');
+        updateUIState(); showNotification('Check-out forçado.');
+      }
+    }
+
+    function limparLogsSupervisao() { if (confirm('Limpar logs?')) { appState.logs = []; salvarEstado(); renderizarLogs(); showNotification('Logs limpos.'); } }
+    function limparOcorrenciasSupervisao() { if (confirm('Limpar ocorrências?')) { appState.ocorrencias = []; salvarEstado(); renderizarOcorrencias(); showNotification('Ocorrências limpas.'); } }
+
+    // 6. Simulador de Queda de Conexão (Modo Offline / Online)
+    function devAlternarModoOffline() {
+      appState.devModoOffline = !appState.devModoOffline;
+      const btn = document.getElementById('dev-btn-toggle-offline');
+      const lbl = document.getElementById('dev-conexao-status');
+      if (appState.devModoOffline) {
+        btn.textContent = "Voltar para Modo Online";
+        btn.className = "btn btn-green";
+        lbl.textContent = "Offline (Simulado)";
+        lbl.style.color = "var(--color-accent-red)";
+        showNotification("Modo Offline ativado para testes.");
+      } else {
+        btn.textContent = "Alternar para Modo Offline";
+        btn.className = "btn btn-dark";
+        lbl.textContent = "Online";
+        lbl.style.color = "var(--color-green-bright)";
+        showNotification("Modo Online restaurado.");
+      }
+    }
+
+    // 7. Injetor de Dados de Teste (Mock Data Generator)
+    function devInjetorMockData() {
+      if (!confirm('Deseja injetar dados de teste (plantões, rondas e ocorrências)?')) return;
+      appState.logs = [
+        { acao: 'Check-in', hora: '06:00', loc: 'Lat: -22.75, Lng: -43.70 (Precisão: 3m)' },
+        { acao: 'Pausa / Refeição', hora: '12:00', loc: 'Lat: -22.75, Lng: -43.70 (Precisão: 4m)' }
+      ];
+      appState.rondas = [
+        { ponto: 'Perímetro Norte', hora: '08:00', data: '30/09/2026' },
+        { ponto: 'Portão Principal', hora: '10:00', data: '30/09/2026' }
+      ];
+      appState.ocorrencias = [
+        { tipo: 'Visitante', desc: 'Entrada de prestador de serviços autorizado.', foto: null, hora: '09:30', data: '30/09/2026' }
+      ];
+      appState.registros = [
+        { data: '2026-09-28', val: 200, horas: '24 hrs', turno: 'Plantão Próprio' },
+        { data: '2026-09-26', val: 200, horas: '24 hrs', turno: 'Plantão Próprio' }
+      ];
+      salvarEstado();
+      renderizarLogs(); renderizarExtrato(); renderizarOcorrencias(); renderizarRondas();
+      showNotification('⚡ Mock data injetado com sucesso!');
+      atualizarPainelDev();
+    }
+    // 9. Editor de Configurações Brutas (JSON Viewer / Editor)
+    function atualizarJsonEditor() {
+      const ed = document.getElementById('dev-json-editor');
+      if (ed) ed.value = JSON.stringify(appState, null, 2);
+    }
+
+    function devSalvarJsonEditor() {
+      try {
+        const parsed = JSON.parse(document.getElementById('dev-json-editor').value);
+        appState = parsed;
+        salvarEstado();
+        location.reload();
+      } catch(err) {
+        alert('JSON inválido. Corrija a sintaxe antes de aplicar.');
+      }
+    }
+
+    // 10. Bloqueio de Tela por Inatividade / Teste de Stress
+    function devSimularRecarregamentoStresse() {
+      showNotification('🔄 Simulando ciclo de vida (Lifecycle / Recarga)...');
+      setTimeout(() => {
+        location.reload();
+      }, 1200);
+    }
+
+    function atualizarPainelDev() {
+      const sizeEl = document.getElementById('dev-storage-size');
+      if (!sizeEl) return;
+      const data = localStorage.getItem('valis_vigia_v3_data') || '';
+      sizeEl.textContent = (data.length / 1024).toFixed(1) + ' KB';
+      document.getElementById('dev-status').textContent = appState.status;
+      atualizarJsonEditor();
+    }
+
+    function alterarSenhaDev() {
+      const nova = document.getElementById('dev-nova-senha').value.trim();
+      if (!nova || nova.length < 4) { alert('Mínimo de 4 caracteres.'); return; }
+      appState.passDev = nova; salvarEstado();
+      document.getElementById('dev-nova-senha').value = ''; showNotification('Senha alterada!');
+    }
+
+    function forcarStatus(novoStatus) { appState.status = novoStatus; updateUIState(); showNotification('Status: ' + novoStatus); }
+
+    function exportarDados() {
+      const dataStr = JSON.stringify(appState, null, 2);
+      const blob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = 'valis_vigia_backup_' + getLocalDateKey() + '.json'; a.click();
+      URL.revokeObjectURL(url); showNotification('Backup exportado!');
+    }
+
+    function importarDados() {
+      const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (confirm('Importar dados?')) { appState = { ...appState, ...data }; salvarEstado(); location.reload(); }
+          } catch(err) { alert('JSON inválido.'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function zerarTudoDev() {
+      if (confirm('Zerar TODO o banco local?')) { localStorage.removeItem('valis_vigia_v3_data'); location.reload(); }
+    }
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      if (el) el.classList.add('active');
+      if (tabId === 'supervisao') atualizarPainelSupervisao();
+      if (tabId === 'dev') atualizarPainelDev();
+    }
+
+    function abrirAuthModal(tipo) {
+      appState.targetAuthTab = tipo;
+      document.getElementById('modal-auth').classList.remove('hidden');
+      document.getElementById('auth-password').value = '';
+      setTimeout(() => document.getElementById('auth-password').focus(), 100);
+    }
+    function fecharModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
+    function validarAcessoAuth() {
+      if (document.getElementById('auth-password').value === appState.passDev) {
+        fecharModalAuth(); switchTab(appState.targetAuthTab, null);
+      } else { alert('Senha incorreta!'); }
+    }
+
     document.getElementById('reg-data').valueAsDate = new Date();
+    const inputEscalaData = document.getElementById('escala-data-inicio');
+    if (inputEscalaData) inputEscalaData.value = getLocalDateKey();
+
+    carregarDadosSalvos();
+    gerarCalendarioEscala();
   </script>
 </body>
 </html>
