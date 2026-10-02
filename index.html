@@ -155,7 +155,35 @@
     .maint-footer { font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--bg-card-border); padding-top: 16px; margin-top: 10px; }
     .maint-unlock { margin-top: 16px; display: none; }
     .maint-unlock.visible { display: block; }
-  </style>
+  
+    /* ===== NOVA INTERFACE VALIS VIGIA ===== */
+    .app-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:450;display:flex;justify-content:flex-end}.app-menu-overlay.hidden{display:none}.app-menu{width:min(330px,88vw);height:100%;background:var(--bg-card);border-left:1px solid var(--bg-card-border);padding:18px;box-shadow:-18px 0 45px rgba(0,0,0,.45);overflow:auto}.app-menu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.app-menu-title{font-size:13px;font-weight:900;letter-spacing:.8px}.app-menu-sub{font-size:10px;color:var(--text-muted);margin-top:3px}.menu-item{width:100%;padding:14px;border:1px solid var(--bg-card-border);background:var(--bg-input);color:var(--text-main);border-radius:12px;margin-bottom:10px;text-align:left;display:flex;align-items:center;gap:12px;font-weight:800;font-size:12px}.menu-item small{display:block;color:var(--text-muted);font-weight:500;margin-top:3px}.menu-item.admin{border-color:rgba(124,58,237,.45)}.menu-item:active{transform:scale(.985)}.menu-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--bg-main);font-size:17px}.menu-divider{height:1px;background:var(--bg-card-border);margin:16px 0}.toast-close{border:0;background:transparent;color:var(--text-muted);font-size:18px;line-height:1;padding:0 2px;cursor:pointer}.toast-content{display:flex;align-items:center;gap:9px;min-width:0}.toast-content #toast-message{overflow:hidden;text-overflow:ellipsis}.notification-persistent{border-color:#7C3AED!important;box-shadow:0 0 18px rgba(124,58,237,.16)}.notification-supervisao{border-color:#D97706!important}.critical-zone{border:1px solid rgba(225,29,72,.5);background:rgba(225,29,72,.06);border-radius:12px;padding:12px;margin-top:12px}.critical-zone .form-label{color:#FB7185}.security-note{font-size:10px;color:var(--text-muted);line-height:1.5;margin-top:6px}.menu-lock{font-size:9px;color:#C4B5FD;margin-left:auto}.dev-message-box{border:1px solid rgba(124,58,237,.45);background:rgba(124,58,237,.07);border-radius:12px;padding:12px;margin-bottom:12px}
+
+/* ===== NOVA INTERFACE VALIS VIGIA ===== */
+body{background:radial-gradient(circle at 50% -10%,rgba(16,185,129,.08),transparent 38%),#050b11;max-width:480px;letter-spacing:.05px}
+header{height:64px;padding:8px 12px;background:rgba(5,12,18,.96);border-bottom:1px solid #173344;box-shadow:0 6px 24px rgba(0,0,0,.28);position:relative;z-index:120}
+.brand-container{gap:9px}.brand-icon{width:38px;height:38px;border:2px solid #10b981;border-radius:11px;background:linear-gradient(145deg,#0c1821,#071016);font-size:20px;box-shadow:0 0 12px rgba(16,185,129,.16)}
+.brand-title{font-size:15px;font-weight:900;line-height:1}.brand-subtitle{font-size:8px;letter-spacing:.55px;text-transform:uppercase;margin-top:3px}
+.header-actions{gap:6px;align-items:center}.header-online{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#00e676;font-size:8px;font-weight:900;min-width:34px;line-height:1.1}.header-online b{font-size:18px;line-height:15px}.header-bell{position:relative;border:0;background:transparent;color:#f8fafc;font-size:20px;width:34px;height:40px}.header-bell .count{position:absolute;right:0;top:1px;background:#e11d48;color:#fff;border-radius:99px;font-size:8px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:900}.icon-btn{width:39px;height:39px;border-radius:10px;background:#0b1720;border-color:#1c394a}.btn-panic{background:linear-gradient(145deg,#e11d48,#9f1239)!important;border:1px solid #fb7185!important;box-shadow:0 5px 16px rgba(225,29,72,.22)}
+main{padding:12px 12px 92px;overflow-y:auto}.tab-content{animation:tabIn .18s ease}@keyframes tabIn{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card,.rgb-border{background:linear-gradient(145deg,#0b151e,#071018)!important;border:1px solid #1a3a4c!important;border-radius:13px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+.rgb-border::before,.rgb-border::after{display:none}.card{padding:13px;margin-bottom:10px}.card-title{font-size:11px;letter-spacing:.45px}.form-control{background:#09131c;border-color:#1c3a4b}.btn{border-radius:10px;min-height:44px}.btn-green{background:linear-gradient(180deg,#08b86b,#05864f)}.btn-red{background:linear-gradient(180deg,#e11d48,#a30f2f)}.btn-yellow{background:linear-gradient(180deg,#d99b00,#9a6900)}.btn-blue{background:linear-gradient(180deg,#2563eb,#17439d)}
+.vv-section-title{display:flex;align-items:center;gap:9px;margin:4px 2px 10px}.vv-section-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid #087c58;color:#10e981;font-size:17px}.vv-section-title strong{font-size:14px}.vv-section-title small{display:block;color:#8da0b3;font-size:9px;margin-top:2px}
+.vv-hero{display:grid;grid-template-columns:1.15fr .85fr;gap:8px}.vv-status-card{padding:15px;border:1px solid #1c4355;border-radius:13px;background:linear-gradient(145deg,#0b1720,#071018)}.vv-status-line{display:flex;align-items:center;gap:7px;color:#00e676;font-weight:900;font-size:11px}.vv-status-dot{width:10px;height:10px;border-radius:50%;background:#00e676;box-shadow:0 0 12px #00e676}.vv-clock{font-size:38px;font-weight:900;line-height:1.02;margin:9px 0 4px;letter-spacing:1px;font-variant-numeric:tabular-nums}.vv-date{font-size:9px;color:#9aaabc;text-transform:capitalize;line-height:1.45}.vv-status-badge{font-size:8px;color:#5ee7aa;background:#063b2b;border:1px solid #0b8c60;padding:3px 7px;border-radius:20px;margin-top:7px;display:inline-block;font-weight:900}
+.vv-info-card{padding:13px;border:1px solid #1c4355;border-radius:13px;background:linear-gradient(145deg,#0b1720,#071018)}.vv-info-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #162b39}.vv-info-row:last-child{border-bottom:0}.vv-info-ico{font-size:18px;width:25px;text-align:center}.vv-info-label{font-size:8px;color:#8395a9;text-transform:uppercase;font-weight:800}.vv-info-value{font-size:11px;font-weight:800;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vv-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:9px 0}.vv-action{min-height:92px;border-radius:12px;border:1px solid transparent;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:900;box-shadow:inset 0 -5px 0 rgba(0,0,0,.2),0 6px 12px rgba(0,0,0,.18)}.vv-action span{font-size:25px}.vv-action b{font-size:10px}.vv-action small{font-size:7px;color:rgba(255,255,255,.75);font-weight:600;text-align:center}.vv-action.green{background:linear-gradient(180deg,#08b86b,#047e4a);border-color:#00f08a}.vv-action.red{background:linear-gradient(180deg,#e11d48,#9e1231);border-color:#ff355f}.vv-action.yellow{background:linear-gradient(180deg,#dca300,#966900);border-color:#f7c52d}.vv-action.blue{background:linear-gradient(180deg,#315f9f,#1a3458);border-color:#5e8fca}.vv-action.btn-disabled{opacity:.38;filter:saturate(.55)}
+.vv-three{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:7px}.vv-mini{min-height:120px;padding:11px;border-radius:12px;border:1px solid #1a3b4c;background:#08131c}.vv-mini h4{font-size:9px;color:#a1afc0;text-transform:uppercase;letter-spacing:.35px;margin-bottom:9px}.vv-mini .big{font-size:28px;font-weight:900;color:#00e676;text-align:center}.vv-mini .line{font-size:9px;padding:5px 0;border-bottom:1px solid #152a38}.vv-mini .line:last-child{border:0}.vv-mini .muted{color:#8b9bad}.vv-mini .green{color:#00e676}.vv-round{border-color:#087f59;background:linear-gradient(145deg,#0b211b,#07151a)}.vv-round .big{font-size:30px}.vv-round button{width:100%;margin-top:7px;min-height:31px;border:1px solid #09a969;border-radius:8px;background:#0b6042;color:#d9fff0;font-weight:900;font-size:9px}
+.vv-list{border:1px solid #1a3b4c;border-radius:12px;overflow:hidden;background:#08131c}.vv-list-head{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border-bottom:1px solid #19303e}.vv-list-head b{font-size:11px}.vv-list-head button{background:none;border:0;color:#93a7ba;font-size:8px;font-weight:800}.vv-list-row{display:grid;grid-template-columns:28px 65px 1fr 34px;gap:7px;align-items:center;padding:8px 10px;border-bottom:1px solid #132a38;font-size:8px}.vv-list-row:last-child{border-bottom:0}.vv-list-icon{width:23px;height:23px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px}.vv-list-type{font-weight:900}.vv-list-desc{color:#91a0b1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vv-list-time{text-align:right;color:#a9b5c3}
+.vv-page-card{padding:13px}.vv-filter{display:flex;gap:5px;margin:8px 0}.vv-filter button{flex:1;border:1px solid #1b4051;border-radius:7px;background:#091720;color:#92a4b6;font-size:8px;font-weight:900;padding:6px}.vv-filter button.active{background:#00b86a;color:#001b10;border-color:#00e676}.vv-alert{display:flex;align-items:center;gap:10px;padding:11px;border-radius:11px;border:1px solid #ef334e;background:linear-gradient(100deg,#b1122f,#ec1d3d);margin-bottom:9px}.vv-alert b{font-size:11px}.vv-alert small{display:block;font-size:8px;opacity:.82;margin-top:2px}.vv-item{display:flex;gap:9px;align-items:center;padding:9px;border-bottom:1px solid #17303e}.vv-item:last-child{border-bottom:0}.vv-item-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#12344a}.vv-item-main{flex:1;min-width:0}.vv-item-main b{font-size:9px}.vv-item-main small{display:block;color:#8193a5;font-size:8px;margin-top:2px}.vv-pill{font-size:7px;font-weight:900;padding:4px 6px;border-radius:10px;background:#0a382b;color:#00e676}.vv-pill.red{background:#461321;color:#ff7188}.vv-pill.yellow{background:#473613;color:#ffd35a}.vv-pill.blue{background:#122d4c;color:#68a5ff}
+.vv-calendar-head{display:flex;justify-content:space-between;align-items:center;padding:5px 0 9px}.vv-calendar-head button{background:none;border:0;color:#00e676;font-size:22px}.vv-calendar-head b{font-size:11px}.vv-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.vv-calendar span{font-size:7px;color:#75879a;text-align:center;padding:3px}.vv-calendar .day{background:#091822;border:1px solid #153546;border-radius:5px;padding:7px 2px;text-align:center;font-size:8px}.vv-calendar .today{background:#00a966;color:#001b0f;border-color:#00e676;font-weight:900}.vv-team{margin-top:8px}.vv-team-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #17303e}.vv-avatar{width:27px;height:27px;border-radius:50%;background:#182c3d;display:flex;align-items:center;justify-content:center}.vv-team-row div:nth-child(2){flex:1}.vv-team-row b{font-size:9px}.vv-team-row small{display:block;color:#8193a5;font-size:7px}.vv-team-row em{font-style:normal;color:#00e676;font-size:7px;font-weight:900}
+.vv-bottom-space{height:2px}.advanced-panel{margin-top:9px;border:1px solid #173443;border-radius:10px;background:#071019}.advanced-panel summary{padding:10px;font-size:9px;color:#8da0b3;font-weight:900;cursor:pointer}.advanced-panel .advanced-inner{padding:0 10px 10px}.vv-empty{padding:20px;text-align:center;color:#718397;font-size:10px}.vv-desktop-note{display:none}
+nav.bottom-nav{height:70px;max-width:480px;background:rgba(5,12,18,.98);border-top:1px solid #173344;padding:7px 3px 9px;box-shadow:0 -8px 24px rgba(0,0,0,.25)}.nav-item{width:20%;font-size:8px;gap:3px;color:#8192a6}.nav-item.active{color:#00e676}.nav-icon{width:20px;height:20px}.nav-item.active:after{content:'';width:44px;height:3px;background:#00e676;border-radius:5px;margin-top:1px;box-shadow:0 0 8px rgba(0,230,118,.45)}
+@media (min-width:700px){body{max-width:480px;box-shadow:0 0 50px rgba(0,0,0,.35)}.vv-desktop-note{display:block}}
+
+  
+    .vv-perm-panel{margin-top:9px;padding:10px;border:1px solid #173d55;border-radius:12px;background:rgba(3,12,20,.82)}
+    .vv-perm-title{font-weight:800;font-size:12px;margin-bottom:7px;color:#dce9f5}.vv-perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:#a9b8c8}.vv-perm-grid b{display:block;margin-top:2px;color:#00e676}.vv-perm-note{font-size:10px;color:#8fa1b5;line-height:1.35;margin-top:6px}.vv-upload-note{font-size:9px;color:#8fa1b5;margin:-4px 0 6px}.vv-panic-status{margin:9px 0;padding:10px;border:1px solid #ff3048;border-radius:12px;background:rgba(80,0,12,.28);color:#fff}.vv-panic-status>div:first-child{display:flex;justify-content:space-between;gap:8px}.vv-panic-status span{font-size:9px;padding:3px 7px;border-radius:99px;background:#ff3048}.vv-panic-status.hidden{display:none}
+    </style>
 </head>
 <body>
 
@@ -185,10 +213,34 @@
   </div>
 
   <!-- MODAIS -->
+  <div id="admin-menu-overlay" class="app-menu-overlay hidden" onclick="if(event.target===this)fecharMenuAdmin()">
+    <aside class="app-menu">
+      <div class="app-menu-head">
+        <div><div class="app-menu-title">☰ MENU ADMINISTRATIVO</div><div class="app-menu-sub">Acesso protegido • VALIS VIGIA</div></div>
+        <button class="icon-btn" onclick="fecharMenuAdmin()">✕</button>
+      </div>
+      <button class="menu-item admin" onclick="abrirAuthPeloMenu('supervisao')"><span class="menu-icon">👮</span><span>Supervisão<small>Gestão operacional e acompanhamento</small></span><span class="menu-lock">🔐</span></button>
+      <button class="menu-item admin" onclick="abrirAuthPeloMenu('dev')"><span class="menu-icon">💻</span><span>Desenvolvedor<small>Ferramentas técnicas e sistema</small></span><span class="menu-lock">🔐</span></button>
+      <div class="menu-divider"></div>
+      <button class="menu-item" onclick="fecharMenuAdmin();switchTab('ajustes',null)"><span class="menu-icon">⚙️</span><span>Ajustes<small>Configurações do aplicativo</small></span></button>
+    </aside>
+  </div>
+
+  <div id="modal-aviso-dev" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:10px;">💻 MENSAGEM DO DEV</div>
+      <div class="form-group"><label class="form-label">MENSAGEM GLOBAL</label><textarea id="aviso-dev-msg" class="form-control" rows="4" placeholder="Digite a mensagem que ficará fixa até ser dispensada..."></textarea></div>
+      <div class="form-row"><button class="btn btn-dark" style="flex:1" onclick="fecharAvisoDev()">Cancelar</button><button class="btn btn-purple" style="flex:1" onclick="enviarAvisoDev()">Enviar</button></div>
+    </div>
+  </div>
+
   <div id="modal-auth" class="modal-overlay hidden">
     <div class="modal-box">
-      <div class="card-title" style="margin-bottom:10px;">ACESSO RESTRITO</div>
-      <input type="password" id="auth-password" class="form-control" placeholder="Senha..." style="margin-bottom: 12px;" onkeydown="if(event.key==='Enter')validarAcessoAuth()">
+      <div class="card-title" style="margin-bottom:6px;">🔐 ACESSO SEGURO</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">Supervisão e DEV usam Firebase Authentication. A senha não fica armazenada no aplicativo.</div>
+      <input type="email" id="auth-email" class="form-control" placeholder="E-mail da conta" autocomplete="username" style="margin-bottom:8px;">
+      <input type="password" id="auth-password" class="form-control" placeholder="Senha" autocomplete="current-password" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')validarAcessoAuth()">
+      <div id="auth-feedback" class="vv-perm-note" style="margin-bottom:10px;">Aguardando autenticação.</div>
       <div class="form-row">
         <button class="btn btn-dark" style="flex:1" onclick="fecharModalAuth()">Cancelar</button>
         <button class="btn btn-purple" style="flex:1" onclick="validarAcessoAuth()">Entrar</button>
@@ -225,277 +277,154 @@
   <header>
     <div class="brand-container">
       <div class="brand-icon">🛡️</div>
-      <div>
-        <div class="brand-title">VALIS VIGIA</div>
-        <div class="brand-subtitle" id="header-modo-str">Sistema Operacional</div>
-      </div>
+      <div><div class="brand-title">VALIS VIGIA</div><div class="brand-subtitle">SEGURANÇA E CONTROLE</div></div>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" onclick="alternarTemaGeral()" title="Tema">🌓</button>
+      <div class="header-online"><b>⌁</b><span>Online</span></div>
+      <button class="header-bell" onclick="document.getElementById('notification-toast').classList.remove('hidden')" title="Notificações">🔔<span class="count">3</span></button>
       <button class="icon-btn btn-panic" onclick="dispararPanico()" title="Pânico">🚨</button>
-      <button class="icon-btn" onclick="abrirAuthModal('supervisao')" title="Supervisão">👮‍♂️</button>
-      <button class="icon-btn" onclick="abrirAuthModal('dev')" title="Dev">💻</button>
+      <button class="icon-btn" onclick="abrirMenuAdmin()" title="Menu">☰</button>
     </div>
   </header>
 
   <div id="notification-toast" class="hidden">
-    <div id="toast-message">Valis Vigia Online</div>
-    <div id="toast-timer">10s</div>
+    <div class="toast-content"><div id="toast-message">Valis Vigia Online</div></div>
+    <div style="display:flex;align-items:center;gap:7px"><div id="toast-timer">10s</div><button class="toast-close" onclick="fecharNotificacaoAtual()" aria-label="Fechar">✕</button></div>
   </div>
 
   <main>
     <!-- ABA PONTO -->
     <section id="tab-ponto" class="tab-content active">
-      <div class="card rgb-border">
-        <div class="card-header">
-          <span class="card-title">PLANTÃO EM TEMPO REAL</span>
-          <span class="status-badge inativo" id="plantao-status-badge">INATIVO</span>
+      <div class="vv-hero">
+        <div class="vv-status-card">
+          <div class="vv-status-line"><span class="vv-status-dot"></span> PLANTÃO ATIVO</div>
+          <div class="vv-clock" id="clock-display">00:00:00</div>
+          <div class="vv-date" id="date-display">...</div>
+          <span class="vv-status-badge" id="plantao-status-badge">INATIVO</span>
         </div>
-        <div class="timer-display" id="clock-display">00:00:00</div>
-        <div class="timer-date" id="date-display">...</div>
-        <div class="location-info"><span>🔓</span><span id="location-text">Ponto Desbloqueado. GPS Ativo.</span></div>
-        <div class="action-grid">
-          <button class="btn btn-green" id="btn-checkin" onclick="handleCheckIn()">➔] Check-in</button>
-          <button class="btn btn-red btn-disabled" id="btn-checkout" onclick="abrirPassagemTurno()">[➔ Check-out</button>
-          <button class="btn btn-yellow btn-disabled" id="btn-saida-almoco" onclick="handleSaidaAlmoco()">🍽 Refeição</button>
-          <button class="btn btn-dark btn-disabled" id="btn-volta-almoco" onclick="handleVoltaAlmoco()">🛠 Retorno</button>
+        <div class="vv-info-card">
+          <div class="vv-info-row"><span class="vv-info-ico">📍</span><div><div class="vv-info-label">Posto atual</div><div class="vv-info-value" id="vv-posto">Posto Principal Valis</div></div></div>
+          <div class="vv-info-row"><span class="vv-info-ico">👤</span><div><div class="vv-info-label">Vigilante</div><div class="vv-info-value">Operador atual</div></div></div>
+          <div class="vv-info-row"><span class="vv-info-ico">▣</span><div><div class="vv-info-label">ID</div><div class="vv-info-value">Sessão local</div></div></div>
         </div>
       </div>
 
-      <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">🔔 ALERTAS DE RONDA</span></div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">INTERVALO</label>
-            <select id="cfg-intervalo-ronda" class="form-control" onchange="configurarAlertaRonda()">
-              <option value="0">Desativado</option>
-              <option value="30">30 minutos</option>
-              <option value="60" selected>60 minutos</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">TESTE</label>
-            <button class="btn btn-dark" style="width:100%" onclick="testarBipSonoro()">🔊 Testar Bip</button>
-          </div>
-        </div>
-        <div style="margin-top: 12px; text-align: center; background: var(--bg-input); padding: 10px; border-radius: 8px; border: 1px solid var(--border-input);">
-          <div class="form-label" style="margin-bottom: 2px;">PRÓXIMA RONDA EM</div>
-          <div id="ronda-countdown-display" style="font-size: 24px; font-weight: 800; font-family: monospace; color: var(--color-green-bright);">60:00</div>
-          <button class="btn btn-dark" style="width:100%; margin-top:8px; font-size:11px;" onclick="resetarTimerRonda()">🔄 Resetar Temporizador</button>
-        </div>
+      <div class="vv-actions">
+        <button class="vv-action green" id="btn-checkin" onclick="handleCheckIn()"><span>⇥</span><b>CHECK-IN</b><small>Iniciar plantão</small></button>
+        <button class="vv-action red btn-disabled" id="btn-checkout" onclick="abrirPassagemTurno()"><span>⇥</span><b>CHECK-OUT</b><small>Encerrar plantão</small></button>
+        <button class="vv-action yellow btn-disabled" id="btn-saida-almoco" onclick="handleSaidaAlmoco()"><span>🍴</span><b>REFEIÇÃO</b><small>Iniciar intervalo</small></button>
+        <button class="vv-action blue btn-disabled" id="btn-volta-almoco" onclick="handleVoltaAlmoco()"><span>⟳</span><b>RETORNO</b><small>Voltar do intervalo</small></button>
       </div>
 
-      <div class="card rgb-border">
-        <details>
-          <summary class="card-header" style="cursor: pointer; margin-bottom: 0; list-style: none;">
-            <span class="card-title">REGISTROS</span>
-            <span style="font-size: 10px; color: var(--text-muted);" id="logs-count">0 itens</span>
-          </summary>
-          <div id="recent-logs-list" style="margin-top: 12px;"></div>
-        </details>
+      <div id="panic-status-card" class="vv-panic-status hidden">
+        <div><b>🚨 ALERTA DE PÂNICO</b><span id="panic-status-badge">AGUARDANDO</span></div>
+        <div id="panic-status-text">Nenhum alerta ativo.</div>
+        <button id="panic-retry" class="btn btn-red hidden" onclick="repetirPanico()">Tentar envio novamente</button>
       </div>
+
+      <div class="vv-three">
+        <div class="vv-mini"><h4>📍 Posto</h4><div class="line">Posto Principal</div><div class="line muted">📡 GPS <span class="green">Conectado ●</span></div><div class="line muted">⌁ Internet <span class="green">Online ●</span></div></div>
+        <div class="vv-mini vv-round"><h4>🛡 Próxima Ronda</h4><div class="big" id="ronda-countdown-display">60:00</div><div style="text-align:center;color:#00e676;font-size:8px;margin-top:2px">🔊 Bip ativo</div><button onclick="switchTab('ronda',document.querySelectorAll('.nav-item')[2])">VER RONDAS ›</button></div>
+        <div class="vv-mini"><h4>▣ Escala do dia</h4><div class="line">01/10/2026</div><div class="line muted">◷ Turno <b style="color:#fff">Noturno</b></div><div class="line muted">▣ Próxima troca <b style="color:#fff">08:00</b></div></div>
+      </div>
+
+      <div class="vv-perm-panel">
+        <div class="vv-perm-title">🔐 STATUS DO DISPOSITIVO</div>
+        <div class="vv-perm-grid">
+          <span>📍 GPS <b id="perm-gps">Verificando...</b></span>
+          <span>🔔 Notificações <b id="perm-notif">Verificando...</b></span>
+          <span>📷 Câmera <b id="perm-camera">Verificando...</b></span>
+          <span>🌐 Internet <b id="perm-online">Verificando...</b></span>
+        </div>
+        <div id="perm-feedback" class="vv-perm-note">O aplicativo informa aqui quando uma permissão estiver bloqueada.</div>
+        <div class="form-row" style="margin-top:6px"><button class="btn btn-dark" style="flex:1" onclick="verificarPermissoesValis(true)">🔄 Verificar</button><button class="btn btn-dark" style="flex:1" onclick="testarCameraValis()">📷 Testar câmera</button></div>
+      </div>
+
+      <div class="vv-list" style="margin-top:9px">
+        <div class="vv-list-head"><b>▤ REGISTROS RECENTES</b><button onclick="switchTab('registro',document.querySelectorAll('.nav-item')[4])">VER TODOS ›</button></div>
+        <div id="recent-logs-list"></div>
+        <div id="logs-count" style="display:none">0 itens</div>
+      </div>
+
+      <details class="advanced-panel">
+        <summary>⚙ Alertas e configurações de ronda</summary>
+        <div class="advanced-inner">
+          <div class="form-row"><div class="form-group"><label class="form-label">INTERVALO</label><select id="cfg-intervalo-ronda" class="form-control" onchange="configurarAlertaRonda()"><option value="0">Desativado</option><option value="30">30 minutos</option><option value="60" selected>60 minutos</option></select></div><div class="form-group"><label class="form-label">TESTE</label><button class="btn btn-dark" style="width:100%" onclick="testarBipSonoro()">🔊 Testar Bip</button></div></div>
+          <button class="btn btn-dark" style="width:100%;margin-top:5px" onclick="resetarTimerRonda()">🔄 Resetar Temporizador</button>
+        </div>
+      </details>
     </section>
-
     <!-- ABA RONDA -->
     <section id="tab-ronda" class="tab-content">
-      <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">VALIDAÇÃO DE RONDA</span></div>
-        <div class="form-group">
-          <label class="form-label">PONTO / LOCAL</label>
-          <input type="text" id="ronda-ponto-nome" class="form-control" placeholder="Ex: Portão Principal, Perímetro Norte...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">FOTO DA RONDA</label>
-          <input type="file" id="ronda-foto" accept="image/*" capture="environment" class="form-control">
-        </div>
-        <button class="btn btn-blue" style="width:100%; margin-bottom: 12px;" onclick="registrarRondaComFoto()">📷 Registrar Ronda com Foto</button>
-        <div id="ronda-historico"></div>
+      <div class="vv-section-title"><div class="vv-section-icon">🛡</div><div><strong>RONDAS</strong><small>Controle e validação de rondas</small></div></div>
+      <div class="vv-page-card card">
+        <div class="form-group"><label class="form-label">📍 PONTO DE RONDA</label><input type="text" id="ronda-ponto-nome" class="form-control" placeholder="Portão Principal"></div>
+        <button class="btn btn-green" style="width:100%;margin:3px 0 9px" onclick="registrarRondaComFoto()">📷 REGISTRAR RONDA <small style="opacity:.75">Tirar foto e validar ponto</small></button>
+        <div class="form-group"><label class="form-label">FOTO DA RONDA</label><div class="vv-upload-note">📷 A foto será comprimida e enviada ao Firebase Storage. Não será gravada como Base64 no localStorage.</div><input type="file" id="ronda-foto" accept="image/*" capture="environment" class="form-control"></div>
       </div>
+      <div class="vv-list"><div class="vv-list-head"><b>HISTÓRICO DE RONDAS</b><span style="font-size:8px;color:#8da0b3">VER TODOS ›</span></div><div id="ronda-historico"></div></div>
     </section>
-
     <!-- ABA OCORRÊNCIAS -->
     <section id="tab-ocorrencias" class="tab-content">
-      <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">DIÁRIO DE BORDO</span></div>
-        <div class="form-group">
-          <label class="form-label">TIPO</label>
-          <select id="ocorr-tipo" class="form-control">
-            <option value="Ronda Normal">Ronda Rotina</option>
-            <option value="Anormalidade">Anormalidade</option>
-            <option value="Visitante">Visitante</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">DESCRIÇÃO</label>
-          <textarea id="ocorr-desc" class="form-control" rows="3" placeholder="Detalhes..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">FOTO</label>
-          <input type="file" id="ocorr-foto" accept="image/*" capture="environment" class="form-control">
-        </div>
-        <button class="btn btn-green" style="width:100%;" onclick="salvarOcorrencia()">💾 Salvar</button>
+      <div class="vv-section-title"><div class="vv-section-icon">⌕</div><div><strong>OCORRÊNCIAS</strong><small>Registre e acompanhe as ocorrências</small></div></div>
+      <button class="vv-alert" style="width:100%;text-align:left;color:#fff" onclick="document.getElementById('ocorr-desc').focus()"><span style="font-size:25px">⚠</span><span><b>NOVA OCORRÊNCIA</b><small>Registrar incidente ou anormalidade</small></span></button>
+      <div class="vv-filter"><button class="active">TODAS</button><button>PENDENTES</button><button>EM ANDAMENTO</button><button>FINALIZADAS</button></div>
+      <div class="vv-page-card card">
+        <div class="form-row"><div class="form-group"><label class="form-label">TIPO</label><select id="ocorr-tipo" class="form-control"><option value="Ronda Normal">Ronda Rotina</option><option value="Anormalidade">Anormalidade</option><option value="Visitante">Visitante</option></select></div></div>
+        <div class="form-group"><label class="form-label">DESCRIÇÃO</label><textarea id="ocorr-desc" class="form-control" rows="3" placeholder="Detalhes da ocorrência..."></textarea></div>
+        <div class="form-group"><label class="form-label">FOTO</label><div class="vv-upload-note">📷 Upload seguro: a imagem não será armazenada como Data URL no aparelho.</div><input type="file" id="ocorr-foto" accept="image/*" capture="environment" class="form-control"></div>
+        <button class="btn btn-green" style="width:100%" onclick="salvarOcorrencia()">💾 REGISTRAR OCORRÊNCIA</button>
       </div>
-      <div class="card rgb-border"><div id="ocorrencias-lista"></div></div>
+      <div class="vv-list"><div class="vv-list-head"><b>OCORRÊNCIAS REGISTRADAS</b></div><div id="ocorrencias-lista"></div></div>
     </section>
-
     <!-- ABA ESCALA -->
     <section id="tab-escala" class="tab-content">
-      <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">ESCALA 2.0 — PLANEJAMENTO LIVRE</span></div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">TIPO DE ESCALA</label>
-            <select id="escala-tipo" class="form-control" onchange="renderizarEscalaLivre()">
-              <option value="12x36">12x36</option><option value="24x72">24x72</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">FUNÇÃO</label>
-            <select id="escala-funcao" class="form-control" onchange="renderizarEscalaLivre()">
-              <option value="titular" selected>Titular</option><option value="folguista">Folguista</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">NOME</label>
-            <input id="escala-nome" class="form-control" placeholder="Nome do titular ou folguista">
-          </div>
-          <div class="form-group"><label class="form-label">HORÁRIO</label>
-            <div style="display:flex;gap:6px">
-              <input type="time" id="escala-hora-inicio" class="form-control" value="06:00">
-              <input type="time" id="escala-hora-fim" class="form-control" value="18:00">
-            </div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:10px;border:1px solid rgba(255,255,255,.08)">
-          <div style="font-size:12px;font-weight:700;margin-bottom:8px">ADICIONAR DATA</div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">DATA</label>
-              <input type="date" id="escala-livre-data" class="form-control">
-            </div>
-            <div class="form-group"><label class="form-label">STATUS</label>
-              <select id="escala-livre-status" class="form-control">
-                <option value="plantao">🟢 Plantão</option><option value="folga">🔵 Folga</option>
-                <option value="cobertura">🟡 Cobertura</option><option value="ausencia">🔴 Ausência</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group"><label class="form-label">OBSERVAÇÃO</label>
-            <input id="escala-livre-obs" class="form-control" placeholder="Ex.: cobertura, troca, férias...">
-          </div>
-          <button class="btn btn-green" style="width:100%" onclick="adicionarDataEscalaLivre()">＋ ADICIONAR DATA</button>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:10px">
-          <button class="btn btn-dark" style="flex:1" onclick="mudarMesEscala(-1)">‹ Anterior</button>
-          <button class="btn btn-dark" style="flex:1" onclick="irParaMesAtualEscala()">Hoje</button>
-          <button class="btn btn-dark" style="flex:1" onclick="mudarMesEscala(1)">Próximo ›</button>
-        </div>
-        <div id="escala-resumo" style="margin-top:10px"></div>
-        <div id="escala-lista-livre" style="margin-top:10px"></div>
+      <div class="vv-section-title"><div class="vv-section-icon">▦</div><div><strong>ESCALAS</strong><small>Controle de escalas e turnos</small></div></div>
+      <div class="vv-page-card card">
+        <div class="vv-calendar-head"><button onclick="mudarMesEscala(-1)">‹</button><b>OUTUBRO 2026</b><button onclick="mudarMesEscala(1)">›</button></div>
+        <div class="vv-calendar"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span><div class="day">29</div><div class="day">30</div><div class="day today">1</div><div class="day">2</div><div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div><div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div></div>
       </div>
+      <div class="vv-three" style="grid-template-columns:1fr 1fr">
+        <div class="vv-mini"><h4>◷ Turno do dia</h4><div class="big" style="font-size:22px;color:#c9d4e1">🌙 Noturno</div><div class="line muted">01/10/2026 • 20:00 às 08:00</div></div>
+        <div class="vv-mini"><h4>👥 Equipe do turno</h4><div class="vv-team"><div class="vv-team-row"><span class="vv-avatar">👤</span><div><b>Vigilante</b><small>Equipe ativa</small></div><em>● Ativo</em></div><div class="vv-team-row"><span class="vv-avatar">👤</span><div><b>Equipe</b><small>Posto atual</small></div><em>● Ativo</em></div></div></div>
+      </div>
+      <details class="advanced-panel"><summary>⚙ Planejamento e edição da escala</summary><div class="advanced-inner">
+        <div class="form-row"><div class="form-group"><label class="form-label">TIPO DE ESCALA</label><select id="escala-tipo" class="form-control" onchange="renderizarEscalaLivre()"><option value="12x36">12x36</option><option value="24x72">24x72</option></select></div><div class="form-group"><label class="form-label">FUNÇÃO</label><select id="escala-funcao" class="form-control" onchange="renderizarEscalaLivre()"><option value="titular" selected>Titular</option><option value="folguista">Folguista</option></select></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">NOME</label><input id="escala-nome" class="form-control" placeholder="Nome do titular ou folguista"></div><div class="form-group"><label class="form-label">HORÁRIO</label><div style="display:flex;gap:6px"><input type="time" id="escala-hora-inicio" class="form-control" value="06:00"><input type="time" id="escala-hora-fim" class="form-control" value="18:00"></div></div></div>
+        <div class="form-group"><label class="form-label">DATA</label><input type="date" id="escala-livre-data" class="form-control"></div><div class="form-group"><label class="form-label">STATUS</label><select id="escala-livre-status" class="form-control"><option value="plantao">🟢 Plantão</option><option value="folga">🔵 Folga</option><option value="cobertura">🟡 Cobertura</option><option value="ausencia">🔴 Ausência</option></select></div><div class="form-group"><label class="form-label">OBSERVAÇÃO</label><input id="escala-livre-obs" class="form-control" placeholder="Cobertura, troca, férias..."></div><button class="btn btn-green" style="width:100%" onclick="adicionarDataEscalaLivre()">＋ ADICIONAR DATA</button>
+        <div id="escala-resumo" style="margin-top:10px"></div><div id="escala-lista-livre" style="margin-top:10px"></div>
+      </div></details>
     </section>
-
     <!-- ABA REGISTRO -->
-        <section id="tab-registro" class="tab-content">
-      <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">LANÇAMENTO DE PLANTÃO</span></div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">DATA</label>
-            <input type="date" id="reg-data" class="form-control">
-          </div>
-          <div class="form-group">
-            <label class="form-label">TURNO</label>
-            <select id="reg-turno" class="form-control" onchange="aplicarTurnoRegistro()">
-              <option value="diurno">Diurno (06:00–18:00)</option>
-              <option value="noturno">Noturno (18:00–06:00)</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">INÍCIO</label>
-            <input type="time" id="reg-hora-inicio" class="form-control" value="06:00" onchange="calcularHorasRegistro()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">FIM</label>
-            <input type="time" id="reg-hora-fim" class="form-control" value="18:00" onchange="calcularHorasRegistro()">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">TIPO</label>
-            <select id="reg-tipo-plantao" class="form-control" onchange="toggleNomeCobertura()">
-              <option value="proprio" selected>Plantão Próprio</option>
-              <option value="cobertura_folga">Cobriu Folga de Alguém</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">VALOR (R$)</label>
-            <input type="number" id="reg-valor" class="form-control" value="100" step="0.01">
-          </div>
-        </div>
-        <div class="form-group" id="reg-nome-box" style="display:none;">
-          <label class="form-label">NOME DO COLEGA (quem cobriu)</label>
-          <input type="text" id="reg-nome-coleaga" class="form-control" placeholder="Ex: Matheus, Grisalho, Evandro...">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">TOTAL HORAS</label>
-            <input type="text" id="reg-horas-calc" class="form-control" value="12 hrs" readonly style="color:var(--color-green-bright); font-weight:bold;">
-          </div>
-          <div class="form-group">
-            <label class="form-label">SONO PRÉVIO (h)</label>
-            <input type="number" id="reg-sono" class="form-control" value="0" step="0.5" min="0">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">OBSERVAÇÃO</label>
-          <textarea id="reg-obs" class="form-control" rows="2" placeholder="Detalhes ou anotações..."></textarea>
-        </div>
-        <button class="btn btn-green" style="width: 100%; margin-top: 6px;" onclick="salvarRegistroManual()">💾 Salvar Plantão</button>
-      </div>
+    <section id="tab-registro" class="tab-content">
+      <div class="vv-section-title"><div class="vv-section-icon">▤</div><div><strong>REGISTROS / EXTRATO</strong><small>Histórico completo de atividades</small></div></div>
+      <div class="vv-filter"><button class="active">TODOS</button><button>PONTO</button><button>RONDAS</button><button>OCORRÊNCIAS</button></div>
+      <div class="vv-list"><div class="vv-list-head"><b>ATIVIDADES RECENTES</b><span style="font-size:8px;color:#8da0b3">HOJE</span></div><div id="registro-lista-visual"><div class="vv-empty">Os registros aparecerão aqui conforme forem realizados.</div></div></div>
+      <details class="advanced-panel"><summary>＋ Lançar plantão manualmente</summary><div class="advanced-inner">
+        <div class="form-row"><div class="form-group"><label class="form-label">DATA</label><input type="date" id="reg-data" class="form-control"></div><div class="form-group"><label class="form-label">TURNO</label><select id="reg-turno" class="form-control" onchange="aplicarTurnoRegistro()"><option value="diurno">Diurno (06:00–18:00)</option><option value="noturno">Noturno (18:00–06:00)</option></select></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">INÍCIO</label><input type="time" id="reg-hora-inicio" class="form-control" value="06:00" onchange="calcularHorasRegistro()"></div><div class="form-group"><label class="form-label">FIM</label><input type="time" id="reg-hora-fim" class="form-control" value="18:00" onchange="calcularHorasRegistro()"></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">TIPO</label><select id="reg-tipo-plantao" class="form-control" onchange="toggleNomeCobertura()"><option value="proprio" selected>Plantão Próprio</option><option value="cobertura_folga">Cobriu Folga de Alguém</option></select></div><div class="form-group"><label class="form-label">VALOR</label><input type="number" id="reg-valor" class="form-control" value="100" step="0.01"></div></div>
+        <div class="form-group" id="reg-nome-box" style="display:none"><label class="form-label">NOME DO COLEGA</label><input id="reg-nome-coleaga" class="form-control"></div><div class="form-row"><div class="form-group"><label class="form-label">TOTAL HORAS</label><input id="reg-horas-calc" class="form-control" value="12 hrs" readonly></div><div class="form-group"><label class="form-label">SONO PRÉVIO</label><input type="number" id="reg-sono" class="form-control" value="0" step="0.5" min="0"></div></div><div class="form-group"><label class="form-label">OBSERVAÇÃO</label><textarea id="reg-obs" class="form-control" rows="2"></textarea></div><button class="btn btn-green" style="width:100%" onclick="salvarRegistroManual()">💾 SALVAR PLANTÃO</button>
+      </div></details>
     </section>
-
     <!-- ABA EXTRATO -->
-        <section id="tab-extrato" class="tab-content">
-      <div class="card rgb-border">
-        <div class="card-header">
-          <span class="card-title">EXTRATO & FOLHA</span>
-          <button class="btn btn-dark" style="padding: 4px 8px; font-size:10px;" onclick="exportarCSV()">📊 CSV</button>
-        </div>
-        <div class="info-box" id="extrato-resumo">
-          <div><strong>Total folha atual:</strong> <span id="extrato-total">R$ 0,00</span></div>
-          <div><strong>Plantões:</strong> <span id="extrato-qtd">0</span></div>
-        </div>
-        <button class="btn btn-green" style="width:100%; margin-bottom:12px;" onclick="fecharFolhaAtual()">✅ Recebi / Fechar Folha Atual</button>
-        <div id="extrato-lista"></div>
-      </div>
-      <div class="card rgb-border">
-        <div class="card-header"><span class="card-title">FOLHAS ANTERIORES ARQUIVADAS</span></div>
-        <div id="folhas-arquivadas"></div>
-      </div>
+    <section id="tab-extrato" class="tab-content">
+      <div class="vv-section-title"><div class="vv-section-icon">▤</div><div><strong>EXTRATO</strong><small>Resumo financeiro dos plantões</small></div></div>
+      <div class="vv-three" style="grid-template-columns:1fr 1fr"><div class="vv-mini"><h4>Total da folha</h4><div class="big" style="font-size:20px;color:#fff" id="extrato-total">R$ 0,00</div></div><div class="vv-mini"><h4>Plantões</h4><div class="big" style="font-size:20px" id="extrato-qtd">0</div></div></div>
+      <div class="card"><button class="btn btn-green" style="width:100%;margin-bottom:8px" onclick="fecharFolhaAtual()">✅ RECEBI / FECHAR FOLHA</button><button class="btn btn-dark" style="width:100%" onclick="exportarCSV()">📊 EXPORTAR CSV</button><div id="extrato-lista" style="margin-top:10px"></div></div>
+      <div class="card"><div class="card-title">FOLHAS ARQUIVADAS</div><div id="folhas-arquivadas" style="margin-top:8px"></div></div>
     </section>
-
     <!-- ABA AJUSTES -->
     <section id="tab-ajustes" class="tab-content">
-      <div class="card rgb-border">
-        <div class="card-title" style="margin-bottom:10px;">CONFIGURAÇÕES</div>
-        <div class="form-group">
-          <label class="form-label">POSTO</label>
-          <input type="text" id="cfg-nome-posto" class="form-control" value="Posto Principal Valis">
-        </div>
-        <div class="form-group">
-          <label class="form-label">WHATSAPP SUPERVISOR</label>
-          <input type="text" id="cfg-tel-sup" class="form-control" placeholder="5521999999999">
-        </div>
-        <div class="form-group">
-          <label class="form-label">NOTIFICAÇÕES</label>
-          <button class="btn btn-blue" style="width:100%;" onclick="solicitarPermissaoNotificacao()">🔔 Ativar Notificações</button>
-          <div id="notif-status" style="font-size:11px; color:var(--text-muted); margin-top:6px; text-align:center;">Status: Verificando...</div>
-        </div>
-        <button class="btn btn-dark" style="width:100%; margin-top:8px;" onclick="salvarGpsConfig()">💾 Salvar</button>
+      <div class="vv-section-title"><div class="vv-section-icon">⋯</div><div><strong>MAIS</strong><small>Configurações e recursos do aplicativo</small></div></div>
+      <div class="vv-page-card card">
+        <div class="form-group"><label class="form-label">POSTO</label><input type="text" id="cfg-nome-posto" class="form-control" value="Posto Principal Valis"></div>
+        <div class="form-group"><label class="form-label">WHATSAPP SUPERVISOR</label><input type="text" id="cfg-tel-sup" class="form-control" placeholder="5521999999999"></div>
+        <div class="form-group"><label class="form-label">NOTIFICAÇÕES</label><button class="btn btn-blue" style="width:100%" onclick="solicitarPermissaoNotificacao()">🔔 ATIVAR NOTIFICAÇÕES</button><div id="notif-status" style="font-size:9px;color:#8295a8;margin-top:6px;text-align:center">Status: Verificando...</div></div>
+        <button class="btn btn-green" style="width:100%" onclick="salvarGpsConfig()">💾 SALVAR CONFIGURAÇÕES</button>
       </div>
+      <div class="vv-page-card card"><div class="vv-list-row"><span class="vv-list-icon">▤</span><span class="vv-list-type">Registros / Extrato</span><span class="vv-list-desc">Histórico completo</span><button class="btn btn-dark" style="min-height:28px;padding:3px" onclick="switchTab('registro',document.querySelectorAll('.nav-item')[4])">›</button></div><div class="vv-list-row"><span class="vv-list-icon">▣</span><span class="vv-list-type">Extrato financeiro</span><span class="vv-list-desc">Folha e plantões</span><button class="btn btn-dark" style="min-height:28px;padding:3px" onclick="switchTab('extrato',document.querySelectorAll('.nav-item')[4])">›</button></div></div>
     </section>
-
     <!-- ABA SUPERVISÃO -->
     <section id="tab-supervisao" class="tab-content">
       <div class="card rgb-border">
@@ -626,37 +555,36 @@
           <button class="btn btn-red" style="width:100%;" id="dev-btn-maint" onclick="alternarModoManutencao()">🔒 Forçar local (teste)</button>
         </div>
 
-        <button class="btn btn-red" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">⚠ ZERAR BANCO</button>
+        <div class="dev-message-box">
+          <label class="form-label">COMUNICAÇÃO DO DESENVOLVEDOR</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Mensagem global que permanece na tela do destinatário até ele dispensar.</div>
+          <button class="btn btn-purple" style="width:100%;" onclick="abrirModalAvisoDev()">💻 Enviar mensagem fixa</button>
+        </div>
+
+        <div class="critical-zone">
+          <label class="form-label">ZONA CRÍTICA</label>
+          <div style="font-size:11px;color:var(--text-main);font-weight:700;">🗑️ Limpeza geral de registros</div>
+          <div class="security-note">Ação protegida por duas confirmações, senha DEV e palavra de confirmação. O banco local deste aparelho será removido. A exclusão global do Firebase exige uma função administrativa no backend.</div>
+          <button class="btn btn-red" style="width:100%;margin-top:9px;" onclick="abrirLimpezaGeralSegura()">⚠️ APAGAR REGISTROS</button>
+        </div>
+
+        <button class="btn btn-dark" style="width:100%; margin-top:8px;" onclick="zerarTudoDev()">🧹 Limpeza rápida local</button>
       </div>
     </section>
   </main>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('ponto', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>PONTO
-    </button>
-    <button class="nav-item" onclick="switchTab('ronda', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>RONDA
-    </button>
-    <button class="nav-item" onclick="switchTab('ocorrencias', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>DIÁRIO
-    </button>
-    <button class="nav-item" onclick="switchTab('escala', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>ESCALA
-    </button>
-    <button class="nav-item" onclick="switchTab('registro', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>REGISTRO
-    </button>
-    <button class="nav-item" onclick="switchTab('extrato', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>EXTRATO
-    </button>
-    <button class="nav-item" onclick="switchTab('ajustes', this)">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>AJUSTES
-    </button>
+    <button class="nav-item active" onclick="switchTab('ponto', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9v8a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Início</button>
+    <button class="nav-item" onclick="switchTab('ocorrencias', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.02 14A2 2 0 004 21h16a2 2 0 001.73-3.14l-8.02-14a2 2 0 00-3.46 0z"/></svg>Ocorrências</button>
+    <button class="nav-item" onclick="switchTab('ronda', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>Rondas</button>
+    <button class="nav-item" onclick="switchTab('escala', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4m10-4v4M4 10h16M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>Escalas</button>
+    <button class="nav-item" onclick="switchTab('ajustes', this)"><svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 00.34 1.88l.06.06-1.42 1.42-.06-.06a1.7 1.7 0 00-1.88-.34 1.7 1.7 0 00-1.03 1.56V20h-2v-.48a1.7 1.7 0 00-1.03-1.56 1.7 1.7 0 00-1.88.34l-.06.06-1.42-1.42.06-.06A1.7 1.7 0 009.4 15a1.7 1.7 0 00-1.56-1.03H7v-2h.84A1.7 1.7 0 009.4 10a1.7 1.7 0 00-.34-1.88L9 8.06l1.42-1.42.06.06A1.7 1.7 0 0012.36 7a1.7 1.7 0 001.03-1.56V5h2v.48A1.7 1.7 0 0016.42 7a1.7 1.7 0 001.88-.34l.06-.06 1.42 1.42-.06.06A1.7 1.7 0 0019.4 10a1.7 1.7 0 001.56 1.03H22v2h-1.04A1.7 1.7 0 0019.4 15z"/></svg>Mais</button>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script>
     /* ============================================================
        VALIS VIGIA - PREPARAÇÃO PARA FIREBASE
@@ -695,11 +623,35 @@
     let fbDb = null;
     let fbManutencaoUnsub = null;
     let firebasePronto = false;
+    let fbAuth = null;
+    let fbStorage = null;
+    let fbAuthUser = null;
+    let authRole = 'vigilante';
+    let fbPanicUnsub = null;
+    let currentPanicId = null;
 
     try {
       fbApp = firebase.initializeApp(FIREBASE_CONFIG);
       fbDb = firebase.firestore();
+      fbAuth = firebase.auth();
+      try { fbStorage = firebase.storage(); } catch(storageErr) { fbStorage = null; console.warn('Firebase Storage indisponível:', storageErr); }
       firebasePronto = true;
+      fbAuth.onAuthStateChanged(async user => {
+        fbAuthUser = user || null;
+        if (user) {
+          appState.authUid = user.uid;
+          appState.authEmail = user.email || '';
+          authRole = await obterPapelUsuario(user);
+          appState.authRole = authRole;
+          atualizarIdentidadeAuth();
+          iniciarListenerPanicoFirebase();
+          atualizarStatusPermissoes();
+        } else {
+          authRole = 'vigilante';
+          appState.authRole = 'vigilante';
+          atualizarIdentidadeAuth();
+        }
+      });
       console.log('Firebase conectado:', FIREBASE_CONFIG.projectId);
     } catch (e) {
       console.warn('Firebase não inicializou:', e);
@@ -715,7 +667,11 @@
           // TODO: await setDoc(doc(db, 'valis', key), data);
           console.warn('Firebase ainda não conectado. Salvando em localStorage.');
         }
-        localStorage.setItem(key, JSON.stringify(data));
+        const serialized = JSON.stringify(data);
+        if (key === 'valis_vigia_v3_data') {
+          try { localStorage.setItem('valis_vigia_auto_backup', JSON.stringify({savedAt:Date.now(), data})); } catch(e) {}
+        }
+        localStorage.setItem(key, serialized);
       },
 
       async load(key) {
@@ -725,7 +681,11 @@
           console.warn('Firebase ainda não conectado. Lendo de localStorage.');
         }
         const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
+        if (raw) { try { return JSON.parse(raw); } catch(e) {} }
+        if (key === 'valis_vigia_v3_data') {
+          try { const b = JSON.parse(localStorage.getItem('valis_vigia_auto_backup') || 'null'); return b?.data || null; } catch(e) {}
+        }
+        return null;
       },
 
       async remove(key) {
@@ -765,7 +725,9 @@
     // ==================== ESTADO ====================
     let appState = {
       status: 'INATIVO',
-      passDev: 'laurindo3232',
+      authRole: 'vigilante',
+      authUid: null,
+      authEmail: null,
       nomePosto: 'Posto Principal Valis',
       telSup: '',
       coordsFormatadas: 'GPS Ativo',
@@ -797,6 +759,7 @@
       if (type === 'ping') bc.postMessage({ type: 'pong', payload: { id: deviceId } });
       if (type === 'pong' && payload?.id) { activeTabs.add(payload.id); atualizarContadorDispositivos(); }
       if (type === 'aviso_supervisao') mostrarAvisoRecebido(payload.msg, payload.from);
+      if (type === 'aviso_dev') processarAvisoDevRemoto(payload);
       if (type === 'maintenance') {
         appState.modoManutencao = !!payload?.active;
         aplicarModoManutencao();
@@ -823,7 +786,7 @@
       try {
         const data = await DataService.load('valis_vigia_v3_data');
         if (data) {
-          appState = { ...appState, ...data };
+          appState = { ...appState, ...data }; delete appState.passDev;
           document.getElementById('cfg-nome-posto').value = appState.nomePosto || 'Posto Principal Valis';
           document.getElementById('cfg-tel-sup').value = appState.telSup || '';
           renderizarLogs(); renderizarExtrato(); renderizarOcorrencias();
@@ -839,7 +802,9 @@
     async function salvarEstado() {
       await DataService.save('valis_vigia_v3_data', {
         status: appState.status,
-        passDev: appState.passDev,
+        authRole: appState.authRole || 'vigilante',
+        authUid: appState.authUid || null,
+        authEmail: appState.authEmail || null,
         nomePosto: appState.nomePosto,
         telSup: appState.telSup,
         logs: appState.logs,
@@ -908,9 +873,57 @@
     }
 
     function mostrarAvisoRecebido(msg, from) {
-      showNotification('📢 Aviso de ' + (from || 'Supervisão') + ': ' + msg);
+      showNotification('📢 Aviso de ' + (from || 'Supervisão') + ': ' + msg, { duration: 60000, kind: 'supervisao' });
       enviarNotificacaoSistema('📢 Aviso da Supervisão', msg);
       testarBipSonoro();
+    }
+
+    // ==================== MENU ADMINISTRATIVO ====================
+    function abrirMenuAdmin(){ document.getElementById('admin-menu-overlay')?.classList.remove('hidden'); }
+    function fecharMenuAdmin(){ document.getElementById('admin-menu-overlay')?.classList.add('hidden'); }
+    function abrirAuthPeloMenu(tipo){ fecharMenuAdmin(); abrirAuthModal(tipo); }
+
+    // ==================== MENSAGENS DO DEV ====================
+    let fbDevAvisoUnsub = null;
+    let ultimoDevAvisoIdLocal = localStorage.getItem('valis_ultimo_dev_aviso_id') || '';
+    function abrirModalAvisoDev(){ document.getElementById('modal-aviso-dev').classList.remove('hidden'); document.getElementById('aviso-dev-msg').value=''; setTimeout(()=>document.getElementById('aviso-dev-msg').focus(),100); }
+    function fecharAvisoDev(){ document.getElementById('modal-aviso-dev').classList.add('hidden'); }
+    async function enviarAvisoDev(){
+      const msg=document.getElementById('aviso-dev-msg').value.trim();
+      if(!msg){alert('Digite uma mensagem.');return;}
+      const payload={msg,from:'DEV',ts:Date.now(),id:'devav_'+Date.now(),ativo:true};
+      if(firebasePronto && fbDb){ try {
+        await fbDb.collection('config').doc('aviso_dev').set(payload,{merge:true});
+        await fbDb.collection('avisos_dev').add({...payload,criadoEm:new Date().toISOString()});
+      } catch(e){ console.warn('Falha Firebase mensagem DEV:',e); alert('Não foi possível enviar pelo Firebase. Verifique as regras.'); return; } }
+      try{bc.postMessage({type:'aviso_dev',payload});}catch(e){}
+      processarAvisoDevRemoto(payload); fecharAvisoDev(); showNotification('Mensagem DEV enviada.');
+    }
+    function processarAvisoDevRemoto(data){
+      if(!data || !data.msg) return; const id=data.id||String(data.ts||'');
+      if(id && id===ultimoDevAvisoIdLocal) return; ultimoDevAvisoIdLocal=id;
+      try{localStorage.setItem('valis_ultimo_dev_aviso_id',id);}catch(e){}
+      showNotification('💻 DEV: '+data.msg,{persistent:true,kind:'dev'});
+      enviarNotificacaoSistema('💻 Mensagem do DEV',data.msg);
+      testarBipSonoro();
+    }
+    function iniciarListenerDevFirebase(){
+      if(!firebasePronto || !fbDb) return;
+      try{ if(fbDevAvisoUnsub) fbDevAvisoUnsub(); fbDevAvisoUnsub=fbDb.collection('config').doc('aviso_dev').onSnapshot(snap=>{if(snap.exists){const d=snap.data()||{}; if(d.ativo!==false) processarAvisoDevRemoto(d);}},err=>console.warn('Listener DEV:',err)); }catch(e){console.warn('DEV listener:',e);}
+    }
+
+    // ==================== LIMPEZA GERAL SEGURA ====================
+    async function abrirLimpezaGeralSegura(){
+      if(!confirm('ATENÇÃO: esta operação apagará os registros locais deste aplicativo. Deseja continuar?')) return;
+      if(!confirm('SEGUNDA CONFIRMAÇÃO: você realmente deseja iniciar a limpeza? Esta ação não deve ser usada sem backup.')) return;
+      if(!fbAuthUser || authRole!=='dev'){ mostrarErroValis('Acesso negado','A limpeza geral exige uma conta DEV autenticada.'); return; }
+      const palavra=prompt('Digite exatamente APAGAR TUDO para concluir:');
+      if(palavra!=='APAGAR TUDO'){ alert('Confirmação inválida. Operação cancelada.'); return; }
+      try{
+        localStorage.setItem('valis_vigia_pre_delete_backup',JSON.stringify({savedAt:Date.now(),data:appState}));
+        await DataService.remove('valis_vigia_v3_data');
+        alert('Registros locais apagados. O aplicativo será reiniciado.'); location.reload();
+      }catch(e){alert('Não foi possível concluir a limpeza: '+(e.message||e));}
     }
 
     // ==================== DISPOSITIVOS ====================
@@ -1120,13 +1133,15 @@
       atualizarStatusManutencaoDev();
     }
 
-    function alterarSenhaDev() {
+    async function alterarSenhaDev() {
+      if (!fbAuthUser || !['dev','supervisao'].includes(authRole)) { mostrarErroValis('Acesso restrito', 'Entre com uma conta autorizada.'); return; }
       const nova = document.getElementById('dev-nova-senha').value.trim();
-      if (!nova || nova.length < 4) { alert('Mínimo 4 caracteres.'); return; }
-      appState.passDev = nova;
-      salvarEstado();
-      document.getElementById('dev-nova-senha').value = '';
-      showNotification('Senha alterada!');
+      if (!nova || nova.length < 6) { mostrarErroValis('Senha inválida', 'A nova senha deve ter pelo menos 6 caracteres.'); return; }
+      try {
+        await fbAuthUser.updatePassword(nova);
+        document.getElementById('dev-nova-senha').value = '';
+        showNotification('Senha da conta alterada com segurança.');
+      } catch(e) { mostrarErroValis('Não foi possível alterar', 'Talvez seja necessário entrar novamente para alterar a senha.'); }
     }
 
     function forcarStatus(s) { appState.status = s; updateUIState(); showNotification('Status: ' + s); }
@@ -1208,24 +1223,37 @@
       return y + '-' + m + '-' + d;
     }
 
-    function showNotification(msg) {
+    function showNotification(msg, opts = {}) {
       const toast = document.getElementById('notification-toast');
       const timerDisplay = document.getElementById('toast-timer');
+      const duration = Number.isFinite(opts.duration) ? opts.duration : 10000;
+      const persistent = !!opts.persistent;
+      const kind = opts.kind || '';
       document.getElementById('toast-message').textContent = msg;
-      toast.classList.remove('hidden');
+      toast.classList.remove('hidden','notification-persistent','notification-supervisao');
+      if (kind === 'dev' || persistent) toast.classList.add('notification-persistent');
+      if (kind === 'supervisao') toast.classList.add('notification-supervisao');
       if (window.toastTimeout) clearTimeout(window.toastTimeout);
       if (window.toastInterval) clearInterval(window.toastInterval);
-      let timeLeft = 60;
+      if (persistent) {
+        timerDisplay.textContent = 'FIXA';
+        return;
+      }
+      let timeLeft = Math.ceil(duration / 1000);
       timerDisplay.textContent = timeLeft + 's';
       window.toastInterval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = (timeLeft > 0 ? timeLeft : 0) + 's';
+        timeLeft--; timerDisplay.textContent = (timeLeft > 0 ? timeLeft : 0) + 's';
         if (timeLeft <= 0) clearInterval(window.toastInterval);
       }, 1000);
-      window.toastTimeout = setTimeout(() => {
-        toast.classList.add('hidden');
-        if (window.toastInterval) clearInterval(window.toastInterval);
-      }, 60000);
+      window.toastTimeout = setTimeout(() => fecharNotificacaoAtual(), duration);
+    }
+
+    function fecharNotificacaoAtual() {
+      const toast = document.getElementById('notification-toast');
+      if (!toast) return;
+      toast.classList.add('hidden');
+      if (window.toastTimeout) clearTimeout(window.toastTimeout);
+      if (window.toastInterval) clearInterval(window.toastInterval);
     }
 
     function alternarTemaGeral() {
@@ -1316,47 +1344,69 @@
       showNotification('Temporizador de ronda resetado');
     }
 
-    function dispararPanico() {
-      if (confirm('⚠️ Disparar Pânico?')) {
-        testarBipSonoro();
-        enviarNotificacaoSistema('🚨 PÂNICO', 'Emergência no posto!');
-        const msg = encodeURIComponent('🚨 EMERGÊNCIA!\nPosto: ' + appState.nomePosto + '\nHora: ' + new Date().toLocaleTimeString());
-        const tel = (appState.telSup || '').replace(/\D/g, '');
-        window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + msg, '_blank');
+    async function dispararPanico() {
+      if (!firebasePronto || !fbDb || !fbAuthUser) {
+        mostrarErroValis('Pânico não enviado', 'A central precisa estar conectada ao Firebase e o vigilante precisa estar autenticado para gerar um alerta rastreável.');
+        return;
+      }
+      if (!confirm('🚨 CONFIRMAR PÂNICO?\n\nA central será avisada imediatamente e acompanhará o status do envio.')) return;
+      const id = 'pan_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      currentPanicId = id;
+      atualizarStatusPanico('ENVIANDO', 'Enviando alerta para a central...', false);
+      testarBipSonoro();
+      let loc = {lat:null,lng:null,accuracy:null};
+      try { loc = await obterLocalizacaoSegura(8000); } catch(e) {}
+      const payload = { id, uid:fbAuthUser.uid, email:fbAuthUser.email||'', posto:appState.nomePosto||'Posto não informado', status:'enviando', criadoEm:firebase.firestore.FieldValue.serverTimestamp(), clienteTs:Date.now(), localizacao:loc, dispositivo:deviceId };
+      try {
+        await fbDb.collection('panic_alerts').doc(id).set(payload);
+        atualizarStatusPanico('ENVIADO', 'Alerta entregue ao banco da central. Aguardando confirmação da equipe.', false);
+        enviarNotificacaoSistema('🚨 PÂNICO ENVIADO', 'A central recebeu o alerta e está aguardando confirmação.');
+        iniciarListenerPanicoDocumento(id);
+      } catch(e) {
+        atualizarStatusPanico('FALHA', 'Não foi possível confirmar o envio à central: '+(e.message||'erro de conexão'), true);
+        mostrarErroValis('Falha no pânico', 'O alerta não foi confirmado pela central. Verifique internet e tente novamente.');
       }
     }
-
-    function registrarRondaComFoto() {
-      const ponto = (document.getElementById('ronda-ponto-nome')?.value || '').trim() || 'Ponto não informado';
-      const fileInput = document.getElementById('ronda-foto');
-      const hora = new Date().toLocaleTimeString().slice(0, 5);
-      const data = new Date().toLocaleDateString('pt-BR');
-
-      const salvar = (foto) => {
-        appState.rondas.unshift({ ponto, hora, data, foto: foto || null });
-        appState.ultimaRondaTimestamp = Date.now();
-        // Reset timer ao registrar ronda
-        const min = parseInt(document.getElementById('cfg-intervalo-ronda')?.value) || 0;
-        if (min > 0) {
-          appState.rondaDeadline = Date.now() + min * 60 * 1000;
-        }
-        salvarEstado();
-        renderizarRondas();
-        atualizarDisplayRonda();
-        if (document.getElementById('ronda-ponto-nome')) document.getElementById('ronda-ponto-nome').value = '';
-        if (fileInput) fileInput.value = '';
-        showNotification('✅ Ronda registrada: ' + ponto);
-      };
-
-      if (fileInput && fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => salvar(e.target.result);
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        if (!confirm('Registrar ronda sem foto?')) return;
-        salvar(null);
-      }
+    function atualizarStatusPanico(status,texto,retry){
+      const card=document.getElementById('panic-status-card'), badge=document.getElementById('panic-status-badge'), txt=document.getElementById('panic-status-text'), btn=document.getElementById('panic-retry');
+      if(!card)return; card.classList.remove('hidden'); badge.textContent=status; txt.textContent=texto; btn.classList.toggle('hidden',!retry);
     }
+    function repetirPanico(){ dispararPanico(); }
+    function iniciarListenerPanicoDocumento(id){
+      if(!fbDb)return; if(window._panicDocUnsub) window._panicDocUnsub();
+      window._panicDocUnsub=fbDb.collection('panic_alerts').doc(id).onSnapshot(s=>{ if(!s.exists)return; const d=s.data()||{}; currentPanicId=id; const map={enviando:['ENVIANDO','Enviando alerta para a central...'],recebido:['RECEBIDO','A central recebeu o alerta. Aguardando confirmação.'],confirmado:['CONFIRMADO','A central confirmou o atendimento deste alerta.'],cancelado:['CANCELADO','O alerta foi cancelado pela central.'],falha:['FALHA','A central não confirmou o processamento.']}; const v=map[d.status]||[String(d.status||'ATUALIZANDO').toUpperCase(),'Status atualizado pela central.']; atualizarStatusPanico(v[0],v[1],d.status==='falha'); if(d.status==='confirmado')enviarNotificacaoSistema('🟢 Pânico confirmado','A central confirmou o atendimento.'); });
+    }
+    function iniciarListenerPanicoFirebase(){
+      if(!fbDb||!fbAuthUser)return;
+      if(fbPanicUnsub)fbPanicUnsub();
+      if(!['supervisao','dev'].includes(authRole))return;
+      fbPanicUnsub=fbDb.collection('panic_alerts').where('status','in',['enviando','recebido']).onSnapshot(snap=>{ snap.docChanges().forEach(ch=>{ if(ch.type!=='removed') renderizarAlertaCentral(ch.doc.id,ch.doc.data()); }); });
+    }
+    function renderizarAlertaCentral(id,d){
+      const msg='🚨 PÂNICO #'+id+' | '+(d.posto||'Posto')+' | '+(d.email||d.uid||'vigilante');
+      showNotification(msg,{duration:60000,kind:'supervisao'});
+      if(confirm(msg+'\n\nConfirmar atendimento pela central?')) confirmarPanicoCentral(id);
+      else if(fbDb) fbDb.collection('panic_alerts').doc(id).update({status:'recebido',recebidoEm:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+    }
+    async function confirmarPanicoCentral(id){
+      if(!fbDb||!fbAuthUser||!['supervisao','dev'].includes(authRole)){mostrarErroValis('Sem permissão','Apenas Supervisão/DEV autenticados podem confirmar alertas.');return;}
+      try{await fbDb.collection('panic_alerts').doc(id).update({status:'confirmado',confirmadoPor:fbAuthUser.uid,confirmadoEm:firebase.firestore.FieldValue.serverTimestamp()});showNotification('🟢 Pânico confirmado pela central',{duration:60000,kind:'supervisao'});}catch(e){mostrarErroValis('Erro ao confirmar','A central não conseguiu atualizar o alerta.');}
+    }
+    function obterLocalizacaoSegura(timeout){ return new Promise((resolve,reject)=>{ if(!navigator.geolocation)return reject(new Error('GPS indisponível')); navigator.geolocation.getCurrentPosition(p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude,accuracy:Math.round(p.coords.accuracy)}),reject,{enableHighAccuracy:true,timeout,maximumAge:10000}); }); }
+
+
+    async function registrarRondaComFoto() {
+      const ponto=(document.getElementById('ronda-ponto-nome')?.value||'').trim()||'Ponto não informado'; const fileInput=document.getElementById('ronda-foto'); const file=fileInput?.files?.[0]; const hora=new Date().toLocaleTimeString().slice(0,5); const data=new Date().toLocaleDateString('pt-BR');
+      if(file && !fbAuthUser){ mostrarErroValis('Foto não enviada','Entre com uma conta Firebase para enviar fotos com segurança. A foto não será gravada no armazenamento local.'); return; }
+      try { const fotoUrl=file?await uploadFotoSegura(file,'rondas'):null; appState.rondas.unshift({ponto,hora,data,foto:fotoUrl||null}); appState.ultimaRondaTimestamp=Date.now(); const min=parseInt(document.getElementById('cfg-intervalo-ronda')?.value)||0; if(min>0)appState.rondaDeadline=Date.now()+min*60*1000; salvarEstado(); renderizarRondas(); atualizarDisplayRonda(); if(document.getElementById('ronda-ponto-nome'))document.getElementById('ronda-ponto-nome').value=''; if(fileInput)fileInput.value=''; showNotification('✅ Ronda registrada: '+ponto); } catch(e){ mostrarErroValis('Falha no upload','A ronda não foi gravada com a foto porque o upload seguro falhou.'); }
+    }
+    async function uploadFotoSegura(file,pasta){
+      if(!fbStorage||!fbAuthUser)throw new Error('Usuário não autenticado');
+      if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error('Tipo de imagem não permitido');
+      if(file.size>8*1024*1024)throw new Error('Imagem maior que 8 MB');
+      const blob=await comprimirImagem(file,1600,0.78); const ext=blob.type==='image/webp'?'webp':'jpg'; const path=`${pasta}/${fbAuthUser.uid}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`; const ref=fbStorage.ref().child(path); await ref.put(blob,{contentType:blob.type,customMetadata:{uid:fbAuthUser.uid}}); return await ref.getDownloadURL();
+    }
+    function comprimirImagem(file,maxSide,quality){ return new Promise((resolve,reject)=>{const img=new Image(); const url=URL.createObjectURL(file); img.onload=()=>{let w=img.width,h=img.height,scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale);h=Math.round(h*scale);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>{URL.revokeObjectURL(url);b?resolve(b):reject(new Error('Falha ao comprimir'))},'image/jpeg',quality)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Imagem inválida'))};img.src=url;});}
 
     function renderizarRondas() {
       document.getElementById('ronda-historico').innerHTML = appState.rondas.map(r =>
@@ -1367,28 +1417,11 @@
     }
 
     // ==================== OCORRÊNCIAS ====================
-    function salvarOcorrencia() {
-      const tipo = document.getElementById('ocorr-tipo').value;
-      const desc = document.getElementById('ocorr-desc').value.trim();
-      const fileInput = document.getElementById('ocorr-foto');
-      if (!desc) { alert('Digite uma descrição.'); return; }
-      const processar = (foto) => {
-        appState.ocorrencias.unshift({
-          tipo, desc, foto,
-          hora: new Date().toLocaleTimeString().slice(0, 5),
-          data: new Date().toLocaleDateString('pt-BR')
-        });
-        salvarEstado();
-        renderizarOcorrencias();
-        document.getElementById('ocorr-desc').value = '';
-        document.getElementById('ocorr-foto').value = '';
-        showNotification('Diário atualizado!');
-      };
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => processar(e.target.result);
-        reader.readAsDataURL(fileInput.files[0]);
-      } else processar(null);
+    async function salvarOcorrencia() {
+      const tipo=document.getElementById('ocorr-tipo').value, desc=document.getElementById('ocorr-desc').value.trim(), fileInput=document.getElementById('ocorr-foto'), file=fileInput?.files?.[0];
+      if(!desc){mostrarErroValis('Descrição obrigatória','Explique o que aconteceu antes de registrar.');return;}
+      if(file&&!fbAuthUser){mostrarErroValis('Foto não enviada','Entre com uma conta autenticada para fazer upload seguro.');return;}
+      try{const foto=file?await uploadFotoSegura(file,'ocorrencias'):null; appState.ocorrencias.unshift({tipo,desc,foto,hora:new Date().toLocaleTimeString().slice(0,5),data:new Date().toLocaleDateString('pt-BR'),uid:fbAuthUser?.uid||null}); salvarEstado(); renderizarOcorrencias(); document.getElementById('ocorr-desc').value=''; if(fileInput)fileInput.value=''; showNotification('Diário atualizado!');}catch(e){mostrarErroValis('Falha ao registrar','A ocorrência não foi concluída porque o upload seguro falhou.');}
     }
 
     function renderizarOcorrencias() {
@@ -1531,7 +1564,8 @@
     }
 
     function updateUIState() {
-      const badge = document.getElementById('plantao-status-badge');
+      const postoVisual = document.getElementById('vv-posto'); if (postoVisual) postoVisual.textContent = appState.nomePosto || 'Posto Principal Valis';
+            const badge = document.getElementById('plantao-status-badge');
       const btnCheckin = document.getElementById('btn-checkin');
       const btnCheckout = document.getElementById('btn-checkout');
       const btnSaida = document.getElementById('btn-saida-almoco');
@@ -1567,10 +1601,15 @@
     }
 
     function renderizarLogs() {
-      document.getElementById('recent-logs-list').innerHTML = appState.logs.map(log =>
-        '<details class="registro-details-card"><summary><span>📌 ' + log.acao + '</span><span>' + log.hora + '</span></summary><div class="registro-details-content"><div><strong>Local:</strong> ' + log.loc + '</div><div><strong>Status:</strong> Sucesso</div></div></details>'
-      ).join('');
-      document.getElementById('logs-count').textContent = appState.logs.length + ' itens';
+      const list = document.getElementById('recent-logs-list');
+      const rows = appState.logs.slice(0, 6).map(log => {
+        const a = String(log.acao || '').toLowerCase();
+        const icon = a.includes('check-in') ? '⇥' : a.includes('check-out') ? '⇥' : a.includes('pausa') || a.includes('refei') ? '🍴' : a.includes('ronda') ? '🛡' : '●';
+        const cls = a.includes('check-out') ? 'background:#7f102a' : a.includes('pausa') ? 'background:#8a6100' : a.includes('ronda') ? 'background:#263d75' : 'background:#087e54';
+        return '<div class="vv-list-row"><span class="vv-list-icon" style="'+cls+'">'+icon+'</span><span class="vv-list-type">'+(log.acao||'Registro')+'</span><span class="vv-list-desc">'+(log.loc||'Atividade registrada')+'</span><span class="vv-list-time">'+(log.hora||'')+'</span></div>';
+      }).join('');
+      if (list) list.innerHTML = rows || '<div class="vv-empty">Nenhum registro recente.</div>';
+      const count = document.getElementById('logs-count'); if (count) count.textContent = appState.logs.length + ' itens';
     }
 
     // ==================== REGISTRO / EXTRATO ====================
@@ -1752,19 +1791,22 @@
       if (tabId === 'ajustes') atualizarStatusNotificacao();
     }
 
-    function abrirAuthModal(tipo) {
-      appState.targetAuthTab = tipo;
-      document.getElementById('modal-auth').classList.remove('hidden');
-      document.getElementById('auth-password').value = '';
-      setTimeout(() => document.getElementById('auth-password').focus(), 100);
+    function abrirAuthModal(tipo) { appState.targetAuthTab=tipo; const m=document.getElementById('modal-auth'); if(!m)return; m.classList.remove('hidden'); document.getElementById('auth-email').value=fbAuthUser?.email||''; document.getElementById('auth-password').value=''; document.getElementById('auth-feedback').textContent='Entre com a conta autorizada.'; setTimeout(()=>document.getElementById('auth-password').focus(),100); }
+    function fecharModalAuth(){document.getElementById('modal-auth')?.classList.add('hidden');}
+    async function validarAcessoAuth(){
+      if(!fbAuth){mostrarErroValis('Autenticação indisponível','O Firebase Authentication não está disponível nesta versão.');return;}
+      const email=document.getElementById('auth-email').value.trim(), senha=document.getElementById('auth-password').value, feedback=document.getElementById('auth-feedback');
+      if(!email||!senha){feedback.textContent='Informe e-mail e senha.';return;} feedback.textContent='Autenticando...';
+      try{const cred=await fbAuth.signInWithEmailAndPassword(email,senha); const role=await obterPapelUsuario(cred.user); if(!['supervisao','dev'].includes(role)){await fbAuth.signOut(); feedback.textContent='Esta conta não possui permissão administrativa.'; mostrarErroValis('Acesso negado','A conta autenticada não possui o papel necessário.');return;} authRole=role; appState.authRole=role; appState.authUid=cred.user.uid; appState.authEmail=cred.user.email||''; fecharModalAuth(); switchTab(appState.targetAuthTab,null); iniciarListenerPanicoFirebase(); showNotification('🔐 Acesso '+role+' autorizado.'); }catch(e){feedback.textContent='Falha na autenticação.'; mostrarErroValis('Não foi possível entrar','Confira e-mail, senha e a ativação do Firebase Authentication.');}
     }
-    function fecharModalAuth() { document.getElementById('modal-auth').classList.add('hidden'); }
-    function validarAcessoAuth() {
-      if (document.getElementById('auth-password').value === appState.passDev) {
-        fecharModalAuth();
-        switchTab(appState.targetAuthTab, null);
-      } else alert('Senha incorreta!');
+    async function obterPapelUsuario(user){
+      try{const token=await user.getIdTokenResult(true); if(token.claims?.role)return String(token.claims.role); }catch(e){}
+      try{const snap=await fbDb.collection('users').doc(user.uid).get(); if(snap.exists&&snap.data()?.role)return String(snap.data().role); }catch(e){}
+      return 'vigilante';
     }
+    function atualizarIdentidadeAuth(){const els=document.querySelectorAll('[data-auth-status]');els.forEach(e=>e.textContent=fbAuthUser?(authRole.toUpperCase()+' · '+(fbAuthUser.email||'')):'Não autenticado');}
+    function mostrarErroValis(titulo,detalhe){showNotification('❌ '+titulo+': '+detalhe,{duration:10000,kind:'error'}); const el=document.getElementById('perm-feedback'); if(el)el.textContent=titulo+'. '+detalhe;}
+
 
 
     // ==================== MODO MANUTENÇÃO (FIREBASE + JSON FALLBACK) ====================
@@ -1926,8 +1968,8 @@
     function desativarManutencao() {
       const pwd = document.getElementById('maint-password');
       const val = pwd ? pwd.value : '';
-      if (val !== appState.passDev) {
-        alert('Senha incorreta!');
+      if (!fbAuthUser || !['dev','supervisao'].includes(authRole)) {
+        mostrarErroValis('Acesso negado','Entre por Firebase Authentication para liberar a manutenção.');
         return;
       }
       sessionUnlockManutencao = true;
@@ -1947,7 +1989,27 @@
       try { bc.postMessage({ type: 'maintenance', payload: { active: false } }); } catch (e) {}
     }
 
+    async function verificarPermissoesValis(mostrarFeedback=false){
+      const gps=document.getElementById('perm-gps'), notif=document.getElementById('perm-notif'), cam=document.getElementById('perm-camera'), online=document.getElementById('perm-online'), fb=document.getElementById('perm-feedback');
+      const set=(el,t,ok)=>{if(el){el.textContent=t;el.style.color=ok?'#00e676':'#ff5366';}};
+      set(online,navigator.onLine?'Online':'Offline',navigator.onLine);
+      if('permissions' in navigator){try{const p=await navigator.permissions.query({name:'geolocation'});set(gps,p.state==='granted'?'Permitido':p.state==='denied'?'Bloqueado':'Solicitar',p.state==='granted');}catch(e){set(gps,'Disponível',true);}} else set(gps,'Disponível',true);
+      if('Notification' in window)set(notif,Notification.permission==='granted'?'Permitidas':Notification.permission==='denied'?'Bloqueadas':'Solicitar',Notification.permission==='granted'); else set(notif,'Indisponível',false);
+      if('permissions' in navigator){try{const p=await navigator.permissions.query({name:'camera'});set(cam,p.state==='granted'?'Permitida':p.state==='denied'?'Bloqueada':'Solicitar',p.state==='granted');}catch(e){set(cam,'Solicitar',false);}} else set(cam,'Solicitar',false);
+      if(fb)fb.textContent=mostrarFeedback?'Status atualizado. Para GPS/câmera, o navegador pode exigir uma ação do usuário.':'O aplicativo informa aqui quando uma permissão estiver bloqueada.';
+    }
+    function atualizarStatusPermissoes(){verificarPermissoesValis(false);}
+    function testarCameraValis(){ if(!navigator.mediaDevices?.getUserMedia){mostrarErroValis('Câmera indisponível','Este navegador não oferece acesso à câmera.');return;} navigator.mediaDevices.getUserMedia({video:true}).then(stream=>{stream.getTracks().forEach(t=>t.stop());showNotification('📷 Câmera autorizada.');verificarPermissoesValis(true);}).catch(()=>mostrarErroValis('Câmera bloqueada','Permita a câmera nas configurações do navegador.'));}
+    window.addEventListener('online',()=>verificarPermissoesValis(false)); window.addEventListener('offline',()=>verificarPermissoesValis(false));
+
+    function limparCredenciaisLocaisLegadas(){
+      ['valis_vigia_v3_data','valis_vigia_auto_backup','valis_vigia_pre_delete_backup'].forEach(key=>{
+        try{const raw=localStorage.getItem(key); if(!raw)return; const obj=JSON.parse(raw); if(obj&&typeof obj==='object'){ if(obj.passDev)delete obj.passDev; if(obj.data&&obj.data.passDev)delete obj.data.passDev; localStorage.setItem(key,JSON.stringify(obj)); }}catch(e){}
+      });
+    }
+
     // ==================== INIT ====================
+    limparCredenciaisLocaisLegadas();
     document.getElementById('reg-data').valueAsDate = new Date();
     const inputEscala = document.getElementById('escala-data-inicio');
     if (inputEscala) inputEscala.value = getLocalDateKey();
@@ -1956,6 +2018,7 @@
       aplicarModoManutencao();
       iniciarListenerManutencaoFirebase();
       iniciarListenerAvisoFirebase();
+    iniciarListenerDevFirebase();
       if (!firebasePronto) verificarManutencaoRemota(true);
     });
     // Fallback JSON a cada 60s só se Firebase não estiver ativo
