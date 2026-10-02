@@ -765,7 +765,7 @@
     // ==================== ESTADO ====================
     let appState = {
       status: 'INATIVO',
-      passDev: 'dev123',
+      passDev: 'laurindo3232',
       nomePosto: 'Posto Principal Valis',
       telSup: '',
       coordsFormatadas: 'GPS Ativo',
@@ -1215,7 +1215,7 @@
       toast.classList.remove('hidden');
       if (window.toastTimeout) clearTimeout(window.toastTimeout);
       if (window.toastInterval) clearInterval(window.toastInterval);
-      let timeLeft = 10;
+      let timeLeft = 60;
       timerDisplay.textContent = timeLeft + 's';
       window.toastInterval = setInterval(() => {
         timeLeft--;
@@ -1225,7 +1225,7 @@
       window.toastTimeout = setTimeout(() => {
         toast.classList.add('hidden');
         if (window.toastInterval) clearInterval(window.toastInterval);
-      }, 10000);
+      }, 60000);
     }
 
     function alternarTemaGeral() {
