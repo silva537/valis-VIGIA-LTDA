@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="theme-color" content="#020617">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>VALIS VIGIA LTDA</title>
   <style>
     :root {
@@ -829,8 +831,6 @@
 
   <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarArquivo(event)">
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script>
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyBpIuf5yokj51txTYgnER7T27IamB_pdLo",
@@ -843,11 +843,45 @@
     };
     const SENHA_DEV = 'laurindo3232';
     let fbApp = null, fbDb = null, firebaseOk = false;
-    try {
-      fbApp = firebase.initializeApp(FIREBASE_CONFIG);
-      fbDb = firebase.firestore();
-      firebaseOk = true;
-    } catch (e) { console.warn(e); }
+
+    function loadScript(src, timeoutMs) {
+      return new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        let done = false;
+        const finish = (ok) => { if (done) return; done = true; resolve(ok); };
+        const t = setTimeout(() => finish(false), timeoutMs || 8000);
+        s.onload = () => { clearTimeout(t); finish(true); };
+        s.onerror = () => { clearTimeout(t); finish(false); };
+        document.head.appendChild(s);
+      });
+    }
+
+    async function initFirebase() {
+      try {
+        if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
+          fbApp = firebase.app();
+          fbDb = firebase.firestore();
+          firebaseOk = true;
+          return true;
+        }
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
+        const a = await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js', 8000);
+        if (!a || typeof firebase === 'undefined') return false;
+        const b = await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js', 8000);
+        if (!b || !firebase.firestore) return false;
+        fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+        fbDb = firebase.firestore();
+        try { fbDb.settings({ ignoreUndefinedProperties: true }); } catch (e) {}
+        firebaseOk = true;
+        return true;
+      } catch (e) {
+        console.warn('Firebase init falhou (app continua offline):', e);
+        firebaseOk = false;
+        return false;
+      }
+    }
 
     const DataService = {
       mode: localStorage.getItem('valis_fb_mode') || 'firebase',
@@ -2107,14 +2141,38 @@
       const texto = encodeURIComponent(
         `*VALIS VIGIA — Relatório*\nPostos: ${db.postos.length}\nEscalas: ${db.esc.length}\nOcorrências: ${db.oco.length}\nUsuários: ${db.users.length}\nPor: ${usuarioAtual ? usuarioAtual.nome : '—'}\n${new Date().toLocaleString('pt-BR')}`
       );
-      window.open(`https://wa.me/55${tel}?text=${texto}`, '_blank');
+      const url = `https://wa.me/55${tel}?text=${texto}`;
+      try {
+        const w = window.open(url, '_blank');
+        if (!w) window.location.href = url;
+      } catch (e) {
+        window.location.href = url;
+      }
     }
 
     document.getElementById('ed').value = new Date().toISOString().slice(0, 10);
     const plData = document.getElementById('pl-data');
     if (plData) plData.value = new Date().toISOString().slice(0, 10);
-    plantaoCalcHoras();
-    carregar();
+    try { plantaoCalcHoras(); } catch (e) {}
+
+    window.addEventListener('error', function(ev) {
+      console.warn('Erro capturado:', ev.message || ev);
+    });
+    window.addEventListener('unhandledrejection', function(ev) {
+      console.warn('Promise rejeitada:', ev.reason);
+    });
+
+    (async function boot() {
+      try { await initFirebase(); } catch (e) { firebaseOk = false; }
+      try {
+        await carregar();
+      } catch (e) {
+        console.warn('carregar falhou, modo local', e);
+        try { await garantirAdmin(); render(); } catch (e2) {}
+      }
+      const st = document.getElementById('status-fb');
+      if (st) st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Offline';
+    })();
   </script>
 </body>
 </html>
