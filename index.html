@@ -1423,27 +1423,45 @@
           ).join('') || '<div class="empty">Nenhuma crítica</div>';
           toast('Críticas filtradas');
           break;
-        case 6:
-          box.innerHTML = db.esc.filter(e => e.s === 'Plantão').map(e =>
-            `<div class="item"><b>${e.n}</b> ${statusBadge(e.s)}<div class="meta">${e.d} · ${e.t} · ${e.p}</div></div>`
-          ).join('') || '<div class="empty">Ninguém em plantão</div>';
+        case 6: {
+          const escalas = db.esc.filter(e => e.s === 'Plantão').map(e =>
+            `<div class="item"><b>${e.n}</b> ${statusBadge(e.s)}<div class="meta">Escala · ${e.d} · ${e.t} · ${e.p}</div></div>`
+          ).join('');
+          const lanc = (db.plantaoes || []).map(x =>
+            `<div class="item"><b>${x.por || '—'}</b><div class="meta">Lançamento · ${x.data} · ${x.turno} · ${moneyBR(x.valor)}</div><div class="meta">${x.tipo} · ${x.horas}</div></div>`
+          ).join('');
+          box.innerHTML = (escalas || '') + (lanc || '') || '<div class="empty">Nenhum plantão</div>';
+          if (!escalas && !lanc) box.innerHTML = '<div class="empty">Nenhum plantão</div>';
           toast('Plantões listados');
           break;
+        }
         case 7:
           box.innerHTML = db.postos.map(p =>
             `<div class="item"><b>📍 ${p.n}</b><div class="meta">${p.d || '—'}</div></div>`
           ).join('') || '<div class="empty">Sem postos</div>';
           toast('Postos');
           break;
-        case 8:
+        case 8: {
+          const pl = db.plantaoes || [];
+          const porUser = {};
+          pl.forEach(x => {
+            const k = x.userLogin || x.por || '—';
+            if (!porUser[k]) porUser[k] = { qtd: 0, total: 0, nome: x.por || k };
+            porUser[k].qtd++;
+            porUser[k].total += (x.valor || 0);
+          });
+          const linhas = Object.keys(porUser).map(k => {
+            const u = porUser[k];
+            return `<div class="item"><b>${u.nome}</b> <span class="meta">@${k}</span><div class="meta">${u.qtd} plantão(ões) · ${moneyBR(u.total)}</div></div>`;
+          }).join('') || '<div class="empty">Nenhum plantão lançado</div>';
           box.innerHTML = `
-            <div class="item"><b>${db.postos.length}</b> postos</div>
-            <div class="item"><b>${db.esc.length}</b> escalas · <b>${db.esc.filter(e=>e.s==='Plantão').length}</b> em plantão</div>
-            <div class="item"><b>${db.oco.length}</b> ocorrências · <b>${db.oco.filter(o=>o.tipo==='Emergência').length}</b> emergências</div>
-            <div class="item"><b>${db.users.filter(u=>u.ativo!==false).length}</b> usuários ativos</div>
-            <div class="item"><b>${db.msg.length}</b> mensagens</div>`;
+            <div class="item"><b>${pl.length}</b> plantões na folha atual</div>
+            <div class="item"><b>${db.postos.length}</b> postos · <b>${db.users.filter(u=>u.ativo!==false).length}</b> usuários</div>
+            <div class="card-label" style="margin-top:10px">Plantões por pessoa</div>
+            ${linhas}`;
           toast('Resumo do dia');
           break;
+        }
         case 9:
           box.innerHTML = (db.atividades || []).slice(0, 12).map(a =>
             `<div class="item"><div class="meta">${a.h}</div><b style="font-size:13px">${a.t}</b></div>`
@@ -1494,6 +1512,35 @@
       const hrs = (min / 60);
       document.getElementById('pl-horas').value = (hrs % 1 === 0 ? hrs : hrs.toFixed(1)) + ' hrs';
     }
+    function podeVerTodosPlantaoes() {
+      return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor');
+    }
+    function plantaoDoUsuario(x) {
+      if (!usuarioAtual) return false;
+      if (x.userLogin) return x.userLogin === usuarioAtual.user;
+      if (x.userId != null) return x.userId === usuarioAtual.id;
+      // legado: só nome
+      return (x.por || '') === usuarioAtual.nome;
+    }
+    function plantaoesDoExtrato() {
+      const all = db.plantaoes || [];
+      if (podeVerTodosPlantaoes()) return all;
+      return all.filter(plantaoDoUsuario);
+    }
+    function folhasDoExtrato() {
+      const all = db.folhasArquivadas || [];
+      if (podeVerTodosPlantaoes()) return all;
+      return all.filter(f => {
+        if (f.userLogin) return f.userLogin === usuarioAtual.user;
+        if (f.por) return f.por === (usuarioAtual && usuarioAtual.nome);
+        // se a folha tem itens, verifica se algum é do usuário
+        if (f.itens && usuarioAtual) {
+          return f.itens.some(plantaoDoUsuario);
+        }
+        return false;
+      });
+    }
+
     async function salvarPlantao() {
       const data = document.getElementById('pl-data').value;
       const valor = parseFloat(document.getElementById('pl-valor').value) || 0;
@@ -1512,6 +1559,8 @@
         cobriu: document.getElementById('pl-cobriu').value.trim() || (usuarioAtual ? usuarioAtual.nome : '—'),
         obs: document.getElementById('pl-obs').value.trim(),
         por: usuarioAtual ? usuarioAtual.nome : '—',
+        userLogin: usuarioAtual ? usuarioAtual.user : '',
+        userId: usuarioAtual ? usuarioAtual.id : null,
         criadoEm: new Date().toISOString()
       };
       if (!db.plantaoes) db.plantaoes = [];
@@ -1526,27 +1575,36 @@
       tab('extrato');
     }
     async function excluirPlantao(id) {
+      const item = (db.plantaoes || []).find(x => x.id === id);
+      if (!item) return;
+      if (!podeVerTodosPlantaoes() && !plantaoDoUsuario(item)) {
+        return alert('Você só pode excluir os seus plantões.');
+      }
       if (!confirm('Excluir este plantão da folha atual?')) return;
       db.plantaoes = (db.plantaoes || []).filter(x => x.id !== id);
       await salvar();
+      await backupPlantaoesAuto('excluir');
       render();
       toast('Excluído');
     }
     async function fecharFolha() {
-      const lista = db.plantaoes || [];
-      if (!lista.length) return alert('Folha atual vazia.');
-      if (!confirm('Confirmar recebimento e arquivar a folha atual?')) return;
+      const lista = plantaoesDoExtrato();
+      if (!lista.length) return alert('Sua folha atual está vazia.');
+      if (!confirm('Confirmar recebimento e arquivar ' + (podeVerTodosPlantaoes() ? 'a folha visível' : 'a SUA folha') + '?')) return;
       const total = lista.reduce((s, x) => s + (x.valor || 0), 0);
+      const ids = new Set(lista.map(x => x.id));
       if (!db.folhasArquivadas) db.folhasArquivadas = [];
       db.folhasArquivadas.unshift({
         id: Date.now(),
         fechadoEm: new Date().toLocaleString('pt-BR'),
         por: usuarioAtual ? usuarioAtual.nome : '—',
+        userLogin: usuarioAtual ? usuarioAtual.user : '',
         total,
         qtd: lista.length,
         itens: lista.slice()
       });
-      db.plantaoes = [];
+      // remove só os plantões arquivados (não apaga de outros usuários)
+      db.plantaoes = (db.plantaoes || []).filter(x => !ids.has(x.id));
       addAtividade('Folha fechada: R$ ' + total.toFixed(2) + ' (' + lista.length + ' plantões)');
       await salvar();
       await backupPlantaoesAuto('fechar_folha');
@@ -1554,8 +1612,8 @@
       toast('Folha arquivada');
     }
     function exportarExtratoCSV() {
-      const lista = db.plantaoes || [];
-      if (!lista.length) return alert('Nada para exportar na folha atual.');
+      const lista = plantaoesDoExtrato();
+      if (!lista.length) return alert('Nada para exportar na sua folha.');
       const sep = ';';
       const lines = [['Data','Turno','Início','Fim','Tipo','Valor','Horas','Sono','Cobriu','Obs','Por'].join(sep)];
       lista.forEach(x => {
@@ -1827,23 +1885,25 @@
       document.getElementById('live-oco').textContent = db.oco.length;
       document.getElementById('live-users').textContent = db.users.filter(u => u.ativo !== false).length;
 
-      // Extrato
+      // Extrato (filtrado por login; supervisão/admin veem todos)
       if (!db.plantaoes) db.plantaoes = [];
       if (!db.folhasArquivadas) db.folhasArquivadas = [];
-      const totalFolha = db.plantaoes.reduce((s, x) => s + (x.valor || 0), 0);
+      const listaEx = plantaoesDoExtrato();
+      const totalFolha = listaEx.reduce((s, x) => s + (x.valor || 0), 0);
       const elTot = document.getElementById('ex-total');
       const elQtd = document.getElementById('ex-qtd');
       if (elTot) elTot.textContent = moneyBR(totalFolha);
-      if (elQtd) elQtd.textContent = db.plantaoes.length;
+      if (elQtd) elQtd.textContent = listaEx.length;
       const exLista = document.getElementById('ex-lista');
       if (exLista) {
-        exLista.innerHTML = db.plantaoes.length
-          ? db.plantaoes.map(x => `
+        const labelTodos = podeVerTodosPlantaoes() ? ' (visão supervisão — todos)' : ' (somente os seus)';
+        exLista.innerHTML = listaEx.length
+          ? listaEx.map(x => `
             <div class="item">
               <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
                 <div>
                   <b>${x.data}</b>
-                  <div class="meta" style="color:var(--yellow)">Cobriu: ${x.cobriu || '—'}</div>
+                  <div class="meta" style="color:var(--yellow)">Por: ${x.por || '—'} · Cobriu: ${x.cobriu || '—'}</div>
                   ${x.sono ? `<div class="meta">💤 ${x.sono}h sono</div>` : ''}
                   ${x.obs ? `<div class="meta">Obs: ${x.obs}</div>` : ''}
                   <div class="meta">${x.turno} · ${x.inicio} – ${x.fim} · ${x.tipo} · ${x.horas}</div>
@@ -1854,12 +1914,13 @@
                 </div>
               </div>
             </div>`).join('')
-          : '<div class="empty">Nenhum plantão na folha atual.</div>';
+          : '<div class="empty">Nenhum plantão na sua folha' + (podeVerTodosPlantaoes() ? '' : '') + '.</div>';
       }
       const exArq = document.getElementById('ex-arquivadas');
       if (exArq) {
-        exArq.innerHTML = db.folhasArquivadas.length
-          ? db.folhasArquivadas.map(f => `
+        const folhas = folhasDoExtrato();
+        exArq.innerHTML = folhas.length
+          ? folhas.map(f => `
             <div class="item">
               <b>Folha · ${f.fechadoEm}</b>
               <div class="meta">${f.qtd} plantão(ões) · <span style="color:var(--green)">${moneyBR(f.total)}</span> · por ${f.por}</div>
