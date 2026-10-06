@@ -1658,13 +1658,19 @@
       }
     }
     async function setManutencao(ativo, msg) {
-      const payload = { ativo: !!ativo, msg: msg || '', por: usuarioAtual ? usuarioAtual.nome : 'DEV', em: new Date().toISOString() };
-      // local mirror
+      const payload = {
+        ativo: !!ativo,
+        msg: msg || '',
+        por: usuarioAtual ? usuarioAtual.nome : 'DEV',
+        em: new Date().toISOString(),
+        // token único para forçar reload nos outros aparelhos
+        forceReload: Date.now()
+      };
       localStorage.setItem('valis_manutencao', JSON.stringify(payload));
       if (firebaseOk && fbDb) {
         try {
           await fbDb.collection('valis').doc('manutencao').set(payload, { merge: true });
-          toast(ativo ? 'Manutenção ATIVADA (Firebase)' : 'Manutenção DESLIGADA');
+          toast(ativo ? 'Manutenção ATIVADA — outros apps vão reiniciar' : 'Manutenção DESLIGADA');
         } catch (e) {
           console.warn(e);
           toast('Salvo local — Firebase falhou');
@@ -1672,7 +1678,54 @@
       } else {
         toast(ativo ? 'Manutenção local ON' : 'Manutenção local OFF');
       }
+      // neste aparelho (DEV): se ativou, também aplica overlay; se desligou, libera
+      if (ativo && !devLiberado) {
+        sessionStorage.setItem('valis_manut_token', String(payload.forceReload));
+        setTimeout(() => location.reload(), 400);
+        return;
+      }
+      if (!ativo) {
+        sessionStorage.removeItem('valis_manut_token');
+      }
       await aplicarManutencaoUI();
+    }
+
+    // Quando manutenção muda no Firebase → força reload nos clientes
+    function iniciarListenerManutencao() {
+      if (!firebaseOk || !fbDb) return;
+      try {
+        fbDb.collection('valis').doc('manutencao').onSnapshot((snap) => {
+          const m = snap.exists ? (snap.data() || {}) : { ativo: false };
+          const token = String(m.forceReload || m.em || '');
+          const visto = sessionStorage.getItem('valis_manut_token') || '';
+
+          // DEV liberado nesta sessão: só atualiza UI, não reinicia
+          if (devLiberado) {
+            aplicarManutencaoUI();
+            return;
+          }
+
+          if (m.ativo) {
+            // novo sinal de manutenção → reinicia 1 vez para carregar o painel limpo
+            if (token && token !== visto) {
+              sessionStorage.setItem('valis_manut_token', token);
+              // pequena espera para gravar sessionStorage
+              setTimeout(() => location.reload(), 300);
+              return;
+            }
+            aplicarManutencaoUI();
+          } else {
+            // manutenção desligada
+            if (visto) {
+              sessionStorage.removeItem('valis_manut_token');
+              // reinicia uma vez para voltar ao app normal
+              setTimeout(() => location.reload(), 300);
+              return;
+            }
+            aplicarManutencaoUI();
+          }
+        });
+      } catch (e) { console.warn(e); }
     }
 
     async function salvar() { return await DataService.save('db_v42', db); }
@@ -1693,12 +1746,8 @@
       if (tel) tel.value = db.telSup || '';
       if (localStorage.getItem('valis_modo_foco') === '1') document.body.classList.add('modo-foco');
       await aplicarManutencaoUI();
-      // listener manutenção em tempo real
-      if (firebaseOk && fbDb) {
-        try {
-          fbDb.collection('valis').doc('manutencao').onSnapshot(() => aplicarManutencaoUI());
-        } catch (e) { console.warn(e); }
-      }
+      // listener manutenção em tempo real (com force reload)
+      iniciarListenerManutencao();
       try {
         const sess = sessionStorage.getItem('valis_user');
         if (sess) {
