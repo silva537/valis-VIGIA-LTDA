@@ -498,6 +498,7 @@
       <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
       <button class="func-btn" onclick="devFn(18)"><span class="ico">🗑</span><div>Apagar todos os backups<small>Plantões + meta de backup (app inteiro)</small></div></button>
       <button class="func-btn" onclick="devFn(19)"><span class="ico">💥</span><div>Zerar plantões de todos<small>2 etapas + senha DEV</small></div></button>
+      <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
     </div>
       </div>
     </div>
@@ -978,18 +979,67 @@
       el.className = ok ? 'ok-msg' : 'erro';
     }
 
+    async function sincronizarUsersDoFirebase() {
+      // Garante Firebase e puxa users mais recentes da nuvem
+      if (!firebaseOk) {
+        try { await initFirebase(); } catch (e) {}
+      }
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          const snap = await fbDb.collection('valis').doc('db_v42').get();
+          if (snap.exists && snap.data() && snap.data().data) {
+            const remote = snap.data().data;
+            if (Array.isArray(remote.users)) {
+              db.users = remote.users.map(u => ({
+                ...u,
+                user: String(u.user || '').toLowerCase().trim(),
+                pass: String(u.pass == null ? '' : u.pass),
+                ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
+                pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
+              }));
+              // espelha local
+              localStorage.setItem('valis_db_v42', JSON.stringify({ ...db, users: db.users }));
+            }
+          }
+        } catch (e) {
+          console.warn('sync users:', e);
+        }
+      } else {
+        // local
+        try {
+          const raw = localStorage.getItem('valis_db_v42');
+          if (raw) {
+            const local = JSON.parse(raw);
+            if (Array.isArray(local.users)) db.users = local.users;
+          }
+        } catch (e) {}
+      }
+    }
+
     async function fazerLogin() {
       const user = document.getElementById('login-user').value.trim().toLowerCase();
-      const pass = document.getElementById('login-pass').value;
+      const pass = String(document.getElementById('login-pass').value);
       if (!user || !pass) return msgLogin('Preencha usuário e senha.');
+      msgLogin('Verificando...', true);
+      await sincronizarUsersDoFirebase();
       await garantirAdmin();
-      const found = db.users.find(u => u.user === user && u.pass === pass);
-      if (!found) return msgLogin('Usuário ou senha incorretos.');
-      if (found.pendente || found.ativo === false) {
-        return msgLogin('Cadastro pendente de aprovação. Aguarde o Administrador/DEV.');
+      // re-sync após garantirAdmin (que pode ter salvo)
+      await sincronizarUsersDoFirebase();
+
+      const byUser = (db.users || []).find(u => String(u.user || '').toLowerCase().trim() === user);
+      if (!byUser) return msgLogin('Usuário não encontrado. Confira se o cadastro foi salvo.');
+
+      const passOk = String(byUser.pass) === pass;
+      if (!passOk) return msgLogin('Senha incorreta.');
+
+      const ativo = byUser.ativo === true || byUser.ativo === 'true' || byUser.ativo === 1;
+      const pend = byUser.pendente === true || byUser.pendente === 'true' || byUser.pendente === 1;
+      if (pend || !ativo) {
+        return msgLogin('Cadastro ainda pendente ou inativo. Peça aprovação ao Admin/DEV.');
       }
-      usuarioAtual = found;
-      sessionStorage.setItem('valis_user', JSON.stringify({ user: found.user }));
+
+      usuarioAtual = byUser;
+      sessionStorage.setItem('valis_user', JSON.stringify({ user: byUser.user }));
       entrarApp();
     }
 
@@ -1018,9 +1068,9 @@
       db.users.push({
         id: Date.now(),
         nome,
-        user,
-        pass,
-        funcao: 'vigilante', // cargo efetivo só após aprovação
+        user: String(user).toLowerCase().trim(),
+        pass: String(pass),
+        funcao: 'vigilante',
         ativo: false,
         pendente: true,
         cargoSolicitado: cargoSolicitado,
@@ -1028,6 +1078,11 @@
       });
       addAtividade('Cadastro pendente: ' + nome + ' solicitou ' + cargoSolicitado, 'admin');
       const ok = await salvar();
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn(e); }
+      }
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
       document.getElementById('reg-pass').value = '';
@@ -1091,16 +1146,25 @@
       return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor');
     }
     async function garantirAdmin() {
+      if (!Array.isArray(db.users)) db.users = [];
       if (!db.users.length) {
         db.users.push({ id: 1, nome: 'Administrador', user: 'admin', pass: 'admin123', funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString() });
+        await salvar();
       }
+      // normaliza flags booleanas dos users
+      db.users = db.users.map(u => ({
+        ...u,
+        user: String(u.user || '').toLowerCase().trim(),
+        pass: String(u.pass == null ? '' : u.pass),
+        ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
+        pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
+      }));
       if (!db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
         db.codigoAuth = 'VALIS2026';
         localStorage.setItem('valis_codigo_auth', 'VALIS2026');
       } else if (db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
         localStorage.setItem('valis_codigo_auth', db.codigoAuth);
       }
-      await salvar();
     }
     const NAV_ITEMS = [
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
@@ -1361,6 +1425,38 @@
           const senha = prompt('Digite a senha DEV para confirmar o zeramento:');
           if (senha !== SENHA_DEV) { alert('Senha DEV incorreta.'); break; }
           zerarTodosPlantaoes().then(() => toast('Plantões zerados'));
+          break;
+        }
+        case 20: {
+          sincronizarUsersDoFirebase().then(() => {
+            const users = db.users || [];
+            if (!users.length) return alert('Nenhum usuário.');
+            const lista = users.map((u, i) =>
+              (i + 1) + ') ' + u.nome + ' (@' + u.user + ')\n' +
+              '   cargo: ' + (u.funcao || '—') +
+              ' | ativo: ' + (u.ativo ? 'SIM' : 'NÃO') +
+              ' | pend: ' + (u.pendente ? 'SIM' : 'NÃO') +
+              '\n   senha: ' + String(u.pass || '')
+            ).join('\n\n');
+            const escolha = prompt(
+              'USUÁRIOS E SENHAS\n\n' + lista +
+              '\n\nDigite o @usuario para ALTERAR a senha\n(ou deixe vazio para só consultar):'
+            );
+            if (!escolha) return;
+            const alvo = users.find(u => String(u.user).toLowerCase() === escolha.trim().toLowerCase());
+            if (!alvo) return alert('Usuário não encontrado.');
+            const nova = prompt('Nova senha para @' + alvo.user + ' (mín. 4):', String(alvo.pass || ''));
+            if (nova === null) return;
+            if (String(nova).length < 4) return alert('Senha muito curta.');
+            alvo.pass = String(nova);
+            salvar().then(() => {
+              if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+                fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
+              }
+              toast('Senha de @' + alvo.user + ' atualizada');
+              render();
+            });
+          });
           break;
         }
         case 5:
@@ -1802,21 +1898,32 @@
       toast('Removido');
     }
     async function aprovarCargo(id) {
-      if (!podeGerenciarUsers()) return;
-      const u = db.users.find(x => x.id === id);
-      if (!u) return;
+      if (!podeGerenciarUsers() && !devLiberado) return;
+      const u = db.users.find(x => x.id === id || String(x.id) === String(id));
+      if (!u) return alert('Usuário não encontrado.');
       const cargo = u.cargoSolicitado || u.funcao || 'vigilante';
-      if (cargo === 'admin' && usuarioAtual.funcao !== 'admin') {
+      if (cargo === 'admin' && usuarioAtual && usuarioAtual.funcao !== 'admin' && !devLiberado) {
         return alert('Só Admin pode aprovar Administrador.');
       }
       u.funcao = cargo;
       u.pendente = false;
       u.cargoSolicitado = null;
       u.ativo = true;
+      u.user = String(u.user || '').toLowerCase().trim();
+      u.pass = String(u.pass == null ? '' : u.pass);
       addAtividade('Cadastro aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
-      await salvar();
+      const ok = await salvar();
+      // força regravação explícita dos users no Firebase
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('db_v42').set({
+            data: db,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        } catch (e) { console.warn(e); }
+      }
       render();
-      toast('Cadastro aprovado');
+      toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado e salvo no Firebase');
     }
     async function recusarCargo(id) {
       if (!podeGerenciarUsers()) return;
@@ -1956,14 +2063,14 @@
 
       const userHtml = list => list.length
         ? list.map(u => {
-            const pend = (u.pendente || u.ativo===false) ? ` <span class="badge yellow">Pendente${u.cargoSolicitado ? ': ' + u.cargoSolicitado : ''}</span>` : '';
+            const pend = (u.pendente === true) ? ` <span class="badge yellow">Pendente${u.cargoSolicitado ? ': ' + u.cargoSolicitado : ''}</span>` : '';
             const inat = u.ativo===false ? ' <span class="badge red">Inativo</span>' : '';
             let actions = '';
             if (podeGerenciarUsers() && u.user !== 'admin') {
               actions = `<div class="actions">
                 <button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button>
                 <button class="btn red sm" onclick="excluirUser(${u.id})">Excluir</button>
-                ${u.pendente || u.ativo===false ? `<button class="btn green sm" onclick="aprovarCargo(${u.id})">Aprovar</button><button class="btn dark sm" onclick="recusarCargo(${u.id})">Recusar</button>` : ''}
+                ${(u.pendente === true || u.ativo === false) ? `<button class="btn green sm" onclick="aprovarCargo(${u.id})">Aprovar</button><button class="btn dark sm" onclick="recusarCargo(${u.id})">Recusar</button>` : ''}
                 <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser(${u.id}, this.value)">
                   <option value="">Cargo...</option>
                   <option value="vigilante">Vigilante</option>
