@@ -413,6 +413,14 @@
 </head>
 <body>
   <div id="toast"></div>
+  <div id="manutencao-overlay" class="modal-bg hidden" style="z-index:300">
+    <div class="modal" style="text-align:center">
+      <h3>🚧 Sistema em manutenção</h3>
+      <p id="manutencao-msg" style="color:var(--muted);font-size:14px;line-height:1.5;margin:12px 0 18px">O aplicativo está temporariamente suspenso pela administração.</p>
+      <button class="btn dark" onclick="location.reload()">Tentar novamente</button>
+      <button class="btn purple" style="margin-top:8px" onclick="abrirDevMenu()">Acesso DEV</button>
+    </div>
+  </div>
 
   <!-- LOGIN -->
   <section id="login" class="login">
@@ -470,7 +478,8 @@
       <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências mock</small></div></button>
       <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
       <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
-      <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
+            <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
+      <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Painel de manutenção<small>Suspender app para todos (Firebase)</small></div></button>
     </div>
       </div>
     </div>
@@ -665,7 +674,11 @@
         <div class="card">
           <div class="field"><label>Destino</label>
             <select id="md" class="select">
-              <option>Equipe</option><option>Supervisão</option><option>Posto</option><option>Todos</option>
+              <option>Equipe</option>
+              <option>Supervisão</option>
+              <option>Posto</option>
+              <option>Vigia</option>
+              <option>Todos</option>
             </select>
           </div>
           <div class="field"><label>Mensagem</label><textarea id="mt" class="area" rows="3" placeholder="Digite a mensagem..."></textarea></div>
@@ -835,23 +848,40 @@
     } catch (e) { console.warn(e); }
 
     const DataService = {
-      mode: 'local',
+      mode: localStorage.getItem('valis_fb_mode') || 'firebase',
       async save(key, data) {
+        // Sempre salva local
         localStorage.setItem('valis_' + key, JSON.stringify(data));
-        if (this.mode === 'firebase' && firebaseOk && fbDb) {
-          try { await fbDb.collection('valis').doc(key).set({ data, updatedAt: new Date().toISOString() }, { merge: true }); }
-          catch (e) { console.warn(e); }
+        // Sempre tenta Firebase quando SDK ok (mesmo em local, faz backup se mode firebase)
+        if (firebaseOk && fbDb && this.mode === 'firebase') {
+          try {
+            await fbDb.collection('valis').doc(key).set({ data, updatedAt: new Date().toISOString() }, { merge: true });
+            return true;
+          } catch (e) {
+            console.warn('Firebase save:', e);
+            return false;
+          }
         }
+        return true;
       },
       async load(key) {
-        if (this.mode === 'firebase' && firebaseOk && fbDb) {
+        // Prefere nuvem se mode firebase
+        if (firebaseOk && fbDb && this.mode === 'firebase') {
           try {
             const snap = await fbDb.collection('valis').doc(key).get();
-            if (snap.exists) return snap.data().data;
-          } catch (e) { console.warn(e); }
+            if (snap.exists && snap.data().data) {
+              // espelha local
+              localStorage.setItem('valis_' + key, JSON.stringify(snap.data().data));
+              return snap.data().data;
+            }
+          } catch (e) { console.warn('Firebase load:', e); }
         }
         const raw = localStorage.getItem('valis_' + key);
         return raw ? JSON.parse(raw) : null;
+      },
+      setMode(m) {
+        this.mode = m;
+        localStorage.setItem('valis_fb_mode', m);
       }
     };
 
@@ -902,11 +932,11 @@
       if (db.users.some(u => u.user === user)) return msgLogin('Usuário já existe.');
       db.users.push({ id: Date.now(), nome, user, pass, funcao, ativo: true, criadoEm: new Date().toISOString() });
       addAtividade('Novo funcionário: ' + nome);
-      await salvar();
+      const ok = await salvar();
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
       document.getElementById('reg-pass').value = '';
-      msgLogin('Cadastrado! Faça login.', true);
+      msgLogin(ok === false ? 'Salvo local (Firebase falhou). Faça login.' : 'Cadastrado e salvo! Faça login.', true);
       setTimeout(() => mostrarLogin('entrar'), 1000);
     }
 
@@ -1086,9 +1116,12 @@
         case 2: document.getElementById('import-file').click(); break;
         case 3: zerarDados(); break;
         case 4:
-          DataService.mode = DataService.mode === 'local' ? 'firebase' : 'local';
+          DataService.setMode(DataService.mode === 'local' ? 'firebase' : 'local');
           toast('Mode: ' + DataService.mode);
           render();
+          break;
+        case 11:
+          abrirPainelManutencao();
           break;
         case 5:
           tab('supervisao');
@@ -1400,12 +1433,31 @@
     async function addMsg() {
       const t = document.getElementById('mt').value.trim();
       if (!t) return alert('Mensagem.');
-      db.msg.unshift({ id: Date.now(), d: document.getElementById('md').value, t, h: new Date().toLocaleString('pt-BR'), de: usuarioAtual ? usuarioAtual.nome : '—' });
+      const dest = document.getElementById('md').value;
+      db.msg.unshift({
+        id: Date.now(),
+        d: dest,
+        t,
+        h: new Date().toLocaleString('pt-BR'),
+        de: usuarioAtual ? usuarioAtual.nome : '—',
+        paraFuncao: dest
+      });
       document.getElementById('mt').value = '';
-      addAtividade('Mensagem enviada');
+      addAtividade('Mensagem → ' + dest);
       await salvar();
+      // tenta espelhar aviso no Firebase para outros dispositivos
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('aviso').set({
+            texto: t,
+            destino: dest,
+            de: usuarioAtual ? usuarioAtual.nome : '—',
+            em: new Date().toISOString()
+          }, { merge: true });
+        } catch (e) { console.warn(e); }
+      }
       render();
-      toast('Enviada');
+      toast('Mensagem para ' + dest);
     }
     async function remover(tipo, id) {
       if (!confirm('Remover?')) return;
@@ -1422,6 +1474,19 @@
       await salvar();
       render();
       toast(u.ativo ? 'Reativado' : 'Desativado');
+    }
+    async function excluirUser(id) {
+      if (!podeGerenciarUsers()) return;
+      const u = db.users.find(x => x.id === id);
+      if (!u) return;
+      if (u.user === 'admin') return alert('Não é possível excluir o admin principal.');
+      if (usuarioAtual && u.id === usuarioAtual.id) return alert('Você não pode excluir o próprio perfil logado.');
+      if (!confirm('Excluir definitivamente o perfil de ' + u.nome + '?')) return;
+      db.users = db.users.filter(x => x.id !== id);
+      addAtividade('Usuário excluído: ' + u.nome + ' (@' + u.user + ')');
+      await salvar();
+      render();
+      toast('Perfil excluído');
     }
 
     function render() {
@@ -1500,9 +1565,10 @@
       }
 
       const userHtml = list => list.length
-        ? list.map(u => `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${u.ativo===false?' <span class="badge red">Inativo</span>':''}<div class="meta">@${u.user}</div>${podeGerenciarUsers()&&u.user!=='admin'?`<div class="actions"><button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button></div>`:''}</div>`).join('')
+        ? list.map(u => `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${u.ativo===false?' <span class="badge red">Inativo</span>':''}<div class="meta">@${u.user}</div>${podeGerenciarUsers()&&u.user!=='admin'?`<div class="actions"><button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button><button class="btn red sm" onclick="excluirUser(${u.id})">Excluir</button></div>`:''}</div>`).join('')
         : '<div class="empty">Nenhum.</div>';
-      document.getElementById('lista-users').innerHTML = userHtml(db.users);
+      const listaUsers = document.getElementById('lista-users');
+      if (listaUsers) listaUsers.innerHTML = userHtml(db.users);
 
       if (usuarioAtual) {
         const htmlPerfil = `<b>${usuarioAtual.nome}</b> ${funcaoBadge(usuarioAtual.funcao)}<div class="meta">@${usuarioAtual.user}</div>`;
@@ -1516,13 +1582,84 @@
       if (statusFb) statusFb.textContent = firebaseOk ? ('FB · ' + DataService.mode) : 'Offline';
     }
 
-    async function salvar() { await DataService.save('db_v42', db); }
+
+    // ---------- MANUTENÇÃO GLOBAL (Firebase) ----------
+    async function lerManutencao() {
+      if (!firebaseOk || !fbDb) return { ativo: false, msg: '' };
+      try {
+        const snap = await fbDb.collection('valis').doc('manutencao').get();
+        if (snap.exists) return snap.data();
+      } catch (e) { console.warn(e); }
+      return { ativo: false, msg: '' };
+    }
+    async function aplicarManutencaoUI() {
+      const m = await lerManutencao();
+      const ov = document.getElementById('manutencao-overlay');
+      if (!ov) return;
+      // DEV logado pode contornar
+      if (m.ativo && !devLiberado) {
+        document.getElementById('manutencao-msg').textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
+        ov.classList.remove('hidden');
+        // esconde app se estiver aberto
+        const app = document.getElementById('app');
+        if (app) app.classList.remove('show');
+      } else {
+        ov.classList.add('hidden');
+      }
+    }
+    function abrirPainelManutencao() {
+      const box = document.getElementById('perfil-painel') || document.getElementById('sup-resultado');
+      // usa modal simples via prompt flow no drawer context
+      const ativo = confirm('MANUTENÇÃO\\n\\nOK = ATIVAR manutenção (suspende o app para todos)\\nCancelar = ver opções de desligar');
+      if (ativo) {
+        const msg = prompt('Mensagem exibida para os usuários:', 'Sistema em manutenção. Voltamos em breve.') || 'Sistema em manutenção. Voltamos em breve.';
+        setManutencao(true, msg);
+      } else {
+        if (confirm('Desligar manutenção agora?')) setManutencao(false, '');
+      }
+    }
+    async function setManutencao(ativo, msg) {
+      const payload = { ativo: !!ativo, msg: msg || '', por: usuarioAtual ? usuarioAtual.nome : 'DEV', em: new Date().toISOString() };
+      // local mirror
+      localStorage.setItem('valis_manutencao', JSON.stringify(payload));
+      if (firebaseOk && fbDb) {
+        try {
+          await fbDb.collection('valis').doc('manutencao').set(payload, { merge: true });
+          toast(ativo ? 'Manutenção ATIVADA (Firebase)' : 'Manutenção DESLIGADA');
+        } catch (e) {
+          console.warn(e);
+          toast('Salvo local — Firebase falhou');
+        }
+      } else {
+        toast(ativo ? 'Manutenção local ON' : 'Manutenção local OFF');
+      }
+      await aplicarManutencaoUI();
+    }
+
+    async function salvar() { return await DataService.save('db_v42', db); }
     async function carregar() {
+      // tenta firebase primeiro se mode firebase
       const data = await DataService.load('db_v42');
-      if (data) { db = { ...db, ...data }; if (!db.users) db.users = []; if (!db.atividades) db.atividades = []; if (!db.plantaoes) db.plantaoes = []; if (!db.folhasArquivadas) db.folhasArquivadas = []; }
+      if (data) {
+        db = { ...db, ...data };
+        if (!db.users) db.users = [];
+        if (!db.atividades) db.atividades = [];
+        if (!db.plantaoes) db.plantaoes = [];
+        if (!db.folhasArquivadas) db.folhasArquivadas = [];
+      }
       await garantirAdmin();
-      document.getElementById('cfg-tel').value = db.telSup || '';
+      // regrava para garantir persistência (local + firebase)
+      await salvar();
+      const tel = document.getElementById('cfg-tel');
+      if (tel) tel.value = db.telSup || '';
       if (localStorage.getItem('valis_modo_foco') === '1') document.body.classList.add('modo-foco');
+      await aplicarManutencaoUI();
+      // listener manutenção em tempo real
+      if (firebaseOk && fbDb) {
+        try {
+          fbDb.collection('valis').doc('manutencao').onSnapshot(() => aplicarManutencaoUI());
+        } catch (e) { console.warn(e); }
+      }
       try {
         const sess = sessionStorage.getItem('valis_user');
         if (sess) {
