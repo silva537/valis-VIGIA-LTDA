@@ -591,6 +591,23 @@
           <div class="field"><label>Observação</label><textarea id="pl-obs" class="area" rows="2" placeholder="Detalhes ou anotações..."></textarea></div>
           <button class="btn green" onclick="salvarPlantao()">💾 Salvar Plantão</button>
         </div>
+        <div class="card">
+          <div class="card-label">Backup e recuperação de plantões</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:10px">
+            Todo plantão salvo gera backup automático (celular + Firebase). Use recuperar se atualizar o app e a lista sumir.
+          </p>
+          <div class="status-bar" style="margin-bottom:10px">
+            <div class="dot" id="pl-bk-dot"></div>
+            <span id="pl-bk-status" style="font-size:12px">Backup: —</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn dark" onclick="backupPlantaoesManual()">☁ Backup agora</button>
+            <button class="btn purple" onclick="recuperarPlantaoes()">↺ Recuperar</button>
+          </div>
+          <button class="btn dark" style="margin-top:8px" onclick="exportarPlantaoesJSON()">📤 Exportar JSON</button>
+          <input type="file" id="pl-import" accept=".json" class="hidden" onchange="importarPlantaoesJSON(event)">
+          <button class="btn dark" style="margin-top:8px" onclick="document.getElementById('pl-import').click()">📥 Importar JSON</button>
+        </div>
       </section>
 
       <!-- EXTRATO & FOLHA -->
@@ -1414,8 +1431,9 @@
       document.getElementById('pl-cobriu').value = '';
       addAtividade('Plantão lançado: ' + data + ' · R$ ' + valor.toFixed(2));
       await salvar();
+      await backupPlantaoesAuto('salvar');
       render();
-      toast('Plantão salvo');
+      toast('Plantão salvo + backup');
       tab('extrato');
     }
     async function excluirPlantao(id) {
@@ -1442,6 +1460,7 @@
       db.plantaoes = [];
       addAtividade('Folha fechada: R$ ' + total.toFixed(2) + ' (' + lista.length + ' plantões)');
       await salvar();
+      await backupPlantaoesAuto('fechar_folha');
       render();
       toast('Folha arquivada');
     }
@@ -1848,9 +1867,153 @@
       } catch (e) { console.warn(e); }
     }
 
-    async function salvar() { return await DataService.save('db_v42', db); }
+
+    // ---------- BACKUP PLANTÕES (local + Firebase) ----------
+    function mergePlantaoes(a, b) {
+      const map = new Map();
+      (a || []).forEach(x => { if (x && x.id != null) map.set(x.id, x); });
+      (b || []).forEach(x => { if (x && x.id != null) map.set(x.id, x); });
+      return Array.from(map.values()).sort((x, y) => (y.id || 0) - (x.id || 0));
+    }
+    function atualizarStatusBackupUI(texto, ok) {
+      const st = document.getElementById('pl-bk-status');
+      const dot = document.getElementById('pl-bk-dot');
+      if (st) st.textContent = texto;
+      if (dot) dot.className = ok ? 'dot' : 'dot off';
+    }
+    async function backupPlantaoesAuto(motivo) {
+      const payload = {
+        plantaoes: db.plantaoes || [],
+        folhasArquivadas: db.folhasArquivadas || [],
+        updatedAt: new Date().toISOString(),
+        motivo: motivo || 'auto',
+        por: usuarioAtual ? usuarioAtual.nome : 'sistema',
+        qtd: (db.plantaoes || []).length
+      };
+      // local dedicado (sobrevive melhor a trocas parciais)
+      try {
+        localStorage.setItem('valis_plantoes_backup', JSON.stringify(payload));
+        localStorage.setItem('valis_plantoes_backup_meta', JSON.stringify({
+          updatedAt: payload.updatedAt,
+          qtd: payload.qtd,
+          motivo: payload.motivo
+        }));
+      } catch (e) { console.warn(e); }
+      let fbOk = false;
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('plantoes_backup').set(payload, { merge: true });
+          fbOk = true;
+        } catch (e) { console.warn('backup plantões FB:', e); }
+      }
+      atualizarStatusBackupUI(
+        'Backup: ' + payload.qtd + ' plantão(ões) · ' + new Date(payload.updatedAt).toLocaleString('pt-BR') + (fbOk ? ' · Firebase' : ' · local'),
+        true
+      );
+      return payload;
+    }
+    async function backupPlantaoesManual() {
+      const p = await backupPlantaoesAuto('manual');
+      await salvar();
+      toast('Backup salvo (' + p.qtd + ' plantões)');
+    }
+    async function recuperarPlantaoes() {
+      let remoto = null;
+      let local = null;
+      try {
+        const raw = localStorage.getItem('valis_plantoes_backup');
+        if (raw) local = JSON.parse(raw);
+      } catch (e) {}
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          const snap = await fbDb.collection('valis').doc('plantoes_backup').get();
+          if (snap.exists) remoto = snap.data();
+        } catch (e) { console.warn(e); }
+      }
+      // escolhe o mais recente / com mais itens
+      const candidatos = [local, remoto].filter(Boolean);
+      if (!candidatos.length) {
+        alert('Nenhum backup de plantões encontrado (local ou Firebase).');
+        return;
+      }
+      candidatos.sort((a, b) => {
+        const ta = new Date(a.updatedAt || 0).getTime();
+        const tb = new Date(b.updatedAt || 0).getTime();
+        if (tb !== ta) return tb - ta;
+        return (b.qtd || 0) - (a.qtd || 0);
+      });
+      const best = candidatos[0];
+      const antes = (db.plantaoes || []).length;
+      db.plantaoes = mergePlantaoes(db.plantaoes || [], best.plantaoes || []);
+      if (best.folhasArquivadas && best.folhasArquivadas.length) {
+        db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], best.folhasArquivadas || []);
+      }
+      await salvar();
+      await backupPlantaoesAuto('pos_recuperar');
+      render();
+      toast('Recuperado: ' + (db.plantaoes || []).length + ' plantões (antes ' + antes + ')');
+    }
+    function exportarPlantaoesJSON() {
+      const payload = {
+        plantaoes: db.plantaoes || [],
+        folhasArquivadas: db.folhasArquivadas || [],
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'valis-plantoes-backup.json';
+      a.click();
+      toast('JSON exportado');
+    }
+    async function importarPlantaoesJSON(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const data = JSON.parse(reader.result);
+          const lista = data.plantaoes || data || [];
+          if (!Array.isArray(lista)) throw new Error('Arquivo inválido');
+          db.plantaoes = mergePlantaoes(db.plantaoes || [], lista);
+          if (Array.isArray(data.folhasArquivadas)) {
+            db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], data.folhasArquivadas);
+          }
+          await salvar();
+          await backupPlantaoesAuto('import_json');
+          render();
+          toast('Importado com sucesso');
+        } catch (e) {
+          alert('Erro ao importar: ' + e.message);
+        }
+        ev.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+        async function salvar() { return await DataService.save('db_v42', db); }
     async function carregar() {
       // tenta firebase primeiro se mode firebase
+      // preserva plantões locais antes do merge (evita apagar em atualização)
+      let localPlantaoes = [];
+      let localFolhas = [];
+      try {
+        const rawLocal = localStorage.getItem('valis_db_v42');
+        if (rawLocal) {
+          const parsed = JSON.parse(rawLocal);
+          localPlantaoes = parsed.plantaoes || [];
+          localFolhas = parsed.folhasArquivadas || [];
+        }
+      } catch (e) {}
+      try {
+        const bk = localStorage.getItem('valis_plantoes_backup');
+        if (bk) {
+          const p = JSON.parse(bk);
+          localPlantaoes = mergePlantaoes(localPlantaoes, p.plantaoes || []);
+          localFolhas = mergePlantaoes(localFolhas, p.folhasArquivadas || []);
+        }
+      } catch (e) {}
+
       const data = await DataService.load('db_v42');
       if (data) {
         db = { ...db, ...data };
@@ -1859,13 +2022,29 @@
         if (!db.plantaoes) db.plantaoes = [];
         if (!db.folhasArquivadas) db.folhasArquivadas = [];
       }
+      // merge com backups locais e dedicados
+      db.plantaoes = mergePlantaoes(db.plantaoes || [], localPlantaoes);
+      db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], localFolhas);
+
+      // tenta backup dedicado no Firebase
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          const snap = await fbDb.collection('valis').doc('plantoes_backup').get();
+          if (snap.exists) {
+            const p = snap.data() || {};
+            db.plantaoes = mergePlantaoes(db.plantaoes || [], p.plantaoes || []);
+            db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], p.folhasArquivadas || []);
+          }
+        } catch (e) { console.warn(e); }
+      }
+
       await garantirAdmin();
       if (localStorage.getItem('valis_ativ_ttl_min') === null) {
         localStorage.setItem('valis_ativ_ttl_min', '2');
       }
       limparAtividadesExpiradas();
-      // regrava para garantir persistência (local + firebase)
       await salvar();
+      await backupPlantaoesAuto('boot');
       const tel = document.getElementById('cfg-tel');
       if (tel) tel.value = db.telSup || '';
       if (localStorage.getItem('valis_modo_foco') === '1') document.body.classList.add('modo-foco');
