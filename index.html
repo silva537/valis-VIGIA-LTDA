@@ -455,9 +455,12 @@
         <div class="field" id="reg-codigo-wrap" style="display:none">
           <label>Código de autorização</label>
           <input id="reg-codigo" class="input" type="password" placeholder="Código liberado pelo DEV/Admin">
-          <p style="font-size:11px;color:var(--muted);margin-top:6px">Supervisor e Admin só com código. Sem código, escolha Vigilante ou Equipe — ou solicite aprovação.</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:6px">Obrigatório para solicitar Supervisor ou Admin.</p>
         </div>
-        <button class="btn green" onclick="cadastrarUsuario()">CADASTRAR FUNCIONÁRIO</button>
+        <p style="font-size:12px;color:var(--yellow);line-height:1.4;margin:8px 0 12px;text-align:left">
+          ⏳ Todo cadastro fica <b>pendente</b> até o Administrador ou DEV aprovar. Sem aprovação não é possível entrar.
+        </p>
+        <button class="btn green" onclick="cadastrarUsuario()">SOLICITAR CADASTRO</button>
       </div>
       <p id="login-msg" class="erro"></p>
     </div>
@@ -980,8 +983,11 @@
       const pass = document.getElementById('login-pass').value;
       if (!user || !pass) return msgLogin('Preencha usuário e senha.');
       await garantirAdmin();
-      const found = db.users.find(u => u.user === user && u.pass === pass && u.ativo !== false);
+      const found = db.users.find(u => u.user === user && u.pass === pass);
       if (!found) return msgLogin('Usuário ou senha incorretos.');
+      if (found.pendente || found.ativo === false) {
+        return msgLogin('Cadastro pendente de aprovação. Aguarde o Administrador/DEV.');
+      }
       usuarioAtual = found;
       sessionStorage.setItem('valis_user', JSON.stringify({ user: found.user }));
       entrarApp();
@@ -999,33 +1005,28 @@
       if (db.users.some(u => u.user === user)) return msgLogin('Usuário já existe.');
 
       const restritas = ['supervisor', 'admin'];
-      let finalFuncao = funcao;
-      let pendente = false;
+      let cargoSolicitado = funcao;
 
+      // Supervisor/Admin: código OBRIGATÓRIO para nem solicitar
       if (restritas.includes(funcao)) {
         if (!validarCodigoAuth(codigo)) {
-          if (!confirm('Sem código válido.\n\nSolicitar cargo "' + funcao + '" para aprovação?\nVocê entra como Vigilante até o Admin/DEV aprovar.')) {
-            return msgLogin('Informe o código de autorização para Supervisor/Admin.');
-          }
-          finalFuncao = 'vigilante';
-          pendente = true;
+          return msgLogin('Código de autorização inválido ou vazio. Supervisor/Admin exigem código do DEV.');
         }
       }
 
+      // TODOS os cadastros públicos ficam pendentes e inativos até aprovação
       db.users.push({
         id: Date.now(),
         nome,
         user,
         pass,
-        funcao: finalFuncao,
-        ativo: true,
-        pendente,
-        cargoSolicitado: pendente ? funcao : null,
+        funcao: 'vigilante', // cargo efetivo só após aprovação
+        ativo: false,
+        pendente: true,
+        cargoSolicitado: cargoSolicitado,
         criadoEm: new Date().toISOString()
       });
-      addAtividade(pendente
-        ? ('Solicitação de cargo: ' + nome + ' → ' + funcao)
-        : ('Novo funcionário: ' + nome + ' (' + finalFuncao + ')'), 'admin');
+      addAtividade('Cadastro pendente: ' + nome + ' solicitou ' + cargoSolicitado, 'admin');
       const ok = await salvar();
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
@@ -1033,10 +1034,13 @@
       if (codigoEl) codigoEl.value = '';
       document.getElementById('reg-funcao').value = 'vigilante';
       atualizarRegFuncaoUI();
-      msgLogin(pendente
-        ? ('Conta criada. Cargo ' + funcao + ' aguarda aprovação.')
-        : (ok === false ? 'Salvo local. Faça login.' : 'Cadastrado! Faça login.'), true);
-      setTimeout(() => mostrarLogin('entrar'), 1200);
+      msgLogin(
+        ok === false
+          ? 'Pedido salvo localmente. Aguarde aprovação do Admin/DEV.'
+          : 'Cadastro enviado! Aguarde aprovação do Administrador/DEV para entrar.',
+        true
+      );
+      setTimeout(() => mostrarLogin('entrar'), 1800);
     }
 
     function atualizarRegFuncaoUI() {
@@ -1337,7 +1341,7 @@
           break;
         }
         case 17: {
-          const pend = (db.users || []).filter(u => u.pendente && u.cargoSolicitado);
+          const pend = (db.users || []).filter(u => u.pendente || u.ativo === false);
           if (!pend.length) { alert('Nenhum cadastro pendente.'); break; }
           tab('usuarios');
           toast(pend.length + ' pendente(s) na lista Equipe');
@@ -1800,29 +1804,32 @@
     async function aprovarCargo(id) {
       if (!podeGerenciarUsers()) return;
       const u = db.users.find(x => x.id === id);
-      if (!u || !u.cargoSolicitado) return;
-      if (u.cargoSolicitado === 'admin' && usuarioAtual.funcao !== 'admin') {
+      if (!u) return;
+      const cargo = u.cargoSolicitado || u.funcao || 'vigilante';
+      if (cargo === 'admin' && usuarioAtual.funcao !== 'admin') {
         return alert('Só Admin pode aprovar Administrador.');
       }
-      u.funcao = u.cargoSolicitado;
+      u.funcao = cargo;
       u.pendente = false;
       u.cargoSolicitado = null;
       u.ativo = true;
-      addAtividade('Cargo aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
+      addAtividade('Cadastro aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
       await salvar();
       render();
-      toast('Cargo aprovado');
+      toast('Cadastro aprovado');
     }
     async function recusarCargo(id) {
       if (!podeGerenciarUsers()) return;
       const u = db.users.find(x => x.id === id);
       if (!u) return;
+      if (!confirm('Recusar e manter conta inativa de ' + u.nome + '?')) return;
       u.pendente = false;
       u.cargoSolicitado = null;
-      addAtividade('Cargo recusado: ' + u.nome, 'admin');
+      u.ativo = false;
+      addAtividade('Cadastro recusado: ' + u.nome, 'admin');
       await salvar();
       render();
-      toast('Solicitação recusada');
+      toast('Cadastro recusado');
     }
     async function alterarFuncaoUser(id, funcao) {
       if (!funcao || !podeGerenciarUsers()) return;
@@ -1949,14 +1956,14 @@
 
       const userHtml = list => list.length
         ? list.map(u => {
-            const pend = u.pendente && u.cargoSolicitado ? ` <span class="badge yellow">Pend: ${u.cargoSolicitado}</span>` : '';
+            const pend = (u.pendente || u.ativo===false) ? ` <span class="badge yellow">Pendente${u.cargoSolicitado ? ': ' + u.cargoSolicitado : ''}</span>` : '';
             const inat = u.ativo===false ? ' <span class="badge red">Inativo</span>' : '';
             let actions = '';
             if (podeGerenciarUsers() && u.user !== 'admin') {
               actions = `<div class="actions">
                 <button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button>
                 <button class="btn red sm" onclick="excluirUser(${u.id})">Excluir</button>
-                ${u.pendente && u.cargoSolicitado ? `<button class="btn green sm" onclick="aprovarCargo(${u.id})">Aprovar cargo</button><button class="btn dark sm" onclick="recusarCargo(${u.id})">Recusar</button>` : ''}
+                ${u.pendente || u.ativo===false ? `<button class="btn green sm" onclick="aprovarCargo(${u.id})">Aprovar</button><button class="btn dark sm" onclick="recusarCargo(${u.id})">Recusar</button>` : ''}
                 <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser(${u.id}, this.value)">
                   <option value="">Cargo...</option>
                   <option value="vigilante">Vigilante</option>
