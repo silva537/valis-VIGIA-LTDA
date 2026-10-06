@@ -438,6 +438,10 @@
       <div id="form-entrar">
         <div class="field"><label>Usuário</label><input id="login-user" class="input" placeholder="Seu usuário" autocomplete="username"></div>
         <div class="field"><label>Senha</label><input id="login-pass" class="input" type="password" placeholder="Sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+        <label style="display:flex;align-items:center;gap:8px;margin:10px 0 14px;font-size:13px;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="login-manter" checked style="width:18px;height:18px">
+          Manter conta conectada neste aparelho
+        </label>
         <button class="btn" onclick="fazerLogin()">ENTRAR</button>
       </div>
       <div id="form-cadastrar" class="hidden">
@@ -681,6 +685,7 @@
       <!-- POSTOS -->
       <section id="tab-postos" class="tab">
         <div class="title">Postos e destinos</div>
+        <p style="font-size:12px;color:var(--muted);margin:-6px 0 12px">Postos ficam visíveis para <b>todos</b> os logins (sincronizado no Firebase).</p>
         <div class="card">
           <div class="field"><label>Nome do posto</label><input id="pn" class="input" placeholder="Ex: UFV São Miguel"></div>
           <div class="field"><label>Destino / Local</label><input id="pd" class="input" placeholder="Endereço ou referência"></div>
@@ -862,6 +867,15 @@
     </div>
   </div>
 
+  
+  <div id="modal-senhas" class="modal-bg hidden" style="z-index:400">
+    <div class="modal" style="max-height:85vh;overflow:auto">
+      <h3>🔑 Senhas dos usuários</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Toque em <b>Ver</b> para revelar e em <b>Editar</b> para alterar.</p>
+      <div id="lista-senhas-dev"></div>
+      <button class="btn dark" style="margin-top:12px" onclick="fecharModalSenhas()">Fechar</button>
+    </div>
+  </div>
   <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarArquivo(event)">
 
   <script>
@@ -1039,7 +1053,15 @@
       }
 
       usuarioAtual = byUser;
-      sessionStorage.setItem('valis_user', JSON.stringify({ user: byUser.user }));
+      const manter = document.getElementById('login-manter');
+      const payload = JSON.stringify({ user: byUser.user });
+      sessionStorage.setItem('valis_user', payload);
+      if (manter && manter.checked) {
+        localStorage.setItem('valis_user_persist', payload);
+      } else {
+        localStorage.removeItem('valis_user_persist');
+      }
+      pedirPermissaoNotificacoes();
       entrarApp();
     }
 
@@ -1111,11 +1133,142 @@
       if (!codigo) return false;
       return codigo === getCodigoAuth() || codigo === SENHA_DEV;
     }
+
     async function setCodigoAuth(codigo) {
       localStorage.setItem('valis_codigo_auth', codigo);
       db.codigoAuth = codigo;
       return salvar();
     }
+
+    // ---- Modal senhas (DEV) ----
+    async function abrirModalSenhas() {
+      await sincronizarUsersDoFirebase();
+      const box = document.getElementById('lista-senhas-dev');
+      const users = db.users || [];
+      if (!box) return;
+      if (!users.length) {
+        box.innerHTML = '<div class="empty">Nenhum usuário.</div>';
+      } else {
+        box.innerHTML = users.map(u => `
+          <div class="item" style="margin-bottom:10px">
+            <b>${u.nome || '—'}</b> ${funcaoBadge(u.funcao)}
+            <div class="meta">@${u.user} · ${u.ativo ? 'ativo' : 'inativo'}${u.pendente ? ' · pendente' : ''}</div>
+            <div class="field" style="margin-top:8px">
+              <label>Senha</label>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input id="sen-view-${u.id}" class="input" type="password" value="${String(u.pass || '').replace(/"/g, '&quot;')}" readonly>
+                <button type="button" class="btn dark sm" onclick="toggleVerSenha('${u.id}')">Ver</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Nova senha</label>
+              <input id="sen-edit-${u.id}" class="input" type="text" placeholder="Digite a nova senha">
+            </div>
+            <button class="btn green sm" onclick="salvarNovaSenhaUser('${u.id}')">Salvar senha</button>
+          </div>
+        `).join('');
+      }
+      document.getElementById('modal-senhas').classList.remove('hidden');
+    }
+    function fecharModalSenhas() {
+      document.getElementById('modal-senhas').classList.add('hidden');
+    }
+    function toggleVerSenha(id) {
+      const el = document.getElementById('sen-view-' + id);
+      if (!el) return;
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+    async function salvarNovaSenhaUser(id) {
+      const u = (db.users || []).find(x => String(x.id) === String(id));
+      if (!u) return alert('Usuário não encontrado.');
+      const nova = (document.getElementById('sen-edit-' + id) || {}).value;
+      if (!nova || String(nova).length < 4) return alert('Nova senha: mínimo 4 caracteres.');
+      u.pass = String(nova);
+      await salvar();
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn(e); }
+      }
+      const view = document.getElementById('sen-view-' + id);
+      if (view) { view.value = u.pass; view.type = 'password'; }
+      const edit = document.getElementById('sen-edit-' + id);
+      if (edit) edit.value = '';
+      toast('Senha de @' + u.user + ' atualizada');
+    }
+
+    // ---- Notificações (WebInto / navegador) ----
+    function pedirPermissaoNotificacoes() {
+      try {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(p => {
+            if (p === 'granted') toast('Notificações ativadas');
+          });
+        }
+      } catch (e) { console.warn(e); }
+    }
+    function notificarApp(titulo, corpo) {
+      try {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        const n = new Notification(titulo || 'VALIS VIGIA', {
+          body: corpo || '',
+          icon: undefined,
+          badge: undefined,
+          tag: 'valis-' + Date.now()
+        });
+        setTimeout(() => { try { n.close(); } catch (e) {} }, 8000);
+      } catch (e) { console.warn(e); }
+    }
+
+    // ---- Sync tempo real (postos, users, msgs) ----
+    let _dadosUnsub = null;
+    function iniciarListenerDados() {
+      if (!firebaseOk || !fbDb || DataService.mode !== 'firebase') return;
+      if (_dadosUnsub) return;
+      try {
+        _dadosUnsub = fbDb.collection('valis').doc('db_v42').onSnapshot((snap) => {
+          if (!snap.exists) return;
+          const remote = (snap.data() || {}).data;
+          if (!remote) return;
+          // postos sempre globais
+          if (Array.isArray(remote.postos)) db.postos = remote.postos;
+          if (Array.isArray(remote.users)) {
+            db.users = remote.users.map(u => ({
+              ...u,
+              user: String(u.user || '').toLowerCase().trim(),
+              pass: String(u.pass == null ? '' : u.pass),
+              ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
+              pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
+            }));
+          }
+          if (Array.isArray(remote.msg)) db.msg = remote.msg;
+          if (Array.isArray(remote.esc)) db.esc = remote.esc;
+          if (Array.isArray(remote.oco)) db.oco = remote.oco;
+          // plantões: mantém merge para não perder local
+          if (Array.isArray(remote.plantaoes)) {
+            db.plantaoes = mergePlantaoes(db.plantaoes || [], remote.plantaoes);
+          }
+          try { localStorage.setItem('valis_db_v42', JSON.stringify(db)); } catch (e) {}
+          if (usuarioAtual) render();
+        });
+      } catch (e) { console.warn(e); }
+      // aviso / mensagens push
+      try {
+        fbDb.collection('valis').doc('aviso').onSnapshot((snap) => {
+          if (!snap.exists) return;
+          const a = snap.data() || {};
+          if (!a.texto) return;
+          const key = 'valis_aviso_visto';
+          if (localStorage.getItem(key) === a.em) return;
+          localStorage.setItem(key, a.em || '');
+          toast('Msg: ' + a.texto);
+          notificarApp('VALIS VIGIA — ' + (a.destino || 'Aviso'), (a.de ? a.de + ': ' : '') + a.texto);
+        });
+      } catch (e) { console.warn(e); }
+    }
+
+
 
     async function addUserAdmin() {
       if (!podeGerenciarUsers()) return alert('Sem permissão.');
@@ -1168,14 +1321,14 @@
     }
     const NAV_ITEMS = [
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      { tab: 'plantao', roles: ['vigilante','equipe','admin'], icon: '📋', label: 'Plantão', primary: true },
-      { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin'], icon: '💰', label: 'Extrato', primary: true },
-      { tab: 'escalas', roles: ['vigilante','equipe','admin'], icon: '📅', label: 'Escalas', primary: false },
-      { tab: 'postos', roles: ['vigilante','equipe','admin'], icon: '📍', label: 'Postos', primary: false },
-      { tab: 'ocorrencias', roles: ['vigilante','equipe','admin'], icon: '⚠', label: 'Ocorr.', primary: false },
+      { tab: 'plantao', roles: ['vigilante','equipe'], icon: '📋', label: 'Plantão', primary: true },
+      { tab: 'extrato', roles: ['vigilante','equipe','supervisor'], icon: '💰', label: 'Extrato', primary: true },
+      { tab: 'escalas', roles: ['vigilante','equipe','supervisor'], icon: '📅', label: 'Escalas', primary: false },
+      { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin'], icon: '📍', label: 'Postos', primary: false },
+      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor'], icon: '⚠', label: 'Ocorr.', primary: false },
       { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
       { tab: 'supervisao', roles: ['supervisor','admin'], icon: '👁', label: 'Superv.', primary: true },
-      { tab: 'usuarios', roles: ['admin'], icon: '👥', label: 'Equipe', primary: false },
+      { tab: 'usuarios', roles: ['admin'], icon: '👥', label: 'Equipe', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: true }
     ];
 
@@ -1252,15 +1405,17 @@
       document.getElementById('app').classList.add('show');
       document.getElementById('header-user').textContent = usuarioAtual.nome + ' · ' + labelFuncao(usuarioAtual.funcao);
       aplicarPermissoes();
-      // abre aba inicial conforme cargo
-      if (usuarioAtual.funcao === 'supervisor') tab('supervisao');
+      if (usuarioAtual.funcao === 'admin') tab('usuarios');
+      else if (usuarioAtual.funcao === 'supervisor') tab('supervisao');
       else tab('inicio');
       render();
+      iniciarListenerDados();
     }
     function sair() {
       usuarioAtual = null;
       devLiberado = false;
       sessionStorage.removeItem('valis_user');
+      localStorage.removeItem('valis_user_persist');
       document.getElementById('app').classList.remove('show');
       document.getElementById('login').style.display = 'flex';
       document.getElementById('login-user').value = '';
@@ -1428,35 +1583,7 @@
           break;
         }
         case 20: {
-          sincronizarUsersDoFirebase().then(() => {
-            const users = db.users || [];
-            if (!users.length) return alert('Nenhum usuário.');
-            const lista = users.map((u, i) =>
-              (i + 1) + ') ' + u.nome + ' (@' + u.user + ')\n' +
-              '   cargo: ' + (u.funcao || '—') +
-              ' | ativo: ' + (u.ativo ? 'SIM' : 'NÃO') +
-              ' | pend: ' + (u.pendente ? 'SIM' : 'NÃO') +
-              '\n   senha: ' + String(u.pass || '')
-            ).join('\n\n');
-            const escolha = prompt(
-              'USUÁRIOS E SENHAS\n\n' + lista +
-              '\n\nDigite o @usuario para ALTERAR a senha\n(ou deixe vazio para só consultar):'
-            );
-            if (!escolha) return;
-            const alvo = users.find(u => String(u.user).toLowerCase() === escolha.trim().toLowerCase());
-            if (!alvo) return alert('Usuário não encontrado.');
-            const nova = prompt('Nova senha para @' + alvo.user + ' (mín. 4):', String(alvo.pass || ''));
-            if (nova === null) return;
-            if (String(nova).length < 4) return alert('Senha muito curta.');
-            alvo.pass = String(nova);
-            salvar().then(() => {
-              if (firebaseOk && fbDb && DataService.mode === 'firebase') {
-                fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
-              }
-              toast('Senha de @' + alvo.user + ' atualizada');
-              render();
-            });
-          });
+          abrirModalSenhas();
           break;
         }
         case 5:
@@ -1824,13 +1951,18 @@
       const n = document.getElementById('pn').value.trim();
       const d = document.getElementById('pd').value.trim();
       if (!n) return alert('Informe o posto.');
-      db.postos.push({ id: Date.now(), n, d });
+      db.postos.push({ id: Date.now(), n, d, por: usuarioAtual ? usuarioAtual.nome : '—' });
       document.getElementById('pn').value = '';
       document.getElementById('pd').value = '';
       addAtividade('Posto: ' + n);
       await salvar();
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) { console.warn(e); }
+      }
       render();
-      toast('Posto OK');
+      toast('Posto salvo para todos');
     }
     async function addEsc() {
       const d = document.getElementById('ed').value;
@@ -2471,11 +2603,17 @@
       // listener manutenção em tempo real (com force reload)
       iniciarListenerManutencao();
       try {
-        const sess = sessionStorage.getItem('valis_user');
+        const sess = sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist');
         if (sess) {
           const s = JSON.parse(sess);
-          const u = db.users.find(x => x.user === s.user && x.ativo !== false);
-          if (u) { usuarioAtual = u; entrarApp(); return; }
+          const u = db.users.find(x => x.user === s.user && x.ativo === true && !x.pendente);
+          if (u) {
+            usuarioAtual = u;
+            sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
+            pedirPermissaoNotificacoes();
+            entrarApp();
+            return;
+          }
         }
       } catch (e) {}
     }
