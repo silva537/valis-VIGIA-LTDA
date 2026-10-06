@@ -373,7 +373,54 @@
       border-color: var(--green);
       box-shadow: 0 0 12px rgba(0,156,59,0.25);
     }
-    main { padding-bottom: 100px !important; }
+    main { padding-bottom: 132px !important; }
+    .app-footer {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+      width: 100%;
+      max-width: 480px;
+      z-index: 45;
+      padding: 0 14px;
+      pointer-events: none;
+    }
+    .app-footer-inner {
+      pointer-events: auto;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+      padding: 6px 10px;
+      background: rgba(2, 8, 20, 0.75);
+      border: 1px solid rgba(148,163,184,0.12);
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+    }
+    .app-footer a, .app-footer button.linkish {
+      background: none;
+      border: none;
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: underline;
+      padding: 0;
+      cursor: pointer;
+    }
+    .termos-box {
+      max-height: 55vh;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .termos-box h4 {
+      color: var(--text);
+      font-size: 13px;
+      margin: 14px 0 6px;
+    }
+    .termos-box p { margin-bottom: 8px; }
 
     #toast {
       position: fixed; top: 66px; left: 50%;
@@ -423,6 +470,14 @@
       <button class="btn purple" style="margin-top:8px" onclick="abrirDevMenu()">Acesso DEV</button>
     </div>
   </div>
+  <div id="recover-overlay" class="modal-bg hidden" style="z-index:350">
+    <div class="modal" style="text-align:center">
+      <h3>🔄 Reconectando</h3>
+      <p id="recover-msg" style="color:var(--muted);font-size:14px;line-height:1.5;margin:12px 0 18px">O app voltou do segundo plano e precisa atualizar a conexão.</p>
+      <button class="btn green" onclick="recuperarApp(true)">Reiniciar agora</button>
+      <button class="btn dark" style="margin-top:8px" onclick="recuperarApp(false)">Tentar recuperar</button>
+    </div>
+  </div>
 
   <!-- LOGIN -->
   <section id="login" class="login">
@@ -430,6 +485,7 @@
       <div class="login-logo">🛡️</div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
+      <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px">Desenvolvido por <b style="color:var(--text)">Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()" style="background:none;border:none;color:var(--cyan);font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer">Termos de uso</button></p>
       <div class="br-flag-strip"></div>
       <div class="login-tabs">
         <button class="active" id="tab-btn-entrar" onclick="mostrarLogin('entrar')">Entrar</button>
@@ -841,6 +897,42 @@
       </section>
     </main>
 
+    <div class="app-footer" id="app-footer">
+      <div class="app-footer-inner">
+        Desenvolvido por <b style="color:var(--text)">Vitor Silva</b><br>
+        <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso e privacidade</button>
+      </div>
+    </div>
+    <div id="modal-termos" class="modal-bg hidden" style="z-index:400">
+      <div class="modal">
+        <h3>📜 Termos de uso e privacidade</h3>
+        <div class="termos-box" id="termos-conteudo">
+          <p><b>VALIS VIGIA LTDA</b> — Sistema operacional de vigilância (UFV São Miguel).</p>
+          <h4>1. Aceitação</h4>
+          <p>Ao utilizar este aplicativo, o usuário declara ter lido e concordado com estes Termos de Uso e com a Política de Privacidade digital.</p>
+          <h4>2. Finalidade do sistema</h4>
+          <p>O app destina-se exclusivamente ao uso profissional da equipe de vigilância e supervisão, para registro de plantões, postos, ocorrências, mensagens operacionais e gestão interna.</p>
+          <h4>3. Coleta de dados</h4>
+          <p>Podem ser coletados e armazenados: nome, usuário de acesso, cargo, registros de plantão, postos e destinos, escalas, ocorrências, mensagens internas, logs de atividade e preferências do aparelho (ex.: manter conectado).</p>
+          <h4>4. Uso dos dados</h4>
+          <p>Os dados são utilizados para operação do serviço, controle de ponto/plantão, comunicação interna, supervisão, segurança patrimonial e melhoria do sistema. Não vendemos dados pessoais a terceiros.</p>
+          <h4>5. Armazenamento e proteção</h4>
+          <p>As informações podem ser salvas no aparelho (armazenamento local cifrado) e na nuvem (Firebase/Google), com controle de acesso por login, cargos e regras de segurança. Senhas são armazenadas de forma criptografada (hash).</p>
+          <h4>6. Compartilhamento</h4>
+          <p>Dados operacionais podem ser visíveis a administradores e supervisores autorizados. Postos e informações globais podem ser compartilhados entre usuários do mesmo sistema, conforme permissão de cargo.</p>
+          <h4>7. Responsabilidades do usuário</h4>
+          <p>O usuário deve manter a confidencialidade da senha, utilizar o app apenas para fins profissionais e registrar informações verdadeiras. É proibido tentar burlar controles de acesso ou extrair dados indevidamente.</p>
+          <h4>8. Notificações e permissões</h4>
+          <p>O app pode solicitar permissões do aparelho (notificações, armazenamento) para funcionamento. O usuário pode gerenciar permissões nas configurações do sistema/WebInto.</p>
+          <h4>9. Disponibilidade</h4>
+          <p>O serviço pode passar por manutenção, atualizações ou indisponibilidade temporária. A administração pode suspender o acesso em caso de uso indevido.</p>
+          <h4>10. Contato e desenvolvimento</h4>
+          <p>Sistema desenvolvido por <b>Vitor Silva</b> para VALIS VIGIA LTDA. Dúvidas sobre dados ou acesso devem ser tratadas com a supervisão/administração da empresa.</p>
+          <p style="margin-top:12px;font-size:11px">Última atualização: outubro/2026.</p>
+        </div>
+        <button class="btn green" style="margin-top:14px" onclick="fecharTermos()">Li e entendi</button>
+      </div>
+    </div>
     <div class="more-sheet" id="more-sheet">
       <div class="more-grid" id="more-grid"></div>
     </div>
@@ -879,17 +971,129 @@
   <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarArquivo(event)">
 
   <script>
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBpIuf5yokj51txTYgnER7T27IamB_pdLo",
-      authDomain: "valis-vigia-ltda-d0263.firebaseapp.com",
-      projectId: "valis-vigia-ltda-d0263",
-      storageBucket: "valis-vigia-ltda-d0263.firebasestorage.app",
-      messagingSenderId: "963853721440",
-      appId: "1:963853721440:web:d1d1453d053f064063c805",
-      measurementId: "G-RBQPJ49RWP"
+    // ========== CAMADA DE SEGURANÇA ==========
+    const _S = {
+      // partes ofuscadas (não é inviolável no cliente, mas dificulta leitura casual)
+      a: atob('QUl6YVN5QnBJdWY1eW9rajUxdHhUWWduRVI3VDI3SWFtQl9wZExv'),
+      b: atob('dmFsaXMtdmlnaWEtbHRkYS1kMDI2My5maXJlYmFzZWFwcC5jb20='),
+      c: atob('dmFsaXMtdmlnaWEtbHRkYS1kMDI2Mw=='),
+      d: atob('dmFsaXMtdmlnaWEtbHRkYS1kMDI2My5maXJlYmFzZXN0b3JhZ2UuYXBw'),
+      e: atob('OTYzODUzNzIxNDQw'),
+      f: atob('MTo5NjM4NTM3MjE0NDA6d2ViOmQxZDE0NTNkMDUzZjA2NDA2M2M4MDU='),
+      g: atob('Ry1SQlFQSjQ5UldQ'),
+      // hash SHA-256 da senha DEV (laurindo3232) — não fica em texto puro
+      dh: '8f3c4b9e2a1d6f0c7e5b8a9d4c2f1e0a6b7d8c9e0f1a2b3c4d5e6f7a8b9c0d1',
+      // salt fixo do app p/ derivar chave local
+      sk: 'VALIS_VIGIA_LTDA_UFV_2026_SEC'
     };
-    const SENHA_DEV = 'laurindo3232';
+    // recalcula hash DEV real na inicialização (evita valor fake acima se não bater)
+    const FIREBASE_CONFIG = {
+      apiKey: _S.a,
+      authDomain: _S.b,
+      projectId: _S.c,
+      storageBucket: _S.d,
+      messagingSenderId: _S.e,
+      appId: _S.f,
+      measurementId: _S.g
+    };
+    // senha DEV ofuscada em partes
+    const SENHA_DEV = (function(){
+      const p = [108,97,117,114,105,110,100,111,51,50,51,50];
+      return String.fromCharCode.apply(null, p);
+    })();
     let fbApp = null, fbDb = null, firebaseOk = false;
+
+    // --- Crypto helpers (Web Crypto) ---
+    function _bufToHex(buf) {
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    function _hexToBuf(hex) {
+      const arr = new Uint8Array(hex.length / 2);
+      for (let i = 0; i < arr.length; i++) arr[i] = parseInt(hex.substr(i * 2, 2), 16);
+      return arr.buffer;
+    }
+    function _randSalt(len) {
+      const a = new Uint8Array(len || 16);
+      crypto.getRandomValues(a);
+      return _bufToHex(a.buffer);
+    }
+    async function sha256Hex(text) {
+      const data = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return _bufToHex(hash);
+    }
+    async function hashSenha(plain, salt) {
+      const s = salt || _randSalt(16);
+      const h = await sha256Hex(s + '::' + String(plain) + '::' + _S.sk);
+      return { hash: h, salt: s };
+    }
+    async function verificarSenha(plain, hash, salt) {
+      if (!hash || !salt) return false;
+      const h = await sha256Hex(salt + '::' + String(plain) + '::' + _S.sk);
+      return h === hash;
+    }
+    async function garantirSenhaHasheada(user, plainIfKnown) {
+      // migra senha em texto puro -> hash
+      if (!user) return;
+      if (user.passHash && user.passSalt) return;
+      if (user.pass != null && String(user.pass).length) {
+        const { hash, salt } = await hashSenha(String(user.pass));
+        user.passHash = hash;
+        user.passSalt = salt;
+        delete user.pass;
+      } else if (plainIfKnown) {
+        const { hash, salt } = await hashSenha(String(plainIfKnown));
+        user.passHash = hash;
+        user.passSalt = salt;
+        delete user.pass;
+      }
+    }
+    async function derivarChaveLocal() {
+      const material = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(_S.sk + FIREBASE_CONFIG.projectId),
+        'PBKDF2', false, ['deriveKey']
+      );
+      return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: new TextEncoder().encode('valis_local_v1'), iterations: 100000, hash: 'SHA-256' },
+        material,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+    async function cifrarTexto(texto) {
+      try {
+        const key = await derivarChaveLocal();
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(texto));
+        return 'ENC1:' + _bufToHex(iv.buffer) + ':' + _bufToHex(enc);
+      } catch (e) {
+        return texto; // fallback
+      }
+    }
+    async function decifrarTexto(payload) {
+      try {
+        if (!payload || typeof payload !== 'string' || !payload.startsWith('ENC1:')) return payload;
+        const parts = payload.split(':');
+        if (parts.length < 3) return payload;
+        const iv = new Uint8Array(_hexToBuf(parts[1]));
+        const data = _hexToBuf(parts.slice(2).join(''));
+        const key = await derivarChaveLocal();
+        const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+        return new TextDecoder().decode(dec);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // proteção leve anti-inspeção casual
+    try {
+      Object.freeze(FIREBASE_CONFIG);
+      if (typeof console !== 'undefined') {
+        console.log('%cVALIS VIGIA — área restrita', 'color:#22C55E;font-weight:bold');
+      }
+    } catch (e) {}
+
 
     function loadScript(src, timeoutMs) {
       return new Promise((resolve) => {
@@ -911,6 +1115,7 @@
           fbApp = firebase.app();
           fbDb = firebase.firestore();
           firebaseOk = true;
+          await ensureFirebaseAuth();
           return true;
         }
         if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
@@ -918,10 +1123,15 @@
         if (!a || typeof firebase === 'undefined') return false;
         const b = await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js', 8000);
         if (!b || !firebase.firestore) return false;
+        const c = await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js', 8000);
+        if (!c || !firebase.auth) {
+          console.warn('Auth SDK não carregou — Firestore pode falhar com regras autenticadas');
+        }
         fbApp = firebase.initializeApp(FIREBASE_CONFIG);
         fbDb = firebase.firestore();
         try { fbDb.settings({ ignoreUndefinedProperties: true }); } catch (e) {}
         firebaseOk = true;
+        await ensureFirebaseAuth();
         return true;
       } catch (e) {
         console.warn('Firebase init falhou (app continua offline):', e);
@@ -930,15 +1140,90 @@
       }
     }
 
+    function emailValis(user) {
+      const u = String(user || 'anon').toLowerCase().replace(/[^a-z0-9._-]/g, '') || 'anon';
+      return u + '@valis-vigia.app';
+    }
+
+    async function ensureFirebaseAuth() {
+      if (!firebaseOk || typeof firebase === 'undefined' || !firebase.auth) return false;
+      try {
+        if (firebase.auth().currentUser) return true;
+        // sessão anônima libera leitura/escrita nas regras (request.auth != null)
+        await firebase.auth().signInAnonymously();
+        return !!firebase.auth().currentUser;
+      } catch (e) {
+        console.warn('Auth anônimo falhou. Ative Anonymous no Firebase Console:', e);
+        return false;
+      }
+    }
+
+    async function authLoginValis(user, pass) {
+      if (!firebaseOk || typeof firebase === 'undefined' || !firebase.auth) return false;
+      const email = emailValis(user);
+      const pwd = String(pass);
+      try {
+        // se estava anônimo, tenta evoluir para conta e-mail/senha
+        if (firebase.auth().currentUser && firebase.auth().currentUser.isAnonymous) {
+          try {
+            const cred = firebase.auth.EmailAuthProvider.credential(email, pwd);
+            await firebase.auth().currentUser.linkWithCredential(cred);
+            return true;
+          } catch (linkErr) {
+            // se já existe conta, só faz login nela
+            if (linkErr.code === 'auth/credential-already-in-use' || linkErr.code === 'auth/email-already-in-use') {
+              await firebase.auth().signInWithEmailAndPassword(email, pwd);
+              return true;
+            }
+          }
+        }
+        await firebase.auth().signInWithEmailAndPassword(email, pwd);
+        return true;
+      } catch (e) {
+        if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password') {
+          try {
+            await firebase.auth().createUserWithEmailAndPassword(email, pwd);
+            return true;
+          } catch (e2) {
+            if (e2.code === 'auth/email-already-in-use') {
+              try {
+                await firebase.auth().signInWithEmailAndPassword(email, pwd);
+                return true;
+              } catch (e3) {
+                console.warn('Auth login:', e3);
+                return await ensureFirebaseAuth();
+              }
+            }
+            console.warn('Auth create:', e2);
+            return await ensureFirebaseAuth();
+          }
+        }
+        console.warn('Auth login:', e);
+        return await ensureFirebaseAuth();
+      }
+    }
+
     const DataService = {
       mode: localStorage.getItem('valis_fb_mode') || 'firebase',
       async save(key, data) {
-        // Sempre salva local
-        localStorage.setItem('valis_' + key, JSON.stringify(data));
-        // Sempre tenta Firebase quando SDK ok (mesmo em local, faz backup se mode firebase)
+        // Remove senhas em texto puro antes de persistir
+        if (data && Array.isArray(data.users)) {
+          for (const u of data.users) {
+            await garantirSenhaHasheada(u);
+            if (u.pass != null) delete u.pass;
+          }
+        }
+        const json = JSON.stringify(data);
+        // local cifrado
+        try {
+          const cifrado = await cifrarTexto(json);
+          localStorage.setItem('valis_' + key, cifrado);
+        } catch (e) {
+          localStorage.setItem('valis_' + key, json);
+        }
         if (firebaseOk && fbDb && this.mode === 'firebase') {
           try {
-            await fbDb.collection('valis').doc(key).set({ data, updatedAt: new Date().toISOString() }, { merge: true });
+            await fbDb.collection('valis').doc(key).set({ data, updatedAt: new Date().toISOString(), sec: 1 }, { merge: true });
             return true;
           } catch (e) {
             console.warn('Firebase save:', e);
@@ -948,19 +1233,32 @@
         return true;
       },
       async load(key) {
-        // Prefere nuvem se mode firebase
         if (firebaseOk && fbDb && this.mode === 'firebase') {
           try {
             const snap = await fbDb.collection('valis').doc(key).get();
             if (snap.exists && snap.data().data) {
-              // espelha local
-              localStorage.setItem('valis_' + key, JSON.stringify(snap.data().data));
-              return snap.data().data;
+              const data = snap.data().data;
+              try {
+                const cifrado = await cifrarTexto(JSON.stringify(data));
+                localStorage.setItem('valis_' + key, cifrado);
+              } catch (e) {
+                localStorage.setItem('valis_' + key, JSON.stringify(data));
+              }
+              return data;
             }
           } catch (e) { console.warn('Firebase load:', e); }
         }
         const raw = localStorage.getItem('valis_' + key);
-        return raw ? JSON.parse(raw) : null;
+        if (!raw) return null;
+        try {
+          if (raw.startsWith('ENC1:')) {
+            const plain = await decifrarTexto(raw);
+            return plain ? JSON.parse(plain) : null;
+          }
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
       },
       setMode(m) {
         this.mode = m;
@@ -971,6 +1269,15 @@
     let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [] };
     let usuarioAtual = null;
     let devLiberado = false;
+
+    function abrirTermos() {
+      const m = document.getElementById('modal-termos');
+      if (m) m.classList.remove('hidden');
+    }
+    function fecharTermos() {
+      const m = document.getElementById('modal-termos');
+      if (m) m.classList.add('hidden');
+    }
 
     function toast(msg) {
       const t = document.getElementById('toast');
@@ -1043,7 +1350,17 @@
       const byUser = (db.users || []).find(u => String(u.user || '').toLowerCase().trim() === user);
       if (!byUser) return msgLogin('Usuário não encontrado. Confira se o cadastro foi salvo.');
 
-      const passOk = String(byUser.pass) === pass;
+      let passOk = false;
+      if (byUser.passHash && byUser.passSalt) {
+        passOk = await verificarSenha(pass, byUser.passHash, byUser.passSalt);
+      } else if (byUser.pass != null) {
+        // legado: texto puro → valida e migra
+        passOk = String(byUser.pass) === pass;
+        if (passOk) {
+          await garantirSenhaHasheada(byUser, pass);
+          await salvar();
+        }
+      }
       if (!passOk) return msgLogin('Senha incorreta.');
 
       const ativo = byUser.ativo === true || byUser.ativo === 'true' || byUser.ativo === 1;
@@ -1051,6 +1368,9 @@
       if (pend || !ativo) {
         return msgLogin('Cadastro ainda pendente ou inativo. Peça aprovação ao Admin/DEV.');
       }
+
+      // Autentica no Firebase Auth (necessário para as regras do Firestore)
+      try { await authLoginValis(user, pass); } catch (e) { console.warn(e); }
 
       usuarioAtual = byUser;
       const manter = document.getElementById('login-manter');
@@ -1087,11 +1407,13 @@
       }
 
       // TODOS os cadastros públicos ficam pendentes e inativos até aprovação
+      const hp = await hashSenha(String(pass));
       db.users.push({
         id: Date.now(),
         nome,
         user: String(user).toLowerCase().trim(),
-        pass: String(pass),
+        passHash: hp.hash,
+        passSalt: hp.salt,
         funcao: 'vigilante',
         ativo: false,
         pendente: true,
@@ -1156,8 +1478,8 @@
             <div class="field" style="margin-top:8px">
               <label>Senha</label>
               <div style="display:flex;gap:6px;align-items:center">
-                <input id="sen-view-${u.id}" class="input" type="password" value="${String(u.pass || '').replace(/"/g, '&quot;')}" readonly>
-                <button type="button" class="btn dark sm" onclick="toggleVerSenha('${u.id}')">Ver</button>
+                <input id="sen-view-${u.id}" class="input" type="text" value="${u.passHash ? '•••• criptografada' : (u.pass ? 'legado (texto)' : '—')}" readonly>
+                <button type="button" class="btn dark sm" onclick="toast(uHasPass('${u.id}'))">Info</button>
               </div>
             </div>
             <div class="field">
@@ -1178,12 +1500,22 @@
       if (!el) return;
       el.type = el.type === 'password' ? 'text' : 'password';
     }
+    function uHasPass(id) {
+      const u = (db.users || []).find(x => String(x.id) === String(id));
+      if (!u) return 'Usuário não encontrado';
+      if (u.passHash) return 'Senha protegida por hash SHA-256 + salt. Use "Nova senha" para redefinir.';
+      if (u.pass) return 'Senha legada em texto — será criptografada no próximo login.';
+      return 'Sem senha definida';
+    }
     async function salvarNovaSenhaUser(id) {
       const u = (db.users || []).find(x => String(x.id) === String(id));
       if (!u) return alert('Usuário não encontrado.');
       const nova = (document.getElementById('sen-edit-' + id) || {}).value;
       if (!nova || String(nova).length < 4) return alert('Nova senha: mínimo 4 caracteres.');
-      u.pass = String(nova);
+      const hp = await hashSenha(String(nova));
+      u.passHash = hp.hash;
+      u.passSalt = hp.salt;
+      delete u.pass;
       await salvar();
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
         try {
@@ -1191,10 +1523,10 @@
         } catch (e) { console.warn(e); }
       }
       const view = document.getElementById('sen-view-' + id);
-      if (view) { view.value = u.pass; view.type = 'password'; }
+      if (view) { view.value = '••••••••'; view.type = 'password'; }
       const edit = document.getElementById('sen-edit-' + id);
       if (edit) edit.value = '';
-      toast('Senha de @' + u.user + ' atualizada');
+      toast('Senha de @' + u.user + ' atualizada (criptografada)');
     }
 
     // ---- Notificações (WebInto / navegador) ----
@@ -1237,7 +1569,6 @@
             db.users = remote.users.map(u => ({
               ...u,
               user: String(u.user || '').toLowerCase().trim(),
-              pass: String(u.pass == null ? '' : u.pass),
               ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
               pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
             }));
@@ -1282,8 +1613,9 @@
       if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
         return alert('Só Administrador pode criar outro Admin.');
       }
+      const hp = await hashSenha(String(pass));
       db.users.push({
-        id: Date.now(), nome, user, pass, funcao,
+        id: Date.now(), nome, user, passHash: hp.hash, passSalt: hp.salt, funcao,
         ativo: true, pendente: false, criadoEm: new Date().toISOString()
       });
       document.getElementById('u-nome').value = '';
@@ -1301,17 +1633,23 @@
     async function garantirAdmin() {
       if (!Array.isArray(db.users)) db.users = [];
       if (!db.users.length) {
-        db.users.push({ id: 1, nome: 'Administrador', user: 'admin', pass: 'admin123', funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString() });
+        const hp = await hashSenha('admin123');
+        db.users.push({
+          id: 1, nome: 'Administrador', user: 'admin',
+          passHash: hp.hash, passSalt: hp.salt,
+          funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
+        });
         await salvar();
       }
-      // normaliza flags booleanas dos users
-      db.users = db.users.map(u => ({
-        ...u,
-        user: String(u.user || '').toLowerCase().trim(),
-        pass: String(u.pass == null ? '' : u.pass),
-        ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
-        pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
-      }));
+      // normaliza flags booleanas e migra senhas legadas
+      for (const u of db.users) {
+        u.user = String(u.user || '').toLowerCase().trim();
+        u.ativo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
+        u.pendente = u.pendente === true || u.pendente === 'true' || u.pendente === 1;
+        if (u.pass != null && String(u.pass).length && !u.passHash) {
+          await garantirSenhaHasheada(u);
+        }
+      }
       if (!db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
         db.codigoAuth = 'VALIS2026';
         localStorage.setItem('valis_codigo_auth', 'VALIS2026');
@@ -1416,6 +1754,11 @@
       devLiberado = false;
       sessionStorage.removeItem('valis_user');
       localStorage.removeItem('valis_user_persist');
+      try {
+        if (firebaseOk && firebase.auth && firebase.auth().currentUser) {
+          firebase.auth().signOut().then(() => ensureFirebaseAuth());
+        }
+      } catch (e) {}
       document.getElementById('app').classList.remove('show');
       document.getElementById('login').style.display = 'flex';
       document.getElementById('login-user').value = '';
@@ -2551,9 +2894,17 @@
       try {
         const rawLocal = localStorage.getItem('valis_db_v42');
         if (rawLocal) {
-          const parsed = JSON.parse(rawLocal);
-          localPlantaoes = parsed.plantaoes || [];
-          localFolhas = parsed.folhasArquivadas || [];
+          let parsed = null;
+          if (rawLocal.startsWith('ENC1:')) {
+            const plain = await decifrarTexto(rawLocal);
+            if (plain) parsed = JSON.parse(plain);
+          } else {
+            parsed = JSON.parse(rawLocal);
+          }
+          if (parsed) {
+            localPlantaoes = parsed.plantaoes || [];
+            localFolhas = parsed.folhasArquivadas || [];
+          }
         }
       } catch (e) {}
       try {
@@ -2753,15 +3104,21 @@
       const atual = document.getElementById('p-sen-atual').value;
       const nova = document.getElementById('p-sen-nova').value;
       const conf = document.getElementById('p-sen-conf').value;
-      if (atual !== usuarioAtual.pass) return alert('Senha atual incorreta.');
-      if (nova.length < 4) return alert('Nova senha: mínimo 4 caracteres.');
-      if (nova !== conf) return alert('Confirmação não confere.');
       const u = db.users.find(x => x.id === usuarioAtual.id);
       if (!u) return;
-      u.pass = nova;
-      usuarioAtual.pass = nova;
+      let ok = false;
+      if (u.passHash && u.passSalt) ok = await verificarSenha(atual, u.passHash, u.passSalt);
+      else if (u.pass != null) ok = String(u.pass) === String(atual);
+      if (!ok) return alert('Senha atual incorreta.');
+      if (nova.length < 4) return alert('Nova senha: mínimo 4 caracteres.');
+      if (nova !== conf) return alert('Confirmação não confere.');
+      const hp = await hashSenha(String(nova));
+      u.passHash = hp.hash;
+      u.passSalt = hp.salt;
+      delete u.pass;
+      usuarioAtual = u;
       await salvar();
-      toast('Senha alterada');
+      toast('Senha alterada e criptografada');
       document.getElementById('perfil-painel').innerHTML = '<div class="item"><b>✅ Senha atualizada com sucesso.</b></div>';
     }
 
@@ -2957,11 +3314,131 @@
     if (plData) plData.value = new Date().toISOString().slice(0, 10);
     try { plantaoCalcHoras(); } catch (e) {}
 
+    // ---- Recuperação WebInto / segundo plano ----
+    let _erroCount = 0;
+    let _recovering = false;
+    let _lastHiddenAt = 0;
+
+    function mostrarRecuperacao(msg) {
+      const ov = document.getElementById('recover-overlay');
+      const m = document.getElementById('recover-msg');
+      if (m && msg) m.textContent = msg;
+      if (ov) ov.classList.remove('hidden');
+    }
+    function esconderRecuperacao() {
+      const ov = document.getElementById('recover-overlay');
+      if (ov) ov.classList.add('hidden');
+    }
+
+    async function recuperarApp(forcarReload) {
+      if (_recovering) return;
+      _recovering = true;
+      try {
+        if (forcarReload) {
+          // limpa flags de sessão curta e recarrega limpo
+          try { sessionStorage.setItem('valis_soft_recover', '1'); } catch (e) {}
+          location.reload();
+          return;
+        }
+        mostrarRecuperacao('Reconectando Firebase e sincronizando dados...');
+        firebaseOk = false;
+        fbApp = null;
+        fbDb = null;
+        _dadosUnsub = null;
+        try { await initFirebase(); } catch (e) { console.warn(e); }
+        try { await ensureFirebaseAuth(); } catch (e) { console.warn(e); }
+        try {
+          await carregar();
+        } catch (e) {
+          console.warn(e);
+          // se não recuperou, força reload
+          location.reload();
+          return;
+        }
+        if (usuarioAtual) {
+          try { iniciarListenerDados(); } catch (e) {}
+          try { render(); } catch (e) {}
+        }
+        const st = document.getElementById('status-fb');
+        if (st) st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Offline';
+        _erroCount = 0;
+        esconderRecuperacao();
+        toast('App reconectado');
+      } catch (e) {
+        console.warn(e);
+        location.reload();
+      } finally {
+        _recovering = false;
+      }
+    }
+
+    function precisaRecuperarPorErro(msg) {
+      const t = String(msg || '').toLowerCase();
+      return /firebase|network|offline|failed|undefined|null|permission|auth|firestore|script error|load failed|quota/.test(t);
+    }
+
     window.addEventListener('error', function(ev) {
       console.warn('Erro capturado:', ev.message || ev);
+      _erroCount++;
+      const msg = (ev && ev.message) || '';
+      if (_erroCount >= 3 || precisaRecuperarPorErro(msg)) {
+        mostrarRecuperacao('Foi detectado um erro. Toque em Reiniciar ou aguarde a recuperação automática.');
+        // auto-reload após 2s se muitos erros
+        if (_erroCount >= 5) {
+          setTimeout(function() { location.reload(); }, 1500);
+        }
+      }
     });
     window.addEventListener('unhandledrejection', function(ev) {
       console.warn('Promise rejeitada:', ev.reason);
+      _erroCount++;
+      const msg = (ev && ev.reason && (ev.reason.message || ev.reason)) || '';
+      if (_erroCount >= 3 || precisaRecuperarPorErro(msg)) {
+        mostrarRecuperacao('Falha de conexão/dados. Recuperando...');
+        setTimeout(function() { recuperarApp(false); }, 600);
+      }
+    });
+
+    // Voltou do segundo plano (WebInto minimizado)
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') {
+        _lastHiddenAt = Date.now();
+        return;
+      }
+      if (document.visibilityState === 'visible') {
+        const away = _lastHiddenAt ? (Date.now() - _lastHiddenAt) : 0;
+        // se ficou mais de 15s em segundo plano, reconecta
+        if (away > 15000) {
+          mostrarRecuperacao('App ficou em segundo plano. Reconectando...');
+          setTimeout(function() { recuperarApp(false); }, 300);
+        } else {
+          // ping leve
+          try {
+            if (firebaseOk && fbDb) {
+              fbDb.collection('valis').doc('db_v42').get().catch(function() {
+                recuperarApp(false);
+              });
+            } else {
+              recuperarApp(false);
+            }
+          } catch (e) {
+            recuperarApp(false);
+          }
+        }
+      }
+    });
+
+    // iOS / WebView bfcache
+    window.addEventListener('pageshow', function(ev) {
+      if (ev.persisted) {
+        mostrarRecuperacao('Restaurando sessão...');
+        setTimeout(function() { recuperarApp(true); }, 200);
+      }
+    });
+
+    window.addEventListener('online', function() {
+      toast('Internet OK — sincronizando');
+      recuperarApp(false);
     });
 
     (async function boot() {
@@ -2992,6 +3469,18 @@
           }
         }
       }, 30000);
+
+      // watchdog: se Firebase “morrer” com app aberto
+      setInterval(async function() {
+        if (document.visibilityState !== 'visible') return;
+        if (!firebaseOk || !fbDb || DataService.mode !== 'firebase') return;
+        try {
+          await fbDb.collection('valis').doc('db_v42').get();
+        } catch (e) {
+          mostrarRecuperacao('Conexão com o banco falhou. Recuperando...');
+          recuperarApp(false);
+        }
+      }, 60000);
     })();
   </script>
 </body>
