@@ -445,12 +445,17 @@
         <div class="field"><label>Usuário</label><input id="reg-user" class="input" placeholder="Ex: joao.silva"></div>
         <div class="field"><label>Senha</label><input id="reg-pass" class="input" type="password" placeholder="Mínimo 4 caracteres"></div>
         <div class="field"><label>Função</label>
-          <select id="reg-funcao" class="select">
+          <select id="reg-funcao" class="select" onchange="atualizarRegFuncaoUI()">
             <option value="vigilante">Vigilante</option>
             <option value="equipe">Equipe</option>
-            <option value="supervisor">Supervisor</option>
-            <option value="admin">Administrador</option>
+            <option value="supervisor">Supervisor (requer código)</option>
+            <option value="admin">Administrador (requer código)</option>
           </select>
+        </div>
+        <div class="field" id="reg-codigo-wrap" style="display:none">
+          <label>Código de autorização</label>
+          <input id="reg-codigo" class="input" type="password" placeholder="Código liberado pelo DEV/Admin">
+          <p style="font-size:11px;color:var(--muted);margin-top:6px">Supervisor e Admin só com código. Sem código, escolha Vigilante ou Equipe — ou solicite aprovação.</p>
         </div>
         <button class="btn green" onclick="cadastrarUsuario()">CADASTRAR FUNCIONÁRIO</button>
       </div>
@@ -486,6 +491,8 @@
       <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado atual no Firebase</small></div></button>
       <button class="func-btn" onclick="devFn(14)"><span class="ico">🧹</span><div>Limpar últimas atividades<small>Apaga o feed do início (todos)</small></div></button>
       <button class="func-btn" onclick="devFn(15)"><span class="ico">⏱️</span><div>Tempo do feed de atividades<small>Define quantos minutos ficam visíveis</small></div></button>
+      <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
+      <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
     </div>
       </div>
     </div>
@@ -982,17 +989,70 @@
       const user = document.getElementById('reg-user').value.trim().toLowerCase();
       const pass = document.getElementById('reg-pass').value;
       const funcao = document.getElementById('reg-funcao').value;
+      const codigoEl = document.getElementById('reg-codigo');
+      const codigo = codigoEl ? codigoEl.value.trim() : '';
       if (!nome || !user || !pass) return msgLogin('Preencha todos os campos.');
       if (pass.length < 4) return msgLogin('Senha mín. 4 caracteres.');
       if (db.users.some(u => u.user === user)) return msgLogin('Usuário já existe.');
-      db.users.push({ id: Date.now(), nome, user, pass, funcao, ativo: true, criadoEm: new Date().toISOString() });
-      addAtividade('Novo funcionário: ' + nome);
+
+      const restritas = ['supervisor', 'admin'];
+      let finalFuncao = funcao;
+      let pendente = false;
+
+      if (restritas.includes(funcao)) {
+        if (!validarCodigoAuth(codigo)) {
+          if (!confirm('Sem código válido.\n\nSolicitar cargo "' + funcao + '" para aprovação?\nVocê entra como Vigilante até o Admin/DEV aprovar.')) {
+            return msgLogin('Informe o código de autorização para Supervisor/Admin.');
+          }
+          finalFuncao = 'vigilante';
+          pendente = true;
+        }
+      }
+
+      db.users.push({
+        id: Date.now(),
+        nome,
+        user,
+        pass,
+        funcao: finalFuncao,
+        ativo: true,
+        pendente,
+        cargoSolicitado: pendente ? funcao : null,
+        criadoEm: new Date().toISOString()
+      });
+      addAtividade(pendente
+        ? ('Solicitação de cargo: ' + nome + ' → ' + funcao)
+        : ('Novo funcionário: ' + nome + ' (' + finalFuncao + ')'), 'admin');
       const ok = await salvar();
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
       document.getElementById('reg-pass').value = '';
-      msgLogin(ok === false ? 'Salvo local (Firebase falhou). Faça login.' : 'Cadastrado e salvo! Faça login.', true);
-      setTimeout(() => mostrarLogin('entrar'), 1000);
+      if (codigoEl) codigoEl.value = '';
+      document.getElementById('reg-funcao').value = 'vigilante';
+      atualizarRegFuncaoUI();
+      msgLogin(pendente
+        ? ('Conta criada. Cargo ' + funcao + ' aguarda aprovação.')
+        : (ok === false ? 'Salvo local. Faça login.' : 'Cadastrado! Faça login.'), true);
+      setTimeout(() => mostrarLogin('entrar'), 1200);
+    }
+
+    function atualizarRegFuncaoUI() {
+      const f = document.getElementById('reg-funcao');
+      const wrap = document.getElementById('reg-codigo-wrap');
+      if (!f || !wrap) return;
+      wrap.style.display = (f.value === 'supervisor' || f.value === 'admin') ? '' : 'none';
+    }
+    function getCodigoAuth() {
+      return localStorage.getItem('valis_codigo_auth') || (db && db.codigoAuth) || 'VALIS2026';
+    }
+    function validarCodigoAuth(codigo) {
+      if (!codigo) return false;
+      return codigo === getCodigoAuth() || codigo === SENHA_DEV;
+    }
+    async function setCodigoAuth(codigo) {
+      localStorage.setItem('valis_codigo_auth', codigo);
+      db.codigoAuth = codigo;
+      return salvar();
     }
 
     async function addUserAdmin() {
@@ -1002,12 +1062,19 @@
       const pass = document.getElementById('u-pass').value;
       const funcao = document.getElementById('u-funcao').value;
       if (!nome || !user || !pass) return alert('Preencha tudo.');
+      if (pass.length < 4) return alert('Senha mín. 4 caracteres.');
       if (db.users.some(u => u.user === user)) return alert('Usuário já existe.');
-      db.users.push({ id: Date.now(), nome, user, pass, funcao, ativo: true, criadoEm: new Date().toISOString() });
+      if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
+        return alert('Só Administrador pode criar outro Admin.');
+      }
+      db.users.push({
+        id: Date.now(), nome, user, pass, funcao,
+        ativo: true, pendente: false, criadoEm: new Date().toISOString()
+      });
       document.getElementById('u-nome').value = '';
       document.getElementById('u-user').value = '';
       document.getElementById('u-pass').value = '';
-      addAtividade('Funcionário: ' + nome);
+      addAtividade('Funcionário: ' + nome + ' (' + funcao + ')', 'admin');
       await salvar();
       render();
       toast('Cadastrado');
@@ -1018,9 +1085,15 @@
     }
     async function garantirAdmin() {
       if (!db.users.length) {
-        db.users.push({ id: 1, nome: 'Administrador', user: 'admin', pass: 'admin123', funcao: 'admin', ativo: true, criadoEm: new Date().toISOString() });
-        await salvar();
+        db.users.push({ id: 1, nome: 'Administrador', user: 'admin', pass: 'admin123', funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString() });
       }
+      if (!db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
+        db.codigoAuth = 'VALIS2026';
+        localStorage.setItem('valis_codigo_auth', 'VALIS2026');
+      } else if (db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
+        localStorage.setItem('valis_codigo_auth', db.codigoAuth);
+      }
+      await salvar();
     }
     const NAV_ITEMS = [
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
@@ -1249,6 +1322,22 @@
           limparAtividadesExpiradas();
           render();
           toast(n === 0 ? 'Feed sem expiração' : ('Feed expira em ' + n + ' min'));
+          break;
+        }
+        case 16: {
+          const atual = getCodigoAuth();
+          const v = prompt('Defina o CÓDIGO DE AUTORIZAÇÃO\n(cadastro Supervisor/Admin):', atual);
+          if (v === null) break;
+          const cod = String(v).trim();
+          if (cod.length < 4) { alert('Mínimo 4 caracteres'); break; }
+          setCodigoAuth(cod).then(() => toast('Código atualizado'));
+          break;
+        }
+        case 17: {
+          const pend = (db.users || []).filter(u => u.pendente && u.cargoSolicitado);
+          if (!pend.length) { alert('Nenhum cadastro pendente.'); break; }
+          tab('usuarios');
+          toast(pend.length + ' pendente(s) na lista Equipe');
           break;
         }
         case 5:
@@ -1631,6 +1720,50 @@
       render();
       toast('Removido');
     }
+    async function aprovarCargo(id) {
+      if (!podeGerenciarUsers()) return;
+      const u = db.users.find(x => x.id === id);
+      if (!u || !u.cargoSolicitado) return;
+      if (u.cargoSolicitado === 'admin' && usuarioAtual.funcao !== 'admin') {
+        return alert('Só Admin pode aprovar Administrador.');
+      }
+      u.funcao = u.cargoSolicitado;
+      u.pendente = false;
+      u.cargoSolicitado = null;
+      u.ativo = true;
+      addAtividade('Cargo aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
+      await salvar();
+      render();
+      toast('Cargo aprovado');
+    }
+    async function recusarCargo(id) {
+      if (!podeGerenciarUsers()) return;
+      const u = db.users.find(x => x.id === id);
+      if (!u) return;
+      u.pendente = false;
+      u.cargoSolicitado = null;
+      addAtividade('Cargo recusado: ' + u.nome, 'admin');
+      await salvar();
+      render();
+      toast('Solicitação recusada');
+    }
+    async function alterarFuncaoUser(id, funcao) {
+      if (!funcao || !podeGerenciarUsers()) return;
+      const u = db.users.find(x => x.id === id);
+      if (!u || u.user === 'admin') return;
+      if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
+        alert('Só Admin pode promover a Administrador.');
+        render();
+        return;
+      }
+      u.funcao = funcao;
+      u.pendente = false;
+      u.cargoSolicitado = null;
+      addAtividade('Cargo alterado: ' + u.nome + ' → ' + funcao, 'admin');
+      await salvar();
+      render();
+      toast('Cargo atualizado');
+    }
     async function desativarUser(id) {
       if (!podeGerenciarUsers()) return;
       const u = db.users.find(x => x.id === id);
@@ -1735,7 +1868,26 @@
       }
 
       const userHtml = list => list.length
-        ? list.map(u => `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${u.ativo===false?' <span class="badge red">Inativo</span>':''}<div class="meta">@${u.user}</div>${podeGerenciarUsers()&&u.user!=='admin'?`<div class="actions"><button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button><button class="btn red sm" onclick="excluirUser(${u.id})">Excluir</button></div>`:''}</div>`).join('')
+        ? list.map(u => {
+            const pend = u.pendente && u.cargoSolicitado ? ` <span class="badge yellow">Pend: ${u.cargoSolicitado}</span>` : '';
+            const inat = u.ativo===false ? ' <span class="badge red">Inativo</span>' : '';
+            let actions = '';
+            if (podeGerenciarUsers() && u.user !== 'admin') {
+              actions = `<div class="actions">
+                <button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button>
+                <button class="btn red sm" onclick="excluirUser(${u.id})">Excluir</button>
+                ${u.pendente && u.cargoSolicitado ? `<button class="btn green sm" onclick="aprovarCargo(${u.id})">Aprovar cargo</button><button class="btn dark sm" onclick="recusarCargo(${u.id})">Recusar</button>` : ''}
+                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser(${u.id}, this.value)">
+                  <option value="">Cargo...</option>
+                  <option value="vigilante">Vigilante</option>
+                  <option value="equipe">Equipe</option>
+                  <option value="supervisor">Supervisor</option>
+                  ${usuarioAtual && usuarioAtual.funcao==='admin' ? '<option value="admin">Admin</option>' : ''}
+                </select>
+              </div>`;
+            }
+            return `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${pend}${inat}<div class="meta">@${u.user}</div>${actions}</div>`;
+          }).join('')
         : '<div class="empty">Nenhum.</div>';
       const listaUsers = document.getElementById('lista-users');
       if (listaUsers) listaUsers.innerHTML = userHtml(db.users);
