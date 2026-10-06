@@ -484,6 +484,8 @@
       <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Ativar manutenção<small>Suspende o app para todos (Firebase)</small></div></button>
       <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Desativar manutenção<small>Libera o app para todos</small></div></button>
       <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado atual no Firebase</small></div></button>
+      <button class="func-btn" onclick="devFn(14)"><span class="ico">🧹</span><div>Limpar últimas atividades<small>Apaga o feed do início (todos)</small></div></button>
+      <button class="func-btn" onclick="devFn(15)"><span class="ico">⏱️</span><div>Tempo do feed de atividades<small>Define quantos minutos ficam visíveis</small></div></button>
     </div>
       </div>
     </div>
@@ -1212,6 +1214,26 @@
           })();
           break;
         }
+        case 14: {
+          if (!confirm('Apagar TODAS as últimas atividades do feed?')) break;
+          db.atividades = [];
+          salvar();
+          render();
+          toast('Atividades apagadas');
+          break;
+        }
+        case 15: {
+          const atual = getAtividadeTTLMin();
+          const v = prompt('Tempo (minutos) que as atividades ficam no início:\n\nEx: 1, 2, 5, 10\n0 = não expiram', String(atual));
+          if (v === null) break;
+          const n = parseFloat(v);
+          if (isNaN(n) || n < 0) { alert('Valor inválido'); break; }
+          localStorage.setItem('valis_ativ_ttl_min', String(n));
+          limparAtividadesExpiradas();
+          render();
+          toast(n === 0 ? 'Feed sem expiração' : ('Feed expira em ' + n + ' min'));
+          break;
+        }
         case 5:
           tab('supervisao');
           document.getElementById('sup-resultado').innerHTML =
@@ -1461,9 +1483,44 @@
     function atualizarTurno() {
       document.getElementById('eh').value = document.getElementById('et').value === 'Noturno' ? '18:00 às 06:00' : '06:00 às 18:00';
     }
-    function addAtividade(txt) {
-      db.atividades.unshift({ t: txt, h: new Date().toLocaleString('pt-BR') });
-      if (db.atividades.length > 40) db.atividades.length = 40;
+    function addAtividade(txt, nivel) {
+      if (!db.atividades) db.atividades = [];
+      const t = String(txt || '');
+      let nv = nivel || 'all';
+      const low = t.toLowerCase();
+      if (/funcion[aá]rio|usu[aá]rio|exclu[ií]d|desativ|manuten|backup|firebase|senha|admin|\bdev\b/.test(low)) {
+        nv = 'admin';
+      } else if (/aviso geral|mensagem|escala|ocorr/.test(low)) {
+        if (nv === 'all') nv = 'gestao';
+      }
+      db.atividades.unshift({
+        t,
+        h: new Date().toLocaleString('pt-BR'),
+        ts: Date.now(),
+        nivel: nv
+      });
+      if (db.atividades.length > 50) db.atividades.length = 50;
+    }
+    function getAtividadeTTLMin() {
+      const v = parseFloat(localStorage.getItem('valis_ativ_ttl_min'));
+      return isNaN(v) ? 2 : v;
+    }
+    function limparAtividadesExpiradas() {
+      if (!db.atividades) return;
+      const min = getAtividadeTTLMin();
+      if (!min || min <= 0) return;
+      const corte = Date.now() - min * 60 * 1000;
+      db.atividades = db.atividades.filter(a => (a.ts || 0) >= corte);
+    }
+    function atividadesVisiveisPara(role) {
+      limparAtividadesExpiradas();
+      return (db.atividades || []).filter(a => {
+        const n = a.nivel || 'all';
+        if (n === 'all') return true;
+        if (n === 'gestao') return role === 'admin' || role === 'supervisor';
+        if (n === 'admin') return role === 'admin';
+        return false;
+      });
     }
     function statusBadge(s) {
       const map = { Plantão: 'green', Folga: 'gray', Cobertura: 'blue', Ausência: 'red' };
@@ -1604,9 +1661,14 @@
         ? db.msg.map(x => `<div class="item"><b>Para: ${x.d}</b><div class="meta">${x.t}</div><div class="meta">${x.h}</div><div class="actions"><button class="btn dark sm" onclick="remover('msg',${x.id})">Excluir</button></div></div>`).join('')
         : '<div class="empty">Nenhuma mensagem.</div>';
 
-      document.getElementById('feed-atividades').innerHTML = db.atividades.length
-        ? db.atividades.slice(0, 8).map(a => `<div class="item"><div class="meta">${a.h}</div><b style="font-size:13px">${a.t}</b></div>`).join('')
-        : '<div class="empty">Nenhuma atividade.</div>';
+      const roleFeed = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
+      const feedList = atividadesVisiveisPara(roleFeed).slice(0, 8);
+      const feedEl = document.getElementById('feed-atividades');
+      if (feedEl) {
+        feedEl.innerHTML = feedList.length
+          ? feedList.map(a => `<div class="item"><div class="meta">${a.h}</div><b style="font-size:13px">${a.t}</b></div>`).join('')
+          : '<div class="empty">Nenhuma atividade recente.</div>';
+      }
 
       document.getElementById('live-postos').textContent = db.postos.length;
       document.getElementById('live-escalas').textContent = db.esc.length;
@@ -1798,6 +1860,10 @@
         if (!db.folhasArquivadas) db.folhasArquivadas = [];
       }
       await garantirAdmin();
+      if (localStorage.getItem('valis_ativ_ttl_min') === null) {
+        localStorage.setItem('valis_ativ_ttl_min', '2');
+      }
+      limparAtividadesExpiradas();
       // regrava para garantir persistência (local + firebase)
       await salvar();
       const tel = document.getElementById('cfg-tel');
@@ -2172,6 +2238,24 @@
       }
       const st = document.getElementById('status-fb');
       if (st) st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Offline';
+      setInterval(() => {
+        if (!db || !db.atividades) return;
+        const antes = db.atividades.length;
+        limparAtividadesExpiradas();
+        if (db.atividades.length !== antes) {
+          salvar();
+          render();
+        } else if (document.getElementById('tab-inicio') && document.getElementById('tab-inicio').classList.contains('active')) {
+          const roleFeed = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
+          const feedList = atividadesVisiveisPara(roleFeed).slice(0, 8);
+          const feedEl = document.getElementById('feed-atividades');
+          if (feedEl) {
+            feedEl.innerHTML = feedList.length
+              ? feedList.map(a => '<div class="item"><div class="meta">' + a.h + '</div><b style="font-size:13px">' + a.t + '</b></div>').join('')
+              : '<div class="empty">Nenhuma atividade recente.</div>';
+          }
+        }
+      }, 30000);
     })();
   </script>
 </body>
