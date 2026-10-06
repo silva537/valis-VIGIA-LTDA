@@ -810,7 +810,7 @@
   </section>
 
   <!-- MODAL DEV PASS -->
-  <div id="modal-dev" class="modal-bg hidden">
+  <div id="modal-dev" class="modal-bg hidden" style="z-index:400">
     <div class="modal">
       <h3>🛠 Acesso DEV</h3>
       <div class="field">
@@ -1076,23 +1076,54 @@
     // DEV MENU
     function abrirDevMenu() {
       if (devLiberado) {
+        // se manutenção ativa, libera a tela também
+        const ov = document.getElementById('manutencao-overlay');
+        if (ov) ov.classList.add('hidden');
         document.getElementById('drawer-overlay').classList.add('open');
         document.getElementById('drawer-dev').classList.add('open');
         return;
       }
       document.getElementById('dev-pass').value = '';
       document.getElementById('dev-erro').textContent = '';
-      document.getElementById('modal-dev').classList.remove('hidden');
-      setTimeout(() => document.getElementById('dev-pass').focus(), 100);
+      const modal = document.getElementById('modal-dev');
+      modal.style.zIndex = '400';
+      modal.classList.remove('hidden');
+      // garante que o overlay de manutenção não bloqueie cliques no modal
+      const ov = document.getElementById('manutencao-overlay');
+      if (ov && !ov.classList.contains('hidden')) {
+        ov.style.pointerEvents = 'none';
+      }
+      setTimeout(() => {
+        const inp = document.getElementById('dev-pass');
+        if (inp) inp.focus();
+      }, 120);
     }
-    function fecharDevModal() { document.getElementById('modal-dev').classList.add('hidden'); }
+    function fecharDevModal() {
+      document.getElementById('modal-dev').classList.add('hidden');
+      const ov = document.getElementById('manutencao-overlay');
+      if (ov) ov.style.pointerEvents = '';
+    }
     function validarDev() {
-      if (document.getElementById('dev-pass').value === SENHA_DEV) {
+      const senha = document.getElementById('dev-pass').value;
+      if (senha === SENHA_DEV) {
         devLiberado = true;
         fecharDevModal();
+        // libera manutenção visualmente para este aparelho/sessão
+        const ov = document.getElementById('manutencao-overlay');
+        if (ov) {
+          ov.classList.add('hidden');
+          ov.style.pointerEvents = '';
+        }
+        // se já havia sessão, reabre o app
+        if (usuarioAtual) {
+          document.getElementById('app').classList.add('show');
+          document.getElementById('login').style.display = 'none';
+        } else {
+          document.getElementById('login').style.display = 'flex';
+        }
         document.getElementById('drawer-overlay').classList.add('open');
         document.getElementById('drawer-dev').classList.add('open');
-        toast('Menu DEV liberado');
+        toast('DEV liberado — sistema desbloqueado nesta sessão');
       } else {
         document.getElementById('dev-erro').textContent = 'Senha DEV incorreta.';
       }
@@ -1596,15 +1627,23 @@
       const m = await lerManutencao();
       const ov = document.getElementById('manutencao-overlay');
       if (!ov) return;
-      // DEV logado pode contornar
+      // se modal DEV estiver aberto, não esconde o modal
+      const modalDev = document.getElementById('modal-dev');
+      const modalAberto = modalDev && !modalDev.classList.contains('hidden');
+      // DEV liberado contorna manutenção nesta sessão
       if (m.ativo && !devLiberado) {
         document.getElementById('manutencao-msg').textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
         ov.classList.remove('hidden');
-        // esconde app se estiver aberto
+        if (!modalAberto) ov.style.pointerEvents = '';
         const app = document.getElementById('app');
         if (app) app.classList.remove('show');
+        // mantém login visível atrás se não houver sessão
+        if (!usuarioAtual) {
+          document.getElementById('login').style.display = 'flex';
+        }
       } else {
         ov.classList.add('hidden');
+        ov.style.pointerEvents = '';
       }
     }
     function abrirPainelManutencao() {
