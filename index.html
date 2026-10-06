@@ -479,7 +479,9 @@
       <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
       <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
             <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
-      <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Painel de manutenção<small>Suspender app para todos (Firebase)</small></div></button>
+      <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Ativar manutenção<small>Suspende o app para todos (Firebase)</small></div></button>
+      <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Desativar manutenção<small>Libera o app para todos</small></div></button>
+      <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado atual no Firebase</small></div></button>
     </div>
       </div>
     </div>
@@ -1151,9 +1153,31 @@
           toast('Mode: ' + DataService.mode);
           render();
           break;
-        case 11:
-          abrirPainelManutencao();
+        case 11: {
+          const msg = prompt('Mensagem para os usuários na tela de manutenção:', 'Sistema em manutenção. Voltamos em breve.') 
+            || 'Sistema em manutenção. Voltamos em breve.';
+          if (!confirm('ATIVAR manutenção agora?\n\nTodos os aparelhos vão reiniciar e ficar bloqueados.')) break;
+          setManutencao(true, msg);
           break;
+        }
+        case 12: {
+          if (!confirm('DESATIVAR manutenção agora?\n\nO app será liberado para todos.')) break;
+          setManutencao(false, '');
+          break;
+        }
+        case 13: {
+          (async () => {
+            const m = await lerManutencao();
+            alert(
+              'Status da manutenção\n\n' +
+              'Ativo: ' + (m.ativo ? 'SIM' : 'NÃO') + '\n' +
+              'Mensagem: ' + (m.msg || '—') + '\n' +
+              'Por: ' + (m.por || '—') + '\n' +
+              'Em: ' + (m.em || '—')
+            );
+          })();
+          break;
+        }
         case 5:
           tab('supervisao');
           document.getElementById('sup-resultado').innerHTML =
