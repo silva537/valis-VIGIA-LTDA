@@ -493,6 +493,8 @@
       <button class="func-btn" onclick="devFn(15)"><span class="ico">⏱️</span><div>Tempo do feed de atividades<small>Define quantos minutos ficam visíveis</small></div></button>
       <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
       <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
+      <button class="func-btn" onclick="devFn(18)"><span class="ico">🗑</span><div>Apagar todos os backups<small>Plantões + meta de backup (app inteiro)</small></div></button>
+      <button class="func-btn" onclick="devFn(19)"><span class="ico">💥</span><div>Zerar plantões de todos<small>2 etapas + senha DEV</small></div></button>
     </div>
       </div>
     </div>
@@ -611,6 +613,7 @@
             <button class="btn dark" onclick="backupPlantaoesManual()">☁ Backup agora</button>
             <button class="btn purple" onclick="recuperarPlantaoes()">↺ Recuperar</button>
           </div>
+          <button class="btn red" style="margin-top:8px" onclick="apagarBackupPlantaoes()">🗑 Apagar backup de plantões</button>
           <button class="btn dark" style="margin-top:8px" onclick="exportarPlantaoesJSON()">📤 Exportar JSON</button>
           <input type="file" id="pl-import" accept=".json" class="hidden" onchange="importarPlantaoesJSON(event)">
           <button class="btn dark" style="margin-top:8px" onclick="document.getElementById('pl-import').click()">📥 Importar JSON</button>
@@ -1338,6 +1341,22 @@
           if (!pend.length) { alert('Nenhum cadastro pendente.'); break; }
           tab('usuarios');
           toast(pend.length + ' pendente(s) na lista Equipe');
+          break;
+        }
+        case 18: {
+          if (!confirm('1/2 — Apagar TODOS os backups do aplicativo (plantões e metadados)?')) break;
+          if (!confirm('2/2 — Confirma? Isso remove backups locais e no Firebase.')) break;
+          const senha = prompt('Digite a senha DEV para confirmar:');
+          if (senha !== SENHA_DEV) { alert('Senha DEV incorreta.'); break; }
+          apagarTodosBackups().then(() => toast('Backups apagados'));
+          break;
+        }
+        case 19: {
+          if (!confirm('1/2 — ZERAR todos os plantões de TODOS os usuários?\nFolhas arquivadas também serão apagadas.')) break;
+          if (!confirm('2/2 — Esta ação é irreversível. Continuar?')) break;
+          const senha = prompt('Digite a senha DEV para confirmar o zeramento:');
+          if (senha !== SENHA_DEV) { alert('Senha DEV incorreta.'); break; }
+          zerarTodosPlantaoes().then(() => toast('Plantões zerados'));
           break;
         }
         case 5:
@@ -2129,6 +2148,79 @@
       const p = await backupPlantaoesAuto('manual');
       await salvar();
       toast('Backup salvo (' + p.qtd + ' plantões)');
+    }
+    async function apagarBackupPlantaoes() {
+      if (!confirm('Apagar o backup de plantões (local + Firebase)?\nOs plantões da folha atual NÃO são apagados — só o backup.')) return;
+      try {
+        localStorage.removeItem('valis_plantoes_backup');
+        localStorage.removeItem('valis_plantoes_backup_meta');
+      } catch (e) {}
+      if (firebaseOk && fbDb) {
+        try {
+          await fbDb.collection('valis').doc('plantoes_backup').delete();
+        } catch (e) {
+          try {
+            await fbDb.collection('valis').doc('plantoes_backup').set({
+              plantaoes: [],
+              folhasArquivadas: [],
+              updatedAt: new Date().toISOString(),
+              motivo: 'apagado',
+              qtd: 0
+            });
+          } catch (e2) { console.warn(e2); }
+        }
+      }
+      atualizarStatusBackupUI('Backup: nenhum', false);
+      toast('Backup de plantões apagado');
+    }
+    async function apagarTodosBackups() {
+      try {
+        localStorage.removeItem('valis_plantoes_backup');
+        localStorage.removeItem('valis_plantoes_backup_meta');
+        // outros metadados de backup se existirem
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.includes('backup') || k.endsWith('_bk'))) keys.push(k);
+        }
+        keys.forEach(k => localStorage.removeItem(k));
+      } catch (e) {}
+      if (firebaseOk && fbDb) {
+        const docs = ['plantoes_backup', 'aviso'];
+        for (const d of docs) {
+          try { await fbDb.collection('valis').doc(d).delete(); } catch (e) {
+            try {
+              await fbDb.collection('valis').doc(d).set({ cleared: true, em: new Date().toISOString() });
+            } catch (e2) {}
+          }
+        }
+      }
+      atualizarStatusBackupUI('Backup: nenhum', false);
+      addAtividade('Todos os backups apagados (DEV)', 'admin');
+      await salvar();
+    }
+    async function zerarTodosPlantaoes() {
+      db.plantaoes = [];
+      db.folhasArquivadas = [];
+      try {
+        localStorage.removeItem('valis_plantoes_backup');
+        localStorage.removeItem('valis_plantoes_backup_meta');
+      } catch (e) {}
+      if (firebaseOk && fbDb) {
+        try {
+          await fbDb.collection('valis').doc('plantoes_backup').set({
+            plantaoes: [],
+            folhasArquivadas: [],
+            updatedAt: new Date().toISOString(),
+            motivo: 'zerado_dev',
+            qtd: 0
+          });
+        } catch (e) { console.warn(e); }
+      }
+      addAtividade('Plantões de todos zerados (DEV)', 'admin');
+      await salvar();
+      await backupPlantaoesAuto('zerado_dev');
+      render();
     }
     async function recuperarPlantaoes() {
       let remoto = null;
