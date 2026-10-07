@@ -1182,7 +1182,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.9.2';
+    const APP_VERSION = '6.9.4';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
@@ -1487,6 +1487,84 @@
       el.className = ok ? 'ok-msg' : 'erro';
     }
 
+    function mergeUsers(localArr, remoteArr) {
+      const map = {};
+      const put = (u) => {
+        if (!u) return;
+        const key = String(u.user || '').toLowerCase().trim() || ('id_' + u.id);
+        if (!key || key === 'id_undefined') return;
+        const prev = map[key];
+        if (!prev) {
+          map[key] = { ...u, user: key };
+          return;
+        }
+        // mescla campos: prioriza pendente true se algum lado ainda pendente e não aprovado
+        const merged = { ...prev, ...u, user: key };
+        // preserva hash de senha se um lado perder
+        if (!merged.passHash && prev.passHash) {
+          merged.passHash = prev.passHash;
+          merged.passSalt = prev.passSalt;
+        }
+        if (!merged.passHash && u.passHash) {
+          merged.passHash = u.passHash;
+          merged.passSalt = u.passSalt;
+        }
+        // se qualquer cópia está pendente e a outra não aprovou explicitamente depois...
+        const prevPend = prev.pendente === true || prev.pendente === 'true' || prev.pendente === 1;
+        const uPend = u.pendente === true || u.pendente === 'true' || u.pendente === 1;
+        const prevAtivo = prev.ativo === true || prev.ativo === 'true' || prev.ativo === 1;
+        const uAtivo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
+        // se um está aprovado (ativo e não pendente), mantém aprovado
+        if ((prevAtivo && !prevPend) || (uAtivo && !uPend)) {
+          merged.pendente = false;
+          merged.ativo = true;
+          if (uAtivo && !uPend && u.funcao) merged.funcao = u.funcao;
+          if (prevAtivo && !prevPend && prev.funcao && !merged.funcao) merged.funcao = prev.funcao;
+        } else if (prevPend || uPend) {
+          merged.pendente = true;
+          merged.ativo = false;
+          merged.cargoSolicitado = u.cargoSolicitado || prev.cargoSolicitado || merged.cargoSolicitado;
+        }
+        // nome mais completo
+        if ((u.nome || '').length > (prev.nome || '').length) merged.nome = u.nome;
+        map[key] = merged;
+      };
+      (localArr || []).forEach(put);
+      (remoteArr || []).forEach(put);
+      return Object.keys(map).map(k => map[k]);
+    }
+
+    /** Grava users lendo a nuvem primeiro (evita apagar cadastro pendente de outro aparelho) */
+    async function salvarUsersSeguro() {
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+      } catch (e) {}
+      let remoteUsers = null;
+      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          const snap = await fbDb.collection('valis').doc('db_v42').get();
+          if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
+            remoteUsers = snap.data().data.users;
+          }
+        } catch (e) {
+          console.warn('salvarUsersSeguro read:', e);
+        }
+      }
+      if (remoteUsers) {
+        db.users = mergeUsers(db.users || [], remoteUsers);
+      }
+      const ok = await salvar();
+      if (window.ValisDevLog) {
+        ValisDevLog.add('users_save', {
+          qtd: (db.users || []).length,
+          pend: (db.users || []).filter(u => u.pendente).length,
+          ok: ok !== false
+        });
+      }
+      return ok;
+    }
+
     async function sincronizarUsersDoFirebase() {
       // Garante Firebase e puxa users mais recentes da nuvem
       if (!firebaseOk) {
@@ -1499,7 +1577,7 @@
           if (snap.exists && snap.data() && snap.data().data) {
             const remote = snap.data().data;
             if (Array.isArray(remote.users)) {
-              db.users = remote.users.map(u => {
+              const remoteNorm = remote.users.map(u => {
                 const o = {
                   ...u,
                   user: String(u.user || '').toLowerCase().trim(),
@@ -1509,6 +1587,7 @@
                 if (o.passHash) delete o.pass;
                 return o;
               });
+              db.users = mergeUsers(db.users || [], remoteNorm);
               try {
                 const json = JSON.stringify({ ...db, users: db.users });
                 if (typeof cifrarTexto === 'function') {
@@ -1628,6 +1707,17 @@
         }
       }
 
+      // Garante Firebase Auth ANTES de gravar (regras exigem request.auth)
+      msgLogin('Enviando cadastro...', true);
+      try {
+        await initFirebase();
+        await ensureFirebaseAuth();
+      } catch (e) {}
+      // puxa users da nuvem para não sobrescrever outros pendentes
+      await sincronizarUsersDoFirebase();
+      if (db.users.some(u => String(u.user || '').toLowerCase() === user)) {
+        return msgLogin('Usuário já existe.');
+      }
       // TODOS os cadastros públicos ficam pendentes e inativos até aprovação
       const hp = await hashSenha(String(pass));
       db.users.push({
@@ -1643,12 +1733,8 @@
         criadoEm: new Date().toISOString()
       });
       addAtividade('Cadastro pendente: ' + nome + ' solicitou ' + cargoSolicitado, 'admin');
-      const ok = await salvar();
-      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
-        try {
-          await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
-        } catch (e) { console.warn(e); }
-      }
+      const ok = await salvarUsersSeguro();
+      if (window.ValisDevLog) ValisDevLog.add('cadastro_pendente', { user: user, ok: ok !== false });
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
       document.getElementById('reg-pass').value = '';
@@ -1787,12 +1873,13 @@
           // postos sempre globais
           if (Array.isArray(remote.postos)) db.postos = remote.postos;
           if (Array.isArray(remote.users)) {
-            db.users = remote.users.map(u => ({
+            const remoteNorm = remote.users.map(u => ({
               ...u,
               user: String(u.user || '').toLowerCase().trim(),
               ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
               pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
             }));
+            db.users = mergeUsers(db.users || [], remoteNorm);
           }
           if (Array.isArray(remote.msg)) db.msg = remote.msg;
           if (Array.isArray(remote.esc)) db.esc = remote.esc;
@@ -2047,6 +2134,10 @@
       render();
       atualizarBtnSup();
       iniciarListenerDados();
+      // admin/dev: puxa pendentes na entrada
+      if (usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'dev' || usuarioAtual.funcao === 'supervisor')) {
+        sincronizarUsersDoFirebase().then(function() { try { render(); } catch (e) {} });
+      }
     }
     function sair() {
       usuarioAtual = null;
@@ -3072,6 +3163,10 @@
         moreBtn.classList.toggle('active', inMore);
       }
       if (btn && btn.classList) btn.classList.add('active');
+      // ao abrir Equipe/Supervisão, força sync dos cadastros pendentes
+      if (name === 'usuarios' || name === 'supervisao') {
+        sincronizarUsersDoFirebase().then(function() { try { render(); } catch (e) {} });
+      }
       render();
     }
 
@@ -3231,16 +3326,7 @@
       // não mexer em pass/passHash — senão quebra login após aprovação
       if (u.passHash) delete u.pass;
       addAtividade('Cadastro aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
-      const ok = await salvar();
-      // força regravação explícita dos users no Firebase
-      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
-        try {
-          await fbDb.collection('valis').doc('db_v42').set({
-            data: db,
-            updatedAt: new Date().toISOString()
-          }, { merge: true });
-        } catch (e) { console.warn(e); }
-      }
+      const ok = await salvarUsersSeguro();
       render();
       toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado e salvo no Firebase');
     }
@@ -3407,7 +3493,17 @@
           }).join('')
         : '<div class="empty">Nenhum.</div>';
       const listaUsers = document.getElementById('lista-users');
-      if (listaUsers) listaUsers.innerHTML = userHtml(db.users);
+      if (listaUsers) {
+        const ordenados = (db.users || []).slice().sort(function(a, b) {
+          const ap = a.pendente ? 0 : 1;
+          const bp = b.pendente ? 0 : 1;
+          return ap - bp;
+        });
+        const pendQtd = ordenados.filter(function(u) { return u.pendente; }).length;
+        listaUsers.innerHTML =
+          (pendQtd ? '<div class="item" style="border-color:var(--yellow)"><b>⏳ ' + pendQtd + ' cadastro(s) aguardando aprovação</b><div class="meta">Atualize a lista se alguém acabou de se cadastrar</div><button class="btn dark sm" style="margin-top:8px" onclick="sincronizarUsersDoFirebase().then(function(){render();toast(\'Lista atualizada\')})">🔄 Atualizar lista</button></div>' : '')
+          + userHtml(ordenados);
+      }
 
       if (usuarioAtual) {
         const htmlPerfil = `<b>${usuarioAtual.nome}</b> ${funcaoBadge(usuarioAtual.funcao)}<div class="meta">@${usuarioAtual.user}</div>`;
@@ -4391,9 +4487,14 @@
       try {
         if (window.ValisUpdate) {
           const u = await ValisUpdate.check();
-          if (u && u.update && u.data && confirm('Nova versão ' + u.data.v + ' no servidor. Atualizar?')) {
-            ValisUpdate.softReload(u.data.v);
-            return;
+          if (u && u.update && u.data) {
+            const ok = confirm('Nova versão ' + u.data.v + ' no servidor. Atualizar?');
+            if (ok) {
+              ValisUpdate.softReload(u.data.v);
+              return;
+            }
+            // Cancelar = não perguntar de novo nesta sessão
+            if (ValisUpdate.markDone) ValisUpdate.markDone(u.data.v);
           }
         } else {
           await checarAtualizacaoApp({ forcarSeErro: false });
