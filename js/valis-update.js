@@ -1,10 +1,14 @@
 /**
+
  * VALIS Update — checagem de version.json (externo)
- * Usado com vercel.json (Cache-Control) para o WebInto pegar deploy novo.
  */
 (function (global) {
   function bust(url) {
     return url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+  }
+
+  function skipKey(ver) {
+    return 'valis_skip_force_' + String(ver || '');
   }
 
   const ValisUpdate = {
@@ -29,6 +33,12 @@
         if (global.ValisDevLog) {
           global.ValisDevLog.add('update_check_ok', { local: local, remote: remote });
         }
+        // já pediu/atualizou esta versão nesta sessão → não repete
+        try {
+          if (remote && sessionStorage.getItem(skipKey(remote)) === '1') {
+            return { ok: true, update: false, data: data, skipped: true };
+          }
+        } catch (e) {}
         if (remote && local && remote !== local && data.forceReload === true) {
           return { ok: true, update: true, data: data };
         }
@@ -38,7 +48,11 @@
         return { ok: false, error: String(e && e.message || e) };
       }
     },
+    markDone: function (ver) {
+      try { sessionStorage.setItem(skipKey(ver), '1'); } catch (e) {}
+    },
     softReload: function (ver) {
+      this.markDone(ver);
       try {
         const path = (location.pathname || '/index.html').split('?')[0];
         location.replace(path + '?v=' + encodeURIComponent(ver || 'new') + '&r=' + Date.now());
