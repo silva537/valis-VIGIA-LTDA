@@ -1,6 +1,6 @@
 {
-  "v": "6.9.1",
+  "v": "6.9.2",
   "build": "2026-10-07",
   "forceReload": false,
-  "msg": "Sem reload agressivo / SW desligado — anti-500 WebInto"
+  "msg": "Login sync fix + vercel no-cache + devlog externo"
 }

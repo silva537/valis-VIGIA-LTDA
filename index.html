@@ -619,6 +619,8 @@
         <button class="func-btn" onclick="devFn(23)"><span class="ico">📋</span><div>Copiar diagnóstico<small>Texto para WhatsApp/suporte</small></div></button>
         <button class="func-btn" onclick="devFn(29)"><span class="ico">🏷️</span><div>Versão do app<small>Changelog VALIS</small></div></button>
         <button class="func-btn" onclick="devFn(26)"><span class="ico">🚨</span><div>Modo emergência<small>Só login, msgs e ocorrência</small></div></button>
+        <button class="func-btn" onclick="devFn(30)"><span class="ico">📜</span><div>Log do sistema (DEV)<small>Boots, login, updates, sync</small></div></button>
+        <button class="func-btn" onclick="devFn(31)"><span class="ico">🧹</span><div>Limpar log DEV<small>Apaga histórico técnico</small></div></button>
       </div></div>
     </div>
 
@@ -1151,7 +1153,9 @@
   </div>
   <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarArquivo(event)">
 
-  <script>
+    <script src="js/valis-devlog.js"></script>
+  <script src="js/valis-update.js"></script>
+<script>
     // ========== CAMADA DE SEGURANÇA ==========
     const _S = {
       // partes ofuscadas (não é inviolável no cliente, mas dificulta leitura casual)
@@ -1178,7 +1182,8 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.9.1';
+    const APP_VERSION = '6.9.2';
+    try { window.APP_VERSION = APP_VERSION; } catch (e) {}
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
@@ -1487,6 +1492,7 @@
       if (!firebaseOk) {
         try { await initFirebase(); } catch (e) {}
       }
+      try { await ensureFirebaseAuth(); } catch (e) {}
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
         try {
           const snap = await fbDb.collection('valis').doc('db_v42').get();
@@ -1532,14 +1538,36 @@
       const user = document.getElementById('login-user').value.trim().toLowerCase();
       const pass = String(document.getElementById('login-pass').value);
       if (!user || !pass) return msgLogin('Preencha usuário e senha.');
-      msgLogin('Verificando...', true);
+      msgLogin('Sincronizando usuários...', true);
+      try {
+        await initFirebase();
+        await ensureFirebaseAuth();
+      } catch (e) {}
+      // carrega users da nuvem ANTES de qualquer seed local
       await sincronizarUsersDoFirebase();
+      if (!(db.users || []).length) {
+        try {
+          const data = await DataService.load('db_v42');
+          if (data && Array.isArray(data.users) && data.users.length) {
+            db.users = data.users;
+          }
+        } catch (e) {}
+      }
       await garantirAdmin();
-      // re-sync após garantirAdmin (que pode ter salvo)
       await sincronizarUsersDoFirebase();
 
-      const byUser = (db.users || []).find(u => String(u.user || '').toLowerCase().trim() === user);
-      if (!byUser) return msgLogin('Usuário não encontrado. Confira se o cadastro foi salvo.');
+      let byUser = (db.users || []).find(u => String(u.user || '').toLowerCase().trim() === user);
+      // segunda tentativa se ainda não achou (rede lenta)
+      if (!byUser) {
+        msgLogin('Buscando na nuvem...', true);
+        await new Promise(r => setTimeout(r, 600));
+        await sincronizarUsersDoFirebase();
+        byUser = (db.users || []).find(u => String(u.user || '').toLowerCase().trim() === user);
+      }
+      if (!byUser) {
+        if (window.ValisDevLog) ValisDevLog.add('login_user_not_found', { user: user, qtdUsers: (db.users || []).length, fb: !!firebaseOk });
+        return msgLogin('Usuário não encontrado. Aguarde a sincronização ou confira o usuário.');
+      }
 
       let passOk = false;
       if (byUser.passHash && byUser.passSalt) {
@@ -1574,6 +1602,7 @@
       }
       byUser.ultimoLogin = new Date().toISOString();
       try { await salvar(); } catch (e) {}
+      if (window.ValisDevLog) ValisDevLog.add('login_ok', { user: byUser.user, funcao: byUser.funcao });
       pedirPermissaoNotificacoes();
       entrarApp();
     }
@@ -1834,25 +1863,59 @@
     }
     async function garantirAdmin() {
       if (!Array.isArray(db.users)) db.users = [];
+      // Se lista local vazia, tenta Firebase ANTES de criar defaults (evita apagar usuários na nuvem)
+      if (!db.users.length) {
+        try {
+          if (!firebaseOk) await initFirebase();
+          if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+            await ensureFirebaseAuth();
+            const snap = await fbDb.collection('valis').doc('db_v42').get();
+            if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
+              db.users = snap.data().data.users;
+              if (window.ValisDevLog) ValisDevLog.add('users_restored_from_firebase', { qtd: db.users.length });
+            }
+          }
+        } catch (e) {
+          if (window.ValisDevLog) ValisDevLog.add('users_restore_fail', String(e && e.message || e));
+        }
+      }
       let mudou = false;
-      if (!db.users.some(u => String(u.user || '').toLowerCase() === 'admin')) {
+      // Só cria admin/dev padrão se AINDA estiver vazio (primeira instalação)
+      if (!db.users.length) {
         const hp = await hashSenha('admin123');
         db.users.push({
           id: 1, nome: 'Administrador', user: 'admin',
           passHash: hp.hash, passSalt: hp.salt,
           funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
         });
-        mudou = true;
-      }
-      // cargo DEV: login com senha; menus técnicos sem senha extra
-      if (!db.users.some(u => String(u.user || '').toLowerCase() === 'dev')) {
-        const hp = await hashSenha('dev12345');
+        const hp2 = await hashSenha('dev12345');
         db.users.push({
           id: 2, nome: 'Desenvolvedor', user: 'dev',
-          passHash: hp.hash, passSalt: hp.salt,
+          passHash: hp2.hash, passSalt: hp2.salt,
           funcao: 'dev', ativo: true, pendente: false, criadoEm: new Date().toISOString()
         });
         mudou = true;
+        if (window.ValisDevLog) ValisDevLog.add('seed_admin_dev', 'primeira instalação');
+      } else {
+        // Garante existência de admin/dev sem apagar os demais
+        if (!db.users.some(u => String(u.user || '').toLowerCase() === 'admin')) {
+          const hp = await hashSenha('admin123');
+          db.users.push({
+            id: Date.now(), nome: 'Administrador', user: 'admin',
+            passHash: hp.hash, passSalt: hp.salt,
+            funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
+          });
+          mudou = true;
+        }
+        if (!db.users.some(u => String(u.user || '').toLowerCase() === 'dev')) {
+          const hp = await hashSenha('dev12345');
+          db.users.push({
+            id: Date.now() + 1, nome: 'Desenvolvedor', user: 'dev',
+            passHash: hp.hash, passSalt: hp.salt,
+            funcao: 'dev', ativo: true, pendente: false, criadoEm: new Date().toISOString()
+          });
+          mudou = true;
+        }
       }
       for (const u of db.users) {
         u.user = String(u.user || '').toLowerCase().trim();
@@ -1869,7 +1932,8 @@
       } else if (db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
         localStorage.setItem('valis_codigo_auth', db.codigoAuth);
       }
-      if (mudou) {
+      // Só salva se realmente adicionou algo — e nunca se users ficou só com seed após falha
+      if (mudou && db.users.length > 0) {
         try { await DataService.save('db_v42', db); } catch (e) {}
       }
     }
@@ -2360,16 +2424,43 @@
         }
         case 29: {
           alert(
-            'VALIS VIGIA LTDA\nVersão ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '6.7') + '\n\n' +
+            'VALIS VIGIA LTDA\nVersão ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '6.9') + '\n\n' +
             'Changelog recente:\n' +
-            '• Menu DEV organizado por seções\n' +
-            '• Sync forçado, diagnóstico copiável\n' +
-            '• Limpar só local, reparar users\n' +
-            '• Modo emergência, auditoria rápida\n' +
-            '• Bolinha de conexão no topo\n' +
-            '• Auth Firebase + regras\n' +
-            '• Extrato por usuário, backup plantões'
+            '• Login sync Firebase antes do seed\n' +
+            '• vercel.json anti-cache\n' +
+            '• valis-devlog.js + valis-update.js externos\n' +
+            '• Log DEV de boots/login/update\n' +
+            '• Anti-500 sem reload agressivo'
           );
+          break;
+        }
+        case 30: {
+          (async () => {
+            let items = [];
+            if (window.ValisDevLog) {
+              items = await ValisDevLog.pullFirebase();
+            }
+            tab('supervisao');
+            const box = document.getElementById('sup-resultado');
+            if (!box) {
+              alert((items || []).slice(0, 20).map(x => x.em + ' · ' + x.event + ' · ' + x.detail).join('\n') || 'Sem logs');
+              return;
+            }
+            box.innerHTML = (items && items.length)
+              ? items.slice(0, 40).map(x =>
+                  '<div class="item"><b>' + (x.event || '') + '</b>' +
+                  '<div class="meta">' + (x.em || '') + (x.ver ? ' · v' + x.ver : '') + '</div>' +
+                  '<div class="meta">' + String(x.detail || '').replace(/</g, '&lt;') + '</div></div>'
+                ).join('')
+              : '<div class="empty">Nenhum log ainda</div>';
+            toast('Log DEV carregado');
+          })();
+          break;
+        }
+        case 31: {
+          if (!confirm('Limpar log DEV?')) break;
+          if (window.ValisDevLog) ValisDevLog.clear();
+          toast('Log DEV limpo');
           break;
         }
         case 5:
@@ -3662,7 +3753,9 @@
       return await DataService.save('db_v42', db);
     }
     async function carregar() {
-      // tenta firebase primeiro se mode firebase
+      try { await initFirebase(); } catch (e) {}
+      try { await ensureFirebaseAuth(); } catch (e) {}
+      if (window.ValisDevLog) ValisDevLog.add('boot_carregar', { fb: !!firebaseOk, ver: APP_VERSION });
       // preserva plantões locais antes do merge (evita apagar em atualização)
       let localPlantaoes = [];
       let localFolhas = [];
@@ -4294,7 +4387,18 @@
 
     (async function boot() {
       try { registrarServiceWorker(); } catch (e) {}
-      try { await checarAtualizacaoApp({ forcarSeErro: false }); } catch (e) {}
+      if (window.ValisDevLog) ValisDevLog.add('app_boot', { ver: APP_VERSION, href: location.href });
+      try {
+        if (window.ValisUpdate) {
+          const u = await ValisUpdate.check();
+          if (u && u.update && u.data && confirm('Nova versão ' + u.data.v + ' no servidor. Atualizar?')) {
+            ValisUpdate.softReload(u.data.v);
+            return;
+          }
+        } else {
+          await checarAtualizacaoApp({ forcarSeErro: false });
+        }
+      } catch (e) {}
       try { await initFirebase(); } catch (e) { firebaseOk = false; }
       try {
         await carregar();
