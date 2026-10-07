@@ -1182,7 +1182,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.10.0';
+    const APP_VERSION = '6.10.1';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1525,8 +1525,27 @@
             if (u.pass != null) delete u.pass;
           }
         }
+        // Antes de gravar db_v42: mescla com a nuvem (não apaga users de outro aparelho)
+        if (key === 'db_v42' && firebaseOk && fbDb && this.mode === 'firebase' && data) {
+          try {
+            const snap = await fbDb.collection('valis').doc(key).get();
+            if (snap.exists && snap.data() && snap.data().data) {
+              const remote = snap.data().data;
+              if (Array.isArray(remote.users) && typeof mergeUsers === 'function') {
+                data.users = mergeUsers(data.users || [], remote.users);
+              }
+              if (Array.isArray(remote.plantaoes) && typeof mergePlantaoes === 'function') {
+                data.plantaoes = mergePlantaoes(data.plantaoes || [], remote.plantaoes);
+              }
+              if (Array.isArray(remote.postos) && remote.postos.length && !(data.postos || []).length) {
+                data.postos = remote.postos;
+              }
+            }
+          } catch (e) {
+            console.warn('save merge pré-nuvem:', e);
+          }
+        }
         const json = JSON.stringify(data);
-        // local cifrado
         try {
           const cifrado = await cifrarTexto(json);
           localStorage.setItem('valis_' + key, cifrado);
@@ -1660,6 +1679,48 @@
     }
 
     /** Grava users lendo a nuvem primeiro (evita apagar cadastro pendente de outro aparelho) */
+    async function pushCadastroPendenteNuvem(userObj) {
+      if (!userObj) return false;
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb) return false;
+        const ref = fbDb.collection('valis').doc('cadastros_pendentes');
+        let items = [];
+        try {
+          const snap = await ref.get();
+          if (snap.exists && Array.isArray((snap.data() || {}).items)) items = snap.data().items;
+        } catch (e) {}
+        items = typeof mergeUsers === 'function' ? mergeUsers(items, [userObj]) : items.concat([userObj]);
+        items = items.filter(function(u) {
+          return u && (u.pendente === true || u.pendente === 'true' || u.pendente === 1 || u.pendente === '1');
+        });
+        await ref.set({ items: items, updatedAt: new Date().toISOString() }, { merge: false });
+        return true;
+      } catch (e) {
+        console.warn('pushCadastroPendenteNuvem:', e);
+        return false;
+      }
+    }
+
+    async function puxarCadastrosPendentesNuvem() {
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb) return 0;
+        const snap = await fbDb.collection('valis').doc('cadastros_pendentes').get();
+        if (!snap.exists) return 0;
+        const items = (snap.data() || {}).items;
+        if (!Array.isArray(items) || !items.length) return 0;
+        const antes = (db.users || []).length;
+        db.users = mergeUsers(db.users || [], items);
+        return (db.users || []).length - antes;
+      } catch (e) {
+        console.warn('puxarCadastrosPendentesNuvem:', e);
+        return 0;
+      }
+    }
+
     async function salvarUsersSeguro() {
       try {
         if (!firebaseOk) await initFirebase();
@@ -1726,13 +1787,22 @@
         } catch (e) {
           console.warn('sync users:', e);
         }
+        try { await puxarCadastrosPendentesNuvem(); } catch (e) {}
       } else {
         // local
         try {
           const raw = localStorage.getItem('valis_db_v42');
           if (raw) {
-            const local = JSON.parse(raw);
-            if (Array.isArray(local.users)) db.users = local.users;
+            let local = raw;
+            if (raw.startsWith('ENC1:')) {
+              try { local = await decifrarTexto(raw); } catch (e2) { local = null; }
+            }
+            if (local) {
+              const parsed = typeof local === 'string' ? JSON.parse(local) : local;
+              if (parsed && Array.isArray(parsed.users)) {
+                db.users = mergeUsers(db.users || [], parsed.users);
+              }
+            }
           }
         } catch (e) {}
       }
@@ -1858,21 +1928,36 @@
         criadoEm: new Date().toISOString()
       });
       addAtividade('Cadastro pendente: ' + nome + ' solicitou ' + cargoSolicitado, 'admin');
+      const novoUser = db.users.find(u => String(u.user || '').toLowerCase() === user);
       const ok = await salvarUsersSeguro();
-      if (window.ValisDevLog) ValisDevLog.add('cadastro_pendente', { user: user, ok: ok !== false });
+      let okPend = false;
+      if (novoUser) {
+        okPend = await pushCadastroPendenteNuvem(novoUser);
+      }
+      // confirma se chegou na nuvem
+      let confirmado = false;
+      try {
+        if (firebaseOk && fbDb) {
+          const snap = await fbDb.collection('valis').doc('db_v42').get();
+          const users = snap.exists && snap.data() && snap.data().data ? (snap.data().data.users || []) : [];
+          confirmado = users.some(u => String(u.user || '').toLowerCase() === user);
+        }
+      } catch (e) {}
+      if (window.ValisDevLog) ValisDevLog.add('cadastro_pendente', { user: user, ok: ok !== false, okPend: okPend, confirmado: confirmado });
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
       document.getElementById('reg-pass').value = '';
       if (codigoEl) codigoEl.value = '';
       document.getElementById('reg-funcao').value = 'vigilante';
       atualizarRegFuncaoUI();
-      msgLogin(
-        ok === false
-          ? 'Pedido salvo localmente. Aguarde aprovação do Admin/DEV.'
-          : 'Cadastro enviado! Aguarde aprovação do Administrador/DEV para entrar.',
-        true
-      );
-      setTimeout(() => mostrarLogin('entrar'), 1800);
+      if (confirmado || okPend) {
+        msgLogin('Cadastro enviado para a nuvem! Aguarde aprovação do Admin/DEV.', true);
+      } else if (ok !== false) {
+        msgLogin('Cadastro salvo. Se o Admin não ver, peça para tocar em Atualizar lista.', true);
+      } else {
+        msgLogin('Sem conexão com a nuvem. Cadastro ficou só neste aparelho — tente de novo com internet.', false);
+      }
+      setTimeout(() => mostrarLogin('entrar'), 2200);
     }
 
     function atualizarRegFuncaoUI() {
@@ -3518,6 +3603,17 @@
       if (u.passHash) delete u.pass;
       addAtividade('Cadastro aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
       const ok = await salvarUsersSeguro();
+      // tira da lista dedicada de pendentes
+      try {
+        if (firebaseOk && fbDb) {
+          const ref = fbDb.collection('valis').doc('cadastros_pendentes');
+          const snap = await ref.get();
+          if (snap.exists && Array.isArray((snap.data() || {}).items)) {
+            const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
+            await ref.set({ items: rest, updatedAt: new Date().toISOString() });
+          }
+        }
+      } catch (e) {}
       render();
       toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado e salvo no Firebase');
     }
