@@ -1178,7 +1178,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.9.0';
+    const APP_VERSION = '6.9.1';
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
@@ -4102,19 +4102,13 @@
     if (plData) plData.value = new Date().toISOString().slice(0, 10);
     try { plantaoCalcHoras(); } catch (e) {}
 
-    // ---- Atualização automática (version.json + SW) ----
+    // ---- Atualização leve (sem reload agressivo — WebInto) ----
     function urlComCacheBust(path) {
       const base = path.indexOf('?') >= 0 ? path + '&' : path + '?';
       return base + 't=' + Date.now();
     }
 
-    function forcarReloadApp(motivo) {
-      try { setConnStatus('yellow', motivo || 'Atualizando app...'); } catch (e) {}
-      const path = (location.pathname || '/index.html').split('?')[0] || '/index.html';
-      const next = path + (path.indexOf('?') >= 0 ? '&' : '?') + 'valis_r=' + Date.now();
-      try { location.replace(next); } catch (e) { location.href = next; }
-    }
-
+    // NÃO força reload automático: no WebInto isso vira tela 500 com frequência
     async function checarAtualizacaoApp(opts) {
       opts = opts || {};
       try {
@@ -4123,50 +4117,48 @@
           headers: { 'Cache-Control': 'no-cache' }
         });
         if (!res.ok) {
-          // 500 / 502 do host: tenta recuperar sem tela cheia
+          // host instável — só sinaliza bolinha, NÃO recarrega a página
           if (res.status >= 500) {
-            try { setConnStatus('yellow', 'Host instável (' + res.status + ')'); } catch (e) {}
-            if (opts.forcarSeErro) {
-              setTimeout(function() { forcarReloadApp('Erro ' + res.status + ' — recarregando'); }, 400);
-            }
+            try { setConnStatus('yellow', 'Host instável (' + res.status + ') — app continua local'); } catch (e) {}
           }
           return false;
         }
         const data = await res.json();
         const remota = String((data && data.v) || '');
         const local = String(typeof APP_VERSION !== 'undefined' ? APP_VERSION : '');
-        if (data && data.forceReload === true) {
-          forcarReloadApp('Atualização obrigatória');
-          return true;
+        // só avisa; reload só se forceReload E usuário confirmar (evita loop 500)
+        if (data && data.forceReload === true && remota && local && remota !== local) {
+          try {
+            if (sessionStorage.getItem('valis_skip_force_' + remota) === '1') return false;
+            if (confirm('Nova versão ' + remota + ' disponível. Atualizar agora?')) {
+              const path = (location.pathname || '/index.html').split('?')[0];
+              location.replace(path + '?v=' + encodeURIComponent(remota) + '&r=' + Date.now());
+              return true;
+            }
+            sessionStorage.setItem('valis_skip_force_' + remota, '1');
+          } catch (e) {}
         }
-        if (remota && local && remota !== local) {
-          // version.json mais novo que o HTML em cache → recarrega
-          forcarReloadApp('Nova versão ' + remota);
-          return true;
-        }
-        try { setConnStatus(firebaseOk ? 'green' : 'red'); } catch (e) {}
         return false;
       } catch (e) {
-        // rede/host caiu ao voltar do segundo plano
-        try { setConnStatus('yellow', 'Sem resposta do host'); } catch (e2) {}
-        if (opts.forcarSeErro) {
-          setTimeout(function() { recuperarApp(false); }, 500);
-        }
+        // sem rede: normal ao voltar do segundo plano — app segue com dados locais
+        try { setConnStatus('yellow', 'Sem rede — modo local'); } catch (e2) {}
         return false;
       }
     }
 
     function registrarServiceWorker() {
+      // WebInto + SW costuma causar tela 500 ao voltar do segundo plano.
+      // Desregistramos qualquer SW antigo e NÃO registramos de novo.
       if (!('serviceWorker' in navigator)) return;
       try {
-        navigator.serviceWorker.register('sw.js').then(function(reg) {
-          try { reg.update(); } catch (e) {}
-          // nova versão do SW
-          if (reg.waiting) {
-            try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
-          }
-          setInterval(function() { try { reg.update(); } catch (e) {} }, 120000);
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          regs.forEach(function(r) { try { r.unregister(); } catch (e) {} });
         }).catch(function() {});
+        if (window.caches && caches.keys) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) { try { caches.delete(k); } catch (e) {} });
+          }).catch(function() {});
+        }
       } catch (e) {}
     }
 
@@ -4208,35 +4200,38 @@
       _recovering = true;
       try {
         if (forcarReload) {
+          // só quando o usuário pede de propósito
           try { sessionStorage.setItem('valis_soft_recover', '1'); } catch (e) {}
-          location.reload();
+          try { location.reload(); } catch (e) {}
           return;
         }
-        setConnStatus('yellow', 'Reconectando Firebase...');
-        try { if (typeof _dadosUnsub === 'function') _dadosUnsub(); } catch (e) {}
-        _dadosUnsub = null;
-        firebaseOk = false;
-        fbApp = null;
-        fbDb = null;
-        try { await initFirebase(); } catch (e) { console.warn(e); }
-        try { await ensureFirebaseAuth(); } catch (e) { console.warn(e); }
+        // recuperação SUAVE: não recarrega a página (evita 500 no WebInto)
+        setConnStatus('yellow', 'Reconectando...');
         try {
-          await carregar();
+          // mantém fbApp se ainda existir; só reativa listeners
+          if (!firebaseOk || !fbDb) {
+            try { if (typeof _dadosUnsub === 'function') _dadosUnsub(); } catch (e) {}
+            _dadosUnsub = null;
+            await initFirebase();
+            await ensureFirebaseAuth();
+          } else {
+            try { await ensureFirebaseAuth(); } catch (e) {}
+          }
+          // re-sync dados sem destruir UI
+          try { await sincronizarUsersDoFirebase(); } catch (e) {}
+          try { await tentarRecuperarPlantaoesSilencioso(); } catch (e) {}
+          if (usuarioAtual) {
+            try { iniciarListenerDados(); } catch (e) {}
+            try { iniciarListenerManutencao(); } catch (e) {}
+            try { render(); } catch (e) {}
+          }
+          _erroCount = 0;
+          setConnStatus(firebaseOk ? 'green' : 'red');
         } catch (e) {
           console.warn(e);
-          setConnStatus('red', 'Falha ao reconectar — toque para tentar');
-          _recovering = false;
-          return;
+          // continua com dados locais — NÃO dá reload
+          setConnStatus('red', 'Offline — dados locais ativos');
         }
-        if (usuarioAtual) {
-          try { iniciarListenerDados(); } catch (e) {}
-          try { render(); } catch (e) {}
-        }
-        _erroCount = 0;
-        setConnStatus(firebaseOk ? 'green' : 'red');
-      } catch (e) {
-        console.warn(e);
-        setConnStatus('red', 'Erro de conexão — toque para tentar');
       } finally {
         _recovering = false;
       }
@@ -4251,20 +4246,17 @@
       console.warn('Erro capturado:', ev.message || ev);
       _erroCount++;
       const msg = (ev && ev.message) || '';
-      if (_erroCount >= 3 || precisaRecuperarPorErro(msg)) {
-        setConnStatus('yellow', 'Problema detectado — reconectando');
-        if (_erroCount >= 5) {
-          setTimeout(function() { recuperarApp(false); }, 800);
-        }
+      if (_erroCount >= 8 || precisaRecuperarPorErro(msg)) {
+        setConnStatus('yellow', 'Problema de rede — app segue local');
+        if (_erroCount === 8) setTimeout(function() { recuperarApp(false); }, 1000);
       }
     });
     window.addEventListener('unhandledrejection', function(ev) {
       console.warn('Promise rejeitada:', ev.reason);
       _erroCount++;
       const msg = (ev && ev.reason && (ev.reason.message || ev.reason)) || '';
-      if (_erroCount >= 3 || precisaRecuperarPorErro(msg)) {
-        setConnStatus('yellow', 'Falha de conexão — reconectando');
-        setTimeout(function() { recuperarApp(false); }, 600);
+      if (_erroCount >= 8 || precisaRecuperarPorErro(msg)) {
+        setConnStatus('yellow', 'Falha de conexão — modo local');
       }
     });
 
@@ -4275,39 +4267,29 @@
         return;
       }
       if (document.visibilityState === 'visible') {
-        const away = _lastHiddenAt ? (Date.now() - _lastHiddenAt) : 0;
-        // checa version.json (anti-500 / força update)
-        checarAtualizacaoApp({ forcarSeErro: away > 10000 });
-        if (away > 15000) {
-          setConnStatus('yellow', 'Voltando do segundo plano...');
-          setTimeout(function() { recuperarApp(false); }, 300);
-        } else {
-          try {
-            if (firebaseOk && fbDb) {
-              fbDb.collection('valis').doc('db_v42').get().catch(function() {
-                recuperarApp(false);
-              });
-            } else {
-              recuperarApp(false);
-            }
-          } catch (e) {
-            recuperarApp(false);
-          }
-        }
+        // Voltou do segundo plano: NÃO recarrega HTML (isso causa 500 no WebInto).
+        // Só reconecta Firebase em background e mantém a tela que já está aberta.
+        setConnStatus('yellow', 'Sincronizando...');
+        setTimeout(function() {
+          recuperarApp(false);
+          try { checarAtualizacaoApp({ forcarSeErro: false }); } catch (e) {}
+        }, 400);
       }
     });
 
-    // iOS / WebView bfcache
     window.addEventListener('pageshow', function(ev) {
       if (ev.persisted) {
-        setConnStatus('yellow', 'Restaurando sessão...');
         setTimeout(function() { recuperarApp(false); }, 200);
       }
     });
 
     window.addEventListener('online', function() {
-      toast('Internet OK — sincronizando');
+      setConnStatus('yellow', 'Internet OK');
       recuperarApp(false);
+    });
+
+    window.addEventListener('offline', function() {
+      setConnStatus('red', 'Sem internet — modo local');
     });
 
     (async function boot() {
