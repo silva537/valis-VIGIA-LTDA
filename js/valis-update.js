@@ -1,5 +1,4 @@
 /**
-
  * VALIS Update — checagem de version.json (externo)
  */
 (function (global) {
