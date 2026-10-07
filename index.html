@@ -1182,7 +1182,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.10.3';
+    const APP_VERSION = '6.10.4';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2704,13 +2704,13 @@
             const box = document.getElementById('lista-users');
             if (box) {
               const extra = pend.map(u => {
-                const idAttr = String(u.id).replace(/'/g, '');
+                const loginAttr = String(u.user || '').toLowerCase().replace(/"/g, '');
                 return '<div class="item" style="border-color:var(--yellow)">' +
                   '<b>' + (u.nome || '') + '</b> <span class="badge yellow">Pendente' + (u.cargoSolicitado ? ': ' + u.cargoSolicitado : '') + '</span>' +
                   '<div class="meta">@' + (u.user || '') + ' · ' + (u.criadoEm ? new Date(u.criadoEm).toLocaleString('pt-BR') : '') + '</div>' +
                   '<div class="actions">' +
-                  '<button type="button" class="btn green sm" onclick="aprovarCargo(\'' + idAttr + '\')">Aprovar</button>' +
-                  '<button type="button" class="btn dark sm" onclick="recusarCargo(\'' + idAttr + '\')">Recusar</button>' +
+                  '<button type="button" class="btn green sm" data-user-act="aprovar" data-user="' + loginAttr + '">Aprovar</button>' +
+                  '<button type="button" class="btn dark sm" data-user-act="recusar" data-user="' + loginAttr + '">Recusar</button>' +
                   '</div></div>';
               }).join('');
               box.insertAdjacentHTML('afterbegin',
@@ -3675,18 +3675,27 @@
       toast('Removido');
     }
     function acharUsuarioPorId(id) {
-      const sid = String(id == null ? '' : id);
+      const sid = String(id == null ? '' : id).trim();
+      if (!sid) return null;
       return (db.users || []).find(function(x) {
         return String(x.id) === sid || String(x.user || '').toLowerCase() === sid.toLowerCase();
       });
     }
+    function acharUsuarioPorLogin(login) {
+      const s = String(login == null ? '' : login).toLowerCase().trim();
+      if (!s) return null;
+      return (db.users || []).find(function(x) {
+        return String(x.user || '').toLowerCase().trim() === s;
+      });
+    }
 
-    async function aprovarCargo(id) {
+    async function aprovarCargo(idOrUser) {
+      try {
       if (!podeGerenciarUsers() && !devLiberado) {
         return alert('Sem permissão para aprovar.');
       }
-      const u = acharUsuarioPorId(id);
-      if (!u) return alert('Usuário não encontrado (id: ' + id + ').');
+      const u = acharUsuarioPorId(idOrUser) || acharUsuarioPorLogin(idOrUser);
+      if (!u) return alert('Usuário não encontrado: ' + idOrUser);
       const cargo = u.cargoSolicitado || u.funcao || 'vigilante';
       if (cargo === 'admin' && usuarioAtual && usuarioAtual.funcao !== 'admin' && usuarioAtual.funcao !== 'dev' && !devLiberado) {
         return alert('Só Admin/DEV pode aprovar Administrador.');
@@ -3716,11 +3725,16 @@
       } catch (e) {}
       render();
       toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado e salvo no Firebase');
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao aprovar: ' + (err && err.message ? err.message : err));
+      }
     }
     async function recusarCargo(id) {
+      try {
       if (!podeGerenciarUsers()) return alert('Sem permissão.');
-      const u = acharUsuarioPorId(id);
-      if (!u) return alert('Usuário não encontrado (id: ' + id + ').');
+      const u = acharUsuarioPorId(id) || acharUsuarioPorLogin(id);
+      if (!u) return alert('Usuário não encontrado: ' + id);
       if (!confirm('Recusar e manter conta inativa de ' + u.nome + '?')) return;
       u.pendente = false;
       u.cargoSolicitado = null;
@@ -3739,10 +3753,14 @@
       } catch (e) {}
       render();
       toast('Cadastro recusado');
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao recusar: ' + (err && err.message ? err.message : err));
+      }
     }
     async function alterarFuncaoUser(id, funcao) {
       if (!funcao || !podeGerenciarUsers()) return;
-      const u = acharUsuarioPorId(id);
+      const u = acharUsuarioPorId(id) || acharUsuarioPorLogin(id);
       if (!u || u.user === 'admin' || u.user === 'dev') return;
       if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
         alert('Só Admin pode promover a Administrador.');
@@ -3758,37 +3776,70 @@
       toast('Cargo atualizado');
     }
     async function desativarUser(id) {
-      if (!podeGerenciarUsers()) return alert('Sem permissão.');
-      const u = acharUsuarioPorId(id);
-      if (!u || u.user === 'admin' || u.user === 'dev') return alert('Não permitido.');
-      u.ativo = !(u.ativo === true || u.ativo === 'true' || u.ativo === 1);
-      await salvarUsersSeguro();
-      render();
-      toast(u.ativo ? 'Reativado' : 'Desativado');
+      try {
+        if (!podeGerenciarUsers()) return alert('Sem permissão.');
+        const u = acharUsuarioPorId(id) || acharUsuarioPorLogin(id);
+        if (!u || u.user === 'admin' || u.user === 'dev') return alert('Não permitido.');
+        u.ativo = !(u.ativo === true || u.ativo === 'true' || u.ativo === 1);
+        await salvarUsersSeguro();
+        render();
+        toast(u.ativo ? 'Reativado' : 'Desativado');
+      } catch (err) {
+        alert('Erro: ' + (err && err.message ? err.message : err));
+      }
     }
     async function excluirUser(id) {
-      if (!podeGerenciarUsers()) return alert('Sem permissão.');
-      const u = acharUsuarioPorId(id);
-      if (!u) return alert('Usuário não encontrado.');
-      if (u.user === 'admin' || u.user === 'dev') return alert('Não é possível excluir admin/dev.');
-      if (usuarioAtual && String(u.id) === String(usuarioAtual.id)) return alert('Você não pode excluir o próprio perfil logado.');
-      if (!confirm('Excluir definitivamente o perfil de ' + u.nome + '?')) return;
-      db.users = db.users.filter(x => String(x.id) !== String(u.id));
-      addAtividade('Usuário excluído: ' + u.nome + ' (@' + u.user + ')');
-      await salvarUsersSeguro();
       try {
-        if (firebaseOk && fbDb) {
-          const ref = fbDb.collection('valis').doc('cadastros_pendentes');
-          const snap = await ref.get();
-          if (snap.exists && Array.isArray((snap.data() || {}).items)) {
-            const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
-            await ref.set({ items: rest, updatedAt: new Date().toISOString() });
-          }
+        if (!podeGerenciarUsers()) return alert('Sem permissão.');
+        const u = acharUsuarioPorId(id) || acharUsuarioPorLogin(id);
+        if (!u) return alert('Usuário não encontrado.');
+        if (u.user === 'admin' || u.user === 'dev') return alert('Não é possível excluir admin/dev.');
+        if (usuarioAtual && String(u.user).toLowerCase() === String(usuarioAtual.user).toLowerCase()) {
+          return alert('Você não pode excluir o próprio perfil logado.');
         }
-      } catch (e) {}
-      render();
-      toast('Perfil excluído');
+        if (!confirm('Excluir definitivamente o perfil de ' + u.nome + '?')) return;
+        db.users = db.users.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
+        addAtividade('Usuário excluído: ' + u.nome + ' (@' + u.user + ')');
+        await salvarUsersSeguro();
+        try {
+          if (firebaseOk && fbDb) {
+            const ref = fbDb.collection('valis').doc('cadastros_pendentes');
+            const snap = await ref.get();
+            if (snap.exists && Array.isArray((snap.data() || {}).items)) {
+              const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
+              await ref.set({ items: rest, updatedAt: new Date().toISOString() });
+            }
+          }
+        } catch (e) {}
+        render();
+        toast('Perfil excluído');
+      } catch (err) {
+        alert('Erro ao excluir: ' + (err && err.message ? err.message : err));
+      }
     }
+
+    // Botões de usuário: delegação (não depende de onclick quebrado)
+    document.addEventListener('click', function(ev) {
+      const btn = ev.target && ev.target.closest ? ev.target.closest('[data-user-act]') : null;
+      if (!btn) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const act = btn.getAttribute('data-user-act');
+      const who = btn.getAttribute('data-user');
+      if (!act || !who) return;
+      if (act === 'aprovar') aprovarCargo(who);
+      else if (act === 'recusar') recusarCargo(who);
+      else if (act === 'excluir') excluirUser(who);
+      else if (act === 'toggle') desativarUser(who);
+    }, true);
+
+    try {
+      window.aprovarCargo = aprovarCargo;
+      window.recusarCargo = recusarCargo;
+      window.excluirUser = excluirUser;
+      window.desativarUser = desativarUser;
+      window.alterarFuncaoUser = alterarFuncaoUser;
+    } catch (e) {}
 
     function render() {
       document.getElementById('s1').textContent = db.postos.length;
@@ -3887,14 +3938,14 @@
             const inat = u.ativo===false ? ' <span class="badge red">Inativo</span>' : '';
             let actions = '';
             if (podeGerenciarUsers() && u.user !== 'admin' && u.user !== 'dev') {
-              const idAttr = String(u.id).replace(/'/g, '');
+              const loginAttr = String(u.user || '').toLowerCase().replace(/"/g, '');
               const mostrarAprovar = precisaAprovacaoUser(u);
               const isAtivo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
               actions = `<div class="actions">
-                <button type="button" class="btn dark sm" onclick="desativarUser('${idAttr}')">${isAtivo ? 'Desativar' : 'Reativar'}</button>
-                <button type="button" class="btn red sm" onclick="excluirUser('${idAttr}')">Excluir</button>
-                ${mostrarAprovar ? `<button type="button" class="btn green sm" onclick="aprovarCargo('${idAttr}')">Aprovar</button><button type="button" class="btn dark sm" onclick="recusarCargo('${idAttr}')">Recusar</button>` : ''}
-                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser('${idAttr}', this.value)">
+                <button type="button" class="btn dark sm" data-user-act="toggle" data-user="${loginAttr}">${isAtivo ? 'Desativar' : 'Reativar'}</button>
+                <button type="button" class="btn red sm" data-user-act="excluir" data-user="${loginAttr}">Excluir</button>
+                ${mostrarAprovar ? `<button type="button" class="btn green sm" data-user-act="aprovar" data-user="${loginAttr}">Aprovar</button><button type="button" class="btn dark sm" data-user-act="recusar" data-user="${loginAttr}">Recusar</button>` : ''}
+                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser('${loginAttr}', this.value)">
                   <option value="">Cargo...</option>
                   <option value="vigilante">Vigilante</option>
                   <option value="equipe">Equipe</option>
@@ -3937,13 +3988,13 @@
             cardP.style.display = pendList.length ? 'block' : 'none';
             boxP.innerHTML = pendList.length
               ? pendList.map(function(u) {
-                  const idAttr = String(u.id).replace(/'/g, '');
+                  const loginAttr = String(u.user || '').toLowerCase().replace(/"/g, '');
                   return '<div class="item"><b>' + (u.nome || '') + '</b> ' +
                     (u.cargoSolicitado ? '<span class="badge yellow">' + u.cargoSolicitado + '</span>' : '') +
                     '<div class="meta">@' + (u.user || '') + '</div>' +
                     '<div class="actions">' +
-                    '<button type="button" class="btn green sm" onclick="aprovarCargo(\'' + idAttr + '\')">Aprovar</button>' +
-                    '<button type="button" class="btn dark sm" onclick="recusarCargo(\'' + idAttr + '\')">Recusar</button>' +
+                    '<button type="button" class="btn green sm" data-user-act="aprovar" data-user="' + loginAttr + '">Aprovar</button>' +
+                    '<button type="button" class="btn dark sm" data-user-act="recusar" data-user="' + loginAttr + '">Recusar</button>' +
                     '</div></div>';
                 }).join('')
               : '<div class="empty">Nenhum pendente</div>';

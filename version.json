@@ -1,5 +1,5 @@
 {
-  "v": "6.10.3",
+  "v": "6.10.4",
   "forceReload": false,
-  "msg": "Botões aprovar/recusar/excluir/reativar corrigidos"
+  "msg": "Botões usuário via data-user (delegação de clique)"
 }
