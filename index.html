@@ -954,11 +954,13 @@
         <div class="card">
           <div class="field"><label>Destino</label>
             <select id="md" class="select">
-              <option>Equipe</option>
-              <option>Supervisão</option>
-              <option>Posto</option>
-              <option>Vigia</option>
-              <option>Todos</option>
+              <option value="Todos">Todos</option>
+              <option value="Equipe">Equipe / Vigilante</option>
+              <option value="Supervisão">Supervisão</option>
+              <option value="Admin">Administrador</option>
+              <option value="DEV">DEV</option>
+              <option value="Posto">Posto</option>
+              <option value="Vigia">Vigia</option>
             </select>
           </div>
           <div class="field"><label>Mensagem</label><textarea id="mt" class="area" rows="3" placeholder="Digite a mensagem..."></textarea></div>
@@ -1153,8 +1155,6 @@
   </div>
   <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarArquivo(event)">
 
-    <script src="js/valis-devlog.js"></script>
-  <script src="js/valis-update.js"></script>
 <script>
     // ========== CAMADA DE SEGURANÇA ==========
     const _S = {
@@ -1182,8 +1182,133 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.9.4';
+    const APP_VERSION = '6.10.0';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
+
+    // ===== ValisDevLog (inline — sem pasta js/) =====
+    const ValisDevLog = (function() {
+      const KEY = 'valis_dev_log_v1';
+      const MAX = 200;
+      function now() { try { return new Date().toISOString(); } catch (e) { return String(Date.now()); } }
+      function read() {
+        try {
+          const raw = localStorage.getItem(KEY);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch (e) { return []; }
+      }
+      function write(arr) {
+        try { localStorage.setItem(KEY, JSON.stringify(arr.slice(0, MAX))); } catch (e) {}
+      }
+      return {
+        add: function(event, detail) {
+          const entry = {
+            em: now(),
+            event: String(event || 'event'),
+            detail: detail == null ? '' : (typeof detail === 'string' ? detail : JSON.stringify(detail)),
+            ver: (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '')
+          };
+          const arr = read();
+          arr.unshift(entry);
+          write(arr);
+          try {
+            if (firebaseOk && fbDb && DataService && DataService.mode === 'firebase') {
+              fbDb.collection('valis').doc('dev_log').set({
+                items: arr.slice(0, 80),
+                updatedAt: entry.em
+              }, { merge: true }).catch(function() {});
+            }
+          } catch (e) {}
+          return entry;
+        },
+        list: function() { return read(); },
+        clear: function() {
+          try { localStorage.removeItem(KEY); } catch (e) {}
+          try {
+            if (firebaseOk && fbDb) {
+              fbDb.collection('valis').doc('dev_log').set({ items: [], updatedAt: now() }).catch(function() {});
+            }
+          } catch (e) {}
+        },
+        pullFirebase: async function() {
+          try {
+            if (!firebaseOk || !fbDb) return read();
+            const snap = await fbDb.collection('valis').doc('dev_log').get();
+            if (snap.exists && snap.data() && Array.isArray(snap.data().items)) {
+              const remote = snap.data().items;
+              const local = read();
+              const map = {};
+              local.concat(remote).forEach(function(x) {
+                const k = (x.em || '') + '|' + (x.event || '');
+                map[k] = x;
+              });
+              const merged = Object.keys(map).map(function(k) { return map[k]; })
+                .sort(function(a, b) { return String(b.em).localeCompare(String(a.em)); });
+              write(merged);
+              return merged;
+            }
+          } catch (e) {}
+          return read();
+        }
+      };
+    })();
+    try { window.ValisDevLog = ValisDevLog; } catch (e) {}
+
+    // ===== ValisUpdate (inline) =====
+    const ValisUpdate = (function() {
+      function bust(url) {
+        return url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+      }
+      function skipKey(ver) { return 'valis_skip_force_' + String(ver || ''); }
+      return {
+        lastCheck: null,
+        lastRemote: null,
+        check: async function() {
+          try {
+            const res = await fetch(bust('version.json'), {
+              cache: 'no-store',
+              headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+            });
+            this.lastCheck = Date.now();
+            if (!res.ok) {
+              ValisDevLog.add('update_check_fail', { status: res.status });
+              return { ok: false, status: res.status };
+            }
+            const data = await res.json();
+            this.lastRemote = data;
+            const local = String(typeof APP_VERSION !== 'undefined' ? APP_VERSION : '');
+            const remote = String((data && data.v) || '');
+            ValisDevLog.add('update_check_ok', { local: local, remote: remote });
+            try {
+              if (remote && sessionStorage.getItem(skipKey(remote)) === '1') {
+                return { ok: true, update: false, data: data, skipped: true };
+              }
+            } catch (e) {}
+            if (remote && local && remote !== local && data.forceReload === true) {
+              return { ok: true, update: true, data: data };
+            }
+            return { ok: true, update: false, data: data };
+          } catch (e) {
+            ValisDevLog.add('update_check_error', String(e && e.message || e));
+            return { ok: false, error: String(e && e.message || e) };
+          }
+        },
+        markDone: function(ver) {
+          try { sessionStorage.setItem(skipKey(ver), '1'); } catch (e) {}
+        },
+        softReload: function(ver) {
+          this.markDone(ver);
+          try {
+            const p = (location.pathname || '/index.html').split('?')[0];
+            location.replace(p + '?v=' + encodeURIComponent(ver || 'new') + '&r=' + Date.now());
+          } catch (e) { location.reload(); }
+        }
+      };
+    })();
+    try { window.ValisUpdate = ValisUpdate; } catch (e) {}
+
+
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
@@ -1946,7 +2071,13 @@
     }
 
     function podeGerenciarUsers() {
-      return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor' || usuarioAtual.funcao === 'dev');
+      if (!usuarioAtual) return false;
+      const f = String(usuarioAtual.funcao || '');
+      return f === 'admin' || f === 'supervisor' || f === 'dev' || !!devLiberado;
+    }
+    function isPendenteUser(u) {
+      if (!u) return false;
+      return u.pendente === true || u.pendente === 'true' || u.pendente === 1 || u.pendente === '1';
     }
     async function garantirAdmin() {
       if (!Array.isArray(db.users)) db.users = [];
@@ -2037,18 +2168,41 @@
     }
     const NAV_ITEMS = [
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      { tab: 'plantao', roles: ['vigilante','equipe'], icon: '📋', label: 'Plantão', primary: true },
-      { tab: 'extrato', roles: ['vigilante','equipe','supervisor'], icon: '💰', label: 'Extrato', primary: true },
-      { tab: 'escalas', roles: ['vigilante','equipe','supervisor'], icon: '📅', label: 'Escalas', primary: false },
-      { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin'], icon: '📍', label: 'Postos', primary: false },
-      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor'], icon: '⚠', label: 'Ocorr.', primary: false },
+      { tab: 'plantao', roles: ['vigilante','equipe','dev'], icon: '📋', label: 'Plantão', primary: true },
+      { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
+      { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escalas', primary: false },
+      { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
+      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorr.', primary: false },
       { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      { tab: 'usuarios', roles: ['admin','dev'], icon: '👥', label: 'Equipe', primary: true },
+      { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: true }
     ];
 
     function rolePode(roles, role) {
+      // DEV vê e acessa tudo
+      if (role === 'dev') return true;
       return roles.includes('all') || roles.includes(role);
+    }
+
+    /** Mensagem visível para o cargo atual */
+    function mensagemVisivelPara(msg, role) {
+      if (!msg) return false;
+      if (role === 'dev' || role === 'admin') return true;
+      const d = String(msg.d || msg.destino || msg.paraFuncao || 'Todos').toLowerCase();
+      if (d === 'todos' || d === 'all') return true;
+      if (role === 'supervisor' && (d.indexOf('superv') >= 0 || d === 'gestao' || d === 'gestão')) return true;
+      if (role === 'vigilante' && (d.indexOf('vigia') >= 0 || d.indexOf('vigil') >= 0 || d === 'equipe' || d === 'posto')) return true;
+      if (role === 'equipe' && (d === 'equipe' || d.indexOf('posto') >= 0 || d.indexOf('vigia') >= 0)) return true;
+      if (role === 'admin' && (d.indexOf('admin') >= 0 || d.indexOf('superv') >= 0)) return true;
+      // destino igual ao nome do cargo
+      if (d === String(role).toLowerCase()) return true;
+      return false;
+    }
+
+    function mensagensDoUsuario() {
+      const role = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
+      const list = db.msg || [];
+      return list.filter(function(m) { return mensagemVisivelPara(m, role); });
     }
 
     function aplicarPermissoes() {
@@ -2127,7 +2281,15 @@
         // (só mantém se digitou SENHA_DEV nesta sessão)
       }
       aplicarPermissoes();
-      if (usuarioAtual.funcao === 'dev') tab('inicio');
+      if (usuarioAtual.funcao === 'dev') {
+        tab('inicio');
+        // DEV: avisa pendentes após sync
+        sincronizarUsersDoFirebase().then(function() {
+          const n = (db.users || []).filter(isPendenteUser).length;
+          if (n > 0) toast(n + ' cadastro(s) pendente(s) — Menu DEV → Cadastros pendentes');
+          try { render(); } catch (e) {}
+        });
+      }
       else if (usuarioAtual.funcao === 'admin') tab('usuarios');
       else if (usuarioAtual.funcao === 'supervisor') tab('supervisao');
       else tab('inicio');
@@ -2347,10 +2509,39 @@
           break;
         }
         case 17: {
-          const pend = (db.users || []).filter(u => u.pendente || u.ativo === false);
-          if (!pend.length) { alert('Nenhum cadastro pendente.'); break; }
-          tab('usuarios');
-          toast(pend.length + ' pendente(s) na lista Equipe');
+          (async () => {
+            toast('Buscando cadastros pendentes...');
+            try {
+              await initFirebase();
+              await ensureFirebaseAuth();
+              await sincronizarUsersDoFirebase();
+            } catch (e) {}
+            const pend = (db.users || []).filter(u => isPendenteUser(u));
+            // abre lista Equipe e destaca pendentes
+            tab('usuarios');
+            render();
+            if (!pend.length) {
+              alert('Nenhum cadastro pendente no momento.\n\nSe alguém acabou de se cadastrar, aguarde 2s e use de novo "Cadastros pendentes".');
+              return;
+            }
+            // painel rápido com aprovar/recusar (DEV)
+            const box = document.getElementById('lista-users');
+            if (box) {
+              const extra = pend.map(u => {
+                const idAttr = JSON.stringify(String(u.id));
+                return '<div class="item" style="border-color:var(--yellow)">' +
+                  '<b>' + (u.nome || '') + '</b> <span class="badge yellow">Pendente' + (u.cargoSolicitado ? ': ' + u.cargoSolicitado : '') + '</span>' +
+                  '<div class="meta">@' + (u.user || '') + ' · ' + (u.criadoEm ? new Date(u.criadoEm).toLocaleString('pt-BR') : '') + '</div>' +
+                  '<div class="actions">' +
+                  '<button class="btn green sm" onclick="aprovarCargo(' + idAttr + ')">Aprovar</button>' +
+                  '<button class="btn dark sm" onclick="recusarCargo(' + idAttr + ')">Recusar</button>' +
+                  '</div></div>';
+              }).join('');
+              box.insertAdjacentHTML('afterbegin',
+                '<div class="card-label" style="margin-bottom:8px">⏳ Pendentes para o DEV (' + pend.length + ')</div>' + extra);
+            }
+            toast(pend.length + ' pendente(s) — use Aprovar / Recusar');
+          })();
           break;
         }
         case 18: {
@@ -3332,8 +3523,8 @@
     }
     async function recusarCargo(id) {
       if (!podeGerenciarUsers()) return;
-      const u = db.users.find(x => x.id === id);
-      if (!u) return;
+      const u = db.users.find(x => String(x.id) === String(id));
+      if (!u) return alert('Usuário não encontrado.');
       if (!confirm('Recusar e manter conta inativa de ' + u.nome + '?')) return;
       u.pendente = false;
       u.cargoSolicitado = null;
@@ -3345,8 +3536,8 @@
     }
     async function alterarFuncaoUser(id, funcao) {
       if (!funcao || !podeGerenciarUsers()) return;
-      const u = db.users.find(x => x.id === id);
-      if (!u || u.user === 'admin') return;
+      const u = db.users.find(x => String(x.id) === String(id));
+      if (!u || u.user === 'admin' || u.user === 'dev') return;
       if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
         alert('Só Admin pode promover a Administrador.');
         render();
@@ -3362,8 +3553,8 @@
     }
     async function desativarUser(id) {
       if (!podeGerenciarUsers()) return;
-      const u = db.users.find(x => x.id === id);
-      if (!u || u.user === 'admin') return alert('Não permitido.');
+      const u = db.users.find(x => String(x.id) === String(id));
+      if (!u || u.user === 'admin' || u.user === 'dev') return alert('Não permitido.');
       u.ativo = !u.ativo;
       await salvar();
       render();
@@ -3405,9 +3596,13 @@
         ? db.oco.map(x => `<div class="item"><b>${x.p||'—'}</b> ${tipoBadge(x.tipo||'Rotina')}<div class="meta">${x.t}</div><div class="meta">${x.d}</div><div class="actions"><button class="btn dark sm" onclick="remover('oco',${x.id})">Excluir</button></div></div>`).join('')
         : '<div class="empty">Nenhuma ocorrência.</div>';
 
-      document.getElementById('lm').innerHTML = db.msg.length
-        ? db.msg.map(x => `<div class="item"><b>Para: ${x.d}</b><div class="meta">${x.t}</div><div class="meta">${x.h}</div><div class="actions"><button class="btn dark sm" onclick="remover('msg',${x.id})">Excluir</button></div></div>`).join('')
-        : '<div class="empty">Nenhuma mensagem.</div>';
+      const msgsView = typeof mensagensDoUsuario === 'function' ? mensagensDoUsuario() : (db.msg || []);
+      const lmEl = document.getElementById('lm');
+      if (lmEl) {
+        lmEl.innerHTML = msgsView.length
+          ? msgsView.map(x => `<div class="item"><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div><div class="actions"><button class="btn dark sm" onclick="remover('msg',${x.id})">Excluir</button></div></div>`).join('')
+          : '<div class="empty">Nenhuma mensagem para o seu cargo.</div>';
+      }
 
       const roleFeed = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
       const feedList = atividadesVisiveisPara(roleFeed).slice(0, 8);
@@ -3472,20 +3667,23 @@
 
       const userHtml = list => list.length
         ? list.map(u => {
-            const pend = (u.pendente === true) ? ` <span class="badge yellow">Pendente${u.cargoSolicitado ? ': ' + u.cargoSolicitado : ''}</span>` : '';
+            const pend = isPendenteUser(u) ? ` <span class="badge yellow">Pendente${u.cargoSolicitado ? ': ' + u.cargoSolicitado : ''}</span>` : '';
             const inat = u.ativo===false ? ' <span class="badge red">Inativo</span>' : '';
             let actions = '';
-            if (podeGerenciarUsers() && u.user !== 'admin') {
+            if (podeGerenciarUsers() && u.user !== 'admin' && u.user !== 'dev') {
+              const idAttr = JSON.stringify(String(u.id));
+              const mostrarAprovar = isPendenteUser(u) || u.ativo === false;
               actions = `<div class="actions">
-                <button class="btn dark sm" onclick="desativarUser(${u.id})">${u.ativo===false?'Reativar':'Desativar'}</button>
-                <button class="btn red sm" onclick="excluirUser(${u.id})">Excluir</button>
-                ${(u.pendente === true || u.ativo === false) ? `<button class="btn green sm" onclick="aprovarCargo(${u.id})">Aprovar</button><button class="btn dark sm" onclick="recusarCargo(${u.id})">Recusar</button>` : ''}
-                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser(${u.id}, this.value)">
+                <button class="btn dark sm" onclick="desativarUser(${idAttr})">${u.ativo===false?'Reativar':'Desativar'}</button>
+                <button class="btn red sm" onclick="excluirUser(${idAttr})">Excluir</button>
+                ${mostrarAprovar ? `<button class="btn green sm" onclick="aprovarCargo(${idAttr})">Aprovar</button><button class="btn dark sm" onclick="recusarCargo(${idAttr})">Recusar</button>` : ''}
+                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser(${idAttr}, this.value)">
                   <option value="">Cargo...</option>
                   <option value="vigilante">Vigilante</option>
                   <option value="equipe">Equipe</option>
                   <option value="supervisor">Supervisor</option>
-                  ${usuarioAtual && usuarioAtual.funcao==='admin' ? '<option value="admin">Admin</option>' : ''}
+                  ${usuarioAtual && (usuarioAtual.funcao==='admin' || usuarioAtual.funcao==='dev') ? '<option value="admin">Admin</option>' : ''}
+                  ${usuarioAtual && usuarioAtual.funcao==='dev' ? '<option value="dev">DEV</option>' : ''}
                 </select>
               </div>`;
             }
@@ -3495,11 +3693,11 @@
       const listaUsers = document.getElementById('lista-users');
       if (listaUsers) {
         const ordenados = (db.users || []).slice().sort(function(a, b) {
-          const ap = a.pendente ? 0 : 1;
-          const bp = b.pendente ? 0 : 1;
+          const ap = isPendenteUser(a) ? 0 : 1;
+          const bp = isPendenteUser(b) ? 0 : 1;
           return ap - bp;
         });
-        const pendQtd = ordenados.filter(function(u) { return u.pendente; }).length;
+        const pendQtd = ordenados.filter(isPendenteUser).length;
         listaUsers.innerHTML =
           (pendQtd ? '<div class="item" style="border-color:var(--yellow)"><b>⏳ ' + pendQtd + ' cadastro(s) aguardando aprovação</b><div class="meta">Atualize a lista se alguém acabou de se cadastrar</div><button class="btn dark sm" style="margin-top:8px" onclick="sincronizarUsersDoFirebase().then(function(){render();toast(\'Lista atualizada\')})">🔄 Atualizar lista</button></div>' : '')
           + userHtml(ordenados);
@@ -3512,6 +3710,31 @@
         if (el1) el1.innerHTML = htmlPerfil;
         if (el2) el2.innerHTML = htmlPerfil;
       }
+      // Painel de pendentes no Início (Admin / Supervisor / DEV)
+      try {
+        const cardP = document.getElementById('card-pendentes');
+        const boxP = document.getElementById('painel-pendentes');
+        if (cardP && boxP) {
+          if (podeGerenciarUsers()) {
+            const pendList = (db.users || []).filter(isPendenteUser);
+            cardP.style.display = pendList.length ? 'block' : 'none';
+            boxP.innerHTML = pendList.length
+              ? pendList.map(function(u) {
+                  const idAttr = JSON.stringify(String(u.id));
+                  return '<div class="item"><b>' + (u.nome || '') + '</b> ' +
+                    (u.cargoSolicitado ? '<span class="badge yellow">' + u.cargoSolicitado + '</span>' : '') +
+                    '<div class="meta">@' + (u.user || '') + '</div>' +
+                    '<div class="actions">' +
+                    '<button class="btn green sm" onclick="aprovarCargo(' + idAttr + ')">Aprovar</button>' +
+                    '<button class="btn dark sm" onclick="recusarCargo(' + idAttr + ')">Recusar</button>' +
+                    '</div></div>';
+                }).join('')
+              : '<div class="empty">Nenhum pendente</div>';
+          } else {
+            cardP.style.display = 'none';
+          }
+        }
+      } catch (e) {}
 
       const statusFb = document.getElementById('status-fb');
       if (statusFb) statusFb.textContent = firebaseOk ? ('FB · ' + DataService.mode) : 'Offline';
