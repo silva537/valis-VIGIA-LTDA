@@ -1,58 +1,47 @@
-lconst CACHE_NAME = 'ponto-pwa-v1.0.5';
+/* VALIS VIGIA — Service Worker (atualização / anti-500 WebInto) */
+const CACHE = 'valis-shell-v681';
+const SHELL = ['./', './index.html', './version.json'];
 
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './style.css',
-  './storage.js',
-  './dashboard.js',
-  './app_part1.js',
-  './app_part2.js',
-  './app_part3.js',
-  './manifest.json'
-];
-
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'skipWaiting') {
-    self.skipWaiting();
-  }
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  // sempre rede para version.json e HTML (evita página 500 antiga em cache)
+  const isVersion = url.pathname.endsWith('version.json');
+  const isHTML = req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/');
+  if (isVersion || isHTML) {
+    e.respondWith(
+      fetch(req, { cache: 'no-store' })
+        .then((res) => {
+          if (!res || res.status >= 500) throw new Error('server ' + (res && res.status));
+          return res;
         })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (event.request.method === 'GET') {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return networkResponse;
-      })
-      .catch(() => caches.match(event.request))
+        .catch(async () => {
+          const cached = await caches.match('./index.html');
+          if (cached) return cached;
+          return new Response(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VALIS</title></head><body style="background:#020617;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px"><div><h2>Reconectando…</h2><p>Toque para reabrir o VALIS.</p><button onclick="location.href=location.pathname.split(\\'?\\')[0]+\\'?r=\\'+Date.now()" style="padding:14px 20px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-weight:700">Abrir app</button></div><script>setTimeout(function(){location.href=location.pathname.split("?")[0]+"?r="+Date.now()},2500)</script></body></html>',
+            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+          );
+        })
+    );
+    return;
+  }
+  e.respondWith(
+    fetch(req).catch(() => caches.match(req))
   );
 });

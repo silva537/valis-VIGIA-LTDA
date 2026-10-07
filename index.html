@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>VALIS VIGIA LTDA</title>
   <style>
     :root {
@@ -160,6 +163,18 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
       box-shadow: 0 0 12px rgba(0,156,59,0.15);
     }
+    .btn-sup-menu {
+      width: 40px; height: 40px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(250,204,21,0.4);
+      border-radius: 10px;
+      display: none;
+      align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 12px rgba(250,204,21,0.15);
+      color: var(--yellow);
+    }
+    .btn-sup-menu.show { display: flex; }
     .hamburger span {
       display: block; width: 18px; height: 2px;
       background: linear-gradient(90deg, #009C3B, #FFDF00, #3B82F6);
@@ -650,6 +665,83 @@
     <button class="btn dark" style="margin-top:16px" onclick="fecharDrawer()">Fechar</button>
   </aside>
 
+  <aside class="drawer" id="drawer-sup" style="border-color:rgba(250,204,21,0.25)">
+    <h2>👁 Menu Supervisão</h2>
+    <div class="sub">Operação da equipe · separado do DEV</div>
+    <div class="br-flag-strip"></div>
+
+    <div class="collapse-box open" id="sup-sec-live">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('sup-sec-live')">
+        <span>📡 Ao vivo<small>Painel, serviço e resumo</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="supFn(1)"><span class="ico">🔄</span><div>Atualizar painel ao vivo<small>Recarrega indicadores</small></div></button>
+        <button class="func-btn" onclick="supFn(6)"><span class="ico">📅</span><div>Quem está de serviço<small>Escalas e plantões do dia</small></div></button>
+        <button class="func-btn" onclick="supFn(8)"><span class="ico">📊</span><div>Resumo do dia<small>Números + plantões por pessoa</small></div></button>
+        <button class="func-btn" onclick="supFn(11)"><span class="ico">💰</span><div>Plantões por pessoa<small>Quantidade e total em R$</small></div></button>
+        <button class="func-btn" onclick="supFn(19)"><span class="ico">⚠️</span><div>Alertas operacionais<small>Inconsistências e pendências</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="sup-sec-equipe">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('sup-sec-equipe')">
+        <span>👥 Equipe<small>Ativos, histórico, faltas</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="supFn(2)"><span class="ico">👥</span><div>Equipe ativa<small>Funcionários ativos</small></div></button>
+        <button class="func-btn" onclick="supFn(12)"><span class="ico">⏳</span><div>Pendências de cadastro<small>Aprovar / recusar</small></div></button>
+        <button class="func-btn" onclick="supFn(17)"><span class="ico">📁</span><div>Histórico do vigilante<small>Plantões e ocorrências</small></div></button>
+        <button class="func-btn" onclick="supFn(16)"><span class="ico">🚫</span><div>Faltas / ausência do dia<small>Registrar ausência</small></div></button>
+        <button class="func-btn" onclick="supFn(23)"><span class="ico">🔄</span><div>Troca de posto<small>Mover vigilante no dia</small></div></button>
+        <button class="func-btn" onclick="supFn(24)"><span class="ico">🛟</span><div>Coberturas do dia<small>Só tipo cobertura</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="sup-sec-oco">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('sup-sec-oco')">
+        <span>🚨 Ocorrências e postos<small>Críticas, dia, checklist</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="supFn(5)"><span class="ico">🚨</span><div>Ocorrências críticas<small>Emergência e incidentes</small></div></button>
+        <button class="func-btn" onclick="supFn(13)"><span class="ico">📆</span><div>Ocorrências do dia<small>Somente hoje</small></div></button>
+        <button class="func-btn" onclick="supFn(7)"><span class="ico">📍</span><div>Mapa de postos<small>Postos e destinos</small></div></button>
+        <button class="func-btn" onclick="supFn(15)"><span class="ico">✅</span><div>Checklist do posto<small>Ronda / portaria / câmeras</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="sup-sec-com">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('sup-sec-com')">
+        <span>💬 Comunicação<small>Avisos e mensagens rápidas</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="supFn(3)"><span class="ico">📢</span><div>Aviso geral<small>Mensagem para todos</small></div></button>
+        <button class="func-btn" onclick="supFn(14)"><span class="ico">🎯</span><div>Aviso por destino<small>Equipe / Sup / Posto / Todos</small></div></button>
+        <button class="func-btn" onclick="supFn(20)"><span class="ico">💬</span><div>Mensagem rápida<small>Textos prontos</small></div></button>
+        <button class="func-btn" onclick="supFn(18)"><span class="ico">🆘</span><div>Registrar chamado de apoio<small>Log de solicitação</small></div></button>
+        <button class="func-btn" onclick="supFn(4)"><span class="ico">📱</span><div>Relatório WhatsApp<small>Resumo operacional</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="sup-sec-rel">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('sup-sec-rel')">
+        <span>📤 Relatórios<small>Turno, CSV, JSON</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="supFn(9)"><span class="ico">📋</span><div>Feed de atividades<small>Últimas ações</small></div></button>
+        <button class="func-btn" onclick="supFn(21)"><span class="ico">📝</span><div>Relatório do turno<small>Texto pronto</small></div></button>
+        <button class="func-btn" onclick="supFn(25)"><span class="ico">📊</span><div>Exportar plantões CSV<small>Folha para conferência</small></div></button>
+        <button class="func-btn" onclick="supFn(10)"><span class="ico">📤</span><div>Exportar relatório JSON<small>Resumo da supervisão</small></div></button>
+      </div></div>
+    </div>
+
+    <button class="btn dark" style="margin-top:16px" onclick="fecharDrawer()">Fechar</button>
+  </aside>
+
   <!-- APP -->
   <section id="app" class="app">
     <header class="top">
@@ -661,6 +753,7 @@
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
+        <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
         <span id="conn-dot" class="conn-dot green" title="Conexão Firebase: OK — toque para reconectar" onclick="recuperarApp(false)"></span>
         <button class="btn dark sm" onclick="sair()">Sair</button>
       </div>
@@ -1083,7 +1176,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.7.1';
+    const APP_VERSION = '6.8.1';
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
@@ -1852,6 +1945,7 @@
       else if (usuarioAtual.funcao === 'supervisor') tab('supervisao');
       else tab('inicio');
       render();
+      atualizarBtnSup();
       iniciarListenerDados();
     }
     function sair() {
@@ -1869,6 +1963,7 @@
       document.getElementById('login-user').value = '';
       document.getElementById('login-pass').value = '';
       fecharDrawer();
+      atualizarBtnSup();
       mostrarLogin('entrar');
     }
     function labelFuncao(f) {
@@ -1932,7 +2027,43 @@
     }
     function fecharDrawer() {
       document.getElementById('drawer-overlay').classList.remove('open');
-      document.getElementById('drawer-dev').classList.remove('open');
+      const d = document.getElementById('drawer-dev');
+      if (d) d.classList.remove('open');
+      const s = document.getElementById('drawer-sup');
+      if (s) s.classList.remove('open');
+    }
+
+    function podeMenuSup() {
+      if (!usuarioAtual) return false;
+      const f = usuarioAtual.funcao;
+      return f === 'supervisor' || f === 'admin' || !!devLiberado;
+    }
+
+    function abrirMenuSup() {
+      if (!podeMenuSup()) {
+        toast('Acesso só para Supervisão / Admin');
+        return;
+      }
+      const ov = document.getElementById('manutencao-overlay');
+      if (ov) ov.classList.add('hidden');
+      document.getElementById('drawer-overlay').classList.add('open');
+      const d = document.getElementById('drawer-dev');
+      if (d) d.classList.remove('open');
+      const s = document.getElementById('drawer-sup');
+      if (s) s.classList.add('open');
+    }
+
+    function atualizarBtnSup() {
+      const b = document.getElementById('btn-sup-menu');
+      if (!b) return;
+      if (podeMenuSup()) b.classList.add('show');
+      else b.classList.remove('show');
+    }
+
+    function supAbrirResultado() {
+      fecharDrawer();
+      tab('supervisao');
+      return document.getElementById('sup-resultado');
     }
 
     // 10 DEV FUNCTIONS
@@ -2248,7 +2379,12 @@
 
     // 10 SUPERVISION FUNCTIONS
     function supFn(n) {
-      const box = document.getElementById('sup-resultado');
+      if (!podeMenuSup() && !(usuarioAtual && (usuarioAtual.funcao === 'supervisor' || usuarioAtual.funcao === 'admin'))) {
+        toast('Sem permissão de supervisão');
+        return;
+      }
+      const box = (typeof supAbrirResultado === 'function') ? supAbrirResultado() : document.getElementById('sup-resultado');
+      if (!box) return;
       switch (n) {
         case 1:
           render();
@@ -2340,6 +2476,301 @@
           toast('Relatório exportado');
           break;
         }
+        case 11: {
+          const pl = db.plantaoes || [];
+          const porUser = {};
+          pl.forEach(x => {
+            const k = x.userLogin || x.por || '—';
+            if (!porUser[k]) porUser[k] = { qtd: 0, total: 0, horas: 0, nome: x.por || k };
+            porUser[k].qtd++;
+            porUser[k].total += Number(x.valor) || 0;
+            const h = parseFloat(String(x.horas || '0').replace(',', '.')) || 0;
+            porUser[k].horas += h;
+          });
+          box.innerHTML = Object.keys(porUser).map(k => {
+            const u = porUser[k];
+            return `<div class="item"><b>${u.nome}</b> <span class="meta">@${k}</span>
+              <div class="meta">${u.qtd} plantão(ões) · ${u.horas.toFixed(1)} h · ${moneyBR(u.total)}</div></div>`;
+          }).join('') || '<div class="empty">Nenhum plantão</div>';
+          toast('Plantões por pessoa');
+          break;
+        }
+        case 12: {
+          const pend = (db.users || []).filter(u => u.pendente);
+          if (!pend.length) {
+            box.innerHTML = '<div class="empty">Nenhum cadastro pendente</div>';
+            break;
+          }
+          box.innerHTML = pend.map(u =>
+            `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.cargoSolicitado || u.funcao)}
+              <div class="meta">@${u.user}</div>
+              <div class="actions">
+                <button class="btn green sm" onclick="aprovarCargo('${u.id}')">Aprovar</button>
+                <button class="btn red sm" onclick="recusarCargo('${u.id}')">Recusar</button>
+              </div>
+            </div>`
+          ).join('');
+          toast('Pendências');
+          break;
+        }
+        case 13: {
+          const hoje = new Date().toLocaleDateString('pt-BR');
+          const iso = new Date().toISOString().slice(0, 10);
+          const list = (db.oco || []).filter(o => {
+            const d = String(o.d || '');
+            return d.includes(hoje) || d.includes(iso);
+          });
+          box.innerHTML = list.map(o =>
+            `<div class="item"><b>${o.p || '—'}</b> ${tipoBadge(o.tipo)}
+              <div class="meta">${o.t}</div><div class="meta">${o.d} · ${o.por || ''}</div></div>`
+          ).join('') || '<div class="empty">Nenhuma ocorrência hoje</div>';
+          toast('Ocorrências do dia');
+          break;
+        }
+        case 14: {
+          const dest = prompt('Destino do aviso:\nTodos | Equipe | Supervisão | Posto | Vigia', 'Todos');
+          if (!dest) return;
+          const msg = prompt('Mensagem:');
+          if (!msg) return;
+          db.msg.unshift({
+            id: Date.now(),
+            d: dest,
+            t: msg,
+            h: new Date().toLocaleString('pt-BR'),
+            de: usuarioAtual ? usuarioAtual.nome : 'Supervisão'
+          });
+          addAtividade('Aviso (' + dest + '): ' + msg.slice(0, 40));
+          salvar();
+          box.innerHTML = `<div class="item"><b>Aviso → ${dest}</b><div class="meta">${msg}</div></div>`;
+          toast('Aviso enviado');
+          try { notificarApp('VALIS · ' + dest, msg); } catch (e) {}
+          break;
+        }
+        case 15: {
+          const posto = prompt('Nome do posto para checklist:', (db.postos[0] && db.postos[0].n) || '');
+          if (!posto) return;
+          const itens = ['Portaria OK', 'Câmeras OK', 'Ronda feita', 'Iluminação OK', 'Comunicação OK'];
+          const ok = [];
+          for (const it of itens) {
+            if (confirm(posto + '\n\n' + it + '?\nOK = Sim / Cancelar = Não')) ok.push(it);
+          }
+          if (!db.checklists) db.checklists = [];
+          const reg = {
+            id: Date.now(),
+            posto,
+            ok,
+            falhou: itens.filter(i => !ok.includes(i)),
+            por: usuarioAtual ? usuarioAtual.nome : '—',
+            em: new Date().toLocaleString('pt-BR')
+          };
+          db.checklists.unshift(reg);
+          if (db.checklists.length > 100) db.checklists.length = 100;
+          addAtividade('Checklist ' + posto + ': ' + ok.length + '/' + itens.length);
+          salvar();
+          box.innerHTML = `<div class="item"><b>Checklist — ${posto}</b>
+            <div class="meta">OK: ${ok.join(', ') || '—'}</div>
+            <div class="meta">Pendente: ${reg.falhou.join(', ') || '—'}</div>
+            <div class="meta">${reg.em} · ${reg.por}</div></div>`;
+          toast('Checklist salvo');
+          break;
+        }
+        case 16: {
+          const nome = prompt('Nome de quem faltou / ausente:');
+          if (!nome) return;
+          const motivo = prompt('Motivo (opcional):', '') || '—';
+          if (!db.faltas) db.faltas = [];
+          db.faltas.unshift({
+            id: Date.now(),
+            nome,
+            motivo,
+            data: new Date().toISOString().slice(0, 10),
+            por: usuarioAtual ? usuarioAtual.nome : '—',
+            em: new Date().toLocaleString('pt-BR')
+          });
+          addAtividade('Falta registrada: ' + nome);
+          salvar();
+          const hoje = new Date().toISOString().slice(0, 10);
+          box.innerHTML = (db.faltas || []).filter(f => f.data === hoje).map(f =>
+            `<div class="item"><b>${f.nome}</b><div class="meta">${f.motivo}</div><div class="meta">${f.em}</div></div>`
+          ).join('') || '<div class="empty">—</div>';
+          toast('Falta registrada');
+          break;
+        }
+        case 17: {
+          const q = prompt('Nome ou usuário do vigilante:');
+          if (!q) return;
+          const ql = q.toLowerCase();
+          const u = (db.users || []).find(x =>
+            String(x.nome || '').toLowerCase().includes(ql) ||
+            String(x.user || '').toLowerCase().includes(ql)
+          );
+          const nome = u ? u.nome : q;
+          const login = u ? u.user : '';
+          const pl = (db.plantaoes || []).filter(p =>
+            (login && p.userLogin === login) ||
+            String(p.por || '').toLowerCase().includes(ql)
+          ).slice(0, 15);
+          const oc = (db.oco || []).filter(o =>
+            String(o.por || '').toLowerCase().includes(ql)
+          ).slice(0, 10);
+          box.innerHTML = `
+            <div class="item"><b>${nome}</b> ${u ? funcaoBadge(u.funcao) : ''}
+              <div class="meta">${login ? '@' + login : ''} · último login: ${(u && u.ultimoLogin) ? new Date(u.ultimoLogin).toLocaleString('pt-BR') : '—'}</div>
+            </div>
+            <div class="card-label">Últimos plantões</div>
+            ${pl.map(p => `<div class="item"><b>${p.data}</b> ${p.turno}<div class="meta">${moneyBR(p.valor)} · ${p.tipo}</div></div>`).join('') || '<div class="empty">Sem plantões</div>'}
+            <div class="card-label">Ocorrências</div>
+            ${oc.map(o => `<div class="item"><b>${o.tipo}</b><div class="meta">${o.t}</div><div class="meta">${o.d}</div></div>`).join('') || '<div class="empty">Sem ocorrências</div>'}`;
+          toast('Histórico');
+          break;
+        }
+        case 18: {
+          const det = prompt('Descreva o chamado de apoio:', 'Solicitou reforço / apoio no posto');
+          if (!det) return;
+          if (!db.chamados) db.chamados = [];
+          db.chamados.unshift({
+            id: Date.now(),
+            t: det,
+            por: usuarioAtual ? usuarioAtual.nome : '—',
+            em: new Date().toLocaleString('pt-BR')
+          });
+          addAtividade('Chamado de apoio: ' + det.slice(0, 50));
+          salvar();
+          box.innerHTML = (db.chamados || []).slice(0, 10).map(c =>
+            `<div class="item"><b>🆘 ${c.t}</b><div class="meta">${c.em} · ${c.por}</div></div>`
+          ).join('');
+          toast('Chamado registrado');
+          break;
+        }
+        case 19: {
+          const alerts = [];
+          (db.plantaoes || []).forEach(p => {
+            if (!p.valor || Number(p.valor) === 0) alerts.push('Plantão sem valor: ' + (p.por || p.userLogin) + ' · ' + p.data);
+            if (!p.userLogin && !p.userId) alerts.push('Plantão sem dono: ' + p.data + ' · ' + (p.por || '—'));
+          });
+          (db.oco || []).slice(0, 30).forEach(o => {
+            if (!o.p) alerts.push('Ocorrência sem posto: ' + (o.t || '').slice(0, 40));
+          });
+          (db.users || []).forEach(u => {
+            if (u.ativo === false && (db.plantaoes || []).some(p => p.userLogin === u.user)) {
+              alerts.push('User inativo com plantão: @' + u.user);
+            }
+          });
+          const pend = (db.users || []).filter(u => u.pendente).length;
+          if (pend) alerts.push(pend + ' cadastro(s) pendente(s)');
+          box.innerHTML = alerts.length
+            ? alerts.slice(0, 25).map(a => `<div class="item"><b>⚠️</b> <span class="meta">${a}</span></div>`).join('')
+            : '<div class="empty">Nenhum alerta no momento</div>';
+          toast('Alertas');
+          break;
+        }
+        case 20: {
+          const opcoes = [
+            'Reforçar ronda no posto',
+            'Conferir portão / acesso',
+            'Manter rádio em alerta',
+            'Reportar qualquer movimentação suspeita',
+            'Checklist de câmeras agora'
+          ];
+          const escolha = prompt('Mensagem rápida (número ou texto):\n' + opcoes.map((o, i) => (i + 1) + ') ' + o).join('\n'), '1');
+          if (!escolha) return;
+          let msg = escolha;
+          const n = parseInt(escolha, 10);
+          if (n >= 1 && n <= opcoes.length) msg = opcoes[n - 1];
+          db.msg.unshift({
+            id: Date.now(),
+            d: 'Equipe',
+            t: msg,
+            h: new Date().toLocaleString('pt-BR'),
+            de: usuarioAtual ? usuarioAtual.nome : 'Supervisão'
+          });
+          addAtividade('Msg rápida: ' + msg);
+          salvar();
+          box.innerHTML = `<div class="item"><b>Mensagem enviada</b><div class="meta">${msg}</div></div>`;
+          toast('Mensagem rápida ok');
+          break;
+        }
+        case 21: {
+          const hoje = new Date().toLocaleDateString('pt-BR');
+          const plHoje = (db.plantaoes || []).filter(p => String(p.data || '').includes(hoje) || String(p.data || '') === new Date().toISOString().slice(0, 10));
+          const ocHoje = (db.oco || []).filter(o => String(o.d || '').includes(hoje));
+          const txt = [
+            '*VALIS VIGIA — Relatório do turno*',
+            'Data: ' + hoje,
+            'Por: ' + (usuarioAtual ? usuarioAtual.nome : '—'),
+            '',
+            'Plantões lançados hoje: ' + plHoje.length,
+            'Ocorrências hoje: ' + ocHoje.length,
+            'Postos: ' + (db.postos || []).length,
+            'Equipe ativa: ' + (db.users || []).filter(u => u.ativo !== false).length,
+            '',
+            'Plantões:',
+            ...(plHoje.slice(0, 10).map(p => '• ' + (p.por || p.userLogin) + ' — ' + p.turno + ' — ' + moneyBR(p.valor))),
+            '',
+            'Ocorrências:',
+            ...(ocHoje.slice(0, 8).map(o => '• [' + o.tipo + '] ' + (o.t || '').slice(0, 60)))
+          ].join('\n');
+          box.innerHTML = `<div class="item"><b>Relatório do turno</b><div class="meta" style="white-space:pre-wrap">${txt.replace(/</g, '&lt;')}</div></div>
+            <button class="btn green" style="margin-top:8px" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.dataset.t).then(()=>toast('Copiado')).catch(()=>prompt('Copie:',this.dataset.t))" data-t="">Copiar texto</button>`;
+          const btn = box.querySelector('button');
+          if (btn) btn.dataset.t = txt;
+          toast('Relatório gerado');
+          break;
+        }
+        case 23: {
+          const quem = prompt('Nome do vigilante:');
+          if (!quem) return;
+          const de = prompt('Posto de origem:');
+          if (de === null) return;
+          const para = prompt('Posto de destino:');
+          if (!para) return;
+          if (!db.trocasPosto) db.trocasPosto = [];
+          db.trocasPosto.unshift({
+            id: Date.now(),
+            quem, de, para,
+            por: usuarioAtual ? usuarioAtual.nome : '—',
+            em: new Date().toLocaleString('pt-BR')
+          });
+          addAtividade('Troca de posto: ' + quem + ' ' + de + ' → ' + para);
+          salvar();
+          box.innerHTML = (db.trocasPosto || []).slice(0, 10).map(t =>
+            `<div class="item"><b>${t.quem}</b><div class="meta">${t.de || '—'} → ${t.para}</div><div class="meta">${t.em}</div></div>`
+          ).join('');
+          toast('Troca registrada');
+          break;
+        }
+        case 24: {
+          const hoje = new Date().toISOString().slice(0, 10);
+          const list = (db.plantaoes || []).filter(p =>
+            String(p.tipo || '').toLowerCase().includes('cobertura') &&
+            (String(p.data || '').includes(hoje) || true)
+          ).filter(p => String(p.tipo || '').toLowerCase().includes('cobertura'));
+          const soHoje = list.filter(p => String(p.data || '') === hoje || String(p.data || '').includes(new Date().toLocaleDateString('pt-BR')));
+          const use = soHoje.length ? soHoje : list.slice(0, 20);
+          box.innerHTML = use.map(p =>
+            `<div class="item"><b>${p.por || p.userLogin}</b><div class="meta">${p.data} · ${p.turno} · ${moneyBR(p.valor)}</div>
+              <div class="meta">Cobriu: ${p.cobriu || '—'} · ${p.obs || ''}</div></div>`
+          ).join('') || '<div class="empty">Nenhuma cobertura</div>';
+          toast('Coberturas');
+          break;
+        }
+        case 25: {
+          const rows = [['Data', 'Turno', 'Tipo', 'Valor', 'Horas', 'Por', 'User', 'Obs']];
+          (db.plantaoes || []).forEach(p => {
+            rows.push([
+              p.data || '', p.turno || '', p.tipo || '', String(p.valor || 0),
+              p.horas || '', p.por || '', p.userLogin || '', (p.obs || '').replace(/\n/g, ' ')
+            ]);
+          });
+          const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'valis-plantoes.csv';
+          a.click();
+          toast('CSV exportado');
+          break;
+        }
       }
     }
 
@@ -2419,6 +2850,10 @@
         criadoEm: new Date().toISOString()
       };
       if (!db.plantaoes) db.plantaoes = [];
+      if (!db.checklists) db.checklists = [];
+      if (!db.faltas) db.faltas = [];
+      if (!db.chamados) db.chamados = [];
+      if (!db.trocasPosto) db.trocasPosto = [];
       db.plantaoes.unshift(item);
       document.getElementById('pl-obs').value = '';
       document.getElementById('pl-cobriu').value = '';
@@ -2764,6 +3199,10 @@
 
       // Extrato (filtrado por login; supervisão/admin veem todos)
       if (!db.plantaoes) db.plantaoes = [];
+      if (!db.checklists) db.checklists = [];
+      if (!db.faltas) db.faltas = [];
+      if (!db.chamados) db.chamados = [];
+      if (!db.trocasPosto) db.trocasPosto = [];
       if (!db.folhasArquivadas) db.folhasArquivadas = [];
       const listaEx = plantaoesDoExtrato();
       const totalFolha = listaEx.reduce((s, x) => s + (x.valor || 0), 0);
@@ -3191,6 +3630,10 @@
         if (!db.users) db.users = [];
         if (!db.atividades) db.atividades = [];
         if (!db.plantaoes) db.plantaoes = [];
+      if (!db.checklists) db.checklists = [];
+      if (!db.faltas) db.faltas = [];
+      if (!db.chamados) db.chamados = [];
+      if (!db.trocasPosto) db.trocasPosto = [];
         if (!db.folhasArquivadas) db.folhasArquivadas = [];
       }
       // merge com backups locais e dedicados
@@ -3588,7 +4031,76 @@
     if (plData) plData.value = new Date().toISOString().slice(0, 10);
     try { plantaoCalcHoras(); } catch (e) {}
 
+    // ---- Atualização automática (version.json + SW) ----
+    function urlComCacheBust(path) {
+      const base = path.indexOf('?') >= 0 ? path + '&' : path + '?';
+      return base + 't=' + Date.now();
+    }
+
+    function forcarReloadApp(motivo) {
+      try { setConnStatus('yellow', motivo || 'Atualizando app...'); } catch (e) {}
+      const path = (location.pathname || '/index.html').split('?')[0] || '/index.html';
+      const next = path + (path.indexOf('?') >= 0 ? '&' : '?') + 'valis_r=' + Date.now();
+      try { location.replace(next); } catch (e) { location.href = next; }
+    }
+
+    async function checarAtualizacaoApp(opts) {
+      opts = opts || {};
+      try {
+        const res = await fetch(urlComCacheBust('version.json'), {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (!res.ok) {
+          // 500 / 502 do host: tenta recuperar sem tela cheia
+          if (res.status >= 500) {
+            try { setConnStatus('yellow', 'Host instável (' + res.status + ')'); } catch (e) {}
+            if (opts.forcarSeErro) {
+              setTimeout(function() { forcarReloadApp('Erro ' + res.status + ' — recarregando'); }, 400);
+            }
+          }
+          return false;
+        }
+        const data = await res.json();
+        const remota = String((data && data.v) || '');
+        const local = String(typeof APP_VERSION !== 'undefined' ? APP_VERSION : '');
+        if (data && data.forceReload === true) {
+          forcarReloadApp('Atualização obrigatória');
+          return true;
+        }
+        if (remota && local && remota !== local) {
+          // version.json mais novo que o HTML em cache → recarrega
+          forcarReloadApp('Nova versão ' + remota);
+          return true;
+        }
+        try { setConnStatus(firebaseOk ? 'green' : 'red'); } catch (e) {}
+        return false;
+      } catch (e) {
+        // rede/host caiu ao voltar do segundo plano
+        try { setConnStatus('yellow', 'Sem resposta do host'); } catch (e2) {}
+        if (opts.forcarSeErro) {
+          setTimeout(function() { recuperarApp(false); }, 500);
+        }
+        return false;
+      }
+    }
+
+    function registrarServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        navigator.serviceWorker.register('sw.js').then(function(reg) {
+          try { reg.update(); } catch (e) {}
+          // nova versão do SW
+          if (reg.waiting) {
+            try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+          }
+          setInterval(function() { try { reg.update(); } catch (e) {} }, 120000);
+        }).catch(function() {});
+      } catch (e) {}
+    }
+
     // ---- Recuperação WebInto / segundo plano ----
+
     let _erroCount = 0;
     let _recovering = false;
     let _lastHiddenAt = 0;
@@ -3693,12 +4205,12 @@
       }
       if (document.visibilityState === 'visible') {
         const away = _lastHiddenAt ? (Date.now() - _lastHiddenAt) : 0;
-        // se ficou mais de 15s em segundo plano, reconecta
+        // checa version.json (anti-500 / força update)
+        checarAtualizacaoApp({ forcarSeErro: away > 10000 });
         if (away > 15000) {
           setConnStatus('yellow', 'Voltando do segundo plano...');
           setTimeout(function() { recuperarApp(false); }, 300);
         } else {
-          // ping leve
           try {
             if (firebaseOk && fbDb) {
               fbDb.collection('valis').doc('db_v42').get().catch(function() {
@@ -3728,6 +4240,8 @@
     });
 
     (async function boot() {
+      try { registrarServiceWorker(); } catch (e) {}
+      try { await checarAtualizacaoApp({ forcarSeErro: false }); } catch (e) {}
       try { await initFirebase(); } catch (e) { firebaseOk = false; }
       try {
         await carregar();
@@ -3758,6 +4272,7 @@
         }
       }, 30000);
 
+      setInterval(function() { checarAtualizacaoApp({ forcarSeErro: false }); }, 180000);
       // watchdog: se Firebase “morrer” com app aberto
       setInterval(async function() {
         if (document.visibilityState !== 'visible') return;
