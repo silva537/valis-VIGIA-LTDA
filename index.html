@@ -565,6 +565,7 @@
             <option value="equipe">Equipe</option>
             <option value="supervisor">Supervisor (requer código)</option>
             <option value="admin">Administrador (requer código)</option>
+            <option value="dev">DEV (requer código especial)</option>
           </select>
         </div>
         <div class="field" id="reg-codigo-wrap" style="display:none">
@@ -1022,6 +1023,7 @@
               <option value="equipe">Equipe</option>
               <option value="supervisor">Supervisor</option>
               <option value="admin">Administrador</option>
+              <option value="dev">DEV</option>
             </select>
           </div>
           <button class="btn green" onclick="addUserAdmin()">Cadastrar</button>
@@ -1176,7 +1178,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.8.1';
+    const APP_VERSION = '6.9.0';
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
@@ -1634,10 +1636,9 @@
     }
 
     function atualizarRegFuncaoUI() {
-      const f = document.getElementById('reg-funcao');
+      const f = document.getElementById('reg-funcao').value;
       const wrap = document.getElementById('reg-codigo-wrap');
-      if (!f || !wrap) return;
-      wrap.style.display = (f.value === 'supervisor' || f.value === 'admin') ? '' : 'none';
+      if (wrap) wrap.style.display = (f === 'supervisor' || f === 'admin' || f === 'dev') ? 'block' : 'none';
     }
     function getCodigoAuth() {
       return localStorage.getItem('valis_codigo_auth') || (db && db.codigoAuth) || 'VALIS2026';
@@ -1808,8 +1809,11 @@
       if (!nome || !user || !pass) return alert('Preencha tudo.');
       if (pass.length < 4) return alert('Senha mín. 4 caracteres.');
       if (db.users.some(u => u.user === user)) return alert('Usuário já existe.');
-      if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
-        return alert('Só Administrador pode criar outro Admin.');
+      if (funcao === 'admin' && usuarioAtual.funcao !== 'admin' && usuarioAtual.funcao !== 'dev') {
+        return alert('Só Admin/DEV pode criar Administrador.');
+      }
+      if (funcao === 'dev' && usuarioAtual.funcao !== 'dev') {
+        return alert('Só o cargo DEV pode criar outro DEV.');
       }
       const hp = await hashSenha(String(pass));
       db.users.push({
@@ -1826,20 +1830,30 @@
     }
 
     function podeGerenciarUsers() {
-      return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor');
+      return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor' || usuarioAtual.funcao === 'dev');
     }
     async function garantirAdmin() {
       if (!Array.isArray(db.users)) db.users = [];
-      if (!db.users.length) {
+      let mudou = false;
+      if (!db.users.some(u => String(u.user || '').toLowerCase() === 'admin')) {
         const hp = await hashSenha('admin123');
         db.users.push({
           id: 1, nome: 'Administrador', user: 'admin',
           passHash: hp.hash, passSalt: hp.salt,
           funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
         });
-        await salvar();
+        mudou = true;
       }
-      // normaliza flags booleanas e migra senhas legadas
+      // cargo DEV: login com senha; menus técnicos sem senha extra
+      if (!db.users.some(u => String(u.user || '').toLowerCase() === 'dev')) {
+        const hp = await hashSenha('dev12345');
+        db.users.push({
+          id: 2, nome: 'Desenvolvedor', user: 'dev',
+          passHash: hp.hash, passSalt: hp.salt,
+          funcao: 'dev', ativo: true, pendente: false, criadoEm: new Date().toISOString()
+        });
+        mudou = true;
+      }
       for (const u of db.users) {
         u.user = String(u.user || '').toLowerCase().trim();
         u.ativo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
@@ -1851,9 +1865,24 @@
       if (!db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
         db.codigoAuth = 'VALIS2026';
         localStorage.setItem('valis_codigo_auth', 'VALIS2026');
+        mudou = true;
       } else if (db.codigoAuth && !localStorage.getItem('valis_codigo_auth')) {
         localStorage.setItem('valis_codigo_auth', db.codigoAuth);
       }
+      if (mudou) {
+        try { await DataService.save('db_v42', db); } catch (e) {}
+      }
+    }
+
+    function isCargoDev() {
+      return !!(usuarioAtual && usuarioAtual.funcao === 'dev') || !!devLiberado;
+    }
+    function isCargoAdmin() {
+      return !!(usuarioAtual && usuarioAtual.funcao === 'admin');
+    }
+    /** Funções perigosas: só cargo DEV (ou senha DEV liberada) */
+    function podeDevPerigoso() {
+      return isCargoDev();
     }
     const NAV_ITEMS = [
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
@@ -1863,8 +1892,7 @@
       { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin'], icon: '📍', label: 'Postos', primary: false },
       { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor'], icon: '⚠', label: 'Ocorr.', primary: false },
       { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      { tab: 'supervisao', roles: ['supervisor','admin'], icon: '👁', label: 'Superv.', primary: true },
-      { tab: 'usuarios', roles: ['admin'], icon: '👥', label: 'Equipe', primary: true },
+      { tab: 'usuarios', roles: ['admin','dev'], icon: '👥', label: 'Equipe', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: true }
     ];
 
@@ -1940,8 +1968,16 @@
       document.getElementById('login').style.display = 'none';
       document.getElementById('app').classList.add('show');
       document.getElementById('header-user').textContent = usuarioAtual.nome + ' · ' + labelFuncao(usuarioAtual.funcao);
+      // cargo DEV: menus técnicos liberados sem senha extra
+      if (usuarioAtual && usuarioAtual.funcao === 'dev') {
+        devLiberado = true;
+      } else if (usuarioAtual && usuarioAtual.funcao !== 'dev') {
+        // admin/supervisor/vigilante não herdam sessão DEV anterior
+        // (só mantém se digitou SENHA_DEV nesta sessão)
+      }
       aplicarPermissoes();
-      if (usuarioAtual.funcao === 'admin') tab('usuarios');
+      if (usuarioAtual.funcao === 'dev') tab('inicio');
+      else if (usuarioAtual.funcao === 'admin') tab('usuarios');
       else if (usuarioAtual.funcao === 'supervisor') tab('supervisao');
       else tab('inicio');
       render();
@@ -1967,25 +2003,28 @@
       mostrarLogin('entrar');
     }
     function labelFuncao(f) {
-      return ({ admin: 'Admin', supervisor: 'Supervisor', vigilante: 'Vigilante', equipe: 'Equipe' })[f] || f;
+      return ({ admin: 'Admin', supervisor: 'Supervisor', vigilante: 'Vigilante', equipe: 'Equipe', dev: 'DEV' })[f] || f;
     }
 
     // DEV MENU
     function abrirDevMenu() {
-      if (devLiberado) {
-        // se manutenção ativa, libera a tela também
+      // logado como cargo DEV → acesso direto ao menu (sem senha extra)
+      if (usuarioAtual && usuarioAtual.funcao === 'dev') {
+        devLiberado = true;
+      }
+      if (devLiberado || (usuarioAtual && usuarioAtual.funcao === 'dev')) {
         const ov = document.getElementById('manutencao-overlay');
         if (ov) ov.classList.add('hidden');
         document.getElementById('drawer-overlay').classList.add('open');
         document.getElementById('drawer-dev').classList.add('open');
         return;
       }
+      // admin/outros: ainda podem liberar com senha mestre DEV
       document.getElementById('dev-pass').value = '';
       document.getElementById('dev-erro').textContent = '';
       const modal = document.getElementById('modal-dev');
       modal.style.zIndex = '400';
       modal.classList.remove('hidden');
-      // garante que o overlay de manutenção não bloqueie cliques no modal
       const ov = document.getElementById('manutencao-overlay');
       if (ov && !ov.classList.contains('hidden')) {
         ov.style.pointerEvents = 'none';
@@ -2036,7 +2075,7 @@
     function podeMenuSup() {
       if (!usuarioAtual) return false;
       const f = usuarioAtual.funcao;
-      return f === 'supervisor' || f === 'admin' || !!devLiberado;
+      return f === 'supervisor' || f === 'admin' || f === 'dev' || !!devLiberado;
     }
 
     function abrirMenuSup() {
@@ -2088,13 +2127,16 @@
       switch (n) {
         case 1: exportar(); break;
         case 2: document.getElementById('import-file').click(); break;
-        case 3: zerarDados(); break;
+        case 3:
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode zerar todos os dados.'); break; }
+          zerarDados(); break;
         case 4:
           DataService.setMode(DataService.mode === 'local' ? 'firebase' : 'local');
           toast('Mode: ' + DataService.mode);
           render();
           break;
         case 11: {
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode ativar manutenção global.'); break; }
           const msg = prompt('Mensagem para os usuários na tela de manutenção:', 'Sistema em manutenção. Voltamos em breve.') 
             || 'Sistema em manutenção. Voltamos em breve.';
           if (!confirm('ATIVAR manutenção agora?\n\nTodos os aparelhos vão reiniciar e ficar bloqueados.')) break;
@@ -2102,6 +2144,7 @@
           break;
         }
         case 12: {
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode desativar manutenção.'); break; }
           if (!confirm('DESATIVAR manutenção agora?\n\nO app será liberado para todos.')) break;
           setManutencao(false, '');
           break;
@@ -2156,6 +2199,7 @@
           break;
         }
         case 18: {
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode apagar todos os backups.'); break; }
           if (!confirm('1/2 — Apagar TODOS os backups do aplicativo (plantões e metadados)?')) break;
           if (!confirm('2/2 — Confirma? Isso remove backups locais e no Firebase.')) break;
           const senha = prompt('Digite a senha DEV para confirmar:');
@@ -2164,6 +2208,7 @@
           break;
         }
         case 19: {
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode zerar plantões de todos.'); break; }
           if (!confirm('1/2 — ZERAR todos os plantões de TODOS os usuários?\nFolhas arquivadas também serão apagadas.')) break;
           if (!confirm('2/2 — Esta ação é irreversível. Continuar?')) break;
           const senha = prompt('Digite a senha DEV para confirmar o zeramento:');
@@ -2237,6 +2282,7 @@
           break;
         }
         case 24: {
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode limpar o localStorage.'); break; }
           if (!confirm('Limpar APENAS o localStorage deste aparelho?\nO Firebase NÃO será apagado.')) break;
           const keys = [];
           for (let i = 0; i < localStorage.length; i++) {
@@ -2799,7 +2845,7 @@
       document.getElementById('pl-horas').value = (hrs % 1 === 0 ? hrs : hrs.toFixed(1)) + ' hrs';
     }
     function podeVerTodosPlantaoes() {
-      return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor');
+      return usuarioAtual && (usuarioAtual.funcao === 'admin' || usuarioAtual.funcao === 'supervisor' || usuarioAtual.funcao === 'dev');
     }
     function plantaoDoUsuario(x) {
       if (!usuarioAtual) return false;
@@ -2989,7 +3035,7 @@
       return `<span class="badge ${map[t]||'blue'}">${t}</span>`;
     }
     function funcaoBadge(f) {
-      const map = { admin: 'purple', supervisor: 'blue', vigilante: 'green', equipe: 'gray' };
+      const map = { admin: 'purple', supervisor: 'blue', vigilante: 'green', equipe: 'gray', dev: 'yellow' };
       return `<span class="badge ${map[f]||'gray'}">${labelFuncao(f)}</span>`;
     }
 
@@ -3080,8 +3126,11 @@
       const u = db.users.find(x => x.id === id || String(x.id) === String(id));
       if (!u) return alert('Usuário não encontrado.');
       const cargo = u.cargoSolicitado || u.funcao || 'vigilante';
-      if (cargo === 'admin' && usuarioAtual && usuarioAtual.funcao !== 'admin' && !devLiberado) {
-        return alert('Só Admin pode aprovar Administrador.');
+      if (cargo === 'admin' && usuarioAtual && usuarioAtual.funcao !== 'admin' && usuarioAtual.funcao !== 'dev' && !devLiberado) {
+        return alert('Só Admin/DEV pode aprovar Administrador.');
+      }
+      if (cargo === 'dev' && usuarioAtual && usuarioAtual.funcao !== 'dev' && !devLiberado) {
+        return alert('Só DEV pode aprovar cargo DEV.');
       }
       u.funcao = cargo;
       u.pendente = false;
@@ -3593,7 +3642,25 @@
       reader.readAsText(file);
     }
 
-    async function salvar() { return await DataService.save('db_v42', db); }
+    async function salvar() {
+      // proteção: nunca sobrescrever nuvem com lista de users vazia
+      try {
+        if (firebaseOk && fbDb && DataService.mode === 'firebase' && (!db.users || !db.users.length)) {
+          const snap = await fbDb.collection('valis').doc('db_v42').get();
+          if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users) && snap.data().data.users.length) {
+            db.users = snap.data().data.users;
+            console.warn('salvar: users local vazio — restaurado da nuvem');
+          }
+        }
+      } catch (e) {}
+      // proteção plantões: se local vazio e existe backup maior, mescla antes de gravar
+      try {
+        if (!(db.plantaoes || []).length) {
+          await tentarRecuperarPlantaoesSilencioso();
+        }
+      } catch (e) {}
+      return await DataService.save('db_v42', db);
+    }
     async function carregar() {
       // tenta firebase primeiro se mode firebase
       // preserva plantões locais antes do merge (evita apagar em atualização)
@@ -3657,8 +3724,12 @@
         localStorage.setItem('valis_ativ_ttl_min', '2');
       }
       limparAtividadesExpiradas();
+      try {
+        const recuperou = await tentarRecuperarPlantaoesSilencioso();
+        if (recuperou) console.warn('Plantões/users recuperados do backup');
+      } catch (e) {}
       await salvar();
-      await backupPlantaoesAuto('boot');
+      try { await backupPlantaoesAuto('boot'); } catch (e) {}
       const tel = document.getElementById('cfg-tel');
       if (tel) tel.value = db.telSup || '';
       if (localStorage.getItem('valis_modo_foco') === '1') document.body.classList.add('modo-foco');
