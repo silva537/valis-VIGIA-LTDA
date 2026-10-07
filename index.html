@@ -167,7 +167,33 @@
     }
     .top .brand { flex: 1; font-weight: 900; font-size: 14px; text-align: center; }
     .top .brand span { display: block; font-size: 10px; font-weight: 500; color: var(--muted); }
-    .top-actions { display: flex; gap: 6px; }
+    .top-actions { display: flex; gap: 6px; align-items: center; }
+    .conn-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #6B7280;
+      box-shadow: none;
+      border: 1px solid rgba(255,255,255,0.15);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background .25s, box-shadow .25s;
+    }
+    .conn-dot.green {
+      background: #22C55E;
+      box-shadow: 0 0 10px rgba(34,197,94,0.75);
+    }
+    .conn-dot.yellow {
+      background: #FACC15;
+      box-shadow: 0 0 10px rgba(250,204,21,0.7);
+      animation: connPulse 1s ease-in-out infinite;
+    }
+    .conn-dot.red {
+      background: #EF4444;
+      box-shadow: 0 0 10px rgba(239,68,68,0.7);
+    }
+    @keyframes connPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(0.92); }
+    }
 
     main { flex: 1; padding: 14px 12px 92px; overflow-y: auto; }
     .tab { display: none; }
@@ -444,6 +470,28 @@
     .modal h3 { font-size: 15px; font-weight: 800; margin-bottom: 14px; }
     .hidden { display: none !important; }
 
+    body.modo-emergencia #tab-plantao,
+    body.modo-emergencia #tab-extrato,
+    body.modo-emergencia #tab-escalas,
+    body.modo-emergencia #tab-postos,
+    body.modo-emergencia #tab-supervisao,
+    body.modo-emergencia #tab-usuarios {
+      /* conteúdo protegido — navegação filtrada no JS também */
+    }
+    body.modo-emergencia .nav button[data-tab="plantao"],
+    body.modo-emergencia .nav button[data-tab="extrato"],
+    body.modo-emergencia .nav button[data-tab="escalas"],
+    body.modo-emergencia .nav button[data-tab="postos"],
+    body.modo-emergencia .nav button[data-tab="supervisao"],
+    body.modo-emergencia .nav button[data-tab="usuarios"],
+    body.modo-emergencia #more-grid button[data-tab="plantao"],
+    body.modo-emergencia #more-grid button[data-tab="extrato"],
+    body.modo-emergencia #more-grid button[data-tab="escalas"],
+    body.modo-emergencia #more-grid button[data-tab="postos"],
+    body.modo-emergencia #more-grid button[data-tab="supervisao"],
+    body.modo-emergencia #more-grid button[data-tab="usuarios"] {
+      display: none !important;
+    }
     body.modo-foco {
       filter: saturate(0.75) brightness(0.82);
     }
@@ -468,14 +516,6 @@
       <p id="manutencao-msg" style="color:var(--muted);font-size:14px;line-height:1.5;margin:12px 0 18px">O aplicativo está temporariamente suspenso pela administração.</p>
       <button class="btn dark" onclick="location.reload()">Tentar novamente</button>
       <button class="btn purple" style="margin-top:8px" onclick="abrirDevMenu()">Acesso DEV</button>
-    </div>
-  </div>
-  <div id="recover-overlay" class="modal-bg hidden" style="z-index:350">
-    <div class="modal" style="text-align:center">
-      <h3>🔄 Reconectando</h3>
-      <p id="recover-msg" style="color:var(--muted);font-size:14px;line-height:1.5;margin:12px 0 18px">O app voltou do segundo plano e precisa atualizar a conexão.</p>
-      <button class="btn green" onclick="recuperarApp(true)">Reiniciar agora</button>
-      <button class="btn dark" style="margin-top:8px" onclick="recuperarApp(false)">Tentar recuperar</button>
     </div>
   </div>
 
@@ -530,38 +570,83 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico • 10 funções</div>
+    <div class="sub">Acesso técnico • organizado por seções · v6.7</div>
     <div class="br-flag-strip"></div>
-    <div class="collapse-box open" id="collapse-dev">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('collapse-dev')">
-        <span>🛠 10 funções DEV<small>Toque para expandir ou minimizar</small></span>
+
+    <div class="collapse-box open" id="dev-sec-users">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-users')">
+        <span>👥 Usuários e acesso<small>Senhas, código, pendentes</small></span>
         <span class="chev">▼</span>
       </button>
-      <div class="collapse-body">
-        <div class="func-list">
-      <button class="func-btn" onclick="devFn(1)"><span class="ico">📤</span><div>Exportar backup<small>JSON completo do sistema</small></div></button>
-      <button class="func-btn" onclick="devFn(2)"><span class="ico">📥</span><div>Importar backup<small>Restaurar dados de arquivo</small></div></button>
-      <button class="func-btn" onclick="devFn(3)"><span class="ico">🗑</span><div>Zerar todos os dados<small>Reset total local</small></div></button>
-      <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar Firebase<small>Mode local ↔ cloud</small></div></button>
-      <button class="func-btn" onclick="devFn(5)"><span class="ico">📋</span><div>Ver logs do sistema<small>Últimas atividades técnicas</small></div></button>
-      <button class="func-btn" onclick="devFn(6)"><span class="ico">💾</span><div>Info de armazenamento<small>Tamanho e chaves salvas</small></div></button>
-      <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências mock</small></div></button>
-      <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
-      <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
-            <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
-      <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Ativar manutenção<small>Suspende o app para todos (Firebase)</small></div></button>
-      <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Desativar manutenção<small>Libera o app para todos</small></div></button>
-      <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado atual no Firebase</small></div></button>
-      <button class="func-btn" onclick="devFn(14)"><span class="ico">🧹</span><div>Limpar últimas atividades<small>Apaga o feed do início (todos)</small></div></button>
-      <button class="func-btn" onclick="devFn(15)"><span class="ico">⏱️</span><div>Tempo do feed de atividades<small>Define quantos minutos ficam visíveis</small></div></button>
-      <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
-      <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
-      <button class="func-btn" onclick="devFn(18)"><span class="ico">🗑</span><div>Apagar todos os backups<small>Plantões + meta de backup (app inteiro)</small></div></button>
-      <button class="func-btn" onclick="devFn(19)"><span class="ico">💥</span><div>Zerar plantões de todos<small>2 etapas + senha DEV</small></div></button>
-      <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
+        <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
+        <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
+        <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
+        <button class="func-btn" onclick="devFn(25)"><span class="ico">🔧</span><div>Reparar usuários<small>Normaliza flags e hashes</small></div></button>
+      </div></div>
     </div>
-      </div>
+
+    <div class="collapse-box" id="dev-sec-manut">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-manut')">
+        <span>🚧 Manutenção e sistema<small>Firebase, diagnóstico, emergência</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Ativar manutenção<small>Suspende o app para todos</small></div></button>
+        <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Desativar manutenção<small>Libera o app para todos</small></div></button>
+        <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado no Firebase</small></div></button>
+        <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar Firebase<small>Mode local ↔ cloud</small></div></button>
+        <button class="func-btn" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sync agora<small>Sobe e baixa dados do Firebase</small></div></button>
+        <button class="func-btn" onclick="devFn(22)"><span class="ico">🟢</span><div>Status da conexão<small>Bolinha + último estado</small></div></button>
+        <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
+        <button class="func-btn" onclick="devFn(23)"><span class="ico">📋</span><div>Copiar diagnóstico<small>Texto para WhatsApp/suporte</small></div></button>
+        <button class="func-btn" onclick="devFn(29)"><span class="ico">🏷️</span><div>Versão do app<small>Changelog VALIS</small></div></button>
+        <button class="func-btn" onclick="devFn(26)"><span class="ico">🚨</span><div>Modo emergência<small>Só login, msgs e ocorrência</small></div></button>
+      </div></div>
     </div>
+
+    <div class="collapse-box" id="dev-sec-backup">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-backup')">
+        <span>💾 Backup e dados<small>Exportar, limpar, zerar</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(1)"><span class="ico">📤</span><div>Exportar backup<small>JSON completo do sistema</small></div></button>
+        <button class="func-btn" onclick="devFn(2)"><span class="ico">📥</span><div>Importar backup<small>Restaurar dados de arquivo</small></div></button>
+        <button class="func-btn" onclick="devFn(18)"><span class="ico">🗑</span><div>Apagar todos os backups<small>Plantões + meta (app inteiro)</small></div></button>
+        <button class="func-btn" onclick="devFn(19)"><span class="ico">💥</span><div>Zerar plantões de todos<small>2 etapas + senha DEV</small></div></button>
+        <button class="func-btn" onclick="devFn(24)"><span class="ico">📱</span><div>Limpar só localStorage<small>Não apaga Firebase</small></div></button>
+        <button class="func-btn" onclick="devFn(3)"><span class="ico">🗑</span><div>Zerar todos os dados<small>Reset total local</small></div></button>
+        <button class="func-btn" onclick="devFn(6)"><span class="ico">💾</span><div>Info de armazenamento<small>Tamanho e chaves salvas</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="dev-sec-feed">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-feed')">
+        <span>📋 Feed e logs<small>Atividades e auditoria</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(5)"><span class="ico">📋</span><div>Ver logs do sistema<small>Últimas atividades técnicas</small></div></button>
+        <button class="func-btn" onclick="devFn(14)"><span class="ico">🧹</span><div>Limpar últimas atividades<small>Apaga o feed do início</small></div></button>
+        <button class="func-btn" onclick="devFn(15)"><span class="ico">⏱️</span><div>Tempo do feed de atividades<small>Minutos visíveis no início</small></div></button>
+        <button class="func-btn" onclick="devFn(28)"><span class="ico">🔎</span><div>Auditoria rápida<small>Users, plantões, inconsistências</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="dev-sec-test">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-test')">
+        <span>🧪 Testes<small>Mock data e avisos</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências</small></div></button>
+        <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
+        <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso Firebase<small>Envia no doc aviso</small></div></button>
+      </div></div>
+    </div>
+
     <button class="btn dark" style="margin-top:16px" onclick="fecharDrawer()">Fechar</button>
   </aside>
 
@@ -576,6 +661,7 @@
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
+        <span id="conn-dot" class="conn-dot green" title="Conexão Firebase: OK — toque para reconectar" onclick="recuperarApp(false)"></span>
         <button class="btn dark sm" onclick="sair()">Sair</button>
       </div>
     </header>
@@ -997,6 +1083,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
+    const APP_VERSION = '6.7.1';
     const SENHA_DEV = (function(){
       const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
@@ -1311,15 +1398,24 @@
           if (snap.exists && snap.data() && snap.data().data) {
             const remote = snap.data().data;
             if (Array.isArray(remote.users)) {
-              db.users = remote.users.map(u => ({
-                ...u,
-                user: String(u.user || '').toLowerCase().trim(),
-                pass: String(u.pass == null ? '' : u.pass),
-                ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
-                pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
-              }));
-              // espelha local
-              localStorage.setItem('valis_db_v42', JSON.stringify({ ...db, users: db.users }));
+              db.users = remote.users.map(u => {
+                const o = {
+                  ...u,
+                  user: String(u.user || '').toLowerCase().trim(),
+                  ativo: u.ativo === true || u.ativo === 'true' || u.ativo === 1,
+                  pendente: u.pendente === true || u.pendente === 'true' || u.pendente === 1
+                };
+                if (o.passHash) delete o.pass;
+                return o;
+              });
+              try {
+                const json = JSON.stringify({ ...db, users: db.users });
+                if (typeof cifrarTexto === 'function') {
+                  cifrarTexto(json).then(c => localStorage.setItem('valis_db_v42', c)).catch(() => localStorage.setItem('valis_db_v42', json));
+                } else {
+                  localStorage.setItem('valis_db_v42', json);
+                }
+              } catch (e) {}
             }
           }
         } catch (e) {
@@ -1381,6 +1477,8 @@
       } else {
         localStorage.removeItem('valis_user_persist');
       }
+      byUser.ultimoLogin = new Date().toISOString();
+      try { await salvar(); } catch (e) {}
       pedirPermissaoNotificacoes();
       entrarApp();
     }
@@ -1580,7 +1678,14 @@
           if (Array.isArray(remote.plantaoes)) {
             db.plantaoes = mergePlantaoes(db.plantaoes || [], remote.plantaoes);
           }
-          try { localStorage.setItem('valis_db_v42', JSON.stringify(db)); } catch (e) {}
+          try {
+            const json = JSON.stringify(db);
+            if (typeof cifrarTexto === 'function') {
+              cifrarTexto(json).then(c => { try { localStorage.setItem('valis_db_v42', c); } catch (e) {} });
+            } else {
+              localStorage.setItem('valis_db_v42', json);
+            }
+          } catch (e) {}
           if (usuarioAtual) render();
         });
       } catch (e) { console.warn(e); }
@@ -1837,6 +1942,16 @@
       el.classList.toggle('open');
     }
 
+    function aplicarModoEmergencia() {
+      const on = document.body.classList.contains('modo-emergencia') || localStorage.getItem('valis_modo_emergencia') === '1';
+      if (on) document.body.classList.add('modo-emergencia');
+      else document.body.classList.remove('modo-emergencia');
+      // esconde abas não essenciais via CSS class on body
+      if (usuarioAtual) {
+        try { aplicarPermissoes(); } catch (e) {}
+      }
+    }
+
     function devFn(n) {
       fecharDrawer();
       switch (n) {
@@ -1927,6 +2042,157 @@
         }
         case 20: {
           abrirModalSenhas();
+          break;
+        }
+        case 21: {
+          (async () => {
+            setConnStatus('yellow', 'Sync forçado...');
+            try {
+              await initFirebase();
+              await ensureFirebaseAuth();
+              await salvar();
+              await carregar();
+              if (usuarioAtual) {
+                try { iniciarListenerDados(); } catch (e) {}
+                try { render(); } catch (e) {}
+              }
+              setConnStatus(firebaseOk ? 'green' : 'red');
+              toast(firebaseOk ? 'Sync concluído' : 'Sync local (FB offline)');
+            } catch (e) {
+              setConnStatus('red');
+              alert('Falha no sync: ' + (e.message || e));
+            }
+          })();
+          break;
+        }
+        case 22: {
+          const ok = firebaseOk && fbDb;
+          const mode = DataService.mode || '—';
+          const uid = (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser)
+            ? firebase.auth().currentUser.uid : '—';
+          setConnStatus(ok ? 'green' : 'red');
+          alert(
+            'Status da conexão\n\n' +
+            'Firebase SDK: ' + (ok ? 'OK' : 'OFF') + '\n' +
+            'Mode: ' + mode + '\n' +
+            'Auth UID: ' + uid + '\n' +
+            'Online: ' + (navigator.onLine ? 'sim' : 'não') + '\n' +
+            'Bolinha: ' + (ok ? 'verde' : 'vermelha')
+          );
+          break;
+        }
+        case 23: {
+          const users = (db.users || []).length;
+          const pl = (db.plantaoes || []).length;
+          const txt = [
+            'VALIS VIGIA — Diagnóstico',
+            'Versão: ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—'),
+            'Data: ' + new Date().toLocaleString('pt-BR'),
+            'Mode: ' + (DataService.mode || '—'),
+            'Firebase: ' + (firebaseOk ? 'OK' : 'OFF'),
+            'Online: ' + (navigator.onLine ? 'sim' : 'não'),
+            'Users: ' + users,
+            'Plantões: ' + pl,
+            'Postos: ' + (db.postos || []).length,
+            'Msgs: ' + (db.msg || []).length,
+            'Ocorrências: ' + (db.oco || []).length,
+            'Sessão: ' + (usuarioAtual ? (usuarioAtual.user + ' / ' + usuarioAtual.funcao) : 'ninguém')
+          ].join('\n');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt).then(() => toast('Diagnóstico copiado')).catch(() => alert(txt));
+          } else {
+            prompt('Copie o diagnóstico:', txt);
+          }
+          break;
+        }
+        case 24: {
+          if (!confirm('Limpar APENAS o localStorage deste aparelho?\nO Firebase NÃO será apagado.')) break;
+          const keys = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('valis_')) keys.push(k);
+          }
+          keys.forEach(k => localStorage.removeItem(k));
+          toast('Local limpo (' + keys.length + ' chaves). Recarregando...');
+          setTimeout(() => location.reload(), 600);
+          break;
+        }
+        case 25: {
+          (async () => {
+            let n = 0;
+            for (const u of (db.users || [])) {
+              u.user = String(u.user || '').toLowerCase().trim();
+              u.ativo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
+              u.pendente = u.pendente === true || u.pendente === 'true' || u.pendente === 1;
+              if (u.pass != null && String(u.pass).length && !u.passHash) {
+                await garantirSenhaHasheada(u);
+              }
+              n++;
+            }
+            await salvar();
+            toast('Reparados ' + n + ' usuário(s)');
+            render();
+          })();
+          break;
+        }
+        case 26: {
+          const on = document.body.classList.toggle('modo-emergencia');
+          localStorage.setItem('valis_modo_emergencia', on ? '1' : '0');
+          aplicarModoEmergencia();
+          toast(on ? 'Modo emergência ON' : 'Modo emergência OFF');
+          break;
+        }
+        case 27: {
+          (async () => {
+            const t = prompt('Texto do aviso de teste:', 'Teste VALIS — ' + new Date().toLocaleTimeString('pt-BR'));
+            if (!t) return;
+            if (!firebaseOk || !fbDb) { alert('Firebase offline'); return; }
+            try {
+              await fbDb.collection('valis').doc('aviso').set({
+                texto: t,
+                destino: 'Todos',
+                de: 'DEV',
+                em: new Date().toISOString()
+              }, { merge: true });
+              toast('Aviso enviado ao Firebase');
+              try { notificarApp('VALIS teste', t); } catch (e) {}
+            } catch (e) {
+              alert('Falha: ' + (e.message || e));
+            }
+          })();
+          break;
+        }
+        case 28: {
+          const users = db.users || [];
+          const semHash = users.filter(u => !u.passHash && (u.pass == null || u.pass === '')).length;
+          const pend = users.filter(u => u.pendente).length;
+          const inat = users.filter(u => u.ativo === false).length;
+          const pl = db.plantaoes || [];
+          const semUser = pl.filter(p => !p.userLogin && !p.userId).length;
+          alert(
+            'Auditoria rápida\n\n' +
+            'Usuários: ' + users.length + ' (pendentes: ' + pend + ', inativos: ' + inat + ')\n' +
+            'Sem senha hash: ' + semHash + '\n' +
+            'Plantões: ' + pl.length + ' (sem dono: ' + semUser + ')\n' +
+            'Postos: ' + (db.postos || []).length + '\n' +
+            'Folhas arquivadas: ' + (db.folhasArquivadas || []).length + '\n' +
+            'Msgs: ' + (db.msg || []).length + '\n' +
+            'Ocorrências: ' + (db.oco || []).length
+          );
+          break;
+        }
+        case 29: {
+          alert(
+            'VALIS VIGIA LTDA\nVersão ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '6.7') + '\n\n' +
+            'Changelog recente:\n' +
+            '• Menu DEV organizado por seções\n' +
+            '• Sync forçado, diagnóstico copiável\n' +
+            '• Limpar só local, reparar users\n' +
+            '• Modo emergência, auditoria rápida\n' +
+            '• Bolinha de conexão no topo\n' +
+            '• Auth Firebase + regras\n' +
+            '• Extrato por usuário, backup plantões'
+          );
           break;
         }
         case 5:
@@ -2216,7 +2482,9 @@
       toast('CSV exportado');
     }
     function moneyBR(v) {
-      return 'R$ ' + (Number(v) || 0).toFixed(2).replace('.', ',');
+      const n = Number(v);
+      const x = (isFinite(n) ? n : 0);
+      return 'R$ ' + x.toFixed(2).replace('.', ',');
     }
 
     function tab(name, btn) {
@@ -2385,7 +2653,8 @@
       u.cargoSolicitado = null;
       u.ativo = true;
       u.user = String(u.user || '').toLowerCase().trim();
-      u.pass = String(u.pass == null ? '' : u.pass);
+      // não mexer em pass/passHash — senão quebra login após aprovação
+      if (u.passHash) delete u.pass;
       addAtividade('Cadastro aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
       const ok = await salvar();
       // força regravação explícita dos users no Firebase
@@ -2885,7 +3154,7 @@
       reader.readAsText(file);
     }
 
-        async function salvar() { return await DataService.save('db_v42', db); }
+    async function salvar() { return await DataService.save('db_v42', db); }
     async function carregar() {
       // tenta firebase primeiro se mode firebase
       // preserva plantões locais antes do merge (evita apagar em atualização)
@@ -2957,7 +3226,12 @@
         const sess = sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist');
         if (sess) {
           const s = JSON.parse(sess);
-          const u = db.users.find(x => x.user === s.user && x.ativo === true && !x.pendente);
+          const u = db.users.find(x => {
+            if (String(x.user || '').toLowerCase() !== String(s.user || '').toLowerCase()) return false;
+            const ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1;
+            const pend = x.pendente === true || x.pendente === 'true' || x.pendente === 1;
+            return ativo && !pend;
+          });
           if (u) {
             usuarioAtual = u;
             sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
@@ -3319,15 +3593,31 @@
     let _recovering = false;
     let _lastHiddenAt = 0;
 
+    function setConnStatus(estado, titulo) {
+      // estado: 'green' | 'yellow' | 'red'
+      const d = document.getElementById('conn-dot');
+      if (!d) return;
+      d.classList.remove('green', 'yellow', 'red');
+      d.classList.add(estado || 'yellow');
+      const labels = {
+        green: 'Conexão Firebase: OK',
+        yellow: 'Reconectando...',
+        red: 'Sem conexão — toque para tentar de novo'
+      };
+      d.title = titulo || labels[estado] || 'Status da conexão';
+      const st = document.getElementById('status-fb');
+      if (st) {
+        if (estado === 'green') st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Local';
+        else if (estado === 'yellow') st.textContent = 'Reconectando...';
+        else st.textContent = 'Offline';
+      }
+    }
     function mostrarRecuperacao(msg) {
-      const ov = document.getElementById('recover-overlay');
-      const m = document.getElementById('recover-msg');
-      if (m && msg) m.textContent = msg;
-      if (ov) ov.classList.remove('hidden');
+      // não usa mais tela cheia — só bolinha amarela
+      setConnStatus('yellow', msg || 'Reconectando...');
     }
     function esconderRecuperacao() {
-      const ov = document.getElementById('recover-overlay');
-      if (ov) ov.classList.add('hidden');
+      setConnStatus(firebaseOk ? 'green' : 'red');
     }
 
     async function recuperarApp(forcarReload) {
@@ -3335,38 +3625,35 @@
       _recovering = true;
       try {
         if (forcarReload) {
-          // limpa flags de sessão curta e recarrega limpo
           try { sessionStorage.setItem('valis_soft_recover', '1'); } catch (e) {}
           location.reload();
           return;
         }
-        mostrarRecuperacao('Reconectando Firebase e sincronizando dados...');
+        setConnStatus('yellow', 'Reconectando Firebase...');
+        try { if (typeof _dadosUnsub === 'function') _dadosUnsub(); } catch (e) {}
+        _dadosUnsub = null;
         firebaseOk = false;
         fbApp = null;
         fbDb = null;
-        _dadosUnsub = null;
         try { await initFirebase(); } catch (e) { console.warn(e); }
         try { await ensureFirebaseAuth(); } catch (e) { console.warn(e); }
         try {
           await carregar();
         } catch (e) {
           console.warn(e);
-          // se não recuperou, força reload
-          location.reload();
+          setConnStatus('red', 'Falha ao reconectar — toque para tentar');
+          _recovering = false;
           return;
         }
         if (usuarioAtual) {
           try { iniciarListenerDados(); } catch (e) {}
           try { render(); } catch (e) {}
         }
-        const st = document.getElementById('status-fb');
-        if (st) st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Offline';
         _erroCount = 0;
-        esconderRecuperacao();
-        toast('App reconectado');
+        setConnStatus(firebaseOk ? 'green' : 'red');
       } catch (e) {
         console.warn(e);
-        location.reload();
+        setConnStatus('red', 'Erro de conexão — toque para tentar');
       } finally {
         _recovering = false;
       }
@@ -3382,10 +3669,9 @@
       _erroCount++;
       const msg = (ev && ev.message) || '';
       if (_erroCount >= 3 || precisaRecuperarPorErro(msg)) {
-        mostrarRecuperacao('Foi detectado um erro. Toque em Reiniciar ou aguarde a recuperação automática.');
-        // auto-reload após 2s se muitos erros
+        setConnStatus('yellow', 'Problema detectado — reconectando');
         if (_erroCount >= 5) {
-          setTimeout(function() { location.reload(); }, 1500);
+          setTimeout(function() { recuperarApp(false); }, 800);
         }
       }
     });
@@ -3394,7 +3680,7 @@
       _erroCount++;
       const msg = (ev && ev.reason && (ev.reason.message || ev.reason)) || '';
       if (_erroCount >= 3 || precisaRecuperarPorErro(msg)) {
-        mostrarRecuperacao('Falha de conexão/dados. Recuperando...');
+        setConnStatus('yellow', 'Falha de conexão — reconectando');
         setTimeout(function() { recuperarApp(false); }, 600);
       }
     });
@@ -3409,7 +3695,7 @@
         const away = _lastHiddenAt ? (Date.now() - _lastHiddenAt) : 0;
         // se ficou mais de 15s em segundo plano, reconecta
         if (away > 15000) {
-          mostrarRecuperacao('App ficou em segundo plano. Reconectando...');
+          setConnStatus('yellow', 'Voltando do segundo plano...');
           setTimeout(function() { recuperarApp(false); }, 300);
         } else {
           // ping leve
@@ -3431,8 +3717,8 @@
     // iOS / WebView bfcache
     window.addEventListener('pageshow', function(ev) {
       if (ev.persisted) {
-        mostrarRecuperacao('Restaurando sessão...');
-        setTimeout(function() { recuperarApp(true); }, 200);
+        setConnStatus('yellow', 'Restaurando sessão...');
+        setTimeout(function() { recuperarApp(false); }, 200);
       }
     });
 
@@ -3451,6 +3737,8 @@
       }
       const st = document.getElementById('status-fb');
       if (st) st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Offline';
+      setConnStatus(firebaseOk ? 'green' : 'red');
+      try { if (localStorage.getItem('valis_modo_emergencia') === '1') { document.body.classList.add('modo-emergencia'); aplicarModoEmergencia(); } } catch (e) {}
       setInterval(() => {
         if (!db || !db.atividades) return;
         const antes = db.atividades.length;
@@ -3477,7 +3765,7 @@
         try {
           await fbDb.collection('valis').doc('db_v42').get();
         } catch (e) {
-          mostrarRecuperacao('Conexão com o banco falhou. Recuperando...');
+          setConnStatus('yellow', 'Firebase instável — reconectando');
           recuperarApp(false);
         }
       }, 60000);
