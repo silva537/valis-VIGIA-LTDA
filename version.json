@@ -1,5 +1,5 @@
 {
-  "v": "6.10.2",
+  "v": "6.10.3",
   "forceReload": false,
-  "msg": "Cadastro por transação Firebase + lista de aprovação ampliada"
+  "msg": "Botões aprovar/recusar/excluir/reativar corrigidos"
 }

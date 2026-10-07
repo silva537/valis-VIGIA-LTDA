@@ -1182,7 +1182,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.10.2';
+    const APP_VERSION = '6.10.3';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2704,13 +2704,13 @@
             const box = document.getElementById('lista-users');
             if (box) {
               const extra = pend.map(u => {
-                const idAttr = JSON.stringify(String(u.id));
+                const idAttr = String(u.id).replace(/'/g, '');
                 return '<div class="item" style="border-color:var(--yellow)">' +
                   '<b>' + (u.nome || '') + '</b> <span class="badge yellow">Pendente' + (u.cargoSolicitado ? ': ' + u.cargoSolicitado : '') + '</span>' +
                   '<div class="meta">@' + (u.user || '') + ' · ' + (u.criadoEm ? new Date(u.criadoEm).toLocaleString('pt-BR') : '') + '</div>' +
                   '<div class="actions">' +
-                  '<button class="btn green sm" onclick="aprovarCargo(' + idAttr + ')">Aprovar</button>' +
-                  '<button class="btn dark sm" onclick="recusarCargo(' + idAttr + ')">Recusar</button>' +
+                  '<button type="button" class="btn green sm" onclick="aprovarCargo(\'' + idAttr + '\')">Aprovar</button>' +
+                  '<button type="button" class="btn dark sm" onclick="recusarCargo(\'' + idAttr + '\')">Recusar</button>' +
                   '</div></div>';
               }).join('');
               box.insertAdjacentHTML('afterbegin',
@@ -3100,8 +3100,8 @@
             `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.cargoSolicitado || u.funcao)}
               <div class="meta">@${u.user}</div>
               <div class="actions">
-                <button class="btn green sm" onclick="aprovarCargo('${u.id}')">Aprovar</button>
-                <button class="btn red sm" onclick="recusarCargo('${u.id}')">Recusar</button>
+                <button type="button" class="btn green sm" onclick="aprovarCargo('${String(u.id)}')">Aprovar</button>
+                <button type="button" class="btn dark sm" onclick="recusarCargo('${String(u.id)}')">Recusar</button>
               </div>
             </div>`
           ).join('');
@@ -3674,10 +3674,19 @@
       render();
       toast('Removido');
     }
+    function acharUsuarioPorId(id) {
+      const sid = String(id == null ? '' : id);
+      return (db.users || []).find(function(x) {
+        return String(x.id) === sid || String(x.user || '').toLowerCase() === sid.toLowerCase();
+      });
+    }
+
     async function aprovarCargo(id) {
-      if (!podeGerenciarUsers() && !devLiberado) return;
-      const u = db.users.find(x => x.id === id || String(x.id) === String(id));
-      if (!u) return alert('Usuário não encontrado.');
+      if (!podeGerenciarUsers() && !devLiberado) {
+        return alert('Sem permissão para aprovar.');
+      }
+      const u = acharUsuarioPorId(id);
+      if (!u) return alert('Usuário não encontrado (id: ' + id + ').');
       const cargo = u.cargoSolicitado || u.funcao || 'vigilante';
       if (cargo === 'admin' && usuarioAtual && usuarioAtual.funcao !== 'admin' && usuarioAtual.funcao !== 'dev' && !devLiberado) {
         return alert('Só Admin/DEV pode aprovar Administrador.');
@@ -3709,21 +3718,31 @@
       toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado e salvo no Firebase');
     }
     async function recusarCargo(id) {
-      if (!podeGerenciarUsers()) return;
-      const u = db.users.find(x => String(x.id) === String(id));
-      if (!u) return alert('Usuário não encontrado.');
+      if (!podeGerenciarUsers()) return alert('Sem permissão.');
+      const u = acharUsuarioPorId(id);
+      if (!u) return alert('Usuário não encontrado (id: ' + id + ').');
       if (!confirm('Recusar e manter conta inativa de ' + u.nome + '?')) return;
       u.pendente = false;
       u.cargoSolicitado = null;
       u.ativo = false;
       addAtividade('Cadastro recusado: ' + u.nome, 'admin');
-      await salvar();
+      await salvarUsersSeguro();
+      try {
+        if (firebaseOk && fbDb) {
+          const ref = fbDb.collection('valis').doc('cadastros_pendentes');
+          const snap = await ref.get();
+          if (snap.exists && Array.isArray((snap.data() || {}).items)) {
+            const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
+            await ref.set({ items: rest, updatedAt: new Date().toISOString() });
+          }
+        }
+      } catch (e) {}
       render();
       toast('Cadastro recusado');
     }
     async function alterarFuncaoUser(id, funcao) {
       if (!funcao || !podeGerenciarUsers()) return;
-      const u = db.users.find(x => String(x.id) === String(id));
+      const u = acharUsuarioPorId(id);
       if (!u || u.user === 'admin' || u.user === 'dev') return;
       if (funcao === 'admin' && usuarioAtual.funcao !== 'admin') {
         alert('Só Admin pode promover a Administrador.');
@@ -3739,24 +3758,34 @@
       toast('Cargo atualizado');
     }
     async function desativarUser(id) {
-      if (!podeGerenciarUsers()) return;
-      const u = db.users.find(x => String(x.id) === String(id));
+      if (!podeGerenciarUsers()) return alert('Sem permissão.');
+      const u = acharUsuarioPorId(id);
       if (!u || u.user === 'admin' || u.user === 'dev') return alert('Não permitido.');
-      u.ativo = !u.ativo;
-      await salvar();
+      u.ativo = !(u.ativo === true || u.ativo === 'true' || u.ativo === 1);
+      await salvarUsersSeguro();
       render();
       toast(u.ativo ? 'Reativado' : 'Desativado');
     }
     async function excluirUser(id) {
-      if (!podeGerenciarUsers()) return;
-      const u = db.users.find(x => x.id === id);
-      if (!u) return;
-      if (u.user === 'admin') return alert('Não é possível excluir o admin principal.');
-      if (usuarioAtual && u.id === usuarioAtual.id) return alert('Você não pode excluir o próprio perfil logado.');
+      if (!podeGerenciarUsers()) return alert('Sem permissão.');
+      const u = acharUsuarioPorId(id);
+      if (!u) return alert('Usuário não encontrado.');
+      if (u.user === 'admin' || u.user === 'dev') return alert('Não é possível excluir admin/dev.');
+      if (usuarioAtual && String(u.id) === String(usuarioAtual.id)) return alert('Você não pode excluir o próprio perfil logado.');
       if (!confirm('Excluir definitivamente o perfil de ' + u.nome + '?')) return;
-      db.users = db.users.filter(x => x.id !== id);
+      db.users = db.users.filter(x => String(x.id) !== String(u.id));
       addAtividade('Usuário excluído: ' + u.nome + ' (@' + u.user + ')');
-      await salvar();
+      await salvarUsersSeguro();
+      try {
+        if (firebaseOk && fbDb) {
+          const ref = fbDb.collection('valis').doc('cadastros_pendentes');
+          const snap = await ref.get();
+          if (snap.exists && Array.isArray((snap.data() || {}).items)) {
+            const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
+            await ref.set({ items: rest, updatedAt: new Date().toISOString() });
+          }
+        }
+      } catch (e) {}
       render();
       toast('Perfil excluído');
     }
@@ -3858,13 +3887,14 @@
             const inat = u.ativo===false ? ' <span class="badge red">Inativo</span>' : '';
             let actions = '';
             if (podeGerenciarUsers() && u.user !== 'admin' && u.user !== 'dev') {
-              const idAttr = JSON.stringify(String(u.id));
+              const idAttr = String(u.id).replace(/'/g, '');
               const mostrarAprovar = precisaAprovacaoUser(u);
+              const isAtivo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
               actions = `<div class="actions">
-                <button class="btn dark sm" onclick="desativarUser(${idAttr})">${u.ativo===false?'Reativar':'Desativar'}</button>
-                <button class="btn red sm" onclick="excluirUser(${idAttr})">Excluir</button>
-                ${mostrarAprovar ? `<button class="btn green sm" onclick="aprovarCargo(${idAttr})">Aprovar</button><button class="btn dark sm" onclick="recusarCargo(${idAttr})">Recusar</button>` : ''}
-                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser(${idAttr}, this.value)">
+                <button type="button" class="btn dark sm" onclick="desativarUser('${idAttr}')">${isAtivo ? 'Desativar' : 'Reativar'}</button>
+                <button type="button" class="btn red sm" onclick="excluirUser('${idAttr}')">Excluir</button>
+                ${mostrarAprovar ? `<button type="button" class="btn green sm" onclick="aprovarCargo('${idAttr}')">Aprovar</button><button type="button" class="btn dark sm" onclick="recusarCargo('${idAttr}')">Recusar</button>` : ''}
+                <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser('${idAttr}', this.value)">
                   <option value="">Cargo...</option>
                   <option value="vigilante">Vigilante</option>
                   <option value="equipe">Equipe</option>
@@ -3903,17 +3933,17 @@
         const boxP = document.getElementById('painel-pendentes');
         if (cardP && boxP) {
           if (podeGerenciarUsers()) {
-            const pendList = (db.users || []).filter(isPendenteUser);
+            const pendList = (db.users || []).filter(function(u) { return precisaAprovacaoUser(u); });
             cardP.style.display = pendList.length ? 'block' : 'none';
             boxP.innerHTML = pendList.length
               ? pendList.map(function(u) {
-                  const idAttr = JSON.stringify(String(u.id));
+                  const idAttr = String(u.id).replace(/'/g, '');
                   return '<div class="item"><b>' + (u.nome || '') + '</b> ' +
                     (u.cargoSolicitado ? '<span class="badge yellow">' + u.cargoSolicitado + '</span>' : '') +
                     '<div class="meta">@' + (u.user || '') + '</div>' +
                     '<div class="actions">' +
-                    '<button class="btn green sm" onclick="aprovarCargo(' + idAttr + ')">Aprovar</button>' +
-                    '<button class="btn dark sm" onclick="recusarCargo(' + idAttr + ')">Recusar</button>' +
+                    '<button type="button" class="btn green sm" onclick="aprovarCargo(\'' + idAttr + '\')">Aprovar</button>' +
+                    '<button type="button" class="btn dark sm" onclick="recusarCargo(\'' + idAttr + '\')">Recusar</button>' +
                     '</div></div>';
                 }).join('')
               : '<div class="empty">Nenhum pendente</div>';
