@@ -1182,7 +1182,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.10.1';
+    const APP_VERSION = '6.10.2';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1679,6 +1679,61 @@
     }
 
     /** Grava users lendo a nuvem primeiro (evita apagar cadastro pendente de outro aparelho) */
+    async function gravarUsuarioNaNuvemTransacao(userObj) {
+      if (!userObj) return false;
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb || !firebase.auth().currentUser) {
+          // tenta auth de novo
+          await ensureFirebaseAuth();
+        }
+        if (!firebaseOk || !fbDb) return false;
+        const ref = fbDb.collection('valis').doc('db_v42');
+        await fbDb.runTransaction(async function(tx) {
+          const doc = await tx.get(ref);
+          let data = {
+            users: [], postos: [], esc: [], oco: [], msg: [],
+            telSup: '', atividades: [], plantaoes: [], folhasArquivadas: []
+          };
+          if (doc.exists && doc.data() && doc.data().data) {
+            data = Object.assign(data, doc.data().data);
+          }
+          data.users = mergeUsers(data.users || [], [userObj]);
+          // garante flags do novo
+          data.users = (data.users || []).map(function(u) {
+            if (String(u.user || '').toLowerCase() === String(userObj.user || '').toLowerCase()) {
+              return Object.assign({}, u, {
+                pendente: true,
+                ativo: false,
+                passHash: userObj.passHash || u.passHash,
+                passSalt: userObj.passSalt || u.passSalt,
+                nome: userObj.nome || u.nome,
+                cargoSolicitado: userObj.cargoSolicitado || u.cargoSolicitado,
+                criadoEm: userObj.criadoEm || u.criadoEm
+              });
+            }
+            return u;
+          });
+          tx.set(ref, { data: data, updatedAt: new Date().toISOString(), sec: 1 }, { merge: true });
+        });
+        // espelho dedicado
+        try { await pushCadastroPendenteNuvem(userObj); } catch (e) {}
+        // atualiza db local com o que a nuvem tem
+        try {
+          const snap = await ref.get();
+          if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
+            db.users = mergeUsers(db.users || [], snap.data().data.users);
+          }
+        } catch (e) {}
+        return true;
+      } catch (e) {
+        console.warn('gravarUsuarioNaNuvemTransacao:', e);
+        if (window.ValisDevLog) ValisDevLog.add('cadastro_tx_fail', String(e && e.message || e));
+        return false;
+      }
+    }
+
     async function pushCadastroPendenteNuvem(userObj) {
       if (!userObj) return false;
       try {
@@ -1859,7 +1914,23 @@
       const ativo = byUser.ativo === true || byUser.ativo === 'true' || byUser.ativo === 1;
       const pend = byUser.pendente === true || byUser.pendente === 'true' || byUser.pendente === 1;
       if (pend || !ativo) {
-        return msgLogin('Cadastro ainda pendente ou inativo. Peça aprovação ao Admin/DEV.');
+        // última chance: nuvem pode ter aprovado agora
+        try {
+          await sincronizarUsersDoFirebase();
+          try { await puxarCadastrosPendentesNuvem(); } catch (e2) {}
+          byUser = (db.users || []).find(u => String(u.user || '').toLowerCase().trim() === user) || byUser;
+          const p2 = byUser.pendente === true || byUser.pendente === 'true' || byUser.pendente === 1;
+          const a2 = byUser.ativo === true || byUser.ativo === 'true' || byUser.ativo === 1;
+          if (!p2 && a2) {
+            // aprovado na nuvem — segue login
+          } else {
+            return msgLogin(p2
+              ? 'Cadastro pendente de aprovação do Admin/DEV.'
+              : 'Conta inativa. Peça reativação ao Admin/DEV.');
+          }
+        } catch (e) {
+          return msgLogin('Cadastro ainda pendente ou inativo. Peça aprovação ao Admin/DEV.');
+        }
       }
 
       // Autentica no Firebase Auth (necessário para as regras do Firestore)
@@ -1929,21 +2000,22 @@
       });
       addAtividade('Cadastro pendente: ' + nome + ' solicitou ' + cargoSolicitado, 'admin');
       const novoUser = db.users.find(u => String(u.user || '').toLowerCase() === user);
-      const ok = await salvarUsersSeguro();
-      let okPend = false;
-      if (novoUser) {
-        okPend = await pushCadastroPendenteNuvem(novoUser);
-      }
-      // confirma se chegou na nuvem
+      // 1) transação na nuvem (fonte da verdade entre aparelhos)
       let confirmado = false;
-      try {
-        if (firebaseOk && fbDb) {
+      if (novoUser) {
+        confirmado = await gravarUsuarioNaNuvemTransacao(novoUser);
+      }
+      // 2) fallback merge local+nuvem
+      const ok = await salvarUsersSeguro();
+      if (!confirmado && novoUser) {
+        try { await pushCadastroPendenteNuvem(novoUser); } catch (e) {}
+        try {
           const snap = await fbDb.collection('valis').doc('db_v42').get();
           const users = snap.exists && snap.data() && snap.data().data ? (snap.data().data.users || []) : [];
           confirmado = users.some(u => String(u.user || '').toLowerCase() === user);
-        }
-      } catch (e) {}
-      if (window.ValisDevLog) ValisDevLog.add('cadastro_pendente', { user: user, ok: ok !== false, okPend: okPend, confirmado: confirmado });
+        } catch (e) {}
+      }
+      if (window.ValisDevLog) ValisDevLog.add('cadastro_pendente', { user: user, ok: ok !== false, confirmado: confirmado });
       document.getElementById('reg-nome').value = '';
       document.getElementById('reg-user').value = '';
       document.getElementById('reg-pass').value = '';
@@ -2163,6 +2235,16 @@
     function isPendenteUser(u) {
       if (!u) return false;
       return u.pendente === true || u.pendente === 'true' || u.pendente === 1 || u.pendente === '1';
+    }
+    function precisaAprovacaoUser(u) {
+      if (!u) return false;
+      const user = String(u.user || '').toLowerCase();
+      if (user === 'admin' || user === 'dev') return false;
+      if (isPendenteUser(u)) return true;
+      // inativo também pode ser cadastro aguardando (mensagem de login mistura os dois)
+      const ativo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
+      if (!ativo) return true;
+      return false;
     }
     async function garantirAdmin() {
       if (!Array.isArray(db.users)) db.users = [];
@@ -2600,13 +2682,22 @@
               await initFirebase();
               await ensureFirebaseAuth();
               await sincronizarUsersDoFirebase();
-            } catch (e) {}
-            const pend = (db.users || []).filter(u => isPendenteUser(u));
-            // abre lista Equipe e destaca pendentes
+              try { await puxarCadastrosPendentesNuvem(); } catch (e) {}
+              // leitura direta do documento
+              if (fbDb) {
+                const snap = await fbDb.collection('valis').doc('db_v42').get();
+                if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
+                  db.users = mergeUsers(db.users || [], snap.data().data.users);
+                }
+              }
+            } catch (e) { console.warn(e); }
+            const pend = (db.users || []).filter(u => precisaAprovacaoUser(u));
             tab('usuarios');
             render();
             if (!pend.length) {
-              alert('Nenhum cadastro pendente no momento.\n\nSe alguém acabou de se cadastrar, aguarde 2s e use de novo "Cadastros pendentes".');
+              const total = (db.users || []).length;
+              const nomes = (db.users || []).map(u => (u.user || '') + (u.ativo === false ? ' (inativo)' : '') + (isPendenteUser(u) ? ' (pend)' : '')).join(', ');
+              alert('Nenhum cadastro pendente na nuvem.\n\nUsuários na base: ' + total + (total ? '\n' + nomes : '') + '\n\nSe o vigilante ainda vê "pendente", peça para cadastrar de novo COM INTERNET (versão 6.10.2+).');
               return;
             }
             // painel rápido com aprovar/recusar (DEV)
@@ -3768,7 +3859,7 @@
             let actions = '';
             if (podeGerenciarUsers() && u.user !== 'admin' && u.user !== 'dev') {
               const idAttr = JSON.stringify(String(u.id));
-              const mostrarAprovar = isPendenteUser(u) || u.ativo === false;
+              const mostrarAprovar = precisaAprovacaoUser(u);
               actions = `<div class="actions">
                 <button class="btn dark sm" onclick="desativarUser(${idAttr})">${u.ativo===false?'Reativar':'Desativar'}</button>
                 <button class="btn red sm" onclick="excluirUser(${idAttr})">Excluir</button>
@@ -3789,11 +3880,11 @@
       const listaUsers = document.getElementById('lista-users');
       if (listaUsers) {
         const ordenados = (db.users || []).slice().sort(function(a, b) {
-          const ap = isPendenteUser(a) ? 0 : 1;
-          const bp = isPendenteUser(b) ? 0 : 1;
+          const ap = precisaAprovacaoUser(a) ? 0 : 1;
+          const bp = precisaAprovacaoUser(b) ? 0 : 1;
           return ap - bp;
         });
-        const pendQtd = ordenados.filter(isPendenteUser).length;
+        const pendQtd = ordenados.filter(precisaAprovacaoUser).length;
         listaUsers.innerHTML =
           (pendQtd ? '<div class="item" style="border-color:var(--yellow)"><b>⏳ ' + pendQtd + ' cadastro(s) aguardando aprovação</b><div class="meta">Atualize a lista se alguém acabou de se cadastrar</div><button class="btn dark sm" style="margin-top:8px" onclick="sincronizarUsersDoFirebase().then(function(){render();toast(\'Lista atualizada\')})">🔄 Atualizar lista</button></div>' : '')
           + userHtml(ordenados);

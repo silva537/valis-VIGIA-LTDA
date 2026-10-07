@@ -1,5 +1,5 @@
 {
-  "v": "6.10.1",
+  "v": "6.10.2",
   "forceReload": false,
-  "msg": "Cadastro cross-device — merge + cadastros_pendentes"
+  "msg": "Cadastro por transação Firebase + lista de aprovação ampliada"
 }
