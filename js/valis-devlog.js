@@ -36,6 +36,7 @@
       const arr = read();
       arr.unshift(entry);
       write(arr);
+      // espelha no Firebase se disponível (best-effort)
       try {
         if (global.firebaseOk && global.fbDb && global.DataService && global.DataService.mode === 'firebase') {
           global.fbDb.collection('valis').doc('dev_log').set({
