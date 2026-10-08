@@ -368,6 +368,42 @@
       transition: background .15s, color .15s;
     }
     .nav button span { font-size: 18px; line-height: 1.15; }
+    .nav button { position: relative; }
+    .nav-badge, .msg-badge {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 16px;
+      text-align: center;
+      box-shadow: 0 0 0 2px rgba(2,8,20,0.9);
+      pointer-events: none;
+    }
+    .msg-badge-inline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      margin-left: 6px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+    .btn-msg-wrap { position: relative; display: block; width: 100%; }
+    .btn-msg-wrap .msg-badge { top: 4px; right: 8px; }
+
     .nav button.active {
       color: #fff;
       background: linear-gradient(135deg, rgba(0,156,59,0.9), rgba(0,39,118,0.85));
@@ -871,6 +907,7 @@
       <div class="collapse-body"><div class="func-list">
         <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências</small></div></button>
         <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
+        <button class="func-btn" onclick="devFn(34)"><span class="ico">⏱️</span><div>Tempo das notificações<small>Duração global (todos os aparelhos)</small></div></button>
         <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso Firebase<small>Envia no doc aviso</small></div></button>
       </div></div>
     </div>
@@ -1041,7 +1078,7 @@
           </div>
           <div class="btn-row" style="margin-top:8px">
             <button class="btn dark" onclick="tab('postos')">📍 Postos</button>
-            <button class="btn purple" onclick="tab('mensagens')">✉ Mensagem</button>
+            <div class="btn-msg-wrap"><button class="btn purple" id="btn-msg-rapido" onclick="tab('mensagens')" style="width:100%">✉ Mensagem</button><span class="msg-badge hidden" id="badge-msg-rapido">0</span></div>
           </div>
         </div>
         <div class="card">
@@ -1454,7 +1491,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.4';
+    const APP_VERSION = '6.12.5';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1878,13 +1915,23 @@
       if (m) m.classList.add('hidden');
     }
 
+    function getNotifDurMs() {
+      try {
+        var c = window.__valisConfigApp || {};
+        var sec = parseInt(c.notifDurSec, 10);
+        if (isNaN(sec) || sec < 3) sec = 10;
+        if (sec > 120) sec = 120;
+        return sec * 1000;
+      } catch (e) { return 10000; }
+    }
     function toast(msg) {
       const t = document.getElementById('toast');
       if (!t) return;
       t.textContent = msg == null ? '' : String(msg);
       t.classList.add('show');
       const len = (msg == null ? 0 : String(msg).length);
-      const ms = len > 120 ? 7000 : (len > 60 ? 4500 : 2800);
+      var base = getNotifDurMs();
+      const ms = len > 120 ? Math.max(base, 12000) : (len > 60 ? Math.max(base, 7000) : base);
       clearTimeout(window.__valisToastTimer);
       window.__valisToastTimer = setTimeout(() => t.classList.remove('show'), ms);
     }
@@ -2156,7 +2203,7 @@
     // ----- Config app (login nuvem / cadastro público) -----
     // Firestore: valis/config_app { loginNuvem: true, cadastroPublico: true }
     async function carregarConfigApp() {
-      const def = { loginNuvem: true, cadastroPublico: true };
+      const def = { loginNuvem: true, cadastroPublico: true, notifDurSec: 10 };
       try {
         const local = localStorage.getItem('valis_config_app');
         if (local) {
@@ -2173,6 +2220,10 @@
             const d = snap.data() || {};
             if (d.loginNuvem != null) def.loginNuvem = !!d.loginNuvem;
             if (d.cadastroPublico != null) def.cadastroPublico = !!d.cadastroPublico;
+            if (d.notifDurSec != null) {
+              var ns = parseInt(d.notifDurSec, 10);
+              if (!isNaN(ns) && ns >= 3 && ns <= 120) def.notifDurSec = ns;
+            }
             try { localStorage.setItem('valis_config_app', JSON.stringify(def)); } catch (e) {}
           }
         }
@@ -2808,7 +2859,9 @@
           } catch (e) { console.warn('SW notify:', e); }
         }
         const n = new Notification(title, options);
-        setTimeout(function() { try { n.close(); } catch (e) {} }, opts.requireInteraction ? 20000 : 10000);
+        var dur = (opts && opts.durationMs) ? opts.durationMs : getNotifDurMs();
+        if (opts.requireInteraction) dur = Math.max(dur, 20000);
+        setTimeout(function() { try { n.close(); } catch (e) {} }, dur);
       } catch (e) { console.warn(e); }
     }
 
@@ -3054,6 +3107,77 @@
       const list = db.msg || [];
       return list.filter(function(m) { return mensagemVisivelPara(m, role); });
     }
+    function msgSeenKey() {
+      var u = usuarioAtual && usuarioAtual.user ? usuarioAtual.user : 'anon';
+      return 'valis_msg_lidas_' + u;
+    }
+    function carregarMsgsLidas() {
+      try {
+        var raw = localStorage.getItem(msgSeenKey());
+        var arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr.map(String) : [];
+      } catch (e) { return []; }
+    }
+    function salvarMsgsLidas(ids) {
+      try {
+        var uniq = Array.from(new Set((ids || []).map(String)));
+        if (uniq.length > 300) uniq = uniq.slice(-300);
+        localStorage.setItem(msgSeenKey(), JSON.stringify(uniq));
+      } catch (e) {}
+    }
+    function contarMsgsNaoLidas() {
+      var list = mensagensDoUsuario();
+      var seen = carregarMsgsLidas();
+      var set = {};
+      seen.forEach(function(id) { set[id] = true; });
+      var n = 0;
+      list.forEach(function(m) {
+        if (m && m.id != null && !set[String(m.id)]) n++;
+      });
+      return n;
+    }
+    function marcarMsgsComoLidas() {
+      var list = mensagensDoUsuario();
+      var seen = carregarMsgsLidas();
+      list.forEach(function(m) {
+        if (m && m.id != null) seen.push(String(m.id));
+      });
+      salvarMsgsLidas(seen);
+      atualizarBadgeMensagens();
+    }
+    function atualizarBadgeMensagens() {
+      try {
+        var n = contarMsgsNaoLidas();
+        var label = n > 99 ? '99+' : String(n);
+        document.querySelectorAll('#main-nav button[data-tab="mensagens"], #more-grid button[data-tab="mensagens"]').forEach(function(btn) {
+          var badge = btn.querySelector('.nav-badge');
+          if (n > 0) {
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'nav-badge';
+              btn.appendChild(badge);
+            }
+            badge.textContent = label;
+          } else if (badge) {
+            badge.remove();
+          }
+        });
+        var br = document.getElementById('badge-msg-rapido');
+        if (br) {
+          if (n > 0) {
+            br.textContent = label;
+            br.classList.remove('hidden');
+          } else {
+            br.classList.add('hidden');
+          }
+        }
+        var title = document.querySelector('#tab-mensagens .title');
+        if (title) {
+          if (n > 0) title.innerHTML = 'Mensagens <span class="msg-badge-inline">' + label + '</span>';
+          else title.textContent = 'Mensagens';
+        }
+      } catch (e) {}
+    }
 
     function aplicarPermissoes() {
       const role = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
@@ -3105,6 +3229,7 @@
           x.classList.toggle('active', x.getAttribute('data-tab') === name);
         });
       }
+      try { atualizarBadgeMensagens(); } catch (e) {}
     }
     function toggleMore() {
       document.getElementById('more-sheet').classList.toggle('open');
@@ -3635,6 +3760,33 @@
         }
         case 33: {
           zerarUsuariosExcetoAdminDev();
+          break;
+        }
+        case 34: {
+          (async function() {
+            var cur = 10;
+            try {
+              await carregarConfigApp();
+              cur = (window.__valisConfigApp && window.__valisConfigApp.notifDurSec) || 10;
+            } catch (e) {}
+            var v = prompt(
+              'Tempo das notificações na tela (segundos) para TODOS os aparelhos.\n\n' +
+              'Mínimo 3 · Máximo 120\n' +
+              'Afeta toast e fechamento automático das notificações do sistema.\n\n' +
+              'Atual: ' + cur + ' s',
+              String(cur)
+            );
+            if (v === null) return;
+            var n = parseInt(v, 10);
+            if (isNaN(n) || n < 3 || n > 120) {
+              alert('Informe um número entre 3 e 120.');
+              return;
+            }
+            var ok = await salvarConfigApp({ notifDurSec: n });
+            toast(ok !== false
+              ? ('Tempo de notificação: ' + n + 's (global)')
+              : ('Salvo local: ' + n + 's (Firebase offline)'));
+          })();
           break;
         }
         case 31: {
@@ -4373,6 +4525,9 @@
           try { atualizarPainelSolicitacoes(false); } catch (e) {}
         }
       }
+      if (name === 'mensagens') {
+        try { marcarMsgsComoLidas(); } catch (e) {}
+      }
       render();
     }
 
@@ -4808,10 +4963,16 @@
       const msgsView = typeof mensagensDoUsuario === 'function' ? mensagensDoUsuario() : (db.msg || []);
       const lmEl = document.getElementById('lm');
       if (lmEl) {
+        const seenSet = {};
+        try { carregarMsgsLidas().forEach(function(id) { seenSet[id] = true; }); } catch (e) {}
         lmEl.innerHTML = msgsView.length
-          ? msgsView.map(x => `<div class="item"><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div><div class="actions"><button class="btn dark sm" onclick="remover('msg',${x.id})">Excluir</button></div></div>`).join('')
+          ? msgsView.map(x => {
+              const unread = x && x.id != null && !seenSet[String(x.id)];
+              return `<div class="item"${unread ? ' style="border-color:var(--yellow)"' : ''}><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}${unread ? ' <span class="badge yellow">Nova</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div><div class="actions"><button class="btn dark sm" onclick="remover('msg',${x.id})">Excluir</button></div></div>`;
+            }).join('')
           : '<div class="empty">Nenhuma mensagem para o seu cargo.</div>';
       }
+      try { atualizarBadgeMensagens(); } catch (e) {}
 
       const roleFeed = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
       const feedList = atividadesVisiveisPara(roleFeed).slice(0, 8);

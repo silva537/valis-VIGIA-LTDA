@@ -1,5 +1,5 @@
 {
-  "v": "6.12.4",
+  "v": "6.12.5",
   "forceReload": true,
-  "msg": "Aviso na tela apos atualizar (20s) + notificar versao"
+  "msg": "Badge msgs nao lidas + tempo global de notificacoes (DEV)"
 }
