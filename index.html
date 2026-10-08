@@ -1016,6 +1016,14 @@
       <!-- USUÁRIOS -->
       <section id="tab-usuarios" class="tab">
         <div class="title">Funcionários</div>
+
+        <div class="card" id="card-solicitacoes" style="border-color:var(--yellow)">
+          <div class="card-label">⏳ Solicitações de cadastro (novo sistema)</div>
+          <div class="meta" style="margin-bottom:8px">Pedidos enviados pelo app · separados dos usuários ativos</div>
+          <button type="button" class="btn dark sm" onclick="atualizarPainelSolicitacoes(true)">🔄 Atualizar pedidos</button>
+          <div id="lista-solicitacoes" class="empty" style="margin-top:10px">Carregando…</div>
+        </div>
+
         <div class="card">
           <div class="card-label">Cadastrar novo</div>
           <div class="field"><label>Nome</label><input id="u-nome" class="input"></div>
@@ -1182,7 +1190,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.10.4';
+    const APP_VERSION = '6.11.0';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1534,9 +1542,7 @@
               if (Array.isArray(remote.users) && typeof mergeUsers === 'function') {
                 data.users = mergeUsers(data.users || [], remote.users);
               }
-              if (Array.isArray(remote.plantaoes) && typeof mergePlantaoes === 'function') {
-                data.plantaoes = mergePlantaoes(data.plantaoes || [], remote.plantaoes);
-              }
+              // NÃO mesclar plantões no save — isso desfaz "fechar folha" e exclusões
               if (Array.isArray(remote.postos) && remote.postos.length && !(data.postos || []).length) {
                 data.postos = remote.postos;
               }
@@ -1952,6 +1958,251 @@
       entrarApp();
     }
 
+
+    // ========== NOVO SISTEMA DE SOLICITAÇÕES (aprovação) ==========
+    // Firestore: valis/solicitacoes  { items: [...], updatedAt }
+    function normalizarSolicitacoes(arr) {
+      if (!Array.isArray(arr)) return [];
+      return arr.map(function(s) {
+        return {
+          id: s.id != null ? s.id : Date.now(),
+          nome: String(s.nome || '').trim(),
+          user: String(s.user || '').toLowerCase().trim(),
+          passHash: s.passHash || '',
+          passSalt: s.passSalt || '',
+          cargoSolicitado: s.cargoSolicitado || 'vigilante',
+          criadoEm: s.criadoEm || new Date().toISOString(),
+          status: s.status || 'pendente' // pendente | aprovado | recusado
+        };
+      }).filter(function(s) { return s.user; });
+    }
+
+    async function carregarSolicitacoes() {
+      if (!db.solicitacoes) db.solicitacoes = [];
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb) return db.solicitacoes;
+        var snap = await fbDb.collection('valis').doc('solicitacoes').get();
+        if (snap.exists && snap.data() && Array.isArray(snap.data().items)) {
+          db.solicitacoes = normalizarSolicitacoes(snap.data().items);
+        }
+        try {
+          localStorage.setItem('valis_solicitacoes', JSON.stringify(db.solicitacoes));
+        } catch (e) {}
+      } catch (e) {
+        console.warn('carregarSolicitacoes:', e);
+        try {
+          var raw = localStorage.getItem('valis_solicitacoes');
+          if (raw) db.solicitacoes = normalizarSolicitacoes(JSON.parse(raw));
+        } catch (e2) {}
+      }
+      return db.solicitacoes || [];
+    }
+
+    async function salvarSolicitacoesNuvem() {
+      if (!db.solicitacoes) db.solicitacoes = [];
+      try {
+        localStorage.setItem('valis_solicitacoes', JSON.stringify(db.solicitacoes));
+      } catch (e) {}
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb) return false;
+        await fbDb.collection('valis').doc('solicitacoes').set({
+          items: db.solicitacoes,
+          updatedAt: new Date().toISOString()
+        });
+        return true;
+      } catch (e) {
+        console.warn('salvarSolicitacoesNuvem:', e);
+        return false;
+      }
+    }
+
+    function solicitacoesPendentes() {
+      return (db.solicitacoes || []).filter(function(s) { return s.status === 'pendente'; });
+    }
+
+    async function enviarSolicitacaoCadastro(dados) {
+      await carregarSolicitacoes();
+      await sincronizarUsersDoFirebase();
+      var user = String(dados.user || '').toLowerCase().trim();
+      if ((db.users || []).some(function(u) { return String(u.user || '').toLowerCase() === user; })) {
+        throw new Error('Usuário já existe. Faça login ou peça reativação.');
+      }
+      if (solicitacoesPendentes().some(function(s) { return s.user === user; })) {
+        throw new Error('Já existe um pedido pendente para este usuário.');
+      }
+      var item = {
+        id: Date.now(),
+        nome: String(dados.nome || '').trim(),
+        user: user,
+        passHash: dados.passHash,
+        passSalt: dados.passSalt,
+        cargoSolicitado: dados.cargoSolicitado || 'vigilante',
+        criadoEm: new Date().toISOString(),
+        status: 'pendente'
+      };
+      db.solicitacoes = (db.solicitacoes || []).filter(function(s) {
+        // remove pedidos antigos recusados do mesmo user (opcional limpeza)
+        return !(s.user === user && s.status !== 'pendente');
+      });
+      db.solicitacoes.unshift(item);
+      var ok = await salvarSolicitacoesNuvem();
+      if (window.ValisDevLog) ValisDevLog.add('solicitacao_enviada', { user: user, ok: ok });
+      return ok;
+    }
+
+    async function aprovarSolicitacao(id) {
+      try {
+        if (!podeGerenciarUsers()) return alert('Sem permissão.');
+        await carregarSolicitacoes();
+        var sid = String(id);
+        var s = (db.solicitacoes || []).find(function(x) { return String(x.id) === sid; });
+        if (!s) return alert('Pedido não encontrado. Toque em Atualizar.');
+        if (s.status !== 'pendente') return alert('Este pedido já foi ' + s.status + '.');
+
+        var cargo = s.cargoSolicitado || 'vigilante';
+        if (cargo === 'admin' && usuarioAtual && usuarioAtual.funcao !== 'admin' && usuarioAtual.funcao !== 'dev' && !devLiberado) {
+          return alert('Só Admin/DEV pode aprovar Administrador.');
+        }
+        if (cargo === 'dev' && usuarioAtual && usuarioAtual.funcao !== 'dev' && !devLiberado) {
+          return alert('Só DEV pode aprovar cargo DEV.');
+        }
+
+        await sincronizarUsersDoFirebase();
+        var existente = (db.users || []).find(function(u) { return String(u.user || '').toLowerCase() === s.user; });
+        if (existente) {
+          existente.nome = s.nome || existente.nome;
+          existente.funcao = cargo;
+          existente.ativo = true;
+          existente.pendente = false;
+          existente.cargoSolicitado = null;
+          if (s.passHash) {
+            existente.passHash = s.passHash;
+            existente.passSalt = s.passSalt;
+            delete existente.pass;
+          }
+        } else {
+          db.users.push({
+            id: Date.now(),
+            nome: s.nome,
+            user: s.user,
+            passHash: s.passHash,
+            passSalt: s.passSalt,
+            funcao: cargo,
+            ativo: true,
+            pendente: false,
+            cargoSolicitado: null,
+            criadoEm: s.criadoEm || new Date().toISOString(),
+            aprovadoEm: new Date().toISOString(),
+            aprovadoPor: usuarioAtual ? usuarioAtual.user : '—'
+          });
+        }
+        s.status = 'aprovado';
+        s.aprovadoEm = new Date().toISOString();
+        s.aprovadoPor = usuarioAtual ? usuarioAtual.user : '—';
+
+        var okUsers = await salvarUsersSeguro();
+        var okSol = await salvarSolicitacoesNuvem();
+        addAtividade('Aprovado (novo sistema): ' + s.nome + ' → ' + cargo, 'admin');
+        await atualizarPainelSolicitacoes(false);
+        render();
+        toast(okUsers !== false && okSol ? 'Aprovado e liberado para login' : 'Aprovado (verifique conexão Firebase)');
+      } catch (e) {
+        alert('Erro ao aprovar: ' + (e && e.message ? e.message : e));
+      }
+    }
+
+    async function recusarSolicitacao(id) {
+      try {
+        if (!podeGerenciarUsers()) return alert('Sem permissão.');
+        await carregarSolicitacoes();
+        var s = (db.solicitacoes || []).find(function(x) { return String(x.id) === String(id); });
+        if (!s) return alert('Pedido não encontrado.');
+        if (!confirm('Recusar pedido de ' + s.nome + ' (@' + s.user + ')?')) return;
+        s.status = 'recusado';
+        s.recusadoEm = new Date().toISOString();
+        await salvarSolicitacoesNuvem();
+        addAtividade('Pedido recusado: ' + s.nome, 'admin');
+        await atualizarPainelSolicitacoes(false);
+        toast('Pedido recusado');
+      } catch (e) {
+        alert('Erro ao recusar: ' + (e && e.message ? e.message : e));
+      }
+    }
+
+    async function excluirSolicitacao(id) {
+      try {
+        if (!podeGerenciarUsers()) return alert('Sem permissão.');
+        await carregarSolicitacoes();
+        var s = (db.solicitacoes || []).find(function(x) { return String(x.id) === String(id); });
+        if (!s) return alert('Pedido não encontrado.');
+        if (!confirm('Excluir pedido de ' + (s.nome || s.user) + '?')) return;
+        db.solicitacoes = (db.solicitacoes || []).filter(function(x) { return String(x.id) !== String(id); });
+        await salvarSolicitacoesNuvem();
+        await atualizarPainelSolicitacoes(false);
+        toast('Pedido excluído');
+      } catch (e) {
+        alert('Erro ao excluir: ' + (e && e.message ? e.message : e));
+      }
+    }
+
+    async function atualizarPainelSolicitacoes(forcarToast) {
+      var box = document.getElementById('lista-solicitacoes');
+      var card = document.getElementById('card-solicitacoes');
+      if (!box) return;
+      if (!podeGerenciarUsers()) {
+        if (card) card.style.display = 'none';
+        return;
+      }
+      if (card) card.style.display = '';
+      box.innerHTML = '<div class="empty">Atualizando…</div>';
+      await carregarSolicitacoes();
+      var pend = solicitacoesPendentes();
+      // também mostra últimos processados (máx 5)
+      var outros = (db.solicitacoes || []).filter(function(s) { return s.status !== 'pendente'; }).slice(0, 5);
+      if (!pend.length && !outros.length) {
+        box.innerHTML = '<div class="empty">Nenhum pedido no momento.</div>';
+        if (forcarToast) toast('Nenhum pedido pendente');
+        return;
+      }
+      var html = '';
+      if (pend.length) {
+        html += '<div class="meta" style="margin-bottom:6px"><b>' + pend.length + ' pendente(s)</b></div>';
+        pend.forEach(function(s) {
+          var id = String(s.id).replace(/'/g, '');
+          html += '<div class="item" style="border-color:var(--yellow)">' +
+            '<b>' + (s.nome || '—') + '</b> <span class="badge yellow">Pendente</span>' +
+            '<div class="meta">@' + s.user + ' · quer: ' + (s.cargoSolicitado || 'vigilante') + '</div>' +
+            '<div class="meta">' + (s.criadoEm ? new Date(s.criadoEm).toLocaleString('pt-BR') : '') + '</div>' +
+            '<div class="actions">' +
+            '<button type="button" class="btn green sm" onclick="return aprovarSolicitacao(\'' + id + '\')">Aprovar</button> ' +
+            '<button type="button" class="btn dark sm" onclick="return recusarSolicitacao(\'' + id + '\')">Recusar</button> ' +
+            '<button type="button" class="btn red sm" onclick="return excluirSolicitacao(\'' + id + '\')">Excluir</button>' +
+            '</div></div>';
+        });
+      }
+      if (outros.length) {
+        html += '<div class="meta" style="margin:10px 0 6px">Histórico recente</div>';
+        outros.forEach(function(s) {
+          var badge = s.status === 'aprovado' ? 'green' : 'red';
+          html += '<div class="item"><b>' + (s.nome || '—') + '</b> <span class="badge ' + badge + '">' + s.status + '</span>' +
+            '<div class="meta">@' + s.user + '</div></div>';
+        });
+      }
+      box.innerHTML = html;
+      if (forcarToast) toast(pend.length + ' pedido(s) pendente(s)');
+    }
+
+    try {
+      window.aprovarSolicitacao = aprovarSolicitacao;
+      window.recusarSolicitacao = recusarSolicitacao;
+      window.excluirSolicitacao = excluirSolicitacao;
+      window.atualizarPainelSolicitacoes = atualizarPainelSolicitacoes;
+    } catch (e) {}
+
     async function cadastrarUsuario() {
       const nome = document.getElementById('reg-nome').value.trim();
       const user = document.getElementById('reg-user').value.trim().toLowerCase();
@@ -1961,75 +2212,45 @@
       const codigo = codigoEl ? codigoEl.value.trim() : '';
       if (!nome || !user || !pass) return msgLogin('Preencha todos os campos.');
       if (pass.length < 4) return msgLogin('Senha mín. 4 caracteres.');
-      if (db.users.some(u => u.user === user)) return msgLogin('Usuário já existe.');
 
-      const restritas = ['supervisor', 'admin'];
-      let cargoSolicitado = funcao;
-
-      // Supervisor/Admin: código OBRIGATÓRIO para nem solicitar
+      const restritas = ['supervisor', 'admin', 'dev'];
+      let cargoSolicitado = funcao || 'vigilante';
       if (restritas.includes(funcao)) {
         if (!validarCodigoAuth(codigo)) {
-          return msgLogin('Código de autorização inválido ou vazio. Supervisor/Admin exigem código do DEV.');
+          return msgLogin('Código de autorização inválido. Supervisor/Admin/DEV exigem código.');
         }
       }
 
-      // Garante Firebase Auth ANTES de gravar (regras exigem request.auth)
-      msgLogin('Enviando cadastro...', true);
+      msgLogin('Enviando pedido de cadastro...', true);
       try {
         await initFirebase();
         await ensureFirebaseAuth();
       } catch (e) {}
-      // puxa users da nuvem para não sobrescrever outros pendentes
-      await sincronizarUsersDoFirebase();
-      if (db.users.some(u => String(u.user || '').toLowerCase() === user)) {
-        return msgLogin('Usuário já existe.');
+
+      try {
+        const hp = await hashSenha(String(pass));
+        const ok = await enviarSolicitacaoCadastro({
+          nome: nome,
+          user: user,
+          passHash: hp.hash,
+          passSalt: hp.salt,
+          cargoSolicitado: cargoSolicitado
+        });
+        document.getElementById('reg-nome').value = '';
+        document.getElementById('reg-user').value = '';
+        document.getElementById('reg-pass').value = '';
+        if (codigoEl) codigoEl.value = '';
+        document.getElementById('reg-funcao').value = 'vigilante';
+        atualizarRegFuncaoUI();
+        if (ok) {
+          msgLogin('Pedido enviado! Aguarde aprovação do Admin/DEV. Depois você poderá entrar.', true);
+        } else {
+          msgLogin('Pedido salvo neste aparelho, mas a nuvem falhou. Confira internet e regras Firebase (documento solicitacoes).', false);
+        }
+        setTimeout(function() { mostrarLogin('entrar'); }, 2200);
+      } catch (err) {
+        msgLogin(String(err && err.message ? err.message : err), false);
       }
-      // TODOS os cadastros públicos ficam pendentes e inativos até aprovação
-      const hp = await hashSenha(String(pass));
-      db.users.push({
-        id: Date.now(),
-        nome,
-        user: String(user).toLowerCase().trim(),
-        passHash: hp.hash,
-        passSalt: hp.salt,
-        funcao: 'vigilante',
-        ativo: false,
-        pendente: true,
-        cargoSolicitado: cargoSolicitado,
-        criadoEm: new Date().toISOString()
-      });
-      addAtividade('Cadastro pendente: ' + nome + ' solicitou ' + cargoSolicitado, 'admin');
-      const novoUser = db.users.find(u => String(u.user || '').toLowerCase() === user);
-      // 1) transação na nuvem (fonte da verdade entre aparelhos)
-      let confirmado = false;
-      if (novoUser) {
-        confirmado = await gravarUsuarioNaNuvemTransacao(novoUser);
-      }
-      // 2) fallback merge local+nuvem
-      const ok = await salvarUsersSeguro();
-      if (!confirmado && novoUser) {
-        try { await pushCadastroPendenteNuvem(novoUser); } catch (e) {}
-        try {
-          const snap = await fbDb.collection('valis').doc('db_v42').get();
-          const users = snap.exists && snap.data() && snap.data().data ? (snap.data().data.users || []) : [];
-          confirmado = users.some(u => String(u.user || '').toLowerCase() === user);
-        } catch (e) {}
-      }
-      if (window.ValisDevLog) ValisDevLog.add('cadastro_pendente', { user: user, ok: ok !== false, confirmado: confirmado });
-      document.getElementById('reg-nome').value = '';
-      document.getElementById('reg-user').value = '';
-      document.getElementById('reg-pass').value = '';
-      if (codigoEl) codigoEl.value = '';
-      document.getElementById('reg-funcao').value = 'vigilante';
-      atualizarRegFuncaoUI();
-      if (confirmado || okPend) {
-        msgLogin('Cadastro enviado para a nuvem! Aguarde aprovação do Admin/DEV.', true);
-      } else if (ok !== false) {
-        msgLogin('Cadastro salvo. Se o Admin não ver, peça para tocar em Atualizar lista.', true);
-      } else {
-        msgLogin('Sem conexão com a nuvem. Cadastro ficou só neste aparelho — tente de novo com internet.', false);
-      }
-      setTimeout(() => mostrarLogin('entrar'), 2200);
     }
 
     function atualizarRegFuncaoUI() {
@@ -2168,7 +2389,20 @@
           if (Array.isArray(remote.oco)) db.oco = remote.oco;
           // plantões: mantém merge para não perder local
           if (Array.isArray(remote.plantaoes)) {
-            db.plantaoes = mergePlantaoes(db.plantaoes || [], remote.plantaoes);
+            var arqIds = {};
+            function _markArq(list) {
+              (list || []).forEach(function(f) {
+                (f.itens || []).forEach(function(it) { arqIds[String(it.id)] = true; });
+              });
+            }
+            _markArq(db.folhasArquivadas);
+            _markArq(remote.folhasArquivadas);
+            var rpl = remote.plantaoes.filter(function(p) { return !arqIds[String(p.id)]; });
+            var lpl = (db.plantaoes || []).filter(function(p) { return !arqIds[String(p.id)]; });
+            db.plantaoes = mergePlantaoes(lpl, rpl);
+            if (Array.isArray(remote.folhasArquivadas) && remote.folhasArquivadas.length) {
+              db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], remote.folhasArquivadas);
+            }
           }
           try {
             const json = JSON.stringify(db);
@@ -2677,24 +2911,21 @@
         }
         case 17: {
           (async () => {
-            toast('Buscando cadastros pendentes...');
+            toast('Buscando solicitações...');
+            tab('usuarios');
             try {
               await initFirebase();
               await ensureFirebaseAuth();
-              await sincronizarUsersDoFirebase();
-              try { await puxarCadastrosPendentesNuvem(); } catch (e) {}
-              // leitura direta do documento
-              if (fbDb) {
-                const snap = await fbDb.collection('valis').doc('db_v42').get();
-                if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
-                  db.users = mergeUsers(db.users || [], snap.data().data.users);
-                }
-              }
+              await atualizarPainelSolicitacoes(true);
             } catch (e) { console.warn(e); }
-            const pend = (db.users || []).filter(u => precisaAprovacaoUser(u));
-            tab('usuarios');
-            render();
+            var pend = solicitacoesPendentes();
             if (!pend.length) {
+              alert('Nenhuma solicitação pendente no novo sistema.\n\nPeça para a pessoa se cadastrar de novo (pedido vai em Solicitações).');
+              return;
+            }
+            return; // painel já mostra Aprovar/Recusar
+            const _legacyPend = (db.users || []).filter(u => precisaAprovacaoUser(u));
+            if (!_legacyPend.length) {
               const total = (db.users || []).length;
               const nomes = (db.users || []).map(u => (u.user || '') + (u.ativo === false ? ' (inativo)' : '') + (isPendenteUser(u) ? ' (pend)' : '')).join(', ');
               alert('Nenhum cadastro pendente na nuvem.\n\nUsuários na base: ' + total + (total ? '\n' + nomes : '') + '\n\nSe o vigilante ainda vê "pendente", peça para cadastrar de novo COM INTERNET (versão 6.10.2+).');
@@ -3100,8 +3331,8 @@
             `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.cargoSolicitado || u.funcao)}
               <div class="meta">@${u.user}</div>
               <div class="actions">
-                <button type="button" class="btn green sm" data-user-act="aprovar" data-user="${String(u.user || u.id).replace(/"/g, '&quot;')}">Aprovar</button>
-                <button type="button" class="btn dark sm" data-user-act="recusar" data-user="${String(u.user || u.id).replace(/"/g, '&quot;')}">Recusar</button>
+                <button type="button" class="btn green sm" onclick="aprovarCargo('${String(u.id)}')">Aprovar</button>
+                <button type="button" class="btn dark sm" onclick="recusarCargo('${String(u.id)}')">Recusar</button>
               </div>
             </div>`
           ).join('');
@@ -3473,28 +3704,47 @@
       toast('Excluído');
     }
     async function fecharFolha() {
-      const lista = plantaoesDoExtrato();
-      if (!lista.length) return alert('Sua folha atual está vazia.');
-      if (!confirm('Confirmar recebimento e arquivar ' + (podeVerTodosPlantaoes() ? 'a folha visível' : 'a SUA folha') + '?')) return;
-      const total = lista.reduce((s, x) => s + (x.valor || 0), 0);
-      const ids = new Set(lista.map(x => x.id));
-      if (!db.folhasArquivadas) db.folhasArquivadas = [];
-      db.folhasArquivadas.unshift({
-        id: Date.now(),
-        fechadoEm: new Date().toLocaleString('pt-BR'),
-        por: usuarioAtual ? usuarioAtual.nome : '—',
-        userLogin: usuarioAtual ? usuarioAtual.user : '',
-        total,
-        qtd: lista.length,
-        itens: lista.slice()
-      });
-      // remove só os plantões arquivados (não apaga de outros usuários)
-      db.plantaoes = (db.plantaoes || []).filter(x => !ids.has(x.id));
-      addAtividade('Folha fechada: R$ ' + total.toFixed(2) + ' (' + lista.length + ' plantões)');
-      await salvar();
-      await backupPlantaoesAuto('fechar_folha');
-      render();
-      toast('Folha arquivada');
+      try {
+        const lista = plantaoesDoExtrato();
+        if (!lista.length) return alert('Sua folha atual está vazia.');
+        const label = podeVerTodosPlantaoes() ? 'a folha visível (todos da lista)' : 'a SUA folha';
+        if (!confirm('Confirmar recebimento e arquivar ' + label + '?\n\n' + lista.length + ' plantão(ões) sairão da folha atual.')) return;
+        const total = lista.reduce(function(s, x) { return s + (Number(x.valor) || 0); }, 0);
+        const ids = {};
+        lista.forEach(function(x) { ids[String(x.id)] = true; });
+        if (!db.folhasArquivadas) db.folhasArquivadas = [];
+        db.folhasArquivadas.unshift({
+          id: Date.now(),
+          fechadoEm: new Date().toLocaleString('pt-BR'),
+          por: usuarioAtual ? usuarioAtual.nome : '—',
+          userLogin: usuarioAtual ? usuarioAtual.user : '',
+          total: total,
+          qtd: lista.length,
+          itens: lista.slice()
+        });
+        const antes = (db.plantaoes || []).length;
+        db.plantaoes = (db.plantaoes || []).filter(function(x) { return !ids[String(x.id)]; });
+        const removidos = antes - (db.plantaoes || []).length;
+        addAtividade('Folha fechada: R$ ' + total.toFixed(2) + ' (' + lista.length + ' plantões)');
+        await salvar();
+        try {
+          if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+            await fbDb.collection('valis').doc('db_v42').set({
+              data: db,
+              updatedAt: new Date().toISOString(),
+              sec: 1
+            }, { merge: true });
+          }
+        } catch (e) { console.warn(e); }
+        try { await backupPlantaoesAuto('fechar_folha'); } catch (e) {}
+        render();
+        toast('Folha arquivada: ' + removidos + ' removido(s) da atual');
+        if (removidos === 0) {
+          alert('Nenhum plantão saiu da folha atual. Atualize a página e tente de novo.');
+        }
+      } catch (err) {
+        alert('Erro ao fechar folha: ' + (err && err.message ? err.message : err));
+      }
     }
     function exportarExtratoCSV() {
       const lista = plantaoesDoExtrato();
@@ -3533,6 +3783,9 @@
       // ao abrir Equipe/Supervisão, força sync dos cadastros pendentes
       if (name === 'usuarios' || name === 'supervisao') {
         sincronizarUsersDoFirebase().then(function() { try { render(); } catch (e) {} });
+        if (name === 'usuarios') {
+          try { atualizarPainelSolicitacoes(false); } catch (e) {}
+        }
       }
       render();
     }
@@ -3818,29 +4071,30 @@
       }
     }
 
-    // Botões de usuário: delegação robusta.
-    // Os cartões são recriados pelo render(), então o listener fica no document.
-    async function tratarAcaoUsuario(ev) {
-      const target = ev.target;
-      const btn = target && target.closest ? target.closest('button[data-user-act]') : null;
-      if (!btn) return;
-      const act = String(btn.getAttribute('data-user-act') || '').trim().toLowerCase();
-      const who = String(btn.getAttribute('data-user') || '').trim();
-      if (!act || !who) return;
-      // Impede o clique de virar submit/navegação, mas deixa o restante do app continuar.
-      ev.preventDefault();
+    window.__valisUserAct = function(act, who) {
       try {
-        if (act === 'aprovar') await aprovarCargo(who);
-        else if (act === 'recusar') await recusarCargo(who);
-        else if (act === 'excluir') await excluirUser(who);
-        else if (act === 'toggle') await desativarUser(who);
-      } catch (err) {
-        console.error('Ação de usuário falhou:', act, who, err);
-        alert('Não foi possível concluir a ação. Tente novamente.');
+        act = String(act || '').trim();
+        who = String(who || '').trim();
+        if (!act || !who) { alert('Ação inválida'); return false; }
+        if (act === 'aprovar') { aprovarCargo(who); return false; }
+        if (act === 'recusar') { recusarCargo(who); return false; }
+        if (act === 'excluir') { excluirUser(who); return false; }
+        if (act === 'toggle') { desativarUser(who); return false; }
+        alert('Ação desconhecida: ' + act);
+      } catch (e) {
+        alert('Erro no botão: ' + (e && e.message ? e.message : e));
       }
-    }
-    document.addEventListener('click', tratarAcaoUsuario, false);
-
+      return false;
+    };
+    document.addEventListener('click', function(ev) {
+      var t = ev.target;
+      if (!t) return;
+      var btn = (t.closest && t.closest('[data-user-act]')) || (t.getAttribute && t.getAttribute('data-user-act') ? t : null);
+      if (!btn) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.__valisUserAct(btn.getAttribute('data-user-act'), btn.getAttribute('data-user'));
+    }, true);
     try {
       window.aprovarCargo = aprovarCargo;
       window.recusarCargo = recusarCargo;
@@ -3950,9 +4204,9 @@
               const mostrarAprovar = precisaAprovacaoUser(u);
               const isAtivo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
               actions = `<div class="actions">
-                <button type="button" class="btn dark sm" data-user-act="toggle" data-user="${loginAttr}">${isAtivo ? 'Desativar' : 'Reativar'}</button>
-                <button type="button" class="btn red sm" data-user-act="excluir" data-user="${loginAttr}">Excluir</button>
-                ${mostrarAprovar ? `<button type="button" class="btn green sm" data-user-act="aprovar" data-user="${loginAttr}">Aprovar</button><button type="button" class="btn dark sm" data-user-act="recusar" data-user="${loginAttr}">Recusar</button>` : ''}
+                <button type="button" class="btn dark sm" data-user-act="toggle" data-user="${loginAttr}" onclick="return window.__valisUserAct('toggle','${loginAttr}')">${isAtivo ? 'Desativar' : 'Reativar'}</button>
+                <button type="button" class="btn red sm" data-user-act="excluir" data-user="${loginAttr}" onclick="return window.__valisUserAct('excluir','${loginAttr}')">Excluir</button>
+                ${mostrarAprovar ? `<button type="button" class="btn green sm" data-user-act="aprovar" data-user="${loginAttr}" onclick="return window.__valisUserAct('aprovar','${loginAttr}')">Aprovar</button><button type="button" class="btn dark sm" data-user-act="recusar" data-user="${loginAttr}" onclick="return window.__valisUserAct('recusar','${loginAttr}')">Recusar</button>` : ''}
                 <select class="select" style="width:auto;padding:6px 8px;font-size:11px" onchange="alterarFuncaoUser('${loginAttr}', this.value)">
                   <option value="">Cargo...</option>
                   <option value="vigilante">Vigilante</option>
@@ -4014,6 +4268,11 @@
 
       const statusFb = document.getElementById('status-fb');
       if (statusFb) statusFb.textContent = firebaseOk ? ('FB · ' + DataService.mode) : 'Offline';
+
+      // painel novo de solicitações
+      if (podeGerenciarUsers()) {
+        try { atualizarPainelSolicitacoes(false); } catch (e) {}
+      }
     }
 
 
