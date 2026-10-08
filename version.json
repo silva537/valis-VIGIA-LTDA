@@ -1,5 +1,5 @@
 {
-  "v": "6.12.3",
+  "v": "6.12.4",
   "forceReload": true,
-  "msg": "Editar plantao no extrato + salvar atualizacao"
+  "msg": "Aviso na tela apos atualizar (20s) + notificar versao"
 }

@@ -628,6 +628,45 @@
     .perfil-chip-detail.show { display: block; }
     .perfil-chip-detail b { color: #e2e8f0; }
 
+    /* ---- Aviso: app acabou de atualizar ---- */
+    #update-done-banner {
+      display: none;
+      position: fixed;
+      left: 50%;
+      bottom: 96px;
+      transform: translateX(-50%) translateY(12px);
+      z-index: 210;
+      width: min(92vw, 400px);
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(22,101,52,0.92));
+      border: 1px solid rgba(34,197,94,0.55);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 24px rgba(34,197,94,0.2);
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: auto;
+    }
+    #update-done-banner.show {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #update-done-banner .ud-title {
+      font-size: 14px; font-weight: 800; color: #bbf7d0; margin-bottom: 4px;
+    }
+    #update-done-banner .ud-msg {
+      font-size: 12px; color: #e2e8f0; line-height: 1.45;
+    }
+    #update-done-banner .ud-ver {
+      color: #86efac; font-weight: 700;
+    }
+    #update-done-banner .ud-close {
+      position: absolute; top: 8px; right: 10px;
+      background: transparent; border: none; color: #94a3b8;
+      font-size: 16px; cursor: pointer; line-height: 1; padding: 4px;
+    }
+
+
 
 
     .modal-bg {
@@ -680,6 +719,11 @@
 </head>
 <body>
   <div id="toast"></div>
+  <div id="update-done-banner" role="status" aria-live="polite">
+    <button type="button" class="ud-close" onclick="esconderAvisoAtualizado()" aria-label="Fechar">×</button>
+    <div class="ud-title">✅ Aplicativo atualizado</div>
+    <div class="ud-msg" id="update-done-msg">O aplicativo foi atualizado para a versão <span class="ud-ver" id="update-done-ver">—</span>.</div>
+  </div>
   <div id="manutencao-overlay" class="modal-bg hidden" style="z-index:99999">
     <div class="modal" style="text-align:center;max-width:360px">
       <h3>🚧 Sistema em manutenção</h3>
@@ -1410,7 +1454,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.3';
+    const APP_VERSION = '6.12.4';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -5770,6 +5814,50 @@
       toast('Atualização adiada nesta sessão');
     }
 
+    var __valisUpdateDoneTimer = null;
+    function esconderAvisoAtualizado() {
+      try {
+        var el = document.getElementById('update-done-banner');
+        if (el) el.classList.remove('show');
+        if (__valisUpdateDoneTimer) {
+          clearTimeout(__valisUpdateDoneTimer);
+          __valisUpdateDoneTimer = null;
+        }
+      } catch (e) {}
+    }
+    function mostrarAvisoAtualizado(versao, anterior) {
+      try {
+        var el = document.getElementById('update-done-banner');
+        var verEl = document.getElementById('update-done-ver');
+        var msgEl = document.getElementById('update-done-msg');
+        if (verEl) verEl.textContent = versao || (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—');
+        if (msgEl) {
+          var ant = anterior ? (' (antes: ' + anterior + ')') : '';
+          msgEl.innerHTML = 'O aplicativo foi atualizado para a versão <span class="ud-ver">' +
+            (versao || '') + '</span>' + ant + '.';
+        }
+        if (el) el.classList.add('show');
+        if (__valisUpdateDoneTimer) clearTimeout(__valisUpdateDoneTimer);
+        __valisUpdateDoneTimer = setTimeout(function() { esconderAvisoAtualizado(); }, 20000);
+        try { notificarApp('VALIS atualizado', 'Versão ' + (versao || '') + ' instalada'); } catch (e) {}
+      } catch (e) {}
+    }
+    /** Detecta se esta abertura já é uma versão nova em relação à última salva no aparelho */
+    function verificarAtualizacaoConcluida() {
+      try {
+        var atual = String(typeof APP_VERSION !== 'undefined' ? APP_VERSION : '');
+        if (!atual) return;
+        var key = 'valis_app_ver_instalada';
+        var anterior = '';
+        try { anterior = String(localStorage.getItem(key) || ''); } catch (e) {}
+        if (anterior && anterior !== atual) {
+          // Acabou de atualizar: avisa na tela por 20s
+          mostrarAvisoAtualizado(atual, anterior);
+        }
+        try { localStorage.setItem(key, atual); } catch (e) {}
+      } catch (e) {}
+    }
+
     async function checarAtualizacaoApp(opts) {
       opts = opts || {};
       try {
@@ -6356,6 +6444,7 @@
       try { registrarServiceWorker(); } catch (e) {}
       try { if (usuarioAtual) pvBoot(); } catch (e) {}
       if (window.ValisDevLog) ValisDevLog.add('app_boot', { ver: APP_VERSION, href: location.href });
+      try { verificarAtualizacaoConcluida(); } catch (e) {}
       try {
         if (window.ValisUpdate) {
           const u = await ValisUpdate.check();
