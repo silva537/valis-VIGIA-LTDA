@@ -1,5 +1,5 @@
 {
-  "v": "6.11.1",
+  "v": "6.11.2",
   "forceReload": false,
-  "msg": "Excluir user fix + login nuvem toggle + manutenção WebInto"
+  "msg": "Senha DEV no painel de manutenção"
 }

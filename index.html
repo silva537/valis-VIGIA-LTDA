@@ -525,12 +525,20 @@
 </head>
 <body>
   <div id="toast"></div>
-  <div id="manutencao-overlay" class="modal-bg hidden" style="z-index:300">
-    <div class="modal" style="text-align:center">
+  <div id="manutencao-overlay" class="modal-bg hidden" style="z-index:99999">
+    <div class="modal" style="text-align:center;max-width:360px">
       <h3>🚧 Sistema em manutenção</h3>
       <p id="manutencao-msg" style="color:var(--muted);font-size:14px;line-height:1.5;margin:12px 0 18px">O aplicativo está temporariamente suspenso pela administração.</p>
-      <button class="btn dark" onclick="location.reload()">Tentar novamente</button>
-      <button class="btn purple" style="margin-top:8px" onclick="abrirDevMenu()">Acesso DEV</button>
+      <button type="button" class="btn dark" onclick="location.reload()">Tentar novamente</button>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);text-align:left">
+        <div class="card-label" style="margin-bottom:8px">Acesso DEV</div>
+        <div class="field" style="margin:0 0 8px">
+          <label>Senha DEV</label>
+          <input id="manut-dev-pass" class="input" type="password" placeholder="Senha do desenvolvedor" autocomplete="off" onkeydown="if(event.key==='Enter')validarDevManutencao()">
+        </div>
+        <p id="manut-dev-erro" class="erro" style="min-height:18px;margin:0 0 8px"></p>
+        <button type="button" class="btn purple" onclick="validarDevManutencao()">Desbloquear com senha DEV</button>
+      </div>
     </div>
   </div>
 
@@ -1192,7 +1200,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.11.1';
+    const APP_VERSION = '6.11.2';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2807,59 +2815,97 @@
     }
 
     // DEV MENU
+    function liberarSessaoDevAposSenha() {
+      devLiberado = true;
+      const ov = document.getElementById('manutencao-overlay');
+      if (ov) {
+        ov.classList.add('hidden');
+        ov.style.display = 'none';
+        ov.style.pointerEvents = '';
+        ov.style.zIndex = '';
+      }
+      const app = document.getElementById('app');
+      if (usuarioAtual) {
+        if (app) {
+          app.style.display = '';
+          app.classList.add('show');
+        }
+        const loginEl = document.getElementById('login');
+        if (loginEl) loginEl.style.display = 'none';
+      } else {
+        if (app) {
+          app.style.display = 'none';
+          app.classList.remove('show');
+        }
+        const loginEl = document.getElementById('login');
+        if (loginEl) loginEl.style.display = 'flex';
+      }
+      try {
+        document.getElementById('drawer-overlay').classList.add('open');
+        document.getElementById('drawer-dev').classList.add('open');
+      } catch (e) {}
+      toast('DEV liberado — desbloqueado nesta sessão (manutenção global continua para os outros)');
+    }
+
+    function validarDevManutencao() {
+      const inp = document.getElementById('manut-dev-pass');
+      const erro = document.getElementById('manut-dev-erro');
+      const senha = inp ? String(inp.value || '') : '';
+      if (senha === SENHA_DEV) {
+        if (erro) erro.textContent = '';
+        if (inp) inp.value = '';
+        liberarSessaoDevAposSenha();
+      } else {
+        if (erro) erro.textContent = 'Senha DEV incorreta.';
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
+      }
+    }
+
     function abrirDevMenu() {
       // logado como cargo DEV → acesso direto ao menu (sem senha extra)
       if (usuarioAtual && usuarioAtual.funcao === 'dev') {
         devLiberado = true;
       }
       if (devLiberado || (usuarioAtual && usuarioAtual.funcao === 'dev')) {
-        const ov = document.getElementById('manutencao-overlay');
-        if (ov) ov.classList.add('hidden');
-        document.getElementById('drawer-overlay').classList.add('open');
-        document.getElementById('drawer-dev').classList.add('open');
+        liberarSessaoDevAposSenha();
         return;
       }
-      // admin/outros: ainda podem liberar com senha mestre DEV
-      document.getElementById('dev-pass').value = '';
-      document.getElementById('dev-erro').textContent = '';
-      const modal = document.getElementById('modal-dev');
-      modal.style.zIndex = '400';
-      modal.classList.remove('hidden');
+      // Se manutenção estiver na tela, foca o campo de senha do próprio overlay
       const ov = document.getElementById('manutencao-overlay');
-      if (ov && !ov.classList.contains('hidden')) {
-        ov.style.pointerEvents = 'none';
+      const manutPass = document.getElementById('manut-dev-pass');
+      if (ov && !ov.classList.contains('hidden') && manutPass) {
+        manutPass.focus();
+        const erro = document.getElementById('manut-dev-erro');
+        if (erro) erro.textContent = 'Digite a senha DEV abaixo para desbloquear.';
+        return;
       }
-      setTimeout(() => {
+      // Fora da manutenção: modal clássico
+      const dp = document.getElementById('dev-pass');
+      const de = document.getElementById('dev-erro');
+      if (dp) dp.value = '';
+      if (de) de.textContent = '';
+      const modal = document.getElementById('modal-dev');
+      if (modal) {
+        modal.style.zIndex = '100000';
+        modal.classList.remove('hidden');
+      }
+      setTimeout(function() {
         const inp = document.getElementById('dev-pass');
         if (inp) inp.focus();
       }, 120);
     }
     function fecharDevModal() {
-      document.getElementById('modal-dev').classList.add('hidden');
-      const ov = document.getElementById('manutencao-overlay');
-      if (ov) ov.style.pointerEvents = '';
+      const modal = document.getElementById('modal-dev');
+      if (modal) modal.classList.add('hidden');
     }
     function validarDev() {
       const senha = document.getElementById('dev-pass').value;
       if (senha === SENHA_DEV) {
-        devLiberado = true;
         fecharDevModal();
-        // libera manutenção visualmente para este aparelho/sessão
-        const ov = document.getElementById('manutencao-overlay');
-        if (ov) {
-          ov.classList.add('hidden');
-          ov.style.pointerEvents = '';
-        }
-        // se já havia sessão, reabre o app
-        if (usuarioAtual) {
-          document.getElementById('app').classList.add('show');
-          document.getElementById('login').style.display = 'none';
-        } else {
-          document.getElementById('login').style.display = 'flex';
-        }
-        document.getElementById('drawer-overlay').classList.add('open');
-        document.getElementById('drawer-dev').classList.add('open');
-        toast('DEV liberado — sistema desbloqueado nesta sessão');
+        liberarSessaoDevAposSenha();
       } else {
         document.getElementById('dev-erro').textContent = 'Senha DEV incorreta.';
       }
