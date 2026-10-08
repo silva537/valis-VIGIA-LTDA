@@ -536,6 +536,99 @@
     .plantao-vivo-geo .ok { color: #4ade80; }
     .plantao-vivo-geo .warn { color: #fbbf24; }
 
+    /* ---- Banner de atualização ---- */
+    #update-banner {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      margin: 0 0 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(59,130,246,0.14));
+      border: 1px solid rgba(34,197,94,0.45);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    #update-banner.show { display: block; }
+    #update-banner .ub-title {
+      font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 4px;
+    }
+    #update-banner .ub-msg {
+      font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 10px;
+    }
+    #update-banner .ub-actions {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    #update-banner .ub-actions button {
+      border: none; border-radius: 10px; padding: 9px 14px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    #update-banner .ub-btn-go { background: #16a34a; color: #fff; }
+    #update-banner .ub-btn-later {
+      background: rgba(15,23,42,0.9); color: #cbd5e1;
+      border: 1px solid rgba(148,163,184,0.25) !important;
+    }
+
+    /* ---- Perfil compacto (canto direito) ---- */
+    .perfil-chip-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .perfil-chip {
+      max-width: 100%;
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(148,163,184,0.22);
+      border-radius: 999px;
+      padding: 6px 10px 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .perfil-chip:active, .perfil-chip.open {
+      border-color: rgba(34,197,94,0.55);
+      box-shadow: 0 0 0 2px rgba(34,197,94,0.12);
+    }
+    .perfil-chip .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #16a34a, #0ea5e9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .perfil-chip .chip-text { min-width: 0; max-width: 160px; }
+    .perfil-chip .chip-text .nome {
+      font-size: 12px; font-weight: 700; color: #e2e8f0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .perfil-chip .chip-text .cargo {
+      font-size: 10px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .perfil-chip .chev-mini {
+      font-size: 10px; color: var(--muted); transition: transform .2s;
+    }
+    .perfil-chip.open .chev-mini { transform: rotate(180deg); }
+    .perfil-chip-detail {
+      display: none;
+      margin-top: 8px;
+      margin-left: auto;
+      max-width: 280px;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      text-align: right;
+    }
+    .perfil-chip-detail.show { display: block; }
+    .perfil-chip-detail b { color: #e2e8f0; }
+
+
 
     .modal-bg {
       position: fixed; inset: 0; background: rgba(0,0,0,.65);
@@ -841,6 +934,15 @@
         <div class="title">Dashboard</div>
         <div class="br-flag-strip"></div>
 
+        <div id="update-banner" role="status" aria-live="polite">
+          <div class="ub-title">🚀 Nova atualização disponível</div>
+          <div class="ub-msg" id="update-banner-msg">O aplicativo recebeu uma versão nova. Atualize para usar as melhorias.</div>
+          <div class="ub-actions">
+            <button type="button" class="ub-btn-go" onclick="aplicarAtualizacaoApp()">Atualizar agora</button>
+            <button type="button" class="ub-btn-later" onclick="adiarAtualizacaoApp()">Depois</button>
+          </div>
+        </div>
+
         <div class="plantao-vivo-card" id="plantao-vivo-card">
           <div class="plantao-vivo-head">
             <div class="titulo">⚡ MODO PLANTÃO ATIVO</div>
@@ -861,9 +963,20 @@
           <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
         </div>
 
-        <div class="card">
-          <div class="card-label">Meu perfil</div>
-          <div id="meu-perfil" class="item">—</div>
+        <div class="perfil-chip-wrap">
+          <div>
+            <div class="perfil-chip" id="perfil-chip" onclick="togglePerfilChip()" title="Meu perfil">
+              <div class="avatar" id="perfil-chip-avatar">?</div>
+              <div class="chip-text">
+                <div class="nome" id="perfil-chip-nome">—</div>
+                <div class="cargo" id="perfil-chip-cargo">Meu perfil</div>
+              </div>
+              <span class="chev-mini">▼</span>
+            </div>
+            <div class="perfil-chip-detail" id="perfil-chip-detail">
+              <div id="meu-perfil">—</div>
+            </div>
+          </div>
         </div>
         <div class="status-bar">
           <div class="dot" id="status-dot"></div>
@@ -1293,7 +1406,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.1';
+    const APP_VERSION = '6.12.2';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1396,8 +1509,8 @@
                 return { ok: true, update: false, data: data, skipped: true };
               }
             } catch (e) {}
-            if (remote && local && remote !== local && data.forceReload === true) {
-              return { ok: true, update: true, data: data };
+            if (remote && local && remote !== local) {
+              return { ok: true, update: true, data: data, force: data.forceReload === true };
             }
             return { ok: true, update: false, data: data };
           } catch (e) {
@@ -4663,6 +4776,20 @@
         const el2 = document.getElementById('meu-perfil-config');
         if (el1) el1.innerHTML = htmlPerfil;
         if (el2) el2.innerHTML = htmlPerfil;
+        try {
+          const nome = String(usuarioAtual.nome || usuarioAtual.user || '—');
+          const cargo = (typeof labelFuncao === 'function' ? labelFuncao(usuarioAtual.funcao) : (usuarioAtual.funcao || ''));
+          const av = document.getElementById('perfil-chip-avatar');
+          const nEl = document.getElementById('perfil-chip-nome');
+          const cEl = document.getElementById('perfil-chip-cargo');
+          if (av) {
+            const parts = nome.trim().split(/\s+/).filter(Boolean);
+            const ini = ((parts[0] && parts[0][0]) || '?') + ((parts.length > 1 && parts[parts.length - 1][0]) || '');
+            av.textContent = ini.toUpperCase();
+          }
+          if (nEl) nEl.textContent = nome;
+          if (cEl) cEl.textContent = cargo ? ('@' + usuarioAtual.user + ' · ' + cargo) : ('@' + (usuarioAtual.user || ''));
+        } catch (e) {}
       }
       // Painel de pendentes no Início (Admin / Supervisor / DEV)
       try {
@@ -5501,6 +5628,46 @@
     }
 
     // NÃO força reload automático: no WebInto isso vira tela 500 com frequência
+    var __valisUpdatePending = null;
+
+    function mostrarBannerAtualizacao(remota, msg, force) {
+      try {
+        __valisUpdatePending = { v: remota, force: !!force };
+        var banner = document.getElementById('update-banner');
+        var msgEl = document.getElementById('update-banner-msg');
+        if (msgEl) {
+          msgEl.textContent = msg || ('Versão ' + remota + ' disponível (você está na ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') + ').');
+        }
+        if (banner) banner.classList.add('show');
+      } catch (e) {}
+    }
+    function esconderBannerAtualizacao() {
+      try {
+        var banner = document.getElementById('update-banner');
+        if (banner) banner.classList.remove('show');
+      } catch (e) {}
+    }
+    function aplicarAtualizacaoApp() {
+      try {
+        var v = (__valisUpdatePending && __valisUpdatePending.v) || '';
+        if (window.ValisUpdate && ValisUpdate.softReload) {
+          ValisUpdate.softReload(v || 'new');
+          return;
+        }
+        var path = (location.pathname || '/index.html').split('?')[0];
+        location.replace(path + '?v=' + encodeURIComponent(v || 'new') + '&r=' + Date.now());
+      } catch (e) { location.reload(); }
+    }
+    function adiarAtualizacaoApp() {
+      try {
+        var v = (__valisUpdatePending && __valisUpdatePending.v) || '';
+        if (v) sessionStorage.setItem('valis_skip_force_' + v, '1');
+        if (window.ValisUpdate && ValisUpdate.markDone) ValisUpdate.markDone(v);
+      } catch (e) {}
+      esconderBannerAtualizacao();
+      toast('Atualização adiada nesta sessão');
+    }
+
     async function checarAtualizacaoApp(opts) {
       opts = opts || {};
       try {
@@ -5509,7 +5676,6 @@
           headers: { 'Cache-Control': 'no-cache' }
         });
         if (!res.ok) {
-          // host instável — só sinaliza bolinha, NÃO recarrega a página
           if (res.status >= 500) {
             try { setConnStatus('yellow', 'Host instável (' + res.status + ') — app continua local'); } catch (e) {}
           }
@@ -5518,24 +5684,40 @@
         const data = await res.json();
         const remota = String((data && data.v) || '');
         const local = String(typeof APP_VERSION !== 'undefined' ? APP_VERSION : '');
-        // só avisa; reload só se forceReload E usuário confirmar (evita loop 500)
-        if (data && data.forceReload === true && remota && local && remota !== local) {
-          try {
-            if (sessionStorage.getItem('valis_skip_force_' + remota) === '1') return false;
-            if (confirm('Nova versão ' + remota + ' disponível. Atualizar agora?')) {
-              const path = (location.pathname || '/index.html').split('?')[0];
-              location.replace(path + '?v=' + encodeURIComponent(remota) + '&r=' + Date.now());
-              return true;
-            }
-            sessionStorage.setItem('valis_skip_force_' + remota, '1');
-          } catch (e) {}
+        if (!(remota && local && remota !== local)) {
+          esconderBannerAtualizacao();
+          return false;
         }
-        return false;
+        try {
+          if (sessionStorage.getItem('valis_skip_force_' + remota) === '1') return false;
+        } catch (e) {}
+
+        var msg = (data && data.msg) ? String(data.msg) : '';
+        var texto = 'Nova versão ' + remota + ' disponível (atual: ' + local + ').';
+        if (msg) texto += ' ' + msg;
+
+        mostrarBannerAtualizacao(remota, texto, !!(data && data.forceReload));
+        return true;
       } catch (e) {
-        // sem rede: normal ao voltar do segundo plano — app segue com dados locais
         try { setConnStatus('yellow', 'Sem rede — modo local'); } catch (e2) {}
         return false;
       }
+    }
+
+    function togglePerfilChip() {
+      try {
+        var chip = document.getElementById('perfil-chip');
+        var det = document.getElementById('perfil-chip-detail');
+        if (!chip || !det) return;
+        var open = !chip.classList.contains('open');
+        if (open) {
+          chip.classList.add('open');
+          det.classList.add('show');
+        } else {
+          chip.classList.remove('open');
+          det.classList.remove('show');
+        }
+      } catch (e) {}
     }
 
 
@@ -6076,13 +6258,15 @@
         if (window.ValisUpdate) {
           const u = await ValisUpdate.check();
           if (u && u.update && u.data) {
-            const ok = confirm('Nova versão ' + u.data.v + ' no servidor. Atualizar?');
-            if (ok) {
-              ValisUpdate.softReload(u.data.v);
-              return;
-            }
-            // Cancelar = não perguntar de novo nesta sessão
-            if (ValisUpdate.markDone) ValisUpdate.markDone(u.data.v);
+            try {
+              if (window.ValisDevLog) ValisDevLog.add('update_available', { v: u.data.v, force: !!u.force });
+            } catch (e) {}
+            var msg = (u.data && u.data.msg) ? String(u.data.msg) : '';
+            var texto = 'Nova versão ' + u.data.v + ' disponível (atual: ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') + ').';
+            if (msg) texto += ' ' + msg;
+            mostrarBannerAtualizacao(String(u.data.v), texto, !!u.force);
+          } else {
+            esconderBannerAtualizacao();
           }
         } else {
           await checarAtualizacaoApp({ forcarSeErro: false });
