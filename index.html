@@ -91,18 +91,58 @@
       justify-content: center;
       padding: 24px;
     }
-    .login-box { width: 100%; max-width: 400px; padding: 28px 22px; text-align: center; }
+    .login-box { width: 100%; max-width: 400px; padding: 28px 22px 22px; text-align: center; }
     .login-logo {
-      width: 60px; height: 60px;
-      background: linear-gradient(135deg, #009C3B, #002776);
+      width: 64px; height: 64px;
+      background: linear-gradient(145deg, #009C3B 0%, #0b6b3a 40%, #002776 100%);
       border-radius: 18px;
       display: flex; align-items: center; justify-content: center;
       font-size: 30px;
       margin: 0 auto 14px;
-      box-shadow: 0 0 24px rgba(0,156,59,0.4);
+      box-shadow: 0 0 28px rgba(0,156,59,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.08);
     }
     .login-box h1 { font-size: 22px; font-weight: 900; letter-spacing: 0.5px; }
-    .login-box .sub { color: var(--muted); font-size: 13px; margin: 6px 0 18px; }
+    .login-box .sub { color: var(--muted); font-size: 13px; margin: 6px 0 8px; }
+    .login-meta {
+      font-size: 11px; color: var(--muted); margin: 0 0 10px; line-height: 1.4;
+    }
+    .login-meta b { color: var(--text); font-weight: 700; }
+    .login-meta .linkish {
+      background: none; border: none; color: var(--cyan); font-size: 11px;
+      font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0;
+    }
+    .login-version {
+      display: inline-block;
+      margin: 0 0 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #86efac;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.28);
+      letter-spacing: 0.3px;
+    }
+    .login-alert {
+      display: none;
+      text-align: left;
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+      border: 1px solid rgba(251,191,36,0.35);
+      background: rgba(251,191,36,0.1);
+      color: #fde68a;
+    }
+    .login-alert.show { display: block; }
+    .login-alert.info {
+      border-color: rgba(34,197,94,0.35);
+      background: rgba(34,197,94,0.1);
+      color: #bbf7d0;
+    }
+    .login-alert b { color: #fff; }
     .login-tabs {
       display: flex; gap: 6px; margin-bottom: 16px;
       background: rgba(0,0,0,0.35); border-radius: 10px; padding: 4px;
@@ -112,6 +152,26 @@
       background: transparent; color: var(--muted); font-weight: 700; font-size: 13px;
     }
     .login-tabs button.active { background: linear-gradient(135deg, #009C3B, #002776); color: #fff; }
+    .login-pass-wrap { position: relative; }
+    .login-pass-wrap .input { padding-right: 44px; }
+    .login-pass-toggle {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: transparent; border: none; color: var(--muted);
+      font-size: 16px; cursor: pointer; padding: 6px; line-height: 1;
+    }
+    .login-pass-toggle:active { color: var(--green); }
+    #form-entrar .btn {
+      width: 100%;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 6px 20px rgba(22,163,74,0.35);
+    }
+    #form-entrar .btn:active { filter: brightness(1.05); }
     .field { margin-bottom: 12px; text-align: left; }
     .field label {
       display: block; font-size: 11px; font-weight: 700; color: var(--muted);
@@ -403,6 +463,61 @@
     }
     .btn-msg-wrap { position: relative; display: block; width: 100%; }
     .btn-msg-wrap .msg-badge { top: 4px; right: 8px; }
+
+    /* ---- Painel de entrada (avisos ao abrir) ---- */
+    .inicio-pack {
+      display: none;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.22);
+      background: rgba(15,23,42,0.92);
+      overflow: hidden;
+    }
+    .inicio-pack.show { display: block; }
+    .inicio-pack .ip-head {
+      padding: 10px 12px 6px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+    .inicio-pack .ip-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(148,163,184,0.12);
+      cursor: pointer;
+    }
+    .inicio-pack .ip-item:active { background: rgba(34,197,94,0.08); }
+    .inicio-pack .ip-ico {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+      background: rgba(34,197,94,0.12);
+    }
+    .inicio-pack .ip-item.warn .ip-ico { background: rgba(251,191,36,0.15); }
+    .inicio-pack .ip-item.msg .ip-ico { background: rgba(59,130,246,0.15); }
+    .inicio-pack .ip-item.upd .ip-ico { background: rgba(34,197,94,0.18); }
+    .inicio-pack .ip-body { flex: 1; min-width: 0; }
+    .inicio-pack .ip-title {
+      font-size: 13px; font-weight: 700; color: #f1f5f9;
+    }
+    .inicio-pack .ip-sub {
+      font-size: 11px; color: var(--muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .inicio-pack .ip-badge {
+      min-width: 22px; height: 22px; padding: 0 6px;
+      border-radius: 999px; background: #ef4444; color: #fff;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .inicio-pack .ip-welcome {
+      padding: 10px 12px 4px;
+      font-size: 12px; color: var(--muted);
+    }
+    .inicio-pack .ip-welcome b { color: #e2e8f0; }
+
 
     .nav button.active {
       color: #fff;
@@ -783,7 +898,9 @@
       <div class="login-logo">🛡️</div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px">Desenvolvido por <b style="color:var(--text)">Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()" style="background:none;border:none;color:var(--cyan);font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <div class="login-version" id="login-version">v—</div>
+      <div class="login-alert" id="login-alert" role="status"></div>
       <div class="br-flag-strip"></div>
       <div class="login-tabs">
         <button class="active" id="tab-btn-entrar" onclick="mostrarLogin('entrar')">Entrar</button>
@@ -791,7 +908,13 @@
       </div>
       <div id="form-entrar">
         <div class="field"><label>Usuário</label><input id="login-user" class="input" placeholder="Seu usuário" autocomplete="username"></div>
-        <div class="field"><label>Senha</label><input id="login-pass" class="input" type="password" placeholder="Sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+        <div class="field">
+          <label>Senha</label>
+          <div class="login-pass-wrap">
+            <input id="login-pass" class="input" type="password" placeholder="Sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()">
+            <button type="button" class="login-pass-toggle" id="login-pass-toggle" onclick="toggleLoginSenha()" title="Mostrar/ocultar senha" aria-label="Mostrar senha">👁</button>
+          </div>
+        </div>
         <label style="display:flex;align-items:center;gap:8px;margin:10px 0 14px;font-size:13px;color:var(--muted);cursor:pointer">
           <input type="checkbox" id="login-manter" checked style="width:18px;height:18px">
           Manter conta conectada neste aparelho
@@ -1022,6 +1145,12 @@
             <button type="button" class="ub-btn-go" onclick="aplicarAtualizacaoApp()">Atualizar agora</button>
             <button type="button" class="ub-btn-later" onclick="adiarAtualizacaoApp()">Depois</button>
           </div>
+        </div>
+
+        <div class="inicio-pack" id="inicio-pack">
+          <div class="ip-welcome" id="inicio-pack-welcome">Bem-vindo</div>
+          <div class="ip-head">📋 Ao abrir o app</div>
+          <div id="inicio-pack-items"></div>
         </div>
 
         <div class="plantao-vivo-card" id="plantao-vivo-card">
@@ -1491,7 +1620,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.5';
+    const APP_VERSION = '6.12.7';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1944,6 +2073,53 @@
       document.getElementById('login-msg').textContent = '';
       document.getElementById('login-msg').className = 'erro';
     }
+    function toggleLoginSenha() {
+      try {
+        var inp = document.getElementById('login-pass');
+        var btn = document.getElementById('login-pass-toggle');
+        if (!inp) return;
+        if (inp.type === 'password') {
+          inp.type = 'text';
+          if (btn) btn.textContent = '🙈';
+        } else {
+          inp.type = 'password';
+          if (btn) btn.textContent = '👁';
+        }
+      } catch (e) {}
+    }
+    function atualizarPainelLogin() {
+      try {
+        var verEl = document.getElementById('login-version');
+        if (verEl) {
+          verEl.textContent = 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—');
+        }
+        var userInp = document.getElementById('login-user');
+        if (userInp && !String(userInp.value || '').trim()) {
+          try {
+            var last = localStorage.getItem('valis_last_user') || '';
+            if (last) userInp.value = last;
+          } catch (e) {}
+        }
+        var alertEl = document.getElementById('login-alert');
+        if (!alertEl) return;
+        var msgs = [];
+        if (!navigator.onLine) {
+          msgs.push('<b>Sem internet</b> — o app pode funcionar em modo local.');
+        }
+        try {
+          if (typeof __valisUpdatePending !== 'undefined' && __valisUpdatePending && __valisUpdatePending.v) {
+            msgs.push('<b>Atualização</b> disponível (v' + __valisUpdatePending.v + '). Entre e atualize.');
+          }
+        } catch (e) {}
+        if (msgs.length) {
+          alertEl.innerHTML = msgs.join('<br>');
+          alertEl.className = (!navigator.onLine) ? 'login-alert show' : 'login-alert show info';
+        } else {
+          alertEl.innerHTML = '';
+          alertEl.className = 'login-alert';
+        }
+      } catch (e) {}
+    }
     function msgLogin(texto, ok) {
       const el = document.getElementById('login-msg');
       el.textContent = texto;
@@ -2336,6 +2512,7 @@
       try { await authLoginValis(user, pass); } catch (e) { console.warn(e); }
 
       usuarioAtual = byUser;
+      try { localStorage.setItem('valis_last_user', byUser.user || ''); } catch (e) {}
       const manter = document.getElementById('login-manter');
       const payload = JSON.stringify({ user: byUser.user });
       sessionStorage.setItem('valis_user', payload);
@@ -2350,6 +2527,7 @@
       pedirPermissaoNotificacoes();
       try { pvBoot(); } catch (e) {}
       entrarApp();
+      try { setTimeout(function() { atualizarPainelInicio(); }, 300); } catch (e) {}
     }
 
 
@@ -3177,6 +3355,79 @@
           else title.textContent = 'Mensagens';
         }
       } catch (e) {}
+      try { atualizarPainelInicio(); } catch (e2) {}
+    }
+
+    function atualizarPainelInicio() {
+      try {
+        var pack = document.getElementById('inicio-pack');
+        var items = document.getElementById('inicio-pack-items');
+        var welcome = document.getElementById('inicio-pack-welcome');
+        if (!pack || !items) return;
+        if (!usuarioAtual) {
+          pack.classList.remove('show');
+          return;
+        }
+        var nome = usuarioAtual.nome || usuarioAtual.user || '';
+        if (welcome) {
+          welcome.innerHTML = 'Olá, <b>' + String(nome).replace(/</g, '&lt;') + '</b> — resumo ao abrir';
+        }
+        var htmlItems = '';
+        var show = false;
+
+        // Mensagens não lidas
+        var nMsg = 0;
+        try { nMsg = contarMsgsNaoLidas(); } catch (e) { nMsg = 0; }
+        if (nMsg > 0) {
+          show = true;
+          var label = nMsg > 99 ? '99+' : String(nMsg);
+          htmlItems += '<div class="ip-item msg" onclick="tab(\'mensagens\')">' +
+            '<div class="ip-ico">✉</div>' +
+            '<div class="ip-body"><div class="ip-title">Mensagens não lidas</div>' +
+            '<div class="ip-sub">Toque para abrir e ler</div></div>' +
+            '<div class="ip-badge">' + label + '</div></div>';
+        }
+
+        // Atualização disponível (banner)
+        var updBanner = document.getElementById('update-banner');
+        var temUpdate = updBanner && updBanner.classList.contains('show');
+        if (temUpdate) {
+          show = true;
+          var ver = (__valisUpdatePending && __valisUpdatePending.v) ? __valisUpdatePending.v : '';
+          htmlItems += '<div class="ip-item upd" onclick="aplicarAtualizacaoApp()">' +
+            '<div class="ip-ico">🚀</div>' +
+            '<div class="ip-body"><div class="ip-title">Atualização disponível</div>' +
+            '<div class="ip-sub">' + (ver ? ('Versão ' + ver + ' — toque para atualizar') : 'Toque para atualizar agora') + '</div></div></div>';
+        }
+
+        // Plantão em andamento
+        try {
+          var sess = typeof pvLoad === 'function' ? pvLoad() : null;
+          if (sess && (sess.status === 'ativo' || sess.status === 'almoco')) {
+            show = true;
+            var stLabel = sess.status === 'almoco' ? 'Em almoço/janta' : 'Plantão em andamento';
+            htmlItems += '<div class="ip-item warn" onclick="document.getElementById(\'plantao-vivo-card\')&&document.getElementById(\'plantao-vivo-card\').scrollIntoView({behavior:\'smooth\'})">' +
+              '<div class="ip-ico">⚡</div>' +
+              '<div class="ip-body"><div class="ip-title">' + stLabel + '</div>' +
+              '<div class="ip-sub">' + (sess.postoNome ? (sess.postoNome + ' · ') : '') + 'desde ' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.checkIn) : '—') + '</div></div></div>';
+          }
+        } catch (e) {}
+
+        // Sem conexão
+        try {
+          if (!navigator.onLine || !firebaseOk) {
+            show = true;
+            htmlItems += '<div class="ip-item warn">' +
+              '<div class="ip-ico">📡</div>' +
+              '<div class="ip-body"><div class="ip-title">Modo local / instável</div>' +
+              '<div class="ip-sub">Dados serão sincronizados quando a conexão voltar</div></div></div>';
+          }
+        } catch (e) {}
+
+        items.innerHTML = htmlItems;
+        if (show) pack.classList.add('show');
+        else pack.classList.remove('show');
+      } catch (e) { console.warn('painel inicio', e); }
     }
 
     function aplicarPermissoes() {
@@ -5946,12 +6197,15 @@
           msgEl.textContent = msg || ('Versão ' + remota + ' disponível (você está na ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') + ').');
         }
         if (banner) banner.classList.add('show');
+        try { atualizarPainelInicio(); } catch (e2) {}
+        try { atualizarPainelLogin(); } catch (e3) {}
       } catch (e) {}
     }
     function esconderBannerAtualizacao() {
       try {
         var banner = document.getElementById('update-banner');
         if (banner) banner.classList.remove('show');
+        try { atualizarPainelInicio(); } catch (e2) {}
       } catch (e) {}
     }
     function aplicarAtualizacaoApp() {
@@ -6606,6 +6860,8 @@
       try { if (usuarioAtual) pvBoot(); } catch (e) {}
       if (window.ValisDevLog) ValisDevLog.add('app_boot', { ver: APP_VERSION, href: location.href });
       try { verificarAtualizacaoConcluida(); } catch (e) {}
+      try { atualizarPainelLogin(); } catch (e) {}
+      try { setTimeout(function() { if (usuarioAtual) atualizarPainelInicio(); }, 400); } catch (e) {}
       try {
         if (window.ValisUpdate) {
           const u = await ValisUpdate.check();

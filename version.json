@@ -1,5 +1,5 @@
 {
-  "v": "6.12.5",
+  "v": "6.12.7",
   "forceReload": true,
-  "msg": "Badge msgs nao lidas + tempo global de notificacoes (DEV)"
+  "msg": "Painel de login melhorado: versao, alerta, olho na senha"
 }
