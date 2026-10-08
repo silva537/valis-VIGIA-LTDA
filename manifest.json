@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "valis-vigia-ltda.",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "valis-vigia-ltda.vercel",
+  "start_url": "/",
+  "theme_color": "#020617",
+  "lang": "pt",
+  "id": "valis-vigia-ltda"
+}
