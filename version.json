@@ -1,5 +1,5 @@
 {
-  "v": "6.11.0",
+  "v": "6.11.1",
   "forceReload": false,
-  "msg": "Novo sistema de solicitações de cadastro"
+  "msg": "Excluir user fix + login nuvem toggle + manutenção WebInto"
 }

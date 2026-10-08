@@ -598,6 +598,8 @@
         <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
         <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
         <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
+        <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login na nuvem ON/OFF<small>Ativa ou bloqueia sync de login no Firebase</small></div></button>
+        <button class="func-btn" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Permite ou bloqueia novos pedidos</small></div></button>
         <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
         <button class="func-btn" onclick="devFn(25)"><span class="ico">🔧</span><div>Reparar usuários<small>Normaliza flags e hashes</small></div></button>
       </div></div>
@@ -1190,7 +1192,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.11.0';
+    const APP_VERSION = '6.11.1';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1782,31 +1784,48 @@
       }
     }
 
-    async function salvarUsersSeguro() {
+    async function salvarUsersSeguro(opts) {
+      opts = opts || {};
+      const forcarLocal = !!opts.forcarLocal; // true = não traz de volta quem foi excluído na nuvem
       try {
         if (!firebaseOk) await initFirebase();
         await ensureFirebaseAuth();
       } catch (e) {}
-      let remoteUsers = null;
-      if (firebaseOk && fbDb && DataService.mode === 'firebase') {
-        try {
-          const snap = await fbDb.collection('valis').doc('db_v42').get();
-          if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
-            remoteUsers = snap.data().data.users;
+      if (!forcarLocal) {
+        let remoteUsers = null;
+        if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+          try {
+            const snap = await fbDb.collection('valis').doc('db_v42').get();
+            if (snap.exists && snap.data() && snap.data().data && Array.isArray(snap.data().data.users)) {
+              remoteUsers = snap.data().data.users;
+            }
+          } catch (e) {
+            console.warn('salvarUsersSeguro read:', e);
           }
-        } catch (e) {
-          console.warn('salvarUsersSeguro read:', e);
+        }
+        if (remoteUsers) {
+          db.users = mergeUsers(db.users || [], remoteUsers);
         }
       }
-      if (remoteUsers) {
-        db.users = mergeUsers(db.users || [], remoteUsers);
-      }
       const ok = await salvar();
+      // grava explícita do array users (fonte da verdade local nesta ação)
+      if (forcarLocal && firebaseOk && fbDb && DataService.mode === 'firebase') {
+        try {
+          await fbDb.collection('valis').doc('db_v42').set({
+            data: db,
+            updatedAt: new Date().toISOString(),
+            sec: 1
+          }, { merge: true });
+        } catch (e) {
+          console.warn('forcarLocal write:', e);
+        }
+      }
       if (window.ValisDevLog) {
         ValisDevLog.add('users_save', {
           qtd: (db.users || []).length,
           pend: (db.users || []).filter(u => u.pendente).length,
-          ok: ok !== false
+          ok: ok !== false,
+          forcarLocal: forcarLocal
         });
       }
       return ok;
@@ -1869,17 +1888,76 @@
       }
     }
 
+
+    // ----- Config app (login nuvem / cadastro público) -----
+    // Firestore: valis/config_app { loginNuvem: true, cadastroPublico: true }
+    async function carregarConfigApp() {
+      const def = { loginNuvem: true, cadastroPublico: true };
+      try {
+        const local = localStorage.getItem('valis_config_app');
+        if (local) {
+          const p = JSON.parse(local);
+          Object.assign(def, p);
+        }
+      } catch (e) {}
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (firebaseOk && fbDb) {
+          const snap = await fbDb.collection('valis').doc('config_app').get();
+          if (snap.exists) {
+            const d = snap.data() || {};
+            if (d.loginNuvem != null) def.loginNuvem = !!d.loginNuvem;
+            if (d.cadastroPublico != null) def.cadastroPublico = !!d.cadastroPublico;
+            try { localStorage.setItem('valis_config_app', JSON.stringify(def)); } catch (e) {}
+          }
+        }
+      } catch (e) { console.warn('config_app', e); }
+      window.__valisConfigApp = def;
+      return def;
+    }
+    async function salvarConfigApp(patch) {
+      const cur = await carregarConfigApp();
+      Object.assign(cur, patch || {});
+      window.__valisConfigApp = cur;
+      try { localStorage.setItem('valis_config_app', JSON.stringify(cur)); } catch (e) {}
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (firebaseOk && fbDb) {
+          await fbDb.collection('valis').doc('config_app').set(cur, { merge: true });
+          return true;
+        }
+      } catch (e) {
+        console.warn(e);
+        return false;
+      }
+      return true;
+    }
+    function loginNuvemAtivo() {
+      const c = window.__valisConfigApp || {};
+      return c.loginNuvem !== false;
+    }
+    function cadastroPublicoAtivo() {
+      const c = window.__valisConfigApp || {};
+      return c.cadastroPublico !== false;
+    }
+
     async function fazerLogin() {
       const user = document.getElementById('login-user').value.trim().toLowerCase();
       const pass = String(document.getElementById('login-pass').value);
       if (!user || !pass) return msgLogin('Preencha usuário e senha.');
-      msgLogin('Sincronizando usuários...', true);
+      msgLogin('Preparando login...', true);
       try {
         await initFirebase();
         await ensureFirebaseAuth();
+        await carregarConfigApp();
       } catch (e) {}
-      // carrega users da nuvem ANTES de qualquer seed local
-      await sincronizarUsersDoFirebase();
+      // sync de usuários só se login na nuvem estiver ativo (DEV pode desligar)
+      if (loginNuvemAtivo()) {
+        msgLogin('Sincronizando usuários...', true);
+        await sincronizarUsersDoFirebase();
+      }
       if (!(db.users || []).length) {
         try {
           const data = await DataService.load('db_v42');
@@ -2225,7 +2303,11 @@
       try {
         await initFirebase();
         await ensureFirebaseAuth();
+        await carregarConfigApp();
       } catch (e) {}
+      if (!cadastroPublicoAtivo()) {
+        return msgLogin('Cadastro público desativado pelo DEV. Peça conta ao administrador.');
+      }
 
       try {
         const hp = await hashSenha(String(pass));
@@ -2456,9 +2538,9 @@
       document.getElementById('u-user').value = '';
       document.getElementById('u-pass').value = '';
       addAtividade('Funcionário: ' + nome + ' (' + funcao + ')', 'admin');
-      await salvar();
+      const okAdd = await salvarUsersSeguro({ forcarLocal: true });
       render();
-      toast('Cadastrado');
+      toast(okAdd === false ? 'Salvo local — Firebase falhou' : 'Cadastrado e sincronizado');
     }
 
     function podeGerenciarUsers() {
@@ -4034,7 +4116,7 @@
         const u = acharUsuarioPorId(id) || acharUsuarioPorLogin(id);
         if (!u || u.user === 'admin' || u.user === 'dev') return alert('Não permitido.');
         u.ativo = !(u.ativo === true || u.ativo === 'true' || u.ativo === 1);
-        await salvarUsersSeguro();
+        await salvarUsersSeguro({ forcarLocal: true });
         render();
         toast(u.ativo ? 'Reativado' : 'Desativado');
       } catch (err) {
@@ -4050,22 +4132,31 @@
         if (usuarioAtual && String(u.user).toLowerCase() === String(usuarioAtual.user).toLowerCase()) {
           return alert('Você não pode excluir o próprio perfil logado.');
         }
-        if (!confirm('Excluir definitivamente o perfil de ' + u.nome + '?')) return;
-        db.users = db.users.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
-        addAtividade('Usuário excluído: ' + u.nome + ' (@' + u.user + ')');
-        await salvarUsersSeguro();
+        if (!confirm('Excluir definitivamente o perfil de ' + u.nome + ' (@' + u.user + ')?\n\nEsta ação remove da nuvem e deste aparelho.')) return;
+        const loginRem = String(u.user || '').toLowerCase();
+        db.users = (db.users || []).filter(x => String(x.user || '').toLowerCase() !== loginRem);
+        addAtividade('Usuário excluído: ' + u.nome + ' (@' + loginRem + ')', 'admin');
+        // forcarLocal evita o merge trazer o usuário de volta da nuvem
+        const okDel = await salvarUsersSeguro({ forcarLocal: true });
         try {
           if (firebaseOk && fbDb) {
             const ref = fbDb.collection('valis').doc('cadastros_pendentes');
             const snap = await ref.get();
             if (snap.exists && Array.isArray((snap.data() || {}).items)) {
-              const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
+              const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== loginRem);
               await ref.set({ items: rest, updatedAt: new Date().toISOString() });
             }
           }
         } catch (e) {}
+        // limpa pedido no novo sistema
+        try {
+          if (db.solicitacoes) {
+            db.solicitacoes = db.solicitacoes.filter(s => String(s.user || '').toLowerCase() !== loginRem);
+            await salvarSolicitacoesNuvem();
+          }
+        } catch (e) {}
         render();
-        toast('Perfil excluído');
+        toast(okDel === false ? 'Removido local (Firebase falhou)' : 'Perfil excluído da nuvem');
       } catch (err) {
         alert('Erro ao excluir: ' + (err && err.message ? err.message : err));
       }
@@ -4289,19 +4380,29 @@
       const m = await lerManutencao();
       const ov = document.getElementById('manutencao-overlay');
       if (!ov) return;
-      // se modal DEV estiver aberto, não esconde o modal
       const modalDev = document.getElementById('modal-dev');
       const modalAberto = modalDev && !modalDev.classList.contains('hidden');
-      // DEV liberado contorna manutenção nesta sessão
+      // Espelha no localStorage para WebInto não “esquecer” após minimizar
+      try {
+        if (m && m.ativo) localStorage.setItem('valis_manutencao', JSON.stringify(m));
+      } catch (e) {}
       if (m.ativo && !devLiberado) {
-        document.getElementById('manutencao-msg').textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
+        const msgEl = document.getElementById('manutencao-msg');
+        if (msgEl) msgEl.textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
         ov.classList.remove('hidden');
-        if (!modalAberto) ov.style.pointerEvents = '';
+        ov.style.display = 'flex';
+        ov.style.zIndex = '99999';
+        ov.style.pointerEvents = 'auto';
         const app = document.getElementById('app');
-        if (app) app.classList.remove('show');
-        // mantém login visível atrás se não houver sessão
-        if (!usuarioAtual) {
-          document.getElementById('login').style.display = 'flex';
+        if (app) {
+          app.classList.remove('show');
+          app.style.display = 'none';
+        }
+        // bloqueia uso: some com login também
+        const loginEl = document.getElementById('login');
+        if (loginEl) loginEl.style.display = 'none';
+        if (modalAberto && modalDev) {
+          // permite DEV abrir menu por cima se já estiver liberado — senão mantém bloqueio
         }
       } else {
         ov.classList.add('hidden');
@@ -4354,6 +4455,14 @@
 
     // Quando manutenção muda no Firebase → força reload nos clientes
     function iniciarListenerManutencao() {
+      // reforço WebInto: consulta periódica (host às vezes “solta” o overlay)
+      try {
+        if (!window.__valisManutPoll) {
+          window.__valisManutPoll = setInterval(function() {
+            try { aplicarManutencaoUI(); } catch (e) {}
+          }, 8000);
+        }
+      } catch (e) {}
       if (!firebaseOk || !fbDb) return;
       try {
         fbDb.collection('valis').doc('manutencao').onSnapshot((snap) => {
