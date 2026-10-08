@@ -606,6 +606,7 @@
         <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
         <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
         <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
+        <button class="func-btn" onclick="devFn(33)"><span class="ico">🧹</span><div>Limpar logins (só admin/dev)<small>Apaga todos os outros usuários</small></div></button>
         <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login na nuvem ON/OFF<small>Ativa ou bloqueia sync de login no Firebase</small></div></button>
         <button class="func-btn" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Permite ou bloqueia novos pedidos</small></div></button>
         <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
@@ -1200,7 +1201,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.11.2';
+    const APP_VERSION = '6.11.3';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1549,10 +1550,8 @@
             const snap = await fbDb.collection('valis').doc(key).get();
             if (snap.exists && snap.data() && snap.data().data) {
               const remote = snap.data().data;
-              if (Array.isArray(remote.users) && typeof mergeUsers === 'function') {
-                data.users = mergeUsers(data.users || [], remote.users);
-              }
-              // NÃO mesclar plantões no save — isso desfaz "fechar folha" e exclusões
+              // NÃO mesclar users nem plantões no save.
+              // Mesclar users no save fazia "Excluir" falhar (usuário voltava da nuvem).
               if (Array.isArray(remote.postos) && remote.postos.length && !(data.postos || []).length) {
                 data.postos = remote.postos;
               }
@@ -3274,6 +3273,10 @@
           })();
           break;
         }
+        case 33: {
+          zerarUsuariosExcetoAdminDev();
+          break;
+        }
         case 31: {
           if (!confirm('Limpar log DEV?')) break;
           if (window.ValisDevLog) ValisDevLog.clear();
@@ -4178,34 +4181,103 @@
         if (usuarioAtual && String(u.user).toLowerCase() === String(usuarioAtual.user).toLowerCase()) {
           return alert('Você não pode excluir o próprio perfil logado.');
         }
-        if (!confirm('Excluir definitivamente o perfil de ' + u.nome + ' (@' + u.user + ')?\n\nEsta ação remove da nuvem e deste aparelho.')) return;
-        const loginRem = String(u.user || '').toLowerCase();
-        db.users = (db.users || []).filter(x => String(x.user || '').toLowerCase() !== loginRem);
+        if (!confirm('Excluir DEFINITIVAMENTE ' + u.nome + ' (@' + u.user + ')?')) return;
+        const loginRem = String(u.user || '').toLowerCase().trim();
+        db.users = (db.users || []).filter(function(x) {
+          return String(x.user || '').toLowerCase().trim() !== loginRem;
+        });
         addAtividade('Usuário excluído: ' + u.nome + ' (@' + loginRem + ')', 'admin');
-        // forcarLocal evita o merge trazer o usuário de volta da nuvem
-        const okDel = await salvarUsersSeguro({ forcarLocal: true });
+        // grava SEM merge (local é a lista final)
+        await salvarUsersSeguro({ forcarLocal: true });
+        // força documento inteiro na nuvem
         try {
+          if (!firebaseOk) await initFirebase();
+          await ensureFirebaseAuth();
           if (firebaseOk && fbDb) {
-            const ref = fbDb.collection('valis').doc('cadastros_pendentes');
-            const snap = await ref.get();
-            if (snap.exists && Array.isArray((snap.data() || {}).items)) {
-              const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== loginRem);
-              await ref.set({ items: rest, updatedAt: new Date().toISOString() });
-            }
+            await fbDb.collection('valis').doc('db_v42').set({
+              data: db,
+              updatedAt: new Date().toISOString(),
+              sec: 1
+            }, { merge: true });
           }
-        } catch (e) {}
-        // limpa pedido no novo sistema
+        } catch (e) { console.warn(e); }
         try {
           if (db.solicitacoes) {
-            db.solicitacoes = db.solicitacoes.filter(s => String(s.user || '').toLowerCase() !== loginRem);
+            db.solicitacoes = db.solicitacoes.filter(function(s) {
+              return String(s.user || '').toLowerCase() !== loginRem;
+            });
             await salvarSolicitacoesNuvem();
           }
         } catch (e) {}
+        // confirma que sumiu local
+        const ainda = (db.users || []).some(function(x) {
+          return String(x.user || '').toLowerCase().trim() === loginRem;
+        });
         render();
-        toast(okDel === false ? 'Removido local (Firebase falhou)' : 'Perfil excluído da nuvem');
+        if (ainda) {
+          alert('Ainda aparece localmente. Toque em Atualizar e tente de novo.');
+        } else {
+          toast('Excluído: @' + loginRem);
+        }
       } catch (err) {
         alert('Erro ao excluir: ' + (err && err.message ? err.message : err));
       }
+    }
+
+    /** DEV: apaga TODOS os usuários exceto admin e dev (local + nuvem) */
+    async function zerarUsuariosExcetoAdminDev() {
+      if (!podeDevPerigoso() && !(usuarioAtual && (usuarioAtual.funcao === 'dev' || usuarioAtual.funcao === 'admin'))) {
+        return alert('Só Admin/DEV.');
+      }
+      if (!confirm('1/2 — Apagar TODOS os logins e deixar só admin e dev?')) return;
+      if (!confirm('2/2 — Confirma? Isso remove vigilantes/equipe/supervisor da nuvem e deste aparelho.')) return;
+      const keep = (db.users || []).filter(function(u) {
+        const x = String(u.user || '').toLowerCase();
+        return x === 'admin' || x === 'dev';
+      });
+      // garante admin/dev
+      if (!keep.some(function(u) { return u.user === 'admin'; })) {
+        const hp = await hashSenha('admin123');
+        keep.push({
+          id: 1, nome: 'Administrador', user: 'admin',
+          passHash: hp.hash, passSalt: hp.salt,
+          funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
+        });
+      }
+      if (!keep.some(function(u) { return u.user === 'dev'; })) {
+        const hp = await hashSenha('dev12345');
+        keep.push({
+          id: 2, nome: 'Desenvolvedor', user: 'dev',
+          passHash: hp.hash, passSalt: hp.salt,
+          funcao: 'dev', ativo: true, pendente: false, criadoEm: new Date().toISOString()
+        });
+      }
+      db.users = keep;
+      db.solicitacoes = [];
+      try { localStorage.setItem('valis_solicitacoes', '[]'); } catch (e) {}
+      await salvarUsersSeguro({ forcarLocal: true });
+      try {
+        if (firebaseOk && fbDb) {
+          await fbDb.collection('valis').doc('db_v42').set({
+            data: db,
+            updatedAt: new Date().toISOString(),
+            sec: 1
+          }, { merge: true });
+          await fbDb.collection('valis').doc('solicitacoes').set({
+            items: [],
+            updatedAt: new Date().toISOString()
+          });
+          await fbDb.collection('valis').doc('cadastros_pendentes').set({
+            items: [],
+            updatedAt: new Date().toISOString()
+          });
+        }
+      } catch (e) { console.warn(e); }
+      addAtividade('Limpeza: só admin e dev restantes', 'admin');
+      render();
+      try { await atualizarPainelSolicitacoes(false); } catch (e) {}
+      alert('Pronto. Restaram apenas admin e dev.\n\nadmin / admin123\ndev / dev12345');
+      toast('Lista limpa: só admin e dev');
     }
 
     window.__valisUserAct = function(act, who) {
@@ -4236,6 +4308,7 @@
       window.aprovarCargo = aprovarCargo;
       window.recusarCargo = recusarCargo;
       window.excluirUser = excluirUser;
+      window.zerarUsuariosExcetoAdminDev = zerarUsuariosExcetoAdminDev;
       window.desativarUser = desativarUser;
       window.alterarFuncaoUser = alterarFuncaoUser;
     } catch (e) {}

@@ -1,5 +1,5 @@
 {
-  "v": "6.11.2",
+  "v": "6.11.3",
   "forceReload": false,
-  "msg": "Senha DEV no painel de manutenção"
+  "msg": "Excluir user definitivo + limpar só admin/dev"
 }
