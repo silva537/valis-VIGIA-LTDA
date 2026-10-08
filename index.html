@@ -478,6 +478,65 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ---- Modo Plantão Ativo ---- */
+    .plantao-vivo-card {
+      background: linear-gradient(160deg, #0b1220 0%, #0f1a2e 50%, #0a1628 100%);
+      border: 1px solid rgba(34,197,94,0.25);
+      border-radius: 16px;
+      padding: 14px 14px 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 24px rgba(34,197,94,0.08);
+    }
+    .plantao-vivo-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 6px;
+    }
+    .plantao-vivo-head .titulo {
+      font-size: 13px; font-weight: 800; letter-spacing: 0.03em;
+      color: #e2e8f0; display: flex; align-items: center; gap: 6px;
+    }
+    .plantao-vivo-badge {
+      font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+      border: 1px solid rgba(34,197,94,0.45); color: #86efac; background: rgba(34,197,94,0.12);
+    }
+    .plantao-vivo-badge.idle { color: #94a3b8; border-color: rgba(148,163,184,0.35); background: rgba(148,163,184,0.1); }
+    .plantao-vivo-badge.almoco { color: #fbbf24; border-color: rgba(251,191,36,0.45); background: rgba(251,191,36,0.12); }
+    .plantao-vivo-badge.fim { color: #f87171; border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.1); }
+    .plantao-vivo-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+    .plantao-vivo-meta b { color: #cbd5e1; font-weight: 600; }
+    .plantao-vivo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .plantao-vivo-btns .full { grid-column: 1 / -1; }
+    .btn-pl-in {
+      background: #16a34a; color: #fff; border: none; border-radius: 12px;
+      padding: 12px 10px; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .btn-pl-in:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-pl-out {
+      background: #dc2626; color: #fff; border: none; border-radius: 12px;
+      padding: 12px 10px; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .btn-pl-out:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-pl-almoco {
+      background: #ea580c; color: #fff; border: none; border-radius: 12px;
+      padding: 12px 10px; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .btn-pl-almoco:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-pl-volta {
+      background: #d97706; color: #fff; border: none; border-radius: 12px;
+      padding: 12px 10px; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .btn-pl-volta:disabled { opacity: 0.4; cursor: not-allowed; }
+    .plantao-vivo-select {
+      width: 100%; margin-bottom: 8px; background: #0f172a; color: var(--text);
+      border: 1px solid rgba(148,163,184,0.25); border-radius: 10px; padding: 10px 12px; font-size: 13px;
+    }
+    .plantao-vivo-geo {
+      font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.35;
+    }
+    .plantao-vivo-geo .ok { color: #4ade80; }
+    .plantao-vivo-geo .warn { color: #fbbf24; }
+
+
     .modal-bg {
       position: fixed; inset: 0; background: rgba(0,0,0,.65);
       display: flex; align-items: center; justify-content: center;
@@ -781,6 +840,27 @@
       <section id="tab-inicio" class="tab active">
         <div class="title">Dashboard</div>
         <div class="br-flag-strip"></div>
+
+        <div class="plantao-vivo-card" id="plantao-vivo-card">
+          <div class="plantao-vivo-head">
+            <div class="titulo">⚡ MODO PLANTÃO ATIVO</div>
+            <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
+          </div>
+          <div class="plantao-vivo-meta" id="pv-meta">
+            Selecione o posto e inicie o check-in (manual ou por GPS).
+          </div>
+          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()">
+            <option value="">— Selecione o posto —</option>
+          </select>
+          <div class="plantao-vivo-btns">
+            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
+            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
+            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Registrar saída almoço / janta</button>
+            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Registrar volta do almoço / janta</button>
+          </div>
+          <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
+        </div>
+
         <div class="card">
           <div class="card-label">Meu perfil</div>
           <div id="meu-perfil" class="item">—</div>
@@ -941,7 +1021,16 @@
         <div class="card">
           <div class="field"><label>Nome do posto</label><input id="pn" class="input" placeholder="Ex: UFV São Miguel"></div>
           <div class="field"><label>Destino / Local</label><input id="pd" class="input" placeholder="Endereço ou referência"></div>
-          <button class="btn green" onclick="addPosto()">Cadastrar posto</button>
+          <div class="grid2">
+            <div class="field"><label>Latitude (GPS)</label><input id="pn-lat" class="input" type="number" step="any" placeholder="-22.61"></div>
+            <div class="field"><label>Longitude (GPS)</label><input id="pn-lng" class="input" type="number" step="any" placeholder="-43.71"></div>
+          </div>
+          <div class="field"><label>Raio geofence (metros)</label><input id="pn-raio" class="input" type="number" min="30" step="10" value="150" placeholder="150"></div>
+          <div class="btn-row">
+            <button type="button" class="btn dark" onclick="postoUsarGpsAtual()">📍 Usar GPS atual</button>
+            <button type="button" class="btn green" onclick="addPosto()">Cadastrar posto</button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4">Com latitude/longitude, o check-in e o check-out do plantão podem ser automáticos ao entrar/sair do raio.</p>
         </div>
         <div id="lp"></div>
       </section>
@@ -1204,7 +1293,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.11.5';
+    const APP_VERSION = '6.12.1';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2047,6 +2136,7 @@
       try { await salvar(); } catch (e) {}
       if (window.ValisDevLog) ValisDevLog.add('login_ok', { user: byUser.user, funcao: byUser.funcao });
       pedirPermissaoNotificacoes();
+      try { pvBoot(); } catch (e) {}
       entrarApp();
     }
 
@@ -2525,7 +2615,6 @@
       opts = opts || {};
       const title = titulo || 'VALIS VIGIA';
       const body = corpo == null ? '' : String(corpo);
-      // Som sempre que possível (app em primeiro plano / aba ativa)
       try {
         if (!opts.silent && document.visibilityState === 'visible') {
           tocarSomNotificacao();
@@ -2537,7 +2626,6 @@
           try { await Notification.requestPermission(); } catch (e) {}
         }
         if (Notification.permission !== 'granted') return;
-
         const options = {
           body: body,
           icon: '/launchericon-192x192.png',
@@ -2549,8 +2637,6 @@
           vibrate: [200, 100, 200],
           data: { url: '/', ts: Date.now() }
         };
-
-        // Preferir Service Worker (funciona melhor em segundo plano / tela bloqueada)
         if ('serviceWorker' in navigator) {
           try {
             const reg = await navigator.serviceWorker.ready;
@@ -2560,8 +2646,6 @@
             }
           } catch (e) { console.warn('SW notify:', e); }
         }
-
-        // Fallback: Notification da página
         const n = new Notification(title, options);
         setTimeout(function() { try { n.close(); } catch (e) {} }, opts.requireInteraction ? 20000 : 10000);
       } catch (e) { console.warn(e); }
@@ -4095,9 +4179,24 @@
       const n = document.getElementById('pn').value.trim();
       const d = document.getElementById('pd').value.trim();
       if (!n) return alert('Informe o posto.');
-      db.postos.push({ id: Date.now(), n, d, por: usuarioAtual ? usuarioAtual.nome : '—' });
+      const latEl = document.getElementById('pn-lat');
+      const lngEl = document.getElementById('pn-lng');
+      const raioEl = document.getElementById('pn-raio');
+      const lat = latEl && latEl.value !== '' ? parseFloat(latEl.value) : null;
+      const lng = lngEl && lngEl.value !== '' ? parseFloat(lngEl.value) : null;
+      const raio = raioEl && raioEl.value !== '' ? parseInt(raioEl.value, 10) : 150;
+      const postoObj = { id: Date.now(), n, d, por: usuarioAtual ? usuarioAtual.nome : '—' };
+      if (lat != null && !isNaN(lat) && lng != null && !isNaN(lng)) {
+        postoObj.lat = lat;
+        postoObj.lng = lng;
+        postoObj.raio = (raio && raio >= 30) ? raio : 150;
+      }
+      db.postos.push(postoObj);
       document.getElementById('pn').value = '';
       document.getElementById('pd').value = '';
+      if (latEl) latEl.value = '';
+      if (lngEl) lngEl.value = '';
+      if (raioEl) raioEl.value = '150';
       addAtividade('Posto: ' + n);
       await salvar();
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
@@ -4439,7 +4538,7 @@
       document.getElementById('op').innerHTML = opts;
 
       document.getElementById('lp').innerHTML = db.postos.length
-        ? db.postos.map(x => `<div class="item"><b>📍 ${x.n}</b><div class="meta">${x.d||'—'}</div><div class="actions"><button class="btn dark sm" onclick="remover('postos',${x.id})">Excluir</button></div></div>`).join('')
+        ? db.postos.map(x => `<div class="item"><b>📍 ${x.n}</b><div class="meta">${x.d||'—'}</div><div class="meta">${(x.lat!=null&&x.lng!=null)?('GPS: '+Number(x.lat).toFixed(5)+', '+Number(x.lng).toFixed(5)+' · raio '+(x.raio||150)+' m'):'Sem geofence — defina GPS para auto check-in'}</div><div class="actions"><button class="btn dark sm" onclick="postoDefinirGps(${x.id})">📍 GPS atual</button><button class="btn dark sm" onclick="remover('postos',${x.id})">Excluir</button></div></div>`).join('')
         : '<div class="empty">Nenhum posto.</div>';
 
       document.getElementById('le').innerHTML = db.esc.length
@@ -4598,6 +4697,9 @@
       if (podeGerenciarUsers()) {
         try { atualizarPainelSolicitacoes(false); } catch (e) {}
       }
+
+      // Modo Plantão Ativo (topo do Dashboard)
+      try { if (usuarioAtual) pvRender(); } catch (e) {}
     }
 
 
@@ -5436,13 +5538,399 @@
       }
     }
 
+
+    // ========== MODO PLANTÃO ATIVO (check-in / almoço / GPS) ==========
+    var _pvWatchId = null;
+    var _pvTickTimer = null;
+    var _pvLastPos = null;
+    var _pvAutoBusy = false;
+
+    function pvKey() {
+      var u = usuarioAtual && usuarioAtual.user ? usuarioAtual.user : 'anon';
+      return 'valis_plantao_vivo_' + u;
+    }
+    function pvLoad() {
+      try {
+        var raw = localStorage.getItem(pvKey());
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) { return null; }
+    }
+    function pvSave(sess) {
+      try {
+        if (!sess) localStorage.removeItem(pvKey());
+        else localStorage.setItem(pvKey(), JSON.stringify(sess));
+      } catch (e) {}
+    }
+    function pvHaversine(lat1, lon1, lat2, lon2) {
+      var R = 6371000;
+      var toR = Math.PI / 180;
+      var dLat = (lat2 - lat1) * toR;
+      var dLon = (lon2 - lon1) * toR;
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * toR) * Math.cos(lat2 * toR) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    function pvFmtHora(iso) {
+      if (!iso) return '—';
+      try {
+        var d = new Date(iso);
+        return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      } catch (e) { return '—'; }
+    }
+    function pvFmtDuracao(ms) {
+      if (ms == null || ms < 0) return '00:00:00';
+      var s = Math.floor(ms / 1000);
+      var h = String(Math.floor(s / 3600)).padStart(2, '0');
+      var m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+      var sec = String(s % 60).padStart(2, '0');
+      return h + ':' + m + ':' + sec;
+    }
+    function pvPostoById(id) {
+      return (db.postos || []).find(function(p) { return String(p.id) === String(id); });
+    }
+    function postoUsarGpsAtual() {
+      if (!navigator.geolocation) return alert('GPS não disponível neste aparelho.');
+      toast('Obtendo GPS…');
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        var latEl = document.getElementById('pn-lat');
+        var lngEl = document.getElementById('pn-lng');
+        if (latEl) latEl.value = pos.coords.latitude.toFixed(6);
+        if (lngEl) lngEl.value = pos.coords.longitude.toFixed(6);
+        toast('GPS preenchido (' + Math.round(pos.coords.accuracy) + ' m)');
+      }, function(err) {
+        alert('Falha GPS: ' + (err && err.message ? err.message : 'permissão negada'));
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
+    }
+    async function postoDefinirGps(id) {
+      var p = (db.postos || []).find(function(x) { return String(x.id) === String(id); });
+      if (!p) return;
+      if (!navigator.geolocation) return alert('GPS não disponível.');
+      toast('Obtendo GPS do posto…');
+      navigator.geolocation.getCurrentPosition(async function(pos) {
+        p.lat = pos.coords.latitude;
+        p.lng = pos.coords.longitude;
+        if (!p.raio) p.raio = 150;
+        await salvar();
+        if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+          try {
+            await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
+          } catch (e) { console.warn(e); }
+        }
+        render();
+        try { pvRender(); } catch (e) {}
+        toast('GPS do posto salvo (±' + Math.round(pos.coords.accuracy) + ' m)');
+      }, function(err) {
+        alert('Falha GPS: ' + (err && err.message ? err.message : 'permissão negada'));
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 });
+    }
+    function pvPreencherSelectPostos() {
+      var sel = document.getElementById('pv-posto');
+      if (!sel) return;
+      var sess = pvLoad();
+      var cur = sess && sess.postoId ? String(sess.postoId) : sel.value;
+      var opts = ['<option value="">— Selecione o posto —</option>'];
+      (db.postos || []).forEach(function(p) {
+        var geo = (p.lat != null && p.lng != null) ? ' 📍' : '';
+        opts.push('<option value="' + p.id + '">' + (p.n || 'Posto') + geo + (p.d ? ' — ' + p.d : '') + '</option>');
+      });
+      sel.innerHTML = opts.join('');
+      if (cur) sel.value = cur;
+    }
+    function pvSelecionarPosto() {
+      var sel = document.getElementById('pv-posto');
+      if (!sel || !sel.value) return;
+      var sess = pvLoad();
+      if (sess && sess.status && sess.status !== 'idle' && sess.status !== 'finalizado') {
+        if (String(sess.postoId) !== String(sel.value)) {
+          toast('Finalize o plantão atual antes de trocar o posto');
+          sel.value = String(sess.postoId || '');
+          return;
+        }
+      }
+      var p = pvPostoById(sel.value);
+      if (!sess || sess.status === 'finalizado') {
+        sess = { status: 'idle', postoId: sel.value, postoNome: p ? p.n : '', checkIn: null, almocoInicio: null, almocoFim: null, checkOut: null };
+      } else {
+        sess.postoId = sel.value;
+        sess.postoNome = p ? p.n : '';
+      }
+      pvSave(sess);
+      pvRender();
+      pvStartGeoWatch();
+    }
+    function pvRender() {
+      var card = document.getElementById('plantao-vivo-card');
+      if (!card) return;
+      pvPreencherSelectPostos();
+      var sess = pvLoad() || { status: 'idle' };
+      var badge = document.getElementById('pv-badge');
+      var meta = document.getElementById('pv-meta');
+      var btnIn = document.getElementById('pv-btn-in');
+      var btnOut = document.getElementById('pv-btn-out');
+      var btnAlm = document.getElementById('pv-btn-almoco');
+      var btnVolta = document.getElementById('pv-btn-volta');
+      var st = sess.status || 'idle';
+
+      if (badge) {
+        badge.className = 'plantao-vivo-badge';
+        if (st === 'ativo') badge.textContent = 'EM ANDAMENTO';
+        else if (st === 'almoco') { badge.textContent = 'EM ALMOÇO'; badge.classList.add('almoco'); }
+        else if (st === 'finalizado') { badge.textContent = 'FINALIZADO'; badge.classList.add('fim'); }
+        else { badge.textContent = 'INATIVO'; badge.classList.add('idle'); }
+      }
+
+      var tempo = '';
+      if (sess.checkIn && (st === 'ativo' || st === 'almoco')) {
+        tempo = 'Tempo decorrido: <b>' + pvFmtDuracao(Date.now() - new Date(sess.checkIn).getTime()) + '</b>';
+      } else if (sess.checkIn && sess.checkOut) {
+        tempo = 'Duração: <b>' + pvFmtDuracao(new Date(sess.checkOut).getTime() - new Date(sess.checkIn).getTime()) + '</b>';
+      }
+
+      var linhas = [];
+      if (sess.postoNome) linhas.push('Posto: <b>' + sess.postoNome + '</b>');
+      if (sess.checkIn) linhas.push('Entrada: <b>' + pvFmtHora(sess.checkIn) + '</b>');
+      if (sess.almocoInicio) linhas.push('Saída almoço: <b>' + pvFmtHora(sess.almocoInicio) + '</b>');
+      if (sess.almocoFim) linhas.push('Volta almoço: <b>' + pvFmtHora(sess.almocoFim) + '</b>');
+      if (sess.checkOut) linhas.push('Saída: <b>' + pvFmtHora(sess.checkOut) + '</b>');
+      if (tempo) linhas.push(tempo);
+      if (!linhas.length) linhas.push('Selecione o posto e inicie o check-in (manual ou por GPS).');
+      if (meta) meta.innerHTML = linhas.join('<br>');
+
+      if (btnIn) btnIn.disabled = !(st === 'idle' || st === 'finalizado');
+      if (btnOut) btnOut.disabled = !(st === 'ativo' || st === 'almoco');
+      if (btnAlm) btnAlm.disabled = !(st === 'ativo');
+      if (btnVolta) btnVolta.disabled = !(st === 'almoco');
+
+      if (!_pvTickTimer && (st === 'ativo' || st === 'almoco')) {
+        _pvTickTimer = setInterval(function() {
+          var s2 = pvLoad();
+          if (!s2 || !s2.checkIn) return;
+          if (s2.status !== 'ativo' && s2.status !== 'almoco') return;
+          var m = document.getElementById('pv-meta');
+          if (!m) return;
+          var t2 = 'Tempo decorrido: <b>' + pvFmtDuracao(Date.now() - new Date(s2.checkIn).getTime()) + '</b>';
+          var L = [];
+          if (s2.postoNome) L.push('Posto: <b>' + s2.postoNome + '</b>');
+          if (s2.checkIn) L.push('Entrada: <b>' + pvFmtHora(s2.checkIn) + '</b>');
+          if (s2.almocoInicio) L.push('Saída almoço: <b>' + pvFmtHora(s2.almocoInicio) + '</b>');
+          if (s2.almocoFim) L.push('Volta almoço: <b>' + pvFmtHora(s2.almocoFim) + '</b>');
+          L.push(t2);
+          m.innerHTML = L.join('<br>');
+        }, 1000);
+      }
+      if (_pvTickTimer && st !== 'ativo' && st !== 'almoco') {
+        clearInterval(_pvTickTimer);
+        _pvTickTimer = null;
+      }
+    }
+    function pvGetPosicao() {
+      return new Promise(function(resolve, reject) {
+        if (!navigator.geolocation) return reject(new Error('GPS indisponível'));
+        navigator.geolocation.getCurrentPosition(
+          function(pos) { resolve(pos); },
+          function(err) { reject(err); },
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 4000 }
+        );
+      });
+    }
+    async function pvCheckIn(auto) {
+      var sel = document.getElementById('pv-posto');
+      if (!sel || !sel.value) {
+        alert('Selecione o posto antes do check-in.');
+        return;
+      }
+      var p = pvPostoById(sel.value);
+      var lat = null, lng = null, acc = null;
+      try {
+        var pos = await pvGetPosicao();
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+        acc = pos.coords.accuracy;
+        _pvLastPos = { lat: lat, lng: lng, acc: acc };
+      } catch (e) {
+        if (auto) return;
+        if (!confirm('GPS indisponível. Registrar check-in sem localização?')) return;
+      }
+      var sess = {
+        status: 'ativo',
+        postoId: sel.value,
+        postoNome: p ? p.n : '',
+        checkIn: new Date().toISOString(),
+        almocoInicio: null,
+        almocoFim: null,
+        checkOut: null,
+        checkInLat: lat,
+        checkInLng: lng,
+        checkInAcc: acc,
+        autoIn: !!auto
+      };
+      pvSave(sess);
+      pvRender();
+      pvStartGeoWatch();
+      addAtividade('Check-in plantão: ' + (p ? p.n : 'posto') + (auto ? ' (GPS auto)' : ''));
+      try { await salvar(); } catch (e) {}
+      toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
+      try { notificarApp('VALIS · Check-in', (p ? p.n + ' · ' : '') + pvFmtHora(sess.checkIn)); } catch (e) {}
+    }
+    async function pvAlmocoInicio() {
+      var sess = pvLoad();
+      if (!sess || sess.status !== 'ativo') return;
+      sess.status = 'almoco';
+      sess.almocoInicio = new Date().toISOString();
+      pvSave(sess);
+      pvRender();
+      addAtividade('Saída almoço/janta — ' + (sess.postoNome || ''));
+      try { await salvar(); } catch (e) {}
+      toast('Saída para almoço/janta registrada');
+    }
+    async function pvAlmocoVolta() {
+      var sess = pvLoad();
+      if (!sess || sess.status !== 'almoco') return;
+      sess.status = 'ativo';
+      sess.almocoFim = new Date().toISOString();
+      pvSave(sess);
+      pvRender();
+      addAtividade('Volta almoço/janta — ' + (sess.postoNome || ''));
+      try { await salvar(); } catch (e) {}
+      toast('Volta do almoço/janta registrada');
+    }
+    async function pvCheckOut(auto) {
+      var sess = pvLoad();
+      if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
+      var lat = null, lng = null, acc = null;
+      try {
+        var pos = await pvGetPosicao();
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+        acc = pos.coords.accuracy;
+      } catch (e) {
+        if (auto) return;
+      }
+      sess.status = 'finalizado';
+      sess.checkOut = new Date().toISOString();
+      sess.checkOutLat = lat;
+      sess.checkOutLng = lng;
+      sess.checkOutAcc = acc;
+      sess.autoOut = !!auto;
+      pvSave(sess);
+      pvRender();
+      addAtividade('Check-out plantão: ' + (sess.postoNome || '') + (auto ? ' (GPS auto)' : ''));
+      try { await salvar(); } catch (e) {}
+      toast(auto ? 'Check-out automático (GPS)' : 'Check-out registrado');
+      try { notificarApp('VALIS · Check-out', (sess.postoNome ? sess.postoNome + ' · ' : '') + pvFmtHora(sess.checkOut)); } catch (e) {}
+
+      try {
+        var ini = new Date(sess.checkIn);
+        var fim = new Date(sess.checkOut);
+        var data = ini.toISOString().slice(0, 10);
+        var hIni = String(ini.getHours()).padStart(2, '0') + ':' + String(ini.getMinutes()).padStart(2, '0');
+        var hFim = String(fim.getHours()).padStart(2, '0') + ':' + String(fim.getMinutes()).padStart(2, '0');
+        var obs = 'Plantão vivo';
+        if (sess.almocoInicio) obs += ' | Almoço ' + pvFmtHora(sess.almocoInicio) + (sess.almocoFim ? '-' + pvFmtHora(sess.almocoFim) : '');
+        if (sess.autoIn) obs += ' | in-auto';
+        if (sess.autoOut) obs += ' | out-auto';
+        if (confirm('Salvar este plantão no extrato?\n' + data + ' ' + hIni + '-' + hFim + '\n' + (sess.postoNome || ''))) {
+          if (!db.plantaoes) db.plantaoes = [];
+          var horasMs = fim.getTime() - ini.getTime();
+          var horasNum = Math.max(0, horasMs / 3600000);
+          db.plantaoes.unshift({
+            id: Date.now(),
+            data: data,
+            turno: (ini.getHours() < 12 ? 'Diurno' : 'Noturno'),
+            inicio: hIni,
+            fim: hFim,
+            tipo: 'Plantão Próprio',
+            valor: 0,
+            horas: horasNum.toFixed(2) + ' hrs',
+            sono: 0,
+            cobriu: usuarioAtual ? usuarioAtual.nome : '—',
+            obs: obs,
+            posto: sess.postoNome || '',
+            por: usuarioAtual ? usuarioAtual.nome : '—',
+            userLogin: usuarioAtual ? usuarioAtual.user : '',
+            userId: usuarioAtual ? usuarioAtual.id : null,
+            criadoEm: new Date().toISOString(),
+            plantaoVivo: true
+          });
+          await salvar();
+          try { await backupPlantaoesAuto('plantao_vivo'); } catch (e) {}
+          toast('Plantão lançado no extrato');
+        }
+      } catch (e) { console.warn(e); }
+    }
+    function pvUpdateGeoLabel(txt) {
+      var el = document.getElementById('pv-geo');
+      if (!el) return;
+      el.innerHTML = txt;
+    }
+    function pvStartGeoWatch() {
+      if (!navigator.geolocation) {
+        pvUpdateGeoLabel('GPS: não disponível neste aparelho');
+        return;
+      }
+      if (_pvWatchId != null) {
+        try { navigator.geolocation.clearWatch(_pvWatchId); } catch (e) {}
+        _pvWatchId = null;
+      }
+      _pvWatchId = navigator.geolocation.watchPosition(function(pos) {
+        _pvLastPos = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          acc: pos.coords.accuracy
+        };
+        pvOnGeoTick();
+      }, function(err) {
+        pvUpdateGeoLabel('<span class="warn">GPS: ' + (err && err.message ? err.message : 'erro') + '</span>');
+      }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+    }
+    function pvOnGeoTick() {
+      if (!_pvLastPos) return;
+      var sess = pvLoad() || { status: 'idle' };
+      var sel = document.getElementById('pv-posto');
+      var postoId = (sess.postoId) || (sel && sel.value) || '';
+      var p = postoId ? pvPostoById(postoId) : null;
+      var acc = Math.round(_pvLastPos.acc || 0);
+      if (!p || p.lat == null || p.lng == null) {
+        pvUpdateGeoLabel('GPS ok (±' + acc + ' m) · posto sem geofence configurada');
+        return;
+      }
+      var dist = pvHaversine(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
+      var raio = (p.raio && p.raio >= 30) ? Number(p.raio) : 150;
+      var dentro = dist <= raio;
+      pvUpdateGeoLabel(
+        (dentro
+          ? '<span class="ok">Dentro do posto</span>'
+          : '<span class="warn">Fora do posto</span>') +
+        ' · ' + Math.round(dist) + ' m (raio ' + raio + ' m) · ±' + acc + ' m'
+      );
+
+      if (_pvAutoBusy) return;
+      var st = sess.status || 'idle';
+      if ((st === 'idle' || st === 'finalizado') && dentro && postoId) {
+        _pvAutoBusy = true;
+        pvCheckIn(true).finally(function() { _pvAutoBusy = false; });
+        return;
+      }
+      if ((st === 'ativo' || st === 'almoco') && dist > raio * 1.25) {
+        _pvAutoBusy = true;
+        pvCheckOut(true).finally(function() { _pvAutoBusy = false; });
+      }
+    }
+    function pvBoot() {
+      try {
+        pvRender();
+        pvStartGeoWatch();
+      } catch (e) { console.warn('pvBoot', e); }
+    }
+
     function registrarServiceWorker() {
-      // PWA: mantém / registra Service Worker para notificações em segundo plano + offline.
+      // PWA: registra Service Worker para notificações em segundo plano + offline.
       if (!('serviceWorker' in navigator)) return;
       try {
         navigator.serviceWorker.register('/pwabuilder-sw.js').then(function(reg) {
           console.log('Service Worker VALIS OK', reg.scope);
-          // força atualização quando houver nova versão do SW
           try { reg.update(); } catch (e) {}
         }).catch(function(err) {
           console.warn('SW register falhou:', err);
@@ -5582,6 +6070,7 @@
 
     (async function boot() {
       try { registrarServiceWorker(); } catch (e) {}
+      try { if (usuarioAtual) pvBoot(); } catch (e) {}
       if (window.ValisDevLog) ValisDevLog.add('app_boot', { ver: APP_VERSION, href: location.href });
       try {
         if (window.ValisUpdate) {

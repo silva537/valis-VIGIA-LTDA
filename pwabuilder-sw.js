@@ -1,6 +1,4 @@
-// VALIS VIGIA — Service Worker (PWA Builder + notificações com som / segundo plano)
-// Workbox offline + handlers de notificação
-
+// VALIS VIGIA — Service Worker (PWA + notificações segundo plano)
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
 const CACHE = "pwabuilder-page";
@@ -43,7 +41,6 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// ---- Notificações em segundo plano / app fechado (quando possível) ----
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = (event.notification.data && event.notification.data.url) || '/';
@@ -52,35 +49,23 @@ self.addEventListener('notificationclick', (event) => {
       for (const client of clientList) {
         if ('focus' in client) {
           client.focus();
-          try {
-            if (client.navigate) client.navigate(targetUrl);
-          } catch (e) {}
+          try { if (client.navigate) client.navigate(targetUrl); } catch (e) {}
           return;
         }
       }
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
 });
 
-self.addEventListener('notificationclose', () => {});
-
-// Suporte a Web Push (se no futuro houver FCM / servidor push)
 self.addEventListener('push', (event) => {
   let data = { title: 'VALIS VIGIA', body: 'Nova mensagem', icon: '/launchericon-192x192.png' };
   try {
-    if (event.data) {
-      const json = event.data.json();
-      data = Object.assign(data, json);
-    }
+    if (event.data) data = Object.assign(data, event.data.json());
   } catch (e) {
-    try {
-      data.body = event.data ? event.data.text() : data.body;
-    } catch (e2) {}
+    try { data.body = event.data ? event.data.text() : data.body; } catch (e2) {}
   }
-  const options = {
+  event.waitUntil(self.registration.showNotification(data.title || 'VALIS VIGIA', {
     body: data.body || '',
     icon: data.icon || '/launchericon-192x192.png',
     badge: data.badge || '/launchericon-96x96.png',
@@ -90,6 +75,5 @@ self.addEventListener('push', (event) => {
     silent: false,
     vibrate: [200, 100, 200],
     data: data.data || { url: '/' }
-  };
-  event.waitUntil(self.registration.showNotification(data.title || 'VALIS VIGIA', options));
+  }));
 });
