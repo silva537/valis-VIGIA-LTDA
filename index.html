@@ -1201,7 +1201,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.11.3';
+    const APP_VERSION = '6.11.4';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2067,10 +2067,31 @@
       try {
         if (!firebaseOk) await initFirebase();
         await ensureFirebaseAuth();
-        if (!firebaseOk || !fbDb) return db.solicitacoes;
-        var snap = await fbDb.collection('valis').doc('solicitacoes').get();
-        if (snap.exists && snap.data() && Array.isArray(snap.data().items)) {
-          db.solicitacoes = normalizarSolicitacoes(snap.data().items);
+        if (!firebaseOk || !fbDb) {
+          try {
+            var raw0 = localStorage.getItem('valis_solicitacoes');
+            if (raw0) db.solicitacoes = normalizarSolicitacoes(JSON.parse(raw0));
+          } catch (e0) {}
+          return db.solicitacoes;
+        }
+        var lista = [];
+        try {
+          var snap = await fbDb.collection('valis').doc('solicitacoes').get();
+          if (snap.exists && snap.data() && Array.isArray(snap.data().items)) {
+            lista = snap.data().items;
+          }
+        } catch (e1) { console.warn(e1); }
+        // fallback db_v42
+        if (!lista.length) {
+          try {
+            var snap2 = await fbDb.collection('valis').doc('db_v42').get();
+            if (snap2.exists && snap2.data() && snap2.data().data && Array.isArray(snap2.data().data.solicitacoes)) {
+              lista = snap2.data().data.solicitacoes;
+            }
+          } catch (e2) { console.warn(e2); }
+        }
+        if (lista.length) {
+          db.solicitacoes = normalizarSolicitacoes(lista);
         }
         try {
           localStorage.setItem('valis_solicitacoes', JSON.stringify(db.solicitacoes));
@@ -2090,16 +2111,51 @@
       try {
         localStorage.setItem('valis_solicitacoes', JSON.stringify(db.solicitacoes));
       } catch (e) {}
+      var ultimoErro = '';
       try {
         if (!firebaseOk) await initFirebase();
-        await ensureFirebaseAuth();
-        if (!firebaseOk || !fbDb) return false;
-        await fbDb.collection('valis').doc('solicitacoes').set({
-          items: db.solicitacoes,
-          updatedAt: new Date().toISOString()
-        });
-        return true;
+        var authOk = await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb) {
+          window.__valisUltimoErroSol = 'Firebase não conectou';
+          return false;
+        }
+        if (!authOk && !(firebase.auth && firebase.auth().currentUser)) {
+          // tenta de novo
+          try { await firebase.auth().signInAnonymously(); } catch (e2) {
+            window.__valisUltimoErroSol = 'Auth anônimo falhou — ative Anonymous no Firebase';
+            return false;
+          }
+        }
+        // 1) documento dedicado
+        try {
+          await fbDb.collection('valis').doc('solicitacoes').set({
+            items: db.solicitacoes,
+            updatedAt: new Date().toISOString()
+          });
+          window.__valisUltimoErroSol = '';
+          return true;
+        } catch (e1) {
+          ultimoErro = String(e1 && e1.message ? e1.message : e1);
+          console.warn('solicitacoes doc:', e1);
+        }
+        // 2) fallback: grava dentro de db_v42 (regras já liberam esse doc)
+        try {
+          db.solicitacoes = db.solicitacoes || [];
+          await fbDb.collection('valis').doc('db_v42').set({
+            data: Object.assign({}, db, { solicitacoes: db.solicitacoes }),
+            updatedAt: new Date().toISOString(),
+            sec: 1
+          }, { merge: true });
+          window.__valisUltimoErroSol = '';
+          return true;
+        } catch (e2) {
+          ultimoErro = String(e2 && e2.message ? e2.message : e2);
+          console.warn('solicitacoes via db_v42:', e2);
+        }
+        window.__valisUltimoErroSol = ultimoErro || 'permission-denied';
+        return false;
       } catch (e) {
+        window.__valisUltimoErroSol = String(e && e.message ? e.message : e);
         console.warn('salvarSolicitacoesNuvem:', e);
         return false;
       }
@@ -2332,9 +2388,10 @@
         document.getElementById('reg-funcao').value = 'vigilante';
         atualizarRegFuncaoUI();
         if (ok) {
-          msgLogin('Pedido enviado! Aguarde aprovação do Admin/DEV. Depois você poderá entrar.', true);
+          msgLogin('Pedido enviado para a nuvem! Aguarde aprovação do Admin/DEV.', true);
         } else {
-          msgLogin('Pedido salvo neste aparelho, mas a nuvem falhou. Confira internet e regras Firebase (documento solicitacoes).', false);
+          var det = window.__valisUltimoErroSol || 'sem detalhe';
+          msgLogin('Nuvem recusou o pedido. Detalhe: ' + det + ' — Ative Authentication Anônimo e publique as regras com solicitacoes.', false);
         }
         setTimeout(function() { mostrarLogin('entrar'); }, 2200);
       } catch (err) {

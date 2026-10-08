@@ -1,5 +1,5 @@
 {
-  "v": "6.11.3",
+  "v": "6.11.4",
   "forceReload": false,
-  "msg": "Excluir user definitivo + limpar só admin/dev"
+  "msg": "Cadastro solicitacoes com fallback db_v42"
 }
