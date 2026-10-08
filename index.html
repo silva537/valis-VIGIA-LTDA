@@ -1051,7 +1051,11 @@
           </div>
           <div class="field"><label>Quem cobriu / nome</label><input id="pl-cobriu" class="input" placeholder="Nome (se cobertura)"></div>
           <div class="field"><label>Observação</label><textarea id="pl-obs" class="area" rows="2" placeholder="Detalhes ou anotações..."></textarea></div>
-          <button class="btn green" onclick="salvarPlantao()">💾 Salvar Plantão</button>
+          <div class="btn-row">
+            <button type="button" class="btn green" id="pl-btn-salvar" onclick="salvarPlantao()">💾 Salvar Plantão</button>
+            <button type="button" class="btn dark hidden" id="pl-btn-cancelar" onclick="cancelarEdicaoPlantao()">Cancelar edição</button>
+          </div>
+          <p id="pl-edit-hint" class="hidden" style="font-size:12px;color:var(--yellow);margin-top:8px">Editando plantão existente — ao salvar, os dados serão atualizados.</p>
         </div>
         <div class="card">
           <div class="card-label">Backup e recuperação de plantões</div>
@@ -1406,7 +1410,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.2';
+    const APP_VERSION = '6.12.3';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -4096,33 +4100,124 @@
       });
     }
 
+    var _plantaoEditId = null;
+
+    function setModoEdicaoPlantao(ativo) {
+      var btnSalvar = document.getElementById('pl-btn-salvar');
+      var btnCancel = document.getElementById('pl-btn-cancelar');
+      var hint = document.getElementById('pl-edit-hint');
+      if (btnSalvar) btnSalvar.textContent = ativo ? '💾 Atualizar Plantão' : '💾 Salvar Plantão';
+      if (btnCancel) {
+        if (ativo) btnCancel.classList.remove('hidden');
+        else btnCancel.classList.add('hidden');
+      }
+      if (hint) {
+        if (ativo) hint.classList.remove('hidden');
+        else hint.classList.add('hidden');
+      }
+    }
+    function cancelarEdicaoPlantao() {
+      _plantaoEditId = null;
+      setModoEdicaoPlantao(false);
+      try {
+        document.getElementById('pl-obs').value = '';
+        document.getElementById('pl-cobriu').value = '';
+      } catch (e) {}
+      toast('Edição cancelada');
+    }
+    function editarPlantao(id) {
+      var item = (db.plantaoes || []).find(function(x) { return String(x.id) === String(id); });
+      if (!item) return alert('Plantão não encontrado.');
+      if (!podeVerTodosPlantaoes() && !plantaoDoUsuario(item)) {
+        return alert('Você só pode editar os seus plantões.');
+      }
+      _plantaoEditId = item.id;
+      try {
+        var el;
+        el = document.getElementById('pl-data'); if (el) el.value = item.data || '';
+        el = document.getElementById('pl-turno'); if (el) el.value = item.turno || 'Diurno';
+        el = document.getElementById('pl-inicio'); if (el) el.value = item.inicio || '06:00';
+        el = document.getElementById('pl-fim'); if (el) el.value = item.fim || '18:00';
+        el = document.getElementById('pl-tipo'); if (el) el.value = item.tipo || 'Plantão Próprio';
+        el = document.getElementById('pl-valor'); if (el) el.value = (item.valor != null ? item.valor : 0);
+        el = document.getElementById('pl-horas'); if (el) el.value = item.horas || '';
+        el = document.getElementById('pl-sono'); if (el) el.value = (item.sono != null ? item.sono : 0);
+        el = document.getElementById('pl-cobriu'); if (el) el.value = item.cobriu || '';
+        el = document.getElementById('pl-obs'); if (el) el.value = item.obs || '';
+        try { plantaoCalcHoras(); } catch (e) {}
+      } catch (e) { console.warn(e); }
+      setModoEdicaoPlantao(true);
+      tab('plantao');
+      toast('Editando plantão — altere e toque em Atualizar');
+      try {
+        var card = document.querySelector('#tab-plantao .card');
+        if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {}
+    }
     async function salvarPlantao() {
       const data = document.getElementById('pl-data').value;
       const valor = parseFloat(document.getElementById('pl-valor').value) || 0;
       if (!data) return alert('Informe a data.');
       if (valor < 0) return alert('Valor inválido.');
-      const item = {
-        id: Date.now(),
-        data,
+      const campos = {
+        data: data,
         turno: document.getElementById('pl-turno').value,
         inicio: document.getElementById('pl-inicio').value,
         fim: document.getElementById('pl-fim').value,
         tipo: document.getElementById('pl-tipo').value,
-        valor,
+        valor: valor,
         horas: document.getElementById('pl-horas').value,
         sono: parseFloat(document.getElementById('pl-sono').value) || 0,
         cobriu: document.getElementById('pl-cobriu').value.trim() || (usuarioAtual ? usuarioAtual.nome : '—'),
-        obs: document.getElementById('pl-obs').value.trim(),
-        por: usuarioAtual ? usuarioAtual.nome : '—',
-        userLogin: usuarioAtual ? usuarioAtual.user : '',
-        userId: usuarioAtual ? usuarioAtual.id : null,
-        criadoEm: new Date().toISOString()
+        obs: document.getElementById('pl-obs').value.trim()
       };
       if (!db.plantaoes) db.plantaoes = [];
       if (!db.checklists) db.checklists = [];
       if (!db.faltas) db.faltas = [];
       if (!db.chamados) db.chamados = [];
       if (!db.trocasPosto) db.trocasPosto = [];
+
+      var editando = _plantaoEditId != null;
+      if (editando) {
+        var idx = (db.plantaoes || []).findIndex(function(x) { return String(x.id) === String(_plantaoEditId); });
+        if (idx < 0) {
+          _plantaoEditId = null;
+          setModoEdicaoPlantao(false);
+          return alert('Plantão não encontrado para editar.');
+        }
+        var atual = db.plantaoes[idx];
+        if (!podeVerTodosPlantaoes() && !plantaoDoUsuario(atual)) {
+          return alert('Você só pode editar os seus plantões.');
+        }
+        db.plantaoes[idx] = Object.assign({}, atual, campos, {
+          id: atual.id,
+          por: atual.por || (usuarioAtual ? usuarioAtual.nome : '—'),
+          userLogin: atual.userLogin || (usuarioAtual ? usuarioAtual.user : ''),
+          userId: atual.userId != null ? atual.userId : (usuarioAtual ? usuarioAtual.id : null),
+          criadoEm: atual.criadoEm || new Date().toISOString(),
+          editadoEm: new Date().toISOString(),
+          editadoPor: usuarioAtual ? usuarioAtual.nome : '—'
+        });
+        addAtividade('Plantão editado: ' + data + ' · R$ ' + valor.toFixed(2));
+        _plantaoEditId = null;
+        setModoEdicaoPlantao(false);
+        document.getElementById('pl-obs').value = '';
+        document.getElementById('pl-cobriu').value = '';
+        await salvar();
+        await backupPlantaoesAuto('editar');
+        render();
+        toast('Plantão atualizado + backup');
+        tab('extrato');
+        return;
+      }
+
+      const item = Object.assign({
+        id: Date.now(),
+        por: usuarioAtual ? usuarioAtual.nome : '—',
+        userLogin: usuarioAtual ? usuarioAtual.user : '',
+        userId: usuarioAtual ? usuarioAtual.id : null,
+        criadoEm: new Date().toISOString()
+      }, campos);
       db.plantaoes.unshift(item);
       document.getElementById('pl-obs').value = '';
       document.getElementById('pl-cobriu').value = '';
@@ -4140,6 +4235,10 @@
         return alert('Você só pode excluir os seus plantões.');
       }
       if (!confirm('Excluir este plantão da folha atual?')) return;
+      if (_plantaoEditId != null && String(_plantaoEditId) === String(id)) {
+        _plantaoEditId = null;
+        setModoEdicaoPlantao(false);
+      }
       db.plantaoes = (db.plantaoes || []).filter(x => x.id !== id);
       await salvar();
       await backupPlantaoesAuto('excluir');
@@ -4713,7 +4812,10 @@
                 </div>
                 <div style="text-align:right">
                   <div style="font-weight:900;color:var(--green)">${moneyBR(x.valor)}</div>
-                  <button class="btn red sm" style="margin-top:6px" onclick="excluirPlantao(${x.id})">Excluir</button>
+                  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;margin-top:6px">
+                    <button class="btn dark sm" onclick="editarPlantao(${x.id})">✏️ Editar</button>
+                    <button class="btn red sm" onclick="excluirPlantao(${x.id})">Excluir</button>
+                  </div>
                 </div>
               </div>
             </div>`).join('')
