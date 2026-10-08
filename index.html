@@ -238,7 +238,7 @@
 
     .item { padding: 12px; margin-bottom: 8px; }
     .item b { font-size: 14px; }
-    .item .meta { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .item .meta { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; white-space: normal; word-wrap: break-word; overflow-wrap: anywhere; }
     .item .actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
 
     .badge {
@@ -468,10 +468,12 @@
       position: fixed; top: 66px; left: 50%;
       transform: translateX(-50%) translateY(-12px);
       background: rgba(15,23,42,0.95); border: 1px solid var(--green);
-      color: var(--text); padding: 10px 16px; border-radius: 10px;
+      color: var(--text); padding: 12px 16px; border-radius: 10px;
       font-size: 13px; font-weight: 600; z-index: 200;
       opacity: 0; pointer-events: none; transition: all .25s;
-      white-space: nowrap; max-width: 90%;
+      white-space: normal; word-wrap: break-word; overflow-wrap: anywhere;
+      max-width: min(92vw, 420px); max-height: 40vh; overflow-y: auto;
+      line-height: 1.45; text-align: left;
       box-shadow: 0 0 20px rgba(34,197,94,0.2);
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -1202,7 +1204,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.11.4';
+    const APP_VERSION = '6.11.5';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -1628,9 +1630,13 @@
 
     function toast(msg) {
       const t = document.getElementById('toast');
-      t.textContent = msg;
+      if (!t) return;
+      t.textContent = msg == null ? '' : String(msg);
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      const len = (msg == null ? 0 : String(msg).length);
+      const ms = len > 120 ? 7000 : (len > 60 ? 4500 : 2800);
+      clearTimeout(window.__valisToastTimer);
+      window.__valisToastTimer = setTimeout(() => t.classList.remove('show'), ms);
     }
 
     function mostrarLogin(modo) {
@@ -2486,27 +2492,78 @@
       toast('Senha de @' + u.user + ' atualizada (criptografada)');
     }
 
-    // ---- Notificações (WebInto / navegador) ----
+    // ---- Notificações PWA (som + segundo plano via Service Worker) ----
+    function tocarSomNotificacao() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.frequency.setValueAtTime(880, ctx.currentTime);
+        o.frequency.setValueAtTime(1175, ctx.currentTime + 0.12);
+        g.gain.setValueAtTime(0.0001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+        o.start(ctx.currentTime);
+        o.stop(ctx.currentTime + 0.38);
+        setTimeout(function() { try { ctx.close(); } catch (e) {} }, 500);
+      } catch (e) {}
+    }
     function pedirPermissaoNotificacoes() {
       try {
         if (!('Notification' in window)) return;
         if (Notification.permission === 'default') {
-          Notification.requestPermission().then(p => {
-            if (p === 'granted') toast('Notificações ativadas');
+          Notification.requestPermission().then(function(p) {
+            if (p === 'granted') toast('Notificações ativadas (com som)');
           });
         }
       } catch (e) { console.warn(e); }
     }
-    function notificarApp(titulo, corpo) {
+    async function notificarApp(titulo, corpo, opts) {
+      opts = opts || {};
+      const title = titulo || 'VALIS VIGIA';
+      const body = corpo == null ? '' : String(corpo);
+      // Som sempre que possível (app em primeiro plano / aba ativa)
       try {
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
-        const n = new Notification(titulo || 'VALIS VIGIA', {
-          body: corpo || '',
-          icon: undefined,
-          badge: undefined,
-          tag: 'valis-' + Date.now()
-        });
-        setTimeout(() => { try { n.close(); } catch (e) {} }, 8000);
+        if (!opts.silent && document.visibilityState === 'visible') {
+          tocarSomNotificacao();
+        }
+      } catch (e) {}
+      try {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+          try { await Notification.requestPermission(); } catch (e) {}
+        }
+        if (Notification.permission !== 'granted') return;
+
+        const options = {
+          body: body,
+          icon: '/launchericon-192x192.png',
+          badge: '/launchericon-96x96.png',
+          tag: opts.tag || ('valis-' + Date.now()),
+          renotify: true,
+          requireInteraction: !!opts.requireInteraction || body.length > 80,
+          silent: false,
+          vibrate: [200, 100, 200],
+          data: { url: '/', ts: Date.now() }
+        };
+
+        // Preferir Service Worker (funciona melhor em segundo plano / tela bloqueada)
+        if ('serviceWorker' in navigator) {
+          try {
+            const reg = await navigator.serviceWorker.ready;
+            if (reg && reg.showNotification) {
+              await reg.showNotification(title, options);
+              return;
+            }
+          } catch (e) { console.warn('SW notify:', e); }
+        }
+
+        // Fallback: Notification da página
+        const n = new Notification(title, options);
+        setTimeout(function() { try { n.close(); } catch (e) {} }, opts.requireInteraction ? 20000 : 10000);
       } catch (e) { console.warn(e); }
     }
 
@@ -5380,19 +5437,17 @@
     }
 
     function registrarServiceWorker() {
-      // WebInto + SW costuma causar tela 500 ao voltar do segundo plano.
-      // Desregistramos qualquer SW antigo e NÃO registramos de novo.
+      // PWA: mantém / registra Service Worker para notificações em segundo plano + offline.
       if (!('serviceWorker' in navigator)) return;
       try {
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          regs.forEach(function(r) { try { r.unregister(); } catch (e) {} });
-        }).catch(function() {});
-        if (window.caches && caches.keys) {
-          caches.keys().then(function(keys) {
-            keys.forEach(function(k) { try { caches.delete(k); } catch (e) {} });
-          }).catch(function() {});
-        }
-      } catch (e) {}
+        navigator.serviceWorker.register('/pwabuilder-sw.js').then(function(reg) {
+          console.log('Service Worker VALIS OK', reg.scope);
+          // força atualização quando houver nova versão do SW
+          try { reg.update(); } catch (e) {}
+        }).catch(function(err) {
+          console.warn('SW register falhou:', err);
+        });
+      } catch (e) { console.warn(e); }
     }
 
     // ---- Recuperação WebInto / segundo plano ----
@@ -5587,13 +5642,7 @@
         }
       }, 60000);
     })();
-  if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/pwabuilder-sw.js')
-      .then(reg => console.log('Service Worker registrado:', reg))
-      .catch(err => console.error('Erro no Service Worker:', err));
-  });
-}
+  // Service Worker registrado em registrarServiceWorker() (boot do app)
   </script>
 </body>
 </html>
