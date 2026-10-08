@@ -3100,8 +3100,8 @@
             `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.cargoSolicitado || u.funcao)}
               <div class="meta">@${u.user}</div>
               <div class="actions">
-                <button type="button" class="btn green sm" onclick="aprovarCargo('${String(u.id)}')">Aprovar</button>
-                <button type="button" class="btn dark sm" onclick="recusarCargo('${String(u.id)}')">Recusar</button>
+                <button type="button" class="btn green sm" data-user-act="aprovar" data-user="${String(u.user || u.id).replace(/"/g, '&quot;')}">Aprovar</button>
+                <button type="button" class="btn dark sm" data-user-act="recusar" data-user="${String(u.user || u.id).replace(/"/g, '&quot;')}">Recusar</button>
               </div>
             </div>`
           ).join('');
@@ -3818,20 +3818,28 @@
       }
     }
 
-    // Botões de usuário: delegação (não depende de onclick quebrado)
-    document.addEventListener('click', function(ev) {
-      const btn = ev.target && ev.target.closest ? ev.target.closest('[data-user-act]') : null;
+    // Botões de usuário: delegação robusta.
+    // Os cartões são recriados pelo render(), então o listener fica no document.
+    async function tratarAcaoUsuario(ev) {
+      const target = ev.target;
+      const btn = target && target.closest ? target.closest('button[data-user-act]') : null;
       if (!btn) return;
-      ev.preventDefault();
-      ev.stopPropagation();
-      const act = btn.getAttribute('data-user-act');
-      const who = btn.getAttribute('data-user');
+      const act = String(btn.getAttribute('data-user-act') || '').trim().toLowerCase();
+      const who = String(btn.getAttribute('data-user') || '').trim();
       if (!act || !who) return;
-      if (act === 'aprovar') aprovarCargo(who);
-      else if (act === 'recusar') recusarCargo(who);
-      else if (act === 'excluir') excluirUser(who);
-      else if (act === 'toggle') desativarUser(who);
-    }, true);
+      // Impede o clique de virar submit/navegação, mas deixa o restante do app continuar.
+      ev.preventDefault();
+      try {
+        if (act === 'aprovar') await aprovarCargo(who);
+        else if (act === 'recusar') await recusarCargo(who);
+        else if (act === 'excluir') await excluirUser(who);
+        else if (act === 'toggle') await desativarUser(who);
+      } catch (err) {
+        console.error('Ação de usuário falhou:', act, who, err);
+        alert('Não foi possível concluir a ação. Tente novamente.');
+      }
+    }
+    document.addEventListener('click', tratarAcaoUsuario, false);
 
     try {
       window.aprovarCargo = aprovarCargo;
