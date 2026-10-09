@@ -1,5 +1,5 @@
 {
-  "v": "6.12.7",
+  "v": "6.12.8",
   "forceReload": true,
-  "msg": "Painel de login melhorado: versao, alerta, olho na senha"
+  "msg": "Postos: so Admin/Supervisao/DEV cadastram e excluem"
 }

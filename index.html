@@ -1344,8 +1344,8 @@
       <!-- POSTOS -->
       <section id="tab-postos" class="tab">
         <div class="title">Postos e destinos</div>
-        <p style="font-size:12px;color:var(--muted);margin:-6px 0 12px">Postos ficam visíveis para <b>todos</b> os logins (sincronizado no Firebase).</p>
-        <div class="card">
+        <p style="font-size:12px;color:var(--muted);margin:-6px 0 12px">Postos visíveis para <b>todos</b>. Cadastrar, GPS e excluir: só <b>Admin, Supervisão e DEV</b>.</p>
+        <div class="card" id="postos-form-card">
           <div class="field"><label>Nome do posto</label><input id="pn" class="input" placeholder="Ex: UFV São Miguel"></div>
           <div class="field"><label>Destino / Local</label><input id="pd" class="input" placeholder="Endereço ou referência"></div>
           <div class="grid2">
@@ -1358,6 +1358,10 @@
             <button type="button" class="btn green" onclick="addPosto()">Cadastrar posto</button>
           </div>
           <p style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4">Com latitude/longitude, o check-in e o check-out do plantão podem ser automáticos ao entrar/sair do raio.</p>
+        </div>
+        <div id="postos-sem-perm" class="item hidden" style="margin-bottom:12px">
+          <b>🔒 Somente visualização</b>
+          <div class="meta">Você pode ver os postos. Incluir, GPS e excluir ficam com Admin, Supervisão ou DEV.</div>
         </div>
         <div id="lp"></div>
       </section>
@@ -1620,7 +1624,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.7';
+    const APP_VERSION = '6.12.8';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -3145,6 +3149,12 @@
       if (!usuarioAtual) return false;
       const f = String(usuarioAtual.funcao || '');
       return f === 'admin' || f === 'supervisor' || f === 'dev' || !!devLiberado;
+    }
+    /** Cadastrar / GPS / excluir postos — só Admin, Supervisão e DEV */
+    function podeGerenciarPostos() {
+      if (!usuarioAtual) return false;
+      const f = String(usuarioAtual.funcao || '');
+      return f === 'admin' || f === 'supervisor' || f === 'dev';
     }
     function isPendenteUser(u) {
       if (!u) return false;
@@ -4838,6 +4848,7 @@
     }
 
     async function addPosto() {
+      if (!podeGerenciarPostos()) return alert('Sem permissão. Só Admin, Supervisão ou DEV podem cadastrar postos.');
       const n = document.getElementById('pn').value.trim();
       const d = document.getElementById('pd').value.trim();
       if (!n) return alert('Informe o posto.');
@@ -4928,6 +4939,9 @@
       toast('Mensagem para ' + dest);
     }
     async function remover(tipo, id) {
+      if (tipo === 'postos' && !podeGerenciarPostos()) {
+        return alert('Sem permissão. Só Admin, Supervisão ou DEV podem excluir postos.');
+      }
       if (!confirm('Remover?')) return;
       db[tipo] = db[tipo].filter(x => x.id !== id);
       await salvar();
@@ -5199,8 +5213,23 @@
       document.getElementById('ep').innerHTML = opts;
       document.getElementById('op').innerHTML = opts;
 
+      const podePostos = typeof podeGerenciarPostos === 'function' && podeGerenciarPostos();
+      try {
+        var formCard = document.getElementById('postos-form-card');
+        var semPerm = document.getElementById('postos-sem-perm');
+        if (formCard) formCard.style.display = podePostos ? '' : 'none';
+        if (semPerm) {
+          if (podePostos) semPerm.classList.add('hidden');
+          else semPerm.classList.remove('hidden');
+        }
+      } catch (e) {}
       document.getElementById('lp').innerHTML = db.postos.length
-        ? db.postos.map(x => `<div class="item"><b>📍 ${x.n}</b><div class="meta">${x.d||'—'}</div><div class="meta">${(x.lat!=null&&x.lng!=null)?('GPS: '+Number(x.lat).toFixed(5)+', '+Number(x.lng).toFixed(5)+' · raio '+(x.raio||150)+' m'):'Sem geofence — defina GPS para auto check-in'}</div><div class="actions"><button class="btn dark sm" onclick="postoDefinirGps(${x.id})">📍 GPS atual</button><button class="btn dark sm" onclick="remover('postos',${x.id})">Excluir</button></div></div>`).join('')
+        ? db.postos.map(x => {
+            const acoes = podePostos
+              ? `<div class="actions"><button class="btn dark sm" onclick="postoDefinirGps(${x.id})">📍 GPS atual</button><button class="btn red sm" onclick="remover('postos',${x.id})">Excluir</button></div>`
+              : '';
+            return `<div class="item"><b>📍 ${x.n}</b><div class="meta">${x.d||'—'}</div><div class="meta">${(x.lat!=null&&x.lng!=null)?('GPS: '+Number(x.lat).toFixed(5)+', '+Number(x.lng).toFixed(5)+' · raio '+(x.raio||150)+' m'):'Sem geofence configurado'}</div>${acoes}</div>`;
+          }).join('')
         : '<div class="empty">Nenhum posto.</div>';
 
       document.getElementById('le').innerHTML = db.esc.length
@@ -6378,6 +6407,7 @@
       return (db.postos || []).find(function(p) { return String(p.id) === String(id); });
     }
     function postoUsarGpsAtual() {
+      if (!podeGerenciarPostos()) return alert('Sem permissão. Só Admin, Supervisão ou DEV podem definir GPS do posto.');
       if (!navigator.geolocation) return alert('GPS não disponível neste aparelho.');
       toast('Obtendo GPS…');
       navigator.geolocation.getCurrentPosition(function(pos) {
@@ -6391,6 +6421,7 @@
       }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
     }
     async function postoDefinirGps(id) {
+      if (!podeGerenciarPostos()) return alert('Sem permissão. Só Admin, Supervisão ou DEV podem alterar GPS do posto.');
       var p = (db.postos || []).find(function(x) { return String(x.id) === String(id); });
       if (!p) return;
       if (!navigator.geolocation) return alert('GPS não disponível.');
