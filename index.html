@@ -1624,7 +1624,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.8';
+    const APP_VERSION = '6.12.10';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -3152,6 +3152,12 @@
     }
     /** Cadastrar / GPS / excluir postos — só Admin, Supervisão e DEV */
     function podeGerenciarPostos() {
+      if (!usuarioAtual) return false;
+      const f = String(usuarioAtual.funcao || '');
+      return f === 'admin' || f === 'supervisor' || f === 'dev';
+    }
+    /** Excluir mensagens — só Admin, Supervisão e DEV */
+    function podeExcluirMensagens() {
       if (!usuarioAtual) return false;
       const f = String(usuarioAtual.funcao || '');
       return f === 'admin' || f === 'supervisor' || f === 'dev';
@@ -4942,6 +4948,9 @@
       if (tipo === 'postos' && !podeGerenciarPostos()) {
         return alert('Sem permissão. Só Admin, Supervisão ou DEV podem excluir postos.');
       }
+      if (tipo === 'msg' && !podeExcluirMensagens()) {
+        return alert('Sem permissão. Só Admin, Supervisão ou DEV podem excluir mensagens.');
+      }
       if (!confirm('Remover?')) return;
       db[tipo] = db[tipo].filter(x => x.id !== id);
       await salvar();
@@ -5248,7 +5257,11 @@
         lmEl.innerHTML = msgsView.length
           ? msgsView.map(x => {
               const unread = x && x.id != null && !seenSet[String(x.id)];
-              return `<div class="item"${unread ? ' style="border-color:var(--yellow)"' : ''}><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}${unread ? ' <span class="badge yellow">Nova</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div><div class="actions"><button class="btn dark sm" onclick="remover('msg',${x.id})">Excluir</button></div></div>`;
+              const podeDelMsg = typeof podeExcluirMensagens === 'function' && podeExcluirMensagens();
+              const acoesMsg = podeDelMsg
+                ? `<div class="actions"><button class="btn red sm" onclick="remover('msg',${x.id})">Excluir</button></div>`
+                : '';
+              return `<div class="item"${unread ? ' style="border-color:var(--yellow)"' : ''}><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}${unread ? ' <span class="badge yellow">Nova</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div>${acoesMsg}</div>`;
             }).join('')
           : '<div class="empty">Nenhuma mensagem para o seu cargo.</div>';
       }
@@ -6360,6 +6373,8 @@
     var _pvTickTimer = null;
     var _pvLastPos = null;
     var _pvAutoBusy = false;
+    /** Após check-out: não reinicia automático por este tempo (ms) */
+    var PV_COOLDOWN_MS = 90000;
 
     function pvKey() {
       var u = usuarioAtual && usuarioAtual.user ? usuarioAtual.user : 'anon';
@@ -6458,9 +6473,23 @@
     }
     function pvSelecionarPosto() {
       var sel = document.getElementById('pv-posto');
-      if (!sel || !sel.value) return;
-      var sess = pvLoad();
-      if (sess && sess.status && sess.status !== 'idle' && sess.status !== 'finalizado') {
+      if (!sel) return;
+      var sess = pvLoad() || { status: 'idle' };
+      var st = sess.status || 'idle';
+      if (!sel.value) {
+        if (st === 'ativo' || st === 'almoco') {
+          toast('Finalize o plantão atual antes de limpar o posto');
+          sel.value = String(sess.postoId || '');
+          return;
+        }
+        sess.status = 'idle';
+        sess.postoId = '';
+        sess.postoNome = '';
+        pvSave(sess);
+        pvRender();
+        return;
+      }
+      if (st !== 'idle' && st !== 'finalizado') {
         if (String(sess.postoId) !== String(sel.value)) {
           toast('Finalize o plantão atual antes de trocar o posto');
           sel.value = String(sess.postoId || '');
@@ -6468,8 +6497,20 @@
         }
       }
       var p = pvPostoById(sel.value);
-      if (!sess || sess.status === 'finalizado') {
-        sess = { status: 'idle', postoId: sel.value, postoNome: p ? p.n : '', checkIn: null, almocoInicio: null, almocoFim: null, checkOut: null };
+      if (st === 'finalizado' || st === 'idle') {
+        var noAutoUntil = sess.noAutoUntil || 0;
+        var needsLeave = !!sess.needsLeaveBeforeAuto;
+        sess = {
+          status: 'idle',
+          postoId: sel.value,
+          postoNome: p ? p.n : '',
+          checkIn: null,
+          almocoInicio: null,
+          almocoFim: null,
+          checkOut: null,
+          noAutoUntil: noAutoUntil,
+          needsLeaveBeforeAuto: needsLeave
+        };
       } else {
         sess.postoId = sel.value;
         sess.postoNome = p ? p.n : '';
@@ -6556,9 +6597,18 @@
     async function pvCheckIn(auto) {
       var sel = document.getElementById('pv-posto');
       if (!sel || !sel.value) {
-        alert('Selecione o posto antes do check-in.');
+        if (!auto) alert('Selecione o posto antes do check-in.');
         return;
       }
+      try {
+        var prev = pvLoad();
+        if (auto && prev) {
+          var until = Number(prev.noAutoUntil || 0);
+          if (until && Date.now() < until) return;
+          if (prev.needsLeaveBeforeAuto) return;
+          if (prev.status === 'ativo' || prev.status === 'almoco') return;
+        }
+      } catch (e) {}
       var p = pvPostoById(sel.value);
       var lat = null, lng = null, acc = null;
       try {
@@ -6582,7 +6632,9 @@
         checkInLat: lat,
         checkInLng: lng,
         checkInAcc: acc,
-        autoIn: !!auto
+        autoIn: !!auto,
+        noAutoUntil: 0,
+        needsLeaveBeforeAuto: false
       };
       pvSave(sess);
       pvRender();
@@ -6632,6 +6684,9 @@
       sess.checkOutLng = lng;
       sess.checkOutAcc = acc;
       sess.autoOut = !!auto;
+      sess.noAutoUntil = Date.now() + PV_COOLDOWN_MS;
+      sess.needsLeaveBeforeAuto = true;
+      sess.lastFinishedPostoId = sess.postoId || '';
       pvSave(sess);
       pvRender();
       addAtividade('Check-out plantão: ' + (sess.postoNome || '') + (auto ? ' (GPS auto)' : ''));
@@ -6707,9 +6762,19 @@
       if (!_pvLastPos) return;
       var sess = pvLoad() || { status: 'idle' };
       var sel = document.getElementById('pv-posto');
-      var postoId = (sess.postoId) || (sel && sel.value) || '';
+      var st = sess.status || 'idle';
+      var postoId = '';
+      if (st === 'ativo' || st === 'almoco') {
+        postoId = (sess.postoId) || (sel && sel.value) || '';
+      } else {
+        postoId = (sel && sel.value) || '';
+      }
       var p = postoId ? pvPostoById(postoId) : null;
       var acc = Math.round(_pvLastPos.acc || 0);
+      if (!postoId) {
+        pvUpdateGeoLabel('GPS ok (±' + acc + ' m) · selecione um posto para auto check-in');
+        return;
+      }
       if (!p || p.lat == null || p.lng == null) {
         pvUpdateGeoLabel('GPS ok (±' + acc + ' m) · posto sem geofence configurada');
         return;
@@ -6717,16 +6782,31 @@
       var dist = pvHaversine(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
       var raio = (p.raio && p.raio >= 30) ? Number(p.raio) : 150;
       var dentro = dist <= raio;
+      var extra = '';
+      var until = Number(sess.noAutoUntil || 0);
+      if ((st === 'finalizado' || st === 'idle') && until && Date.now() < until) {
+        var rest = Math.ceil((until - Date.now()) / 1000);
+        extra = ' · auto em ' + rest + 's';
+      } else if ((st === 'finalizado' || st === 'idle') && sess.needsLeaveBeforeAuto && dentro) {
+        extra = ' · saia do raio para liberar auto';
+      }
       pvUpdateGeoLabel(
         (dentro
           ? '<span class="ok">Dentro do posto</span>'
           : '<span class="warn">Fora do posto</span>') +
-        ' · ' + Math.round(dist) + ' m (raio ' + raio + ' m) · ±' + acc + ' m'
+        ' · ' + Math.round(dist) + ' m (raio ' + raio + ' m) · ±' + acc + ' m' + extra
       );
 
+      if ((st === 'finalizado' || st === 'idle') && sess.needsLeaveBeforeAuto && !dentro) {
+        sess.needsLeaveBeforeAuto = false;
+        pvSave(sess);
+      }
+
       if (_pvAutoBusy) return;
-      var st = sess.status || 'idle';
+
       if ((st === 'idle' || st === 'finalizado') && dentro && postoId) {
+        if (until && Date.now() < until) return;
+        if (sess.needsLeaveBeforeAuto) return;
         _pvAutoBusy = true;
         pvCheckIn(true).finally(function() { _pvAutoBusy = false; });
         return;

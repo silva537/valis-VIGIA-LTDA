@@ -1,5 +1,5 @@
 {
-  "v": "6.12.8",
+  "v": "6.12.10",
   "forceReload": true,
-  "msg": "Postos: so Admin/Supervisao/DEV cadastram e excluem"
+  "msg": "Mensagens: so Admin/Supervisao/DEV excluem"
 }
