@@ -4,7 +4,7 @@
   <link rel="manifest" href="/manifest.json">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#020617">
+  <meta name="theme-color" content="#070b14">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,11 +14,11 @@
   <title>VALIS VIGIA LTDA</title>
   <style>
     :root {
-      --bg: #020617;
-      --card: rgba(15, 23, 42, 0.88);
-      --card2: rgba(2, 6, 23, 0.92);
-      --border: rgba(34, 197, 94, 0.25);
-      --text: #F8FAFC;
+      --bg: #070b14;
+      --card: rgba(15, 23, 42, 0.9);
+      --card2: rgba(8, 12, 22, 0.95);
+      --border: rgba(148, 163, 184, 0.14);
+      --text: #F1F5F9;
       --muted: #94A3B8;
       --green: #22C55E;
       --yellow: #FACC15;
@@ -29,58 +29,55 @@
       --red: #EF4444;
       --purple: #A78BFA;
       --cyan: #22D3EE;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 10px 32px rgba(0, 0, 0, 0.38);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
     body {
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      font-family: var(--font);
       min-height: 100vh;
       max-width: 480px;
       margin: 0 auto;
-      background:
-        linear-gradient(180deg, rgba(2,6,23,0.82) 0%, rgba(2,6,23,0.92) 40%, rgba(0,39,118,0.35) 100%),
-        repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(0,156,59,0.03) 40px, rgba(0,156,59,0.03) 80px),
-        radial-gradient(ellipse at 20% 0%, rgba(0,156,59,0.25), transparent 50%),
-        radial-gradient(ellipse at 80% 100%, rgba(0,39,118,0.4), transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(255,223,0,0.08), transparent 60%),
-        #020617;
-      background-attachment: fixed;
+      letter-spacing: 0.01em;
+      background-color: #020617;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(0,156,59,0.18), transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(0,39,118,0.28), transparent 50%),
+        linear-gradient(180deg, #020617 0%, #0a1220 100%);
+      background-attachment: scroll;
+      -webkit-font-smoothing: antialiased;
     }
+    body > * { position: relative; z-index: 1; }
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; border: none; }
 
-    /* GLOW CARDS */
+    /* Cards estáticos — sem RGB animado (melhor FPS) */
     .card, .stat-card, .item, .login-box, .modal, .drawer {
       position: relative;
-      background: var(--card);
-      border: 1px solid transparent;
-      border-radius: 14px;
-      background-clip: padding-box;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
     }
-    .card::before, .stat-card::before, .login-box::before, .modal::before, .drawer::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 15px;
-      background: linear-gradient(135deg, #009C3B, #FFDF00, #002776, #009C3B);
-      background-size: 300% 300%;
-      z-index: -1;
-      opacity: 0.55;
-      animation: borderGlow 8s linear infinite;
+    .card, .stat-card, .login-box {
+      background: rgba(15, 23, 42, 0.94);
+      border-color: rgba(0, 156, 59, 0.28);
     }
-    .item::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 13px;
-      background: linear-gradient(135deg, rgba(0,156,59,0.5), rgba(255,223,0,0.3), rgba(0,39,118,0.5));
-      z-index: -1;
-      opacity: 0.4;
+    .item {
+      background: rgba(15, 23, 42, 0.88);
+      border-radius: var(--radius-sm);
+      border-color: rgba(148, 163, 184, 0.14);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
-    @keyframes borderGlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .card::before, .stat-card::before, .login-box::before,
+    .modal::before, .drawer::before, .item::before {
+      content: none !important;
+      display: none !important;
+      animation: none !important;
     }
 
     /* LOGIN */
@@ -178,16 +175,40 @@
       text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
     }
     .input, .select, .area {
-      width: 100%; padding: 13px 14px; border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.25); background: rgba(2,6,23,0.85); color: #fff; font-size: 15px; outline: none;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.18);
+      background: rgba(2, 8, 20, 0.65);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
+    .input:focus, .select:focus, .area:focus {
+      border-color: rgba(34,197,94,0.55);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.12);
+    }
+    .input::placeholder, .area::placeholder { color: #64748B; }
     .input:focus, .select:focus, .area:focus { border-color: var(--green); box-shadow: 0 0 0 2px rgba(34,197,94,0.15); }
     .area { resize: vertical; min-height: 90px; }
     .btn {
-      width: 100%; padding: 14px; border-radius: 10px;
-      background: linear-gradient(135deg, #009C3B, #007A2F); color: #fff; font-weight: 800; font-size: 14px;
-      box-shadow: 0 0 16px rgba(0,156,59,0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.28);
+      transition: transform .12s ease, filter .12s ease;
     }
+    .btn:active { transform: scale(0.98); filter: brightness(1.05); }
     .btn:active { opacity: 0.88; }
     .btn.green { background: linear-gradient(135deg, #16A34A, #15803D); }
     .btn.red { background: linear-gradient(135deg, #DC2626, #991B1B); box-shadow: 0 0 12px rgba(239,68,68,0.25); }
@@ -270,22 +291,29 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.55; transform: scale(0.92); }
     }
-
-    main { flex: 1; padding: 14px 12px 92px; overflow-y: auto; }
+    main {
+      padding: 16px 14px 132px !important;
+    }
     .tab { display: none; }
     .tab.active { display: block; animation: fadeIn .2s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
     .title {
-      font-size: 19px; font-weight: 900; margin-bottom: 12px;
-      display: flex; justify-content: space-between; align-items: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+      color: #F8FAFC;
     }
     .title small { font-size: 11px; font-weight: 600; color: var(--muted); }
 
     .card { padding: 15px; margin-bottom: 12px; }
     .card-label {
-      font-size: 11px; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #86efac;
+      margin-bottom: 12px;
     }
 
     .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -311,14 +339,22 @@
     .badge.blue { background: rgba(59,130,246,.15); color: var(--blue); }
     .badge.gray { background: #1F2937; color: #9CA3AF; }
     .badge.purple { background: rgba(167,139,250,.15); color: var(--purple); }
-
-    .empty { text-align: center; padding: 24px 14px; color: var(--muted); font-size: 13px; }
-
+    .empty {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      border: 1px dashed rgba(148,163,184,0.2);
+      border-radius: 14px;
+      background: rgba(2,8,20,0.35);
+    }
     .status-bar {
       display: flex; align-items: center; gap: 8px;
-      background: rgba(2,6,23,0.7); border-radius: 10px;
-      padding: 10px 12px; margin-bottom: 12px; font-size: 13px;
-      border: 1px solid rgba(0,156,59,0.2);
+      background: rgba(8,12,22,0.78);
+      border-radius: 12px;
+      padding: 11px 13px; margin-bottom: 12px; font-size: 13px;
+      border: 1px solid rgba(148,163,184,0.12);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     }
     .dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -328,8 +364,11 @@
 
     .live-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .live-cell {
-      background: rgba(2,6,23,0.75); border: 1px solid rgba(0,156,59,0.2);
-      border-radius: 10px; padding: 12px;
+      background: rgba(8,12,22,0.82);
+      border: 1px solid rgba(0,156,59,0.22);
+      border-radius: 14px;
+      padding: 13px 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     }
     .live-cell .lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
     .live-cell .val { font-size: 13px; font-weight: 700; color: var(--green); text-shadow: 0 0 8px rgba(34,197,94,0.3); }
@@ -361,15 +400,43 @@
     .collapse-box.open .collapse-head .chev { transform: rotate(180deg); }
     .collapse-body { display: none; }
     .collapse-box.open .collapse-body { display: block; }
-    .collapse-head small { display: block; font-weight: 500; color: var(--muted); font-size: 11px; margin-top: 2px; }
-
-    .func-btn {
-      display: flex; align-items: center; gap: 12px;
-      width: 100%; text-align: left; padding: 12px 14px;
-      background: rgba(2,6,23,0.75); border: 1px solid rgba(148,163,184,0.15);
-      border-radius: 12px; color: var(--text); font-size: 13px; font-weight: 600;
+    #collapse-ex-folha:not(.open) #ex-lista-body {
+      display: none !important;
     }
-    .func-btn:active { border-color: var(--green); }
+    #collapse-ex-folha.open #ex-lista-body {
+      display: block !important;
+    }
+    #btn-ex-folha-min {
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      display: none;
+    }
+    #btn-ex-folha-min.show-admin {
+      display: flex !important;
+    }
+
+    .collapse-head small { display: block; font-weight: 500; color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .func-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(15,23,42,0.78);
+      border: 1px solid rgba(148,163,184,0.12);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+      transition: border-color .15s, background .15s, transform .12s;
+    }
+    .func-btn:active {
+      border-color: rgba(34,197,94,0.45);
+      background: rgba(34,197,94,0.08);
+      transform: scale(0.99);
+    }
     .func-btn .ico { font-size: 18px; width: 28px; text-align: center; }
     .func-btn small { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
 
@@ -401,12 +468,12 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      background: rgba(2, 8, 20, 0.92);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(0,156,59,0.35);
-      border-radius: 18px;
+      background: rgba(8, 12, 22, 0.92);
+
+      border: 1px solid rgba(148,163,184,0.12);
+      border-radius: 20px;
       padding: 6px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 20px rgba(0,156,59,0.12);
+      box-shadow: 0 10px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(34,197,94,0.06);
       overflow-x: auto;
       scrollbar-width: none;
     }
@@ -469,10 +536,12 @@
       display: none;
       margin-bottom: 12px;
       border-radius: 14px;
-      border: 1px solid rgba(148,163,184,0.22);
+      border: 1px solid transparent;
       background: rgba(15,23,42,0.92);
       overflow: hidden;
+      position: relative;
     }
+    .inicio-pack::before { content: none !important; display: none !important; }
     .inicio-pack.show { display: block; }
     .inicio-pack .ip-head {
       padding: 10px 12px 6px;
@@ -517,12 +586,10 @@
       font-size: 12px; color: var(--muted);
     }
     .inicio-pack .ip-welcome b { color: #e2e8f0; }
-
-
     .nav button.active {
       color: #fff;
-      background: linear-gradient(135deg, rgba(0,156,59,0.9), rgba(0,39,118,0.85));
-      box-shadow: 0 0 14px rgba(0,156,59,0.35);
+      background: linear-gradient(135deg, rgba(22,163,74,0.95), rgba(0,39,118,0.88));
+      box-shadow: 0 4px 14px rgba(22,163,74,0.3);
     }
     .nav button.nav-more {
       color: var(--yellow);
@@ -534,14 +601,15 @@
     .more-sheet {
       position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%);
       width: calc(100% - 24px); max-width: 456px;
-      background: rgba(2,8,20,0.96);
-      border: 1px solid rgba(0,156,59,0.35);
-      border-radius: 16px;
-      padding: 12px;
+      background: rgba(8,12,22,0.96);
+      border: 1px solid rgba(0,156,59,0.3);
+      border-radius: 18px;
+      padding: 14px;
       z-index: 55;
       display: none;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    }
+      box-shadow: 0 14px 44px rgba(0,0,0,0.55);
+      }
+
     .more-sheet.open { display: block; animation: fadeIn .18s ease; }
     .more-sheet .more-grid {
       display: grid;
@@ -631,12 +699,17 @@
 
     /* ---- Modo Plantão Ativo ---- */
     .plantao-vivo-card {
-      background: linear-gradient(160deg, #0b1220 0%, #0f1a2e 50%, #0a1628 100%);
-      border: 1px solid rgba(34,197,94,0.25);
-      border-radius: 16px;
-      padding: 14px 14px 12px;
-      margin-bottom: 12px;
-      box-shadow: 0 0 24px rgba(34,197,94,0.08);
+      position: relative;
+      margin-bottom: 14px;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(34,197,94,0.3);
+      background: rgba(15,23,42,0.95);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+    }
+    .plantao-vivo-card::before {
+      content: none !important;
+      display: none !important;
     }
     .plantao-vivo-head {
       display: flex; align-items: center; justify-content: space-between;
@@ -862,9 +935,11 @@
       animation: none;
     }
     .br-flag-strip {
-      height: 3px; border-radius: 2px; margin-bottom: 12px;
+      height: 4px;
+      border-radius: 999px;
+      margin: 10px 0 14px;
       background: linear-gradient(90deg, #009C3B 0%, #009C3B 33%, #FFDF00 33%, #FFDF00 66%, #002776 66%, #002776 100%);
-      box-shadow: 0 0 10px rgba(0,156,59,0.3);
+      box-shadow: 0 0 12px rgba(0,156,59,0.35);
     }
   </style>
 </head>
@@ -1300,7 +1375,14 @@
             <span><b id="ex-total">R$ 0,00</b> · <span id="ex-qtd">0</span> plantão(ões)</span>
           </div>
           <button class="btn green" onclick="fecharFolha()">✓ Recebi / Fechar Folha Atual</button>
-          <div id="ex-lista" style="margin-top:12px"></div>
+          <button type="button" class="btn dark" id="btn-ex-folha-min" onclick="toggleExFolhaLista()">
+            <span id="ex-folha-min-label">📋 Minimizar lista de plantões</span>
+          </button>
+          <div id="collapse-ex-folha" class="collapse-box" style="margin-top:8px">
+            <div class="collapse-body" id="ex-lista-body">
+              <div id="ex-lista"></div>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-label">Folhas anteriores arquivadas</div>
@@ -1624,7 +1706,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '6.12.10';
+    const APP_VERSION = '7.2.3-ui';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -3708,6 +3790,46 @@
       if (!el) return;
       el.classList.toggle('open');
     }
+    function podeMinimizarFolhaExtrato() {
+      if (!usuarioAtual) return false;
+      const f = String(usuarioAtual.funcao || '').toLowerCase().trim();
+      return f === 'admin' || f === 'dev';
+    }
+    function toggleExFolhaLista() {
+      const box = document.getElementById('collapse-ex-folha');
+      if (!box) return;
+      box.classList.toggle('open');
+      try {
+        localStorage.setItem('valis_ex_folha_open', box.classList.contains('open') ? '1' : '0');
+      } catch (e) {}
+      atualizarExFolhaToggleLabel();
+    }
+    function atualizarExFolhaToggleLabel() {
+      const box = document.getElementById('collapse-ex-folha');
+      const lab = document.getElementById('ex-folha-min-label');
+      if (!box || !lab) return;
+      if (box.classList.contains('open')) {
+        lab.textContent = '📋 Minimizar lista de plantões';
+      } else {
+        lab.textContent = '📋 Expandir lista de plantões';
+      }
+    }
+    function aplicarCollapseFolhaExtrato() {
+      const box = document.getElementById('collapse-ex-folha');
+      const btn = document.getElementById('btn-ex-folha-min');
+      if (!box) return;
+      if (podeMinimizarFolhaExtrato()) {
+        if (btn) btn.classList.add('show-admin');
+        var pref = null;
+        try { pref = localStorage.getItem('valis_ex_folha_open'); } catch (e) {}
+        if (pref === '1') box.classList.add('open');
+        else box.classList.remove('open');
+        atualizarExFolhaToggleLabel();
+      } else {
+        if (btn) btn.classList.remove('show-admin');
+        box.classList.add('open');
+      }
+    }
 
     function aplicarModoEmergencia() {
       const on = document.body.classList.contains('modo-emergencia') || localStorage.getItem('valis_modo_emergencia') === '1';
@@ -4795,6 +4917,9 @@
       if (name === 'mensagens') {
         try { marcarMsgsComoLidas(); } catch (e) {}
       }
+      if (name === 'extrato') {
+        try { setTimeout(aplicarCollapseFolhaExtrato, 0); } catch (e) {}
+      }
       render();
     }
 
@@ -5294,6 +5419,7 @@
       const elQtd = document.getElementById('ex-qtd');
       if (elTot) elTot.textContent = moneyBR(totalFolha);
       if (elQtd) elQtd.textContent = listaEx.length;
+      try { aplicarCollapseFolhaExtrato(); } catch (e) {}
       const exLista = document.getElementById('ex-lista');
       if (exLista) {
         const labelTodos = podeVerTodosPlantaoes() ? ' (visão supervisão — todos)' : ' (somente os seus)';
