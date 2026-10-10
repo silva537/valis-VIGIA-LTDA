@@ -466,35 +466,38 @@
     .nav {
       pointer-events: auto;
       display: flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(8, 12, 22, 0.92);
-
-      border: 1px solid rgba(148,163,184,0.12);
-      border-radius: 20px;
-      padding: 6px;
-      box-shadow: 0 10px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(34,197,94,0.06);
-      overflow-x: auto;
-      scrollbar-width: none;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 2px;
+      background: rgba(6, 10, 18, 0.96);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 22px;
+      padding: 5px 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,197,94,0.08);
+      overflow: visible;
     }
     .nav::-webkit-scrollbar { display: none; }
     .nav button {
-      flex: 1;
-      min-width: 52px;
+      flex: 1 1 0;
+      min-width: 0;
       background: transparent;
-      color: #64748B;
-      padding: 8px 4px;
-      font-size: 9px;
+      color: #94A3B8;
+      padding: 9px 2px 8px;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.15px;
+      line-height: 1.15;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
-      border-radius: 12px;
-      transition: background .15s, color .15s;
+      justify-content: center;
+      gap: 4px;
+      border-radius: 14px;
+      transition: background .15s, color .15s, box-shadow .15s;
+      position: relative;
+      white-space: nowrap;
     }
-    .nav button span { font-size: 18px; line-height: 1.15; }
+    .nav button span { font-size: 20px; line-height: 1; display: block; }
     .nav button { position: relative; }
     .nav-badge, .msg-badge {
       position: absolute;
@@ -588,15 +591,19 @@
     .inicio-pack .ip-welcome b { color: #e2e8f0; }
     .nav button.active {
       color: #fff;
-      background: linear-gradient(135deg, rgba(22,163,74,0.95), rgba(0,39,118,0.88));
-      box-shadow: 0 4px 14px rgba(22,163,74,0.3);
+      background: linear-gradient(160deg, rgba(22,163,74,0.95), rgba(15, 80, 50, 0.92));
+      box-shadow: 0 4px 14px rgba(22,163,74,0.35);
     }
     .nav button.nav-more {
-      color: var(--yellow);
+      color: #cbd5e1;
+      border: 1px dashed rgba(148,163,184,0.25);
+      background: rgba(15,23,42,0.55);
     }
     .nav button.nav-more.active {
-      background: linear-gradient(135deg, rgba(250,204,21,0.25), rgba(0,39,118,0.5));
-      color: var(--yellow);
+      color: #fff;
+      border-style: solid;
+      border-color: rgba(34,197,94,0.45);
+      background: rgba(34,197,94,0.18);
     }
     .more-sheet {
       position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%);
@@ -934,6 +941,10 @@
       opacity: 0.25;
       animation: none;
     }
+    body.tema-compacto .card { padding: 10px 12px; }
+    body.tema-compacto .item { padding: 8px; margin-bottom: 6px; }
+    body.tema-compacto .title { font-size: 1.15rem; margin-bottom: 10px; }
+    body.tema-compacto .plantao-vivo-card { padding: 10px; }
     .br-flag-strip {
       height: 4px;
       border-radius: 999px;
@@ -1604,6 +1615,100 @@
           <div id="perfil-painel" class="empty">Toque em uma opção acima.</div>
         </div>
       </section>
+
+      <section id="tab-labs" class="tab">
+        <div class="title">Ferramentas</div>
+        <div class="br-flag-strip"></div>
+        <div class="card"><div class="card-label">Recursos operacionais</div>
+          <div class="meta" style="font-size:12px;color:var(--muted);line-height:1.45">
+            Ronda, presença GPS, troca de posto, alertas, mensagens por posto, emergência,
+            relatório, valores, folha, postos, ocorrências com foto, offline, tema compacto,
+            logs, sessão e 2FA.
+          </div>
+        </div>
+        <div class="card"><div class="card-label">1 · Ronda digital</div>
+          <div class="field"><label>Posto</label><select id="lab-ronda-posto" class="select"></select></div>
+          <div class="field"><label>Itens (um por linha)</label><textarea id="lab-ronda-itens" class="area" rows="3" placeholder="Portão&#10;Câmeras&#10;Gerador"></textarea></div>
+          <button class="btn green" onclick="labSalvarRonda()">Salvar ronda</button>
+          <div id="lab-rondas-lista" style="margin-top:10px"></div>
+        </div>
+        <div class="card"><div class="card-label">2 · Histórico presença GPS</div>
+          <div id="lab-presenca-lista" class="empty">Sem registros (check-in/out plantão vivo).</div>
+        </div>
+        <div class="card"><div class="card-label">3 · Troca de posto</div>
+          <div class="field"><label>Novo posto</label><select id="lab-troca-posto" class="select"></select></div>
+          <button class="btn dark" onclick="labTrocaPosto()">Registrar troca</button>
+          <div id="lab-trocas-lista" style="margin-top:10px"></div>
+        </div>
+        <div class="card"><div class="card-label">4 · Alerta plantão longo</div>
+          <div class="field"><label>Horas máx.</label><input id="lab-alerta-horas" class="input" type="number" min="1" max="24" step="0.5" value="12"></div>
+          <button class="btn yellow" onclick="labSalvarAlertaHoras()">Salvar limite</button>
+          <div class="meta" id="lab-alerta-status" style="margin-top:8px;font-size:12px;color:var(--muted)">—</div>
+        </div>
+        <div class="card"><div class="card-label">5 · Leitura de msgs</div>
+          <div id="lab-msg-lidos" class="empty">Abra Msgs para marcar leitura.</div>
+        </div>
+        <div class="card"><div class="card-label">6 · Msg por posto</div>
+          <div class="field"><label>Posto</label><select id="lab-msg-posto" class="select"></select></div>
+          <div class="field"><label>Texto</label><textarea id="lab-msg-posto-txt" class="area" rows="2"></textarea></div>
+          <button class="btn purple" onclick="labMsgPosto()">Enviar</button>
+        </div>
+        <div class="card"><div class="card-label">7 · Emergência</div>
+          <button class="btn red" onclick="labPanico()">🚨 EMERGÊNCIA</button>
+        </div>
+        <div class="card"><div class="card-label">8 · Relatório mensal</div>
+          <div class="field"><label>Mês AAAA-MM</label><input id="lab-rel-mes" class="input" placeholder="2026-10"></div>
+          <button class="btn dark" onclick="labRelatorioMensal()">Gerar</button>
+          <div id="lab-rel-out" style="margin-top:10px;font-size:13px;white-space:pre-wrap"></div>
+        </div>
+        <div class="card"><div class="card-label">9 · Valores por tipo</div>
+          <div class="grid2">
+            <div class="field"><label>Diurno</label><input id="lab-val-diurno" class="input" type="number" step="0.01"></div>
+            <div class="field"><label>Noturno</label><input id="lab-val-noturno" class="input" type="number" step="0.01"></div>
+            <div class="field"><label>Cobertura</label><input id="lab-val-cob" class="input" type="number" step="0.01"></div>
+            <div class="field"><label>Próprio</label><input id="lab-val-prop" class="input" type="number" step="0.01"></div>
+          </div>
+          <button class="btn green" onclick="labSalvarValores()">Salvar</button>
+        </div>
+        <div class="card"><div class="card-label">10 · Status folha</div>
+          <div id="lab-folhas-status" class="empty">—</div>
+        </div>
+        <div class="card"><div class="card-label">11–12 · Posto foto + contatos</div>
+          <div class="field"><label>Posto</label><select id="lab-posto-extra" class="select" onchange="labLoadPostoExtra()"></select></div>
+          <div class="field"><label>Foto URL</label><input id="lab-posto-foto" class="input"></div>
+          <div class="field"><label>Contatos</label><textarea id="lab-posto-contatos" class="area" rows="2"></textarea></div>
+          <button class="btn dark" onclick="labSalvarPostoExtra()">Salvar</button>
+        </div>
+        <div class="card"><div class="card-label">13 · Ocorrência com foto</div>
+          <div class="field"><label>Descrição</label><input id="lab-oco-txt" class="input"></div>
+          <div class="field"><label>Foto</label><input id="lab-oco-foto" class="input" type="file" accept="image/*"></div>
+          <button class="btn yellow" onclick="labOcoFoto()">Registrar</button>
+        </div>
+        <div class="card"><div class="card-label">14 · Fila offline</div>
+          <div id="lab-offline-q" class="meta" style="font-size:12px">—</div>
+          <button class="btn dark sm" style="width:auto;margin-top:8px" onclick="labFlushOffline()">Reenviar fila</button>
+        </div>
+        <div class="card"><div class="card-label">15 · Atalho PWA</div>
+          <div class="meta" style="font-size:12px;color:var(--muted)">Instale o PWA no Android (menu → Instalar app). Use o Plantão vivo no Início.</div>
+          <button class="btn green" onclick="tab('inicio')">Ir ao Início</button>
+        </div>
+        <div class="card"><div class="card-label">16 · Tema compacto</div>
+          <button class="btn dark" onclick="labToggleCompacto()">Ativar / desativar</button>
+        </div>
+        <div class="card"><div class="card-label">17 · Log sensível</div>
+          <div id="lab-logs" class="empty">—</div>
+          <button class="btn dark sm" style="width:auto;margin-top:8px" onclick="labLimparLogs()">Limpar</button>
+        </div>
+        <div class="card"><div class="card-label">18 · Timeout sessão (min)</div>
+          <div class="field"><input id="lab-sess-min" class="input" type="number" min="5" max="480" value="120"></div>
+          <button class="btn yellow" onclick="labSalvarSessao()">Aplicar</button>
+        </div>
+        <div class="card"><div class="card-label">19 · 2FA Admin/DEV</div>
+          <div class="field"><input id="lab-2fa" class="input" placeholder="Código" autocomplete="off"></div>
+          <button class="btn purple" onclick="labSalvar2FA()">Salvar 2FA</button>
+        </div>
+      </section>
+
     </main>
 
     <div class="app-footer" id="app-footer">
@@ -1706,7 +1811,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '7.2.3-ui';
+    const APP_VERSION = '8.1.0';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2117,7 +2222,7 @@
       }
     };
 
-    let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [] };
+    let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [], rondas: [], presenca: [], trocasPostoPlantao: [], valoresPlantao: {}, labsConfig: {}, logsSensivel: [] };
     let usuarioAtual = null;
     let devLiberado = false;
 
@@ -3345,16 +3450,19 @@
     function podeDevPerigoso() {
       return isCargoDev();
     }
-    const NAV_ITEMS = [
+        const NAV_ITEMS = [
+      /* Barra principal (máx. 4 + Mais) */
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
       { tab: 'plantao', roles: ['vigilante','equipe','dev'], icon: '📋', label: 'Plantão', primary: true },
       { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
+      { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
+      /* Menu Mais */
       { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escalas', primary: false },
       { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
-      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorr.', primary: false },
-      { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: true },
-      { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: true }
+      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorrências', primary: false },
+      { tab: 'labs', roles: ['all'], icon: '🛠', label: 'Ferramentas', primary: false },
+      { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: false },
+      { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
     ];
 
     function rolePode(roles, role) {
@@ -4916,6 +5024,10 @@
       }
       if (name === 'mensagens') {
         try { marcarMsgsComoLidas(); } catch (e) {}
+        try { labMarcarMsgLida(); } catch (e) {}
+      }
+      if (name === 'labs') {
+        try { labRender(); } catch (e) {}
       }
       if (name === 'extrato') {
         try { setTimeout(aplicarCollapseFolhaExtrato, 0); } catch (e) {}
@@ -5337,6 +5449,327 @@
       window.alterarFuncaoUser = alterarFuncaoUser;
     } catch (e) {}
 
+
+    function labPedir2FASePreciso(user) {
+      try {
+        if (!user) return true;
+        var f = String(user.funcao || '').toLowerCase();
+        if (f !== 'admin' && f !== 'dev') return true;
+        var code = '';
+        try { code = localStorage.getItem('valis_2fa_code') || ''; } catch (e) {}
+        if (!code && db && db.labsConfig && db.labsConfig.twoFA) code = db.labsConfig.twoFA;
+        if (!code) return true;
+        var dig = prompt('Código 2FA (Admin/DEV):');
+        if (dig == null) return false;
+        if (String(dig).trim() !== String(code).trim()) { alert('Código 2FA incorreto.'); return false; }
+        return true;
+      } catch (e) { return true; }
+    }
+    function labEnsureDb() {
+      if (!db.rondas) db.rondas = [];
+      if (!db.presenca) db.presenca = [];
+      if (!db.trocasPostoPlantao) db.trocasPostoPlantao = [];
+      if (!db.valoresPlantao) db.valoresPlantao = { Diurno: 100, Noturno: 120, Cobertura: 130, 'Plantão Próprio': 100 };
+      if (!db.labsConfig) db.labsConfig = {};
+      if (!db.logsSensivel) db.logsSensivel = [];
+      if (!db.msg) db.msg = [];
+      if (!db.oco) db.oco = [];
+      if (!db.postos) db.postos = [];
+      if (!db.folhasArquivadas) db.folhasArquivadas = [];
+    }
+    function labLog(acao, detalhe) {
+      try {
+        labEnsureDb();
+        db.logsSensivel.unshift({ id: Date.now(), em: new Date().toISOString(), por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—', acao: String(acao || ''), detalhe: String(detalhe || '') });
+        db.logsSensivel = db.logsSensivel.slice(0, 200);
+      } catch (e) {}
+    }
+    function labFillPostoSelects() {
+      labEnsureDb();
+      ['lab-ronda-posto', 'lab-troca-posto', 'lab-msg-posto', 'lab-posto-extra'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var cur = el.value;
+        el.innerHTML = '<option value="">— Posto —</option>' + (db.postos || []).map(function(p) {
+          return '<option value="' + p.id + '">' + (p.n || p.id) + '</option>';
+        }).join('');
+        if (cur) el.value = cur;
+      });
+    }
+    async function labSalvarRonda() {
+      labEnsureDb();
+      var pid = document.getElementById('lab-ronda-posto').value;
+      var itens = (document.getElementById('lab-ronda-itens').value || '').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+      if (!pid || !itens.length) return alert('Posto e itens.');
+      var p = (db.postos || []).find(function(x){return String(x.id)===String(pid);});
+      db.rondas.unshift({ id: Date.now(), postoId: pid, postoNome: p ? p.n : '', itens: itens, por: usuarioAtual ? usuarioAtual.nome : '—', em: new Date().toISOString() });
+      labLog('ronda', p ? p.n : pid);
+      try { await salvar(); } catch (e) {}
+      toast('Ronda salva'); labRender();
+    }
+    function labRegPresenca(tipo, postoNome, lat, lng) {
+      try {
+        labEnsureDb();
+        db.presenca.unshift({ id: Date.now(), tipo: tipo, posto: postoNome || '', lat: lat, lng: lng, por: usuarioAtual ? usuarioAtual.nome : '—', em: new Date().toISOString() });
+        db.presenca = db.presenca.slice(0, 300);
+      } catch (e) {}
+    }
+    async function labTrocaPosto() {
+      labEnsureDb();
+      var pid = document.getElementById('lab-troca-posto').value;
+      if (!pid) return alert('Selecione o posto.');
+      var p = (db.postos || []).find(function(x){return String(x.id)===String(pid);});
+      var sess = typeof pvLoad === 'function' ? pvLoad() : null;
+      if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return alert('Inicie plantão vivo antes.');
+      var de = sess.postoNome || '';
+      sess.postoId = pid; sess.postoNome = p ? p.n : '';
+      if (typeof pvSave === 'function') pvSave(sess);
+      try { var sel = document.getElementById('pv-posto'); if (sel) sel.value = String(pid); } catch (e) {}
+      db.trocasPostoPlantao.unshift({ id: Date.now(), de: de, para: sess.postoNome, por: usuarioAtual ? usuarioAtual.nome : '—', em: new Date().toISOString() });
+      labLog('troca_posto', de + ' → ' + sess.postoNome);
+      try { await salvar(); } catch (e) {}
+      if (typeof pvRender === 'function') pvRender();
+      toast('Troca registrada'); labRender();
+    }
+    function labSalvarAlertaHoras() {
+      labEnsureDb();
+      var h = parseFloat(document.getElementById('lab-alerta-horas').value) || 12;
+      db.labsConfig.alertaHoras = h;
+      try { localStorage.setItem('valis_lab_alerta_h', String(h)); } catch (e) {}
+      toast('Limite: ' + h + 'h'); labCheckPlantaoLongo();
+    }
+    function labCheckPlantaoLongo() {
+      try {
+        labEnsureDb();
+        var h = (db.labsConfig && db.labsConfig.alertaHoras) || parseFloat(localStorage.getItem('valis_lab_alerta_h')) || 12;
+        var el = document.getElementById('lab-alerta-status');
+        var sess = typeof pvLoad === 'function' ? pvLoad() : null;
+        if (!sess || !sess.checkIn || (sess.status !== 'ativo' && sess.status !== 'almoco')) {
+          if (el) el.textContent = 'Nenhum plantão ativo. Limite: ' + h + 'h'; return;
+        }
+        var horas = (Date.now() - new Date(sess.checkIn).getTime()) / 3600000;
+        if (el) el.textContent = 'Decorrido: ' + horas.toFixed(1) + 'h / limite ' + h + 'h';
+        if (horas >= h) {
+          var key = 'lab_alerta_' + (sess.checkIn || '');
+          if (sessionStorage.getItem(key) !== '1') {
+            sessionStorage.setItem(key, '1');
+            try { notificarApp('VALIS · Plantão longo', 'Já se passaram ' + horas.toFixed(1) + 'h'); } catch (e) {}
+            toast('⚠ Plantão longo: ' + horas.toFixed(1) + 'h');
+          }
+        }
+      } catch (e) {}
+    }
+    function labMarcarMsgLida() {
+      try {
+        labEnsureDb();
+        if (!usuarioAtual) return;
+        var nome = usuarioAtual.nome || usuarioAtual.user || '';
+        (db.msg || []).forEach(function(m) {
+          if (!m.lidos) m.lidos = [];
+          if (m.lidos.indexOf(nome) < 0) m.lidos.push(nome);
+        });
+      } catch (e) {}
+    }
+    async function labMsgPosto() {
+      labEnsureDb();
+      var pid = document.getElementById('lab-msg-posto').value;
+      var t = (document.getElementById('lab-msg-posto-txt').value || '').trim();
+      if (!pid || !t) return alert('Posto e mensagem.');
+      var p = (db.postos || []).find(function(x){return String(x.id)===String(pid);});
+      db.msg.unshift({ id: Date.now(), d: 'Posto: ' + (p ? p.n : pid), t: t, h: new Date().toLocaleString('pt-BR'), de: usuarioAtual ? usuarioAtual.nome : '—', postoId: pid, lidos: [] });
+      document.getElementById('lab-msg-posto-txt').value = '';
+      labLog('msg_posto', p ? p.n : pid);
+      try { await salvar(); } catch (e) {}
+      toast('Mensagem ao posto'); labRender();
+    }
+    async function labPanico() {
+      if (!confirm('Disparar EMERGÊNCIA?')) return;
+      labEnsureDb();
+      var lat = null, lng = null;
+      try { if (typeof _pvLastPos !== 'undefined' && _pvLastPos) { lat = _pvLastPos.lat; lng = _pvLastPos.lng; } } catch (e) {}
+      var txt = '🚨 EMERGÊNCIA — ' + (usuarioAtual ? usuarioAtual.nome : '—');
+      if (lat != null) txt += ' · GPS ' + Number(lat).toFixed(5) + ',' + Number(lng).toFixed(5);
+      db.msg.unshift({ id: Date.now(), d: 'Supervisão', t: txt, h: new Date().toLocaleString('pt-BR'), de: usuarioAtual ? usuarioAtual.nome : '—', emergencia: true, lidos: [] });
+      try { addAtividade(txt); } catch (e) {}
+      labLog('panico', txt);
+      try { await salvar(); } catch (e) {}
+      try { notificarApp('VALIS · EMERGÊNCIA', txt); } catch (e) {}
+      toast('Alerta enviado');
+    }
+    function labRelatorioMensal() {
+      labEnsureDb();
+      var mes = (document.getElementById('lab-rel-mes').value || '').trim();
+      if (!mes) { var d = new Date(); mes = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); document.getElementById('lab-rel-mes').value = mes; }
+      var lista = (db.plantaoes || []).filter(function(x){ return String(x.data||'').indexOf(mes)===0; });
+      var porUser = {}, total = 0;
+      lista.forEach(function(x){ var k = x.por || x.userLogin || '—'; if (!porUser[k]) porUser[k]={q:0,v:0}; porUser[k].q++; porUser[k].v += Number(x.valor)||0; total += Number(x.valor)||0; });
+      var lines = ['Relatório '+mes, 'Plantões: '+lista.length, 'Total: R$ '+total.toFixed(2), ''];
+      Object.keys(porUser).sort().forEach(function(k){ lines.push(k+': '+porUser[k].q+' · R$ '+porUser[k].v.toFixed(2)); });
+      var out = document.getElementById('lab-rel-out'); if (out) out.textContent = lines.join('\n');
+    }
+    function labSalvarValores() {
+      labEnsureDb();
+      db.valoresPlantao = {
+        Diurno: parseFloat(document.getElementById('lab-val-diurno').value)||0,
+        Noturno: parseFloat(document.getElementById('lab-val-noturno').value)||0,
+        Cobertura: parseFloat(document.getElementById('lab-val-cob').value)||0,
+        'Plantão Próprio': parseFloat(document.getElementById('lab-val-prop').value)||0
+      };
+      labLog('valores_plantao', JSON.stringify(db.valoresPlantao));
+      toast('Tabela salva'); try { salvar(); } catch (e) {}
+    }
+    async function labSetFolhaStatus(id, st) {
+      labEnsureDb();
+      var f = (db.folhasArquivadas||[]).find(function(x){return String(x.id)===String(id);});
+      if (!f) return;
+      f.statusPagamento = st;
+      labLog('folha_status', id+' → '+st);
+      try { await salvar(); } catch (e) {}
+      labRender(); toast('Folha: '+st);
+    }
+    function labLoadPostoExtra() {
+      labEnsureDb();
+      var pid = document.getElementById('lab-posto-extra').value;
+      var p = (db.postos||[]).find(function(x){return String(x.id)===String(pid);});
+      document.getElementById('lab-posto-foto').value = (p && p.fotoUrl) ? p.fotoUrl : '';
+      document.getElementById('lab-posto-contatos').value = (p && p.contatos) ? p.contatos : '';
+    }
+    async function labSalvarPostoExtra() {
+      if (typeof podeGerenciarPostos === 'function' && !podeGerenciarPostos()) return alert('Só Admin/Supervisão/DEV.');
+      labEnsureDb();
+      var pid = document.getElementById('lab-posto-extra').value;
+      var p = (db.postos||[]).find(function(x){return String(x.id)===String(pid);});
+      if (!p) return alert('Posto?');
+      p.fotoUrl = document.getElementById('lab-posto-foto').value.trim();
+      p.contatos = document.getElementById('lab-posto-contatos').value.trim();
+      labLog('posto_extra', p.n);
+      try { await salvar(); } catch (e) {}
+      toast('Posto atualizado');
+    }
+    function labOcoFoto() {
+      labEnsureDb();
+      var t = (document.getElementById('lab-oco-txt').value||'').trim();
+      if (!t) return alert('Descreva.');
+      var fileInput = document.getElementById('lab-oco-foto');
+      var file = fileInput && fileInput.files && fileInput.files[0];
+      function save(dataUrl) {
+        db.oco.unshift({ id: Date.now(), p: '—', tipo: 'Com foto', t: t, d: new Date().toLocaleString('pt-BR'), por: usuarioAtual ? usuarioAtual.nome : '—', foto: dataUrl || null });
+        labLog('oco_foto', t.slice(0,40));
+        document.getElementById('lab-oco-txt').value = '';
+        if (fileInput) fileInput.value = '';
+        try { salvar(); } catch (e) {}
+        toast('Ocorrência registrada'); try { render(); } catch (e) {}
+      }
+      if (!file) return save(null);
+      var reader = new FileReader();
+      reader.onload = function() {
+        try {
+          var img = new Image();
+          img.onload = function() {
+            var c = document.createElement('canvas'); var max = 800; var w = img.width, h = img.height;
+            if (w > max || h > max) { var r = Math.min(max/w, max/h); w = Math.round(w*r); h = Math.round(h*r); }
+            c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+            save(c.toDataURL('image/jpeg', 0.7));
+          };
+          img.src = reader.result;
+        } catch (e) { save(reader.result); }
+      };
+      reader.readAsDataURL(file);
+    }
+    function labOfflineKey() { return 'valis_offline_queue'; }
+    async function labFlushOffline() {
+      var q = []; try { q = JSON.parse(localStorage.getItem(labOfflineKey())||'[]'); } catch (e) {}
+      if (!q.length) { toast('Fila vazia'); return; }
+      try { await salvar(); localStorage.setItem(labOfflineKey(), '[]'); toast('Fila processada ('+q.length+')'); }
+      catch (e) { toast('Ainda offline / erro'); }
+      labRender();
+    }
+    function labToggleCompacto() {
+      document.body.classList.toggle('tema-compacto');
+      try { localStorage.setItem('valis_tema_compacto', document.body.classList.contains('tema-compacto') ? '1' : '0'); } catch (e) {}
+      toast(document.body.classList.contains('tema-compacto') ? 'Compacto ON' : 'Compacto OFF');
+    }
+    function labLimparLogs() { labEnsureDb(); db.logsSensivel = []; toast('Logs limpos'); labRender(); }
+    function labSalvarSessao() {
+      var min = parseInt(document.getElementById('lab-sess-min').value, 10) || 120;
+      try { localStorage.setItem('valis_sess_timeout_min', String(min)); } catch (e) {}
+      labEnsureDb(); db.labsConfig.sessTimeoutMin = min;
+      toast('Timeout: '+min+' min'); labArmSessionWatch();
+    }
+    var _labSessTimer = null;
+    function labArmSessionWatch() {
+      try {
+        if (_labSessTimer) clearInterval(_labSessTimer);
+        var min = parseInt(localStorage.getItem('valis_sess_timeout_min')||'0', 10);
+        if (!min || min < 5) return;
+        var touch = function(){ try { localStorage.setItem('valis_last_activity', String(Date.now())); } catch(e){} };
+        ['click','touchstart','keydown'].forEach(function(ev){ document.addEventListener(ev, touch, {passive:true}); });
+        touch();
+        _labSessTimer = setInterval(function(){
+          if (!usuarioAtual) return;
+          var last = parseInt(localStorage.getItem('valis_last_activity')||'0', 10);
+          if (last && Date.now()-last > min*60000) {
+            toast('Sessão expirada');
+            try { if (typeof fazerLogout==='function') fazerLogout(); } catch(e){}
+          }
+        }, 30000);
+      } catch (e) {}
+    }
+    function labSalvar2FA() {
+      var code = (document.getElementById('lab-2fa').value||'').trim();
+      try { localStorage.setItem('valis_2fa_code', code); } catch(e){}
+      labEnsureDb(); db.labsConfig.twoFA = code;
+      labLog('2fa_config', code ? 'definido' : 'limpo');
+      toast(code ? '2FA salvo' : '2FA limpo'); try { salvar(); } catch(e){}
+    }
+    function labRender() {
+      try {
+        labEnsureDb(); labFillPostoSelects();
+        var rl = document.getElementById('lab-rondas-lista');
+        if (rl) rl.innerHTML = (db.rondas||[]).slice(0,8).map(function(r){
+          return '<div class="item"><b>'+(r.postoNome||'')+'</b><div class="meta">'+(r.itens||[]).join(' · ')+'</div><div class="meta">'+(r.por||'')+' · '+(r.em||'')+'</div></div>';
+        }).join('') || '<div class="empty">Nenhuma ronda</div>';
+        var pl = document.getElementById('lab-presenca-lista');
+        if (pl) pl.innerHTML = (db.presenca||[]).slice(0,12).map(function(x){
+          return '<div class="item"><b>'+x.tipo+'</b> · '+(x.posto||'')+'<div class="meta">'+(x.em||'')+(x.lat!=null?(' · '+Number(x.lat).toFixed(4)+','+Number(x.lng).toFixed(4)):'')+'</div></div>';
+        }).join('') || '<div class="empty">Sem registros ainda.</div>';
+        var tl = document.getElementById('lab-trocas-lista');
+        if (tl) tl.innerHTML = (db.trocasPostoPlantao||[]).slice(0,8).map(function(x){
+          return '<div class="item"><b>'+(x.de||'—')+' → '+(x.para||'—')+'</b><div class="meta">'+(x.por||'')+' · '+(x.em||'')+'</div></div>';
+        }).join('') || '';
+        var ml = document.getElementById('lab-msg-lidos');
+        if (ml) ml.innerHTML = (db.msg||[]).slice(0,6).map(function(m){
+          return '<div class="item"><div class="meta">'+(m.h||'')+' · '+(m.de||'')+'</div><b style="font-size:13px">'+String(m.t||'').slice(0,80)+'</b><div class="meta">Lidos: '+((m.lidos&&m.lidos.length)?m.lidos.join(', '):'ninguém ainda')+'</div></div>';
+        }).join('') || '<div class="empty">Sem msgs</div>';
+        var v = db.valoresPlantao||{};
+        var el;
+        el=document.getElementById('lab-val-diurno'); if(el&&el.value==='') el.value=v.Diurno!=null?v.Diurno:100;
+        el=document.getElementById('lab-val-noturno'); if(el&&el.value==='') el.value=v.Noturno!=null?v.Noturno:120;
+        el=document.getElementById('lab-val-cob'); if(el&&el.value==='') el.value=v.Cobertura!=null?v.Cobertura:130;
+        el=document.getElementById('lab-val-prop'); if(el&&el.value==='') el.value=v['Plantão Próprio']!=null?v['Plantão Próprio']:100;
+        var fl = document.getElementById('lab-folhas-status');
+        if (fl) {
+          var folhas = db.folhasArquivadas||[];
+          fl.innerHTML = folhas.length ? folhas.slice(0,10).map(function(f){
+            var st=f.statusPagamento||'pendente';
+            return '<div class="item"><b>Folha · '+(f.fechadoEm||f.id)+'</b><div class="meta">'+(f.qtd||0)+' · '+(typeof moneyBR==='function'?moneyBR(f.total||0):f.total)+' · '+st+'</div><div class="actions"><button class="btn green sm" onclick="labSetFolhaStatus(\''+f.id+'\',\'pago\')">Pago</button><button class="btn dark sm" onclick="labSetFolhaStatus(\''+f.id+'\',\'pendente\')">Pendente</button></div></div>';
+          }).join('') : '<div class="empty">Nenhuma folha</div>';
+        }
+        var oq = document.getElementById('lab-offline-q');
+        if (oq) { var q=[]; try{q=JSON.parse(localStorage.getItem(labOfflineKey())||'[]');}catch(e){} oq.textContent=q.length?(q.length+' na fila'):'Fila vazia'; }
+        var lg = document.getElementById('lab-logs');
+        if (lg) lg.innerHTML = (db.logsSensivel||[]).slice(0,15).map(function(x){
+          return '<div class="item"><b>'+(x.acao||'')+'</b><div class="meta">'+(x.por||'')+' · '+(x.em||'')+'</div><div class="meta">'+(x.detalhe||'')+'</div></div>';
+        }).join('') || '<div class="empty">Sem logs</div>';
+        var ah = document.getElementById('lab-alerta-horas');
+        if (ah && !ah.dataset.ready) { ah.value=(db.labsConfig&&db.labsConfig.alertaHoras)||localStorage.getItem('valis_lab_alerta_h')||12; ah.dataset.ready='1'; }
+        var sm = document.getElementById('lab-sess-min');
+        if (sm && !sm.dataset.ready) { sm.value=localStorage.getItem('valis_sess_timeout_min')||(db.labsConfig&&db.labsConfig.sessTimeoutMin)||120; sm.dataset.ready='1'; }
+        labCheckPlantaoLongo();
+      } catch (e) { console.warn('labRender', e); }
+    }
+    try { if (localStorage.getItem('valis_tema_compacto')==='1') document.body.classList.add('tema-compacto'); } catch(e){}
+
     function render() {
       document.getElementById('s1').textContent = db.postos.length;
       document.getElementById('s2').textContent = db.esc.length;
@@ -5420,6 +5853,7 @@
       if (elTot) elTot.textContent = moneyBR(totalFolha);
       if (elQtd) elQtd.textContent = listaEx.length;
       try { aplicarCollapseFolhaExtrato(); } catch (e) {}
+      try { labRender(); } catch (e) {}
       const exLista = document.getElementById('ex-lista');
       if (exLista) {
         const labelTodos = podeVerTodosPlantaoes() ? ' (visão supervisão — todos)' : ' (somente os seus)';
@@ -6768,6 +7202,7 @@
       addAtividade('Check-in plantão: ' + (p ? p.n : 'posto') + (auto ? ' (GPS auto)' : ''));
       try { await salvar(); } catch (e) {}
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
+      try { labRegPresenca('check-in', sess.postoNome, sess.checkInLat, sess.checkInLng); } catch (e) {}
       try { notificarApp('VALIS · Check-in', (p ? p.n + ' · ' : '') + pvFmtHora(sess.checkIn)); } catch (e) {}
     }
     async function pvAlmocoInicio() {
@@ -6818,6 +7253,7 @@
       addAtividade('Check-out plantão: ' + (sess.postoNome || '') + (auto ? ' (GPS auto)' : ''));
       try { await salvar(); } catch (e) {}
       toast(auto ? 'Check-out automático (GPS)' : 'Check-out registrado');
+      try { labRegPresenca('check-out', sess.postoNome, sess.checkOutLat, sess.checkOutLng); } catch (e) {}
       try { notificarApp('VALIS · Check-out', (sess.postoNome ? sess.postoNome + ' · ' : '') + pvFmtHora(sess.checkOut)); } catch (e) {}
 
       try {
@@ -6946,6 +7382,8 @@
       try {
         pvRender();
         pvStartGeoWatch();
+        try { labArmSessionWatch(); } catch (e2) {}
+        try { setInterval(labCheckPlantaoLongo, 60000); } catch (e3) {}
       } catch (e) { console.warn('pvBoot', e); }
     }
 
