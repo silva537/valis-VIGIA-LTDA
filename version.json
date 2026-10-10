@@ -1,5 +1,5 @@
 {
-  "v": "8.1.0",
-  "forceReload": false,
-  "msg": "VALIS 8.1.0 — ferramentas operacionais e nav organizada"
+  "v": "8.1.1",
+  "forceReload": true,
+  "msg": "Notificacoes PWA reforcadas (SW + 2o plano)"
 }

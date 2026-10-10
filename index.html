@@ -1626,6 +1626,14 @@
             logs, sessão e 2FA.
           </div>
         </div>
+        <div class="card">
+          <div class="card-label">🔔 Notificações em segundo plano</div>
+          <div class="meta" style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4">
+            Permita notificações e use o PWA <b>instalado</b>. No Android, não force o fechamento do app.
+            iPhone (iOS) limita bastante notificação de PWA com o app fechado.
+          </div>
+          <button class="btn green" onclick="ativarNotificacoesPWA()">Ativar / testar notificações</button>
+        </div>
         <div class="card"><div class="card-label">1 · Ronda digital</div>
           <div class="field"><label>Posto</label><select id="lab-ronda-posto" class="select"></select></div>
           <div class="field"><label>Itens (um por linha)</label><textarea id="lab-ronda-itens" class="area" rows="3" placeholder="Portão&#10;Câmeras&#10;Gerador"></textarea></div>
@@ -1811,7 +1819,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '8.1.0';
+    const APP_VERSION = '8.1.1';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -3197,40 +3205,99 @@
       const title = titulo || 'VALIS VIGIA';
       const body = corpo == null ? '' : String(corpo);
       try {
-        if (!opts.silent && document.visibilityState === 'visible') {
-          tocarSomNotificacao();
-        }
+        if (!opts.silent) tocarSomNotificacao();
       } catch (e) {}
       try {
         if (!('Notification' in window)) return;
         if (Notification.permission === 'default') {
           try { await Notification.requestPermission(); } catch (e) {}
         }
-        if (Notification.permission !== 'granted') return;
-        const options = {
+        if (Notification.permission !== 'granted') {
+          console.warn('Notificação bloqueada — permita nas configurações do navegador/PWA');
+          return;
+        }
+        const payload = {
+          title: title,
           body: body,
           icon: '/launchericon-192x192.png',
           badge: '/launchericon-96x96.png',
           tag: opts.tag || ('valis-' + Date.now()),
-          renotify: true,
-          requireInteraction: !!opts.requireInteraction || body.length > 80,
-          silent: false,
-          vibrate: [200, 100, 200],
-          data: { url: '/', ts: Date.now() }
+          requireInteraction: !!opts.requireInteraction || body.length > 60,
+          data: { url: opts.url || '/', ts: Date.now() }
         };
         if ('serviceWorker' in navigator) {
           try {
             const reg = await navigator.serviceWorker.ready;
-            if (reg && reg.showNotification) {
-              await reg.showNotification(title, options);
-              return;
+            if (reg) {
+              if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                  type: 'SHOW_NOTIFICATION',
+                  payload: payload
+                });
+              }
+              if (reg.showNotification) {
+                await reg.showNotification(payload.title, {
+                  body: payload.body,
+                  icon: payload.icon,
+                  badge: payload.badge,
+                  tag: payload.tag,
+                  renotify: true,
+                  requireInteraction: payload.requireInteraction,
+                  silent: false,
+                  vibrate: [200, 100, 200, 100, 200],
+                  data: payload.data
+                });
+                return;
+              }
             }
           } catch (e) { console.warn('SW notify:', e); }
         }
-        const n = new Notification(title, options);
+        const n = new Notification(title, {
+          body: body,
+          icon: payload.icon,
+          badge: payload.badge,
+          tag: payload.tag,
+          renotify: true,
+          requireInteraction: payload.requireInteraction,
+          silent: false,
+          data: payload.data
+        });
         var dur = (opts && opts.durationMs) ? opts.durationMs : getNotifDurMs();
         if (opts.requireInteraction) dur = Math.max(dur, 20000);
         setTimeout(function() { try { n.close(); } catch (e) {} }, dur);
+      } catch (e) { console.warn(e); }
+    }
+
+    var _valisLastMsgIds = {};
+    function marcarMsgsComoJaVistas() {
+      try {
+        (db.msg || []).forEach(function(m) {
+          if (m && m.id != null) _valisLastMsgIds[String(m.id)] = true;
+        });
+      } catch (e) {}
+    }
+    function notificarMsgsNovas(listaMsgs) {
+      try {
+        if (!usuarioAtual || !Array.isArray(listaMsgs)) return;
+        var role = String(usuarioAtual.funcao || '');
+        var nome = usuarioAtual.nome || usuarioAtual.user || '';
+        listaMsgs.slice(0, 30).forEach(function(m) {
+          if (!m || m.id == null) return;
+          var id = String(m.id);
+          if (_valisLastMsgIds[id]) return;
+          _valisLastMsgIds[id] = true;
+          try {
+            if (typeof mensagemVisivelPara === 'function' && !mensagemVisivelPara(m, role)) return;
+          } catch (e) {}
+          if (m.de && nome && String(m.de) === String(nome)) return;
+          var titulo = m.emergencia ? 'VALIS · EMERGÊNCIA' : 'VALIS · Mensagem';
+          var corpo = (m.de ? m.de + ': ' : '') + String(m.t || '').slice(0, 160);
+          notificarApp(titulo, corpo, { tag: 'valis-msg-' + id, requireInteraction: !!m.emergencia });
+        });
+        var keys = Object.keys(_valisLastMsgIds);
+        if (keys.length > 200) {
+          keys.slice(0, keys.length - 150).forEach(function(k) { delete _valisLastMsgIds[k]; });
+        }
       } catch (e) { console.warn(e); }
     }
 
@@ -3255,7 +3322,10 @@
             }));
             db.users = mergeUsers(db.users || [], remoteNorm);
           }
-          if (Array.isArray(remote.msg)) db.msg = remote.msg;
+          if (Array.isArray(remote.msg)) {
+            db.msg = remote.msg;
+            try { notificarMsgsNovas(remote.msg); } catch (e) {}
+          }
           if (Array.isArray(remote.esc)) db.esc = remote.esc;
           if (Array.isArray(remote.oco)) db.oco = remote.oco;
           // plantões: mantém merge para não perder local
@@ -3293,10 +3363,17 @@
           const a = snap.data() || {};
           if (!a.texto) return;
           const key = 'valis_aviso_visto';
-          if (localStorage.getItem(key) === a.em) return;
-          localStorage.setItem(key, a.em || '');
-          toast('Msg: ' + a.texto);
-          notificarApp('VALIS VIGIA — ' + (a.destino || 'Aviso'), (a.de ? a.de + ': ' : '') + a.texto);
+          const stamp = String(a.em || a.texto);
+          if (localStorage.getItem(key) === stamp) return;
+          localStorage.setItem(key, stamp);
+          if (document.visibilityState === 'visible') {
+            try { toast('Msg: ' + a.texto); } catch (e) {}
+          }
+          notificarApp(
+            'VALIS VIGIA — ' + (a.destino || 'Aviso'),
+            (a.de ? a.de + ': ' : '') + a.texto,
+            { tag: 'valis-aviso', requireInteraction: true }
+          );
         });
       } catch (e) { console.warn(e); }
     }
@@ -4091,7 +4168,9 @@
               await salvar();
               await carregar();
               if (usuarioAtual) {
-                try { iniciarListenerDados(); } catch (e) {}
+                try { marcarMsgsComoJaVistas(); } catch (e) {}
+      try { iniciarListenerDados(); } catch (e) {}
+      try { setTimeout(function(){ if (usuarioAtual) ativarNotificacoesPWA(); }, 1200); } catch (e) {}
                 try { render(); } catch (e) {}
               }
               setConnStatus(firebaseOk ? 'green' : 'red');
@@ -7388,16 +7467,68 @@
     }
 
     function registrarServiceWorker() {
-      // PWA: registra Service Worker para notificações em segundo plano + offline.
       if (!('serviceWorker' in navigator)) return;
       try {
-        navigator.serviceWorker.register('/pwabuilder-sw.js').then(function(reg) {
+        navigator.serviceWorker.register('/pwabuilder-sw.js').then(async function(reg) {
           console.log('Service Worker VALIS OK', reg.scope);
           try { reg.update(); } catch (e) {}
+          try {
+            if ('Notification' in window && Notification.permission === 'default') {
+              await Notification.requestPermission();
+            }
+          } catch (e) {}
+          try {
+            if (reg.periodicSync && Notification.permission === 'granted') {
+              const tags = await reg.periodicSync.getTags();
+              if (tags.indexOf('valis-check-avisos') < 0) {
+                await reg.periodicSync.register('valis-check-avisos', {
+                  minInterval: 15 * 60 * 1000
+                });
+              }
+            }
+          } catch (e) { console.warn('periodicSync:', e); }
         }).catch(function(err) {
           console.warn('SW register falhou:', err);
         });
+        navigator.serviceWorker.addEventListener('message', function(ev) {
+          if (!ev.data) return;
+          if (ev.data.type === 'VALIS_BG_SYNC') {
+            try { if (typeof recuperarApp === 'function') recuperarApp(false); } catch (e) {}
+            try { if (typeof iniciarListenerDados === 'function') iniciarListenerDados(); } catch (e) {}
+          }
+        });
       } catch (e) { console.warn(e); }
+    }
+
+    async function ativarNotificacoesPWA() {
+      try {
+        if (!('Notification' in window)) {
+          toast('Este aparelho não suporta notificações');
+          return false;
+        }
+        var perm = Notification.permission;
+        if (perm === 'default') {
+          perm = await Notification.requestPermission();
+        }
+        if (perm !== 'granted') {
+          toast('Ative as notificações nas configurações do app/navegador');
+          return false;
+        }
+        registrarServiceWorker();
+        try {
+          var reg = await navigator.serviceWorker.ready;
+          if (reg.periodicSync) {
+            await reg.periodicSync.register('valis-check-avisos', { minInterval: 15 * 60 * 1000 });
+          }
+        } catch (e) {}
+        await notificarApp('VALIS · Notificações', 'Notificações ativas neste aparelho', { tag: 'valis-teste-perm' });
+        toast('Notificações OK');
+        return true;
+      } catch (e) {
+        console.warn(e);
+        toast('Falha ao ativar notificações');
+        return false;
+      }
     }
 
     // ---- Recuperação WebInto / segundo plano ----
