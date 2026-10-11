@@ -1819,7 +1819,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '8.1.1';
+    const APP_VERSION = '8.1.2';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -5108,6 +5108,9 @@
       if (name === 'labs') {
         try { labRender(); } catch (e) {}
       }
+      if (name === 'inicio' || name === 'plantao') {
+        try { setTimeout(function(){ if (usuarioAtual) pvBoot(); }, 200); } catch (e) {}
+      }
       if (name === 'extrato') {
         try { setTimeout(aplicarCollapseFolhaExtrato, 0); } catch (e) {}
       }
@@ -7101,14 +7104,44 @@
       var sel = document.getElementById('pv-posto');
       if (!sel) return;
       var sess = pvLoad();
-      var cur = sess && sess.postoId ? String(sess.postoId) : sel.value;
+      var cur = '';
+      try { cur = localStorage.getItem('valis_pv_ultimo_posto') || ''; } catch (e) {}
+      if (sess && sess.postoId) cur = String(sess.postoId);
+      if (!cur && sel.value) cur = sel.value;
       var opts = ['<option value="">— Selecione o posto —</option>'];
+      var comGps = [];
       (db.postos || []).forEach(function(p) {
         var geo = (p.lat != null && p.lng != null) ? ' 📍' : '';
+        if (p.lat != null && p.lng != null) comGps.push(p);
         opts.push('<option value="' + p.id + '">' + (p.n || 'Posto') + geo + (p.d ? ' — ' + p.d : '') + '</option>');
       });
       sel.innerHTML = opts.join('');
-      if (cur) sel.value = cur;
+      // Auto: último posto, ou único posto com GPS
+      if (cur) {
+        sel.value = cur;
+      } else if (comGps.length === 1) {
+        sel.value = String(comGps[0].id);
+        cur = sel.value;
+      }
+      if (sel.value) {
+        try { localStorage.setItem('valis_pv_ultimo_posto', String(sel.value)); } catch (e) {}
+        // Garante sessão idle com posto já escolhido (para auto GPS sem trocar select)
+        if (!sess || sess.status === 'idle' || sess.status === 'finalizado' || !sess.status) {
+          var p = pvPostoById(sel.value);
+          var keepCooldown = sess || {};
+          pvSave({
+            status: (sess && sess.status === 'finalizado') ? 'finalizado' : 'idle',
+            postoId: sel.value,
+            postoNome: p ? p.n : '',
+            checkIn: (sess && sess.status === 'finalizado') ? sess.checkIn : null,
+            almocoInicio: (sess && sess.status === 'finalizado') ? sess.almocoInicio : null,
+            almocoFim: (sess && sess.status === 'finalizado') ? sess.almocoFim : null,
+            checkOut: (sess && sess.status === 'finalizado') ? sess.checkOut : null,
+            noAutoUntil: keepCooldown.noAutoUntil || 0,
+            needsLeaveBeforeAuto: !!keepCooldown.needsLeaveBeforeAuto
+          });
+        }
+      }
     }
     function pvSelecionarPosto() {
       var sel = document.getElementById('pv-posto');
@@ -7155,6 +7188,7 @@
         sess.postoNome = p ? p.n : '';
       }
       pvSave(sess);
+      try { if (sel.value) localStorage.setItem('valis_pv_ultimo_posto', String(sel.value)); } catch (e) {}
       pvRender();
       pvStartGeoWatch();
     }
@@ -7381,23 +7415,63 @@
     }
     function pvStartGeoWatch() {
       if (!navigator.geolocation) {
-        pvUpdateGeoLabel('GPS: não disponível neste aparelho');
+        pvUpdateGeoLabel('<span class="warn">GPS: não disponível neste aparelho</span>');
         return;
       }
+      pvUpdateGeoLabel('GPS: obtendo localização…');
       if (_pvWatchId != null) {
         try { navigator.geolocation.clearWatch(_pvWatchId); } catch (e) {}
         _pvWatchId = null;
       }
-      _pvWatchId = navigator.geolocation.watchPosition(function(pos) {
+      var onOk = function(pos) {
         _pvLastPos = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           acc: pos.coords.accuracy
         };
         pvOnGeoTick();
-      }, function(err) {
-        pvUpdateGeoLabel('<span class="warn">GPS: ' + (err && err.message ? err.message : 'erro') + '</span>');
-      }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+      };
+      var onErr = function(err) {
+        var msg = 'erro';
+        if (err) {
+          if (err.code === 1) msg = 'permissão negada — permita localização nas configurações';
+          else if (err.code === 2) msg = 'indisponível no momento';
+          else if (err.code === 3) msg = 'tempo esgotado — tentando de novo…';
+          else if (err.message) msg = err.message;
+        }
+        pvUpdateGeoLabel('<span class="warn">GPS: ' + msg + '</span>');
+        // tenta de novo em alguns segundos
+        setTimeout(function() {
+          try {
+            navigator.geolocation.getCurrentPosition(onOk, function() {}, {
+              enableHighAccuracy: true, maximumAge: 15000, timeout: 20000
+            });
+          } catch (e) {}
+        }, 4000);
+      };
+      // 1) fix imediato
+      try {
+        navigator.geolocation.getCurrentPosition(onOk, onErr, {
+          enableHighAccuracy: true, maximumAge: 10000, timeout: 20000
+        });
+      } catch (e) { onErr(e); }
+      // 2) acompanhamento contínuo
+      try {
+        _pvWatchId = navigator.geolocation.watchPosition(onOk, onErr, {
+          enableHighAccuracy: true, maximumAge: 8000, timeout: 25000
+        });
+      } catch (e) { console.warn(e); }
+    }
+    function pvEscolherPostoMaisProximo() {
+      if (!_pvLastPos || !db.postos || !db.postos.length) return null;
+      var best = null, bestD = Infinity;
+      db.postos.forEach(function(p) {
+        if (p.lat == null || p.lng == null) return;
+        var d = pvHaversine(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
+        var raio = (p.raio && p.raio >= 30) ? Number(p.raio) : 150;
+        if (d <= raio && d < bestD) { bestD = d; best = p; }
+      });
+      return best;
     }
     function pvOnGeoTick() {
       if (!_pvLastPos) return;
@@ -7408,7 +7482,20 @@
       if (st === 'ativo' || st === 'almoco') {
         postoId = (sess.postoId) || (sel && sel.value) || '';
       } else {
-        postoId = (sel && sel.value) || '';
+        postoId = (sel && sel.value) || (sess.postoId) || '';
+        // Se nenhum posto escolhido: tenta o mais próximo dentro do raio
+        if (!postoId) {
+          var near = pvEscolherPostoMaisProximo();
+          if (near) {
+            postoId = String(near.id);
+            if (sel) sel.value = postoId;
+            try { localStorage.setItem('valis_pv_ultimo_posto', postoId); } catch (e) {}
+            sess.postoId = postoId;
+            sess.postoNome = near.n || '';
+            if (!sess.status) sess.status = 'idle';
+            pvSave(sess);
+          }
+        }
       }
       var p = postoId ? pvPostoById(postoId) : null;
       var acc = Math.round(_pvLastPos.acc || 0);
@@ -7417,7 +7504,7 @@
         return;
       }
       if (!p || p.lat == null || p.lng == null) {
-        pvUpdateGeoLabel('GPS ok (±' + acc + ' m) · posto sem geofence configurada');
+        pvUpdateGeoLabel('GPS ok (±' + acc + ' m) · posto sem geofence (cadastre GPS no posto)');
         return;
       }
       var dist = pvHaversine(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
@@ -7459,8 +7546,18 @@
     }
     function pvBoot() {
       try {
+        pvPreencherSelectPostos();
         pvRender();
         pvStartGeoWatch();
+        // Reavalia ao voltar para o app (abertura / 2º plano)
+        if (!window._pvVisBound) {
+          window._pvVisBound = true;
+          document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && usuarioAtual) {
+              try { pvStartGeoWatch(); } catch (e) {}
+            }
+          });
+        }
         try { labArmSessionWatch(); } catch (e2) {}
         try { setInterval(labCheckPlantaoLongo, 60000); } catch (e3) {}
       } catch (e) { console.warn('pvBoot', e); }
