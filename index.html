@@ -1118,6 +1118,7 @@
         <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
         <button class="func-btn" onclick="devFn(34)"><span class="ico">⏱️</span><div>Tempo das notificações<small>Duração global (todos os aparelhos)</small></div></button>
         <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso Firebase<small>Envia no doc aviso</small></div></button>
+        <button class="func-btn" onclick="devFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, 2FA, relatório, emergência…</small></div></button>
       </div></div>
     </div>
 
@@ -1140,6 +1141,7 @@
         <button class="func-btn" onclick="supFn(8)"><span class="ico">📊</span><div>Resumo do dia<small>Números + plantões por pessoa</small></div></button>
         <button class="func-btn" onclick="supFn(11)"><span class="ico">💰</span><div>Plantões por pessoa<small>Quantidade e total em R$</small></div></button>
         <button class="func-btn" onclick="supFn(19)"><span class="ico">⚠️</span><div>Alertas operacionais<small>Inconsistências e pendências</small></div></button>
+        <button class="func-btn" onclick="supFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, relatório, emergência…</small></div></button>
       </div></div>
     </div>
 
@@ -1819,7 +1821,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '8.1.2';
+    const APP_VERSION = '8.1.3';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -3537,7 +3539,6 @@
       { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escalas', primary: false },
       { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
       { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorrências', primary: false },
-      { tab: 'labs', roles: ['all'], icon: '🛠', label: 'Ferramentas', primary: false },
       { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: false },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
     ];
@@ -3936,6 +3937,13 @@
       if (s) s.classList.remove('open');
     }
 
+
+    function podeAcessarFerramentas() {
+      if (!usuarioAtual) return false;
+      const f = String(usuarioAtual.funcao || '').toLowerCase();
+      return f === 'admin' || f === 'supervisor' || f === 'dev' || !!devLiberado;
+    }
+
     function podeMenuSup() {
       if (!usuarioAtual) return false;
       const f = usuarioAtual.funcao;
@@ -4280,6 +4288,16 @@
           })();
           break;
         }
+        case 40: {
+          if (!podeAcessarFerramentas()) {
+            alert('Acesso só para Admin, Supervisão ou DEV.');
+            break;
+          }
+          tab('labs');
+          try { labRender(); } catch (e) {}
+          toast('Ferramentas avançadas');
+          break;
+        }
         case 28: {
           const users = db.users || [];
           const semHash = users.filter(u => !u.passHash && (u.pass == null || u.pass === '')).length;
@@ -4424,6 +4442,14 @@
 
     // 10 SUPERVISION FUNCTIONS
     function supFn(n) {
+      if (n === 40) {
+        fecharDrawer();
+        if (!podeAcessarFerramentas()) { alert('Acesso só para Admin, Supervisão ou DEV.'); return; }
+        tab('labs');
+        try { labRender(); } catch (e) {}
+        toast('Ferramentas avançadas');
+        return;
+      }
       if (!podeMenuSup() && !(usuarioAtual && (usuarioAtual.funcao === 'supervisor' || usuarioAtual.funcao === 'admin'))) {
         toast('Sem permissão de supervisão');
         return;
@@ -5082,6 +5108,10 @@
     }
 
     function tab(name, btn) {
+      if (name === 'labs' && !podeAcessarFerramentas()) {
+        toast('Ferramentas só para Admin / Supervisão / DEV');
+        return;
+      }
       document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
       const el = document.getElementById('tab-' + name);
       if (el) el.classList.add('active');

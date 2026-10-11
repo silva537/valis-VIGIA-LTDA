@@ -1,5 +1,5 @@
 {
-  "v": "8.1.2",
+  "v": "8.1.3",
   "forceReload": true,
-  "msg": "GPS plantao: fix imediato + auto posto + reativa ao abrir"
+  "msg": "Ferramentas só Admin/Supervisão/DEV (menu DEV e Supervisão)"
 }
