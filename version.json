@@ -1,5 +1,5 @@
 {
-  "v": "8.1.3",
+  "v": "8.2.0",
   "forceReload": true,
-  "msg": "Ferramentas só Admin/Supervisão/DEV (menu DEV e Supervisão)"
+  "msg": "8.2.0: seguranca, FCM base, folha atraso, offline, auditoria, valores, oco foto, PDF"
 }

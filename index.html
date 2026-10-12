@@ -1142,6 +1142,7 @@
         <button class="func-btn" onclick="supFn(11)"><span class="ico">💰</span><div>Plantões por pessoa<small>Quantidade e total em R$</small></div></button>
         <button class="func-btn" onclick="supFn(19)"><span class="ico">⚠️</span><div>Alertas operacionais<small>Inconsistências e pendências</small></div></button>
         <button class="func-btn" onclick="supFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, relatório, emergência…</small></div></button>
+        <button class="func-btn" onclick="supFn(41)"><span class="ico">📋</span><div>Auditoria<small>Ações sensíveis recentes</small></div></button>
       </div></div>
     </div>
 
@@ -1388,6 +1389,24 @@
             <span><b id="ex-total">R$ 0,00</b> · <span id="ex-qtd">0</span> plantão(ões)</span>
           </div>
           <button class="btn green" onclick="fecharFolha()">✓ Recebi / Fechar Folha Atual</button>
+          <div class="meta" style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4">
+            Confirma pagamento e arquiva os plantões. Se fechar por engano, use <b>Restaurar plantões</b> em Folhas anteriores.
+          </div>
+          <div id="folha-auto-config-box" class="card" style="margin-top:12px;padding:12px;display:none">
+            <div class="card-label">Fechamento automático</div>
+            <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4">
+              Nos dias definidos (ex.: 5 e 15), ao abrir o app a folha do vigilante é arquivada como paga.
+              Continua podendo restaurar manualmente.
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px">
+              <input type="checkbox" id="folha-auto-ativo"> Ativar fechamento automático
+            </label>
+            <div class="field"><label>Dias do mês (separados por vírgula)</label>
+              <input id="folha-auto-dias" class="input" placeholder="5,15" value="5,15">
+            </div>
+            <button type="button" class="btn dark sm" style="width:auto" onclick="salvarConfigFolhaAutoUI()">Salvar datas</button>
+            <div class="meta" id="folha-auto-status" style="margin-top:8px;font-size:11px;color:var(--muted)"></div>
+          </div>
           <button type="button" class="btn dark" id="btn-ex-folha-min" onclick="toggleExFolhaLista()">
             <span id="ex-folha-min-label">📋 Minimizar lista de plantões</span>
           </button>
@@ -1399,6 +1418,9 @@
         </div>
         <div class="card">
           <div class="card-label">Folhas anteriores arquivadas</div>
+          <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:8px">
+            Cada folha pode ser restaurada para a lista atual ou marcada como paga/pendente.
+          </div>
           <div id="ex-arquivadas" class="empty">Nenhuma folha arquivada</div>
         </div>
       </section>
@@ -1472,6 +1494,7 @@
             </select>
           </div>
           <div class="field"><label>Descrição</label><textarea id="ot" class="area" rows="3" placeholder="Descreva o ocorrido..."></textarea></div>
+          <div class="field"><label>Foto (opcional)</label><input id="ot-foto" class="input" type="file" accept="image/*"></div>
           <button class="btn green" onclick="addOco()">Registrar ocorrência</button>
         </div>
         <div id="lo"></div>
@@ -1635,6 +1658,8 @@
             iPhone (iOS) limita bastante notificação de PWA com o app fechado.
           </div>
           <button class="btn green" onclick="ativarNotificacoesPWA()">Ativar / testar notificações</button>
+          <button class="btn dark" style="margin-top:8px" onclick="salvarVapidFCM()">Configurar VAPID (FCM)</button>
+          <button class="btn purple" style="margin-top:8px" onclick="ativarFCM()">Ativar FCM (app fechado)</button>
         </div>
         <div class="card"><div class="card-label">1 · Ronda digital</div>
           <div class="field"><label>Posto</label><select id="lab-ronda-posto" class="select"></select></div>
@@ -1669,6 +1694,7 @@
         <div class="card"><div class="card-label">8 · Relatório mensal</div>
           <div class="field"><label>Mês AAAA-MM</label><input id="lab-rel-mes" class="input" placeholder="2026-10"></div>
           <button class="btn dark" onclick="labRelatorioMensal()">Gerar</button>
+          <button class="btn green" onclick="exportarRelatorioMensalPDF((document.getElementById('lab-rel-mes')||{}).value)">PDF / Imprimir</button>
           <div id="lab-rel-out" style="margin-top:10px;font-size:13px;white-space:pre-wrap"></div>
         </div>
         <div class="card"><div class="card-label">9 · Valores por tipo</div>
@@ -1821,7 +1847,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '8.1.3';
+    const APP_VERSION = '8.2.0';
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2635,6 +2661,30 @@
       return c.cadastroPublico !== false;
     }
 
+    async function migrarSenhasLegadas() {
+      try {
+        var mudou = false;
+        var users = db.users || [];
+        for (var i = 0; i < users.length; i++) {
+          var u = users[i];
+          if (u && u.pass != null && u.pass !== '' && !(u.passHash && u.passSalt)) {
+            try {
+              await garantirSenhaHasheada(u, String(u.pass));
+              try { delete u.pass; } catch (e) { u.pass = undefined; }
+              mudou = true;
+            } catch (e) {}
+          } else if (u && u.passHash && u.pass != null) {
+            try { delete u.pass; } catch (e) { u.pass = undefined; }
+            mudou = true;
+          }
+        }
+        if (mudou) {
+          try { registrarAuditoria('seguranca_migrar_senhas', 'ok'); } catch (e) {}
+          await salvar();
+        }
+        return mudou;
+      } catch (e) { return false; }
+    }
     async function fazerLogin() {
       const user = document.getElementById('login-user').value.trim().toLowerCase();
       const pass = String(document.getElementById('login-pass').value);
@@ -2686,6 +2736,7 @@
         }
       }
       if (!passOk) return msgLogin('Senha incorreta.');
+      try { migrarSenhasLegadas(); } catch (e) {}
 
       const ativo = byUser.ativo === true || byUser.ativo === 'true' || byUser.ativo === 1;
       const pend = byUser.pendente === true || byUser.pendente === 'true' || byUser.pendente === 1;
@@ -4179,6 +4230,7 @@
                 try { marcarMsgsComoJaVistas(); } catch (e) {}
       try { iniciarListenerDados(); } catch (e) {}
       try { setTimeout(function(){ if (usuarioAtual) ativarNotificacoesPWA(); }, 1200); } catch (e) {}
+      try { setTimeout(function(){ if (usuarioAtual) verificarFechamentoAutomaticoFolha(); }, 2500); } catch (e) {}
                 try { render(); } catch (e) {}
               }
               setConnStatus(firebaseOk ? 'green' : 'red');
@@ -4448,6 +4500,23 @@
         tab('labs');
         try { labRender(); } catch (e) {}
         toast('Ferramentas avançadas');
+        return;
+      }
+      if (n === 41) {
+        fecharDrawer();
+        tab('supervisao');
+        var boxAudit = document.getElementById('sup-resultado');
+        var logsA = db.logsSensivel || [];
+        if (boxAudit) {
+          boxAudit.innerHTML = logsA.length
+            ? logsA.slice(0, 40).map(function(x) {
+                return '<div class="item"><b>' + (x.acao || '') + '</b><div class="meta">' +
+                  (x.por || '') + ' · ' + (x.em || '') + '</div><div class="meta">' +
+                  (x.detalhe || '') + '</div></div>';
+              }).join('')
+            : '<div class="empty">Sem registros de auditoria ainda</div>';
+        }
+        toast('Auditoria');
         return;
       }
       if (!podeMenuSup() && !(usuarioAtual && (usuarioAtual.funcao === 'supervisor' || usuarioAtual.funcao === 'admin'))) {
@@ -4954,7 +5023,18 @@
     }
     async function salvarPlantao() {
       const data = document.getElementById('pl-data').value;
-      const valor = parseFloat(document.getElementById('pl-valor').value) || 0;
+      var tipoPl = document.getElementById('pl-tipo').value;
+      var valorInput = document.getElementById('pl-valor').value;
+      var valor = parseFloat(valorInput);
+      if (isNaN(valor)) valor = 0;
+      if ((!valorInput || Number(valorInput) === 0) && db.valoresPlantao) {
+        var tabV = db.valoresPlantao || {};
+        if (tabV[tipoPl] != null) valor = Number(tabV[tipoPl]) || 0;
+        else if (String(tipoPl).indexOf('Cobertura') >= 0 && tabV.Cobertura != null) valor = Number(tabV.Cobertura) || 0;
+        else if (String(tipoPl).indexOf('Noturno') >= 0 && tabV.Noturno != null) valor = Number(tabV.Noturno) || 0;
+        else if (String(tipoPl).indexOf('Diurno') >= 0 && tabV.Diurno != null) valor = Number(tabV.Diurno) || 0;
+        else if (tabV['Plantão Próprio'] != null) valor = Number(tabV['Plantão Próprio']) || 0;
+      }
       if (!data) return alert('Informe a data.');
       if (valor < 0) return alert('Valor inválido.');
       const campos = {
@@ -4962,7 +5042,7 @@
         turno: document.getElementById('pl-turno').value,
         inicio: document.getElementById('pl-inicio').value,
         fim: document.getElementById('pl-fim').value,
-        tipo: document.getElementById('pl-tipo').value,
+        tipo: tipoPl,
         valor: valor,
         horas: document.getElementById('pl-horas').value,
         sono: parseFloat(document.getElementById('pl-sono').value) || 0,
@@ -5043,29 +5123,217 @@
       render();
       toast('Excluído');
     }
-    async function fecharFolha() {
+
+    function getFolhaAutoConfig() {
+      var cfg = (db && db.labsConfig) ? db.labsConfig : {};
+      var dias = cfg.folhaDiasFechamento;
+      if (!Array.isArray(dias) || !dias.length) {
+        try {
+          var raw = localStorage.getItem('valis_folha_dias_auto');
+          if (raw) dias = JSON.parse(raw);
+        } catch (e) {}
+      }
+      if (!Array.isArray(dias) || !dias.length) dias = [5, 15];
+      dias = dias.map(function(d) { return parseInt(d, 10); }).filter(function(d) {
+        return d >= 1 && d <= 31;
+      });
+      if (!dias.length) dias = [5, 15];
+      var ativo = cfg.folhaAutoAtivo;
+      if (ativo == null) {
+        try {
+          var a = localStorage.getItem('valis_folha_auto_ativo');
+          if (a === '0') ativo = false;
+          else ativo = true;
+        } catch (e) { ativo = true; }
+      }
+      return { ativo: !!ativo, dias: dias };
+    }
+
+    function salvarFolhaAutoConfig(ativo, dias) {
+      if (!db.labsConfig) db.labsConfig = {};
+      db.labsConfig.folhaAutoAtivo = !!ativo;
+      db.labsConfig.folhaDiasFechamento = (dias || [5, 15]).slice();
       try {
-        const lista = plantaoesDoExtrato();
-        if (!lista.length) return alert('Sua folha atual está vazia.');
-        const label = podeVerTodosPlantaoes() ? 'a folha visível (todos da lista)' : 'a SUA folha';
-        if (!confirm('Confirmar recebimento e arquivar ' + label + '?\n\n' + lista.length + ' plantão(ões) sairão da folha atual.')) return;
-        const total = lista.reduce(function(s, x) { return s + (Number(x.valor) || 0); }, 0);
-        const ids = {};
-        lista.forEach(function(x) { ids[String(x.id)] = true; });
+        localStorage.setItem('valis_folha_auto_ativo', ativo ? '1' : '0');
+        localStorage.setItem('valis_folha_dias_auto', JSON.stringify(db.labsConfig.folhaDiasFechamento));
+      } catch (e) {}
+    }
+
+    function chavePeriodoFolhaAuto(data) {
+      var d = data || new Date();
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+
+    function jaFechouFolhaAutoHoje(periodo) {
+      var login = usuarioAtual ? String(usuarioAtual.user || '') : '';
+      var key = 'valis_folha_auto_done_' + periodo + '_' + login;
+      try {
+        if (localStorage.getItem(key) === '1') return true;
+      } catch (e) {}
+      var folhas = db.folhasArquivadas || [];
+      return folhas.some(function(f) {
+        return f.autoFechamento && f.periodoAuto === periodo &&
+          (f.userLogin === login || (usuarioAtual && f.por === usuarioAtual.nome));
+      });
+    }
+
+    function marcarFolhaAutoFeita(periodo) {
+      var login = usuarioAtual ? String(usuarioAtual.user || '') : '';
+      try {
+        localStorage.setItem('valis_folha_auto_done_' + periodo + '_' + login, '1');
+      } catch (e) {}
+    }
+
+    async function fecharFolhaInterno(opts) {
+      opts = opts || {};
+      const lista = plantaoesDoExtrato();
+      if (!lista.length) return { ok: false, reason: 'vazia' };
+      const total = lista.reduce(function(s, x) { return s + (Number(x.valor) || 0); }, 0);
+      const ids = {};
+      lista.forEach(function(x) { ids[String(x.id)] = true; });
+      if (!db.folhasArquivadas) db.folhasArquivadas = [];
+      const periodo = opts.periodo || chavePeriodoFolhaAuto();
+      db.folhasArquivadas.unshift({
+        id: Date.now(),
+        fechadoEm: new Date().toLocaleString('pt-BR'),
+        por: usuarioAtual ? usuarioAtual.nome : '—',
+        userLogin: usuarioAtual ? usuarioAtual.user : '',
+        total: total,
+        qtd: lista.length,
+        itens: lista.slice(),
+        statusPagamento: opts.statusPagamento || 'pago',
+        pagoEm: new Date().toLocaleString('pt-BR'),
+        pagoPor: opts.auto ? 'Sistema (auto)' : (usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—'),
+        autoFechamento: !!opts.auto,
+        periodoAuto: opts.auto ? periodo : null
+      });
+      const antes = (db.plantaoes || []).length;
+      db.plantaoes = (db.plantaoes || []).filter(function(x) { return !ids[String(x.id)]; });
+      const removidos = antes - (db.plantaoes || []).length;
+      addAtividade(
+        (opts.auto ? 'Folha auto-fechada' : 'Folha fechada') +
+        ': R$ ' + total.toFixed(2) + ' (' + lista.length + ' plantões)'
+      );
+      try { registrarAuditoria(opts.auto ? 'folha_auto' : 'folha_fechar', lista.length + ' · R$ ' + total.toFixed(2)); } catch (e) {}
+      await salvar();
+      try {
+        if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+          await fbDb.collection('valis').doc('db_v42').set({
+            data: db,
+            updatedAt: new Date().toISOString(),
+            sec: 1
+          }, { merge: true });
+        }
+      } catch (e) { console.warn(e); }
+      try { await backupPlantaoesAuto(opts.auto ? 'fechar_folha_auto' : 'fechar_folha'); } catch (e) {}
+      if (opts.auto) marcarFolhaAutoFeita(periodo);
+      return { ok: true, removidos: removidos, total: total, qtd: lista.length };
+    }
+
+    function periodoFolhaAutoVencido(hoje, dias) {
+      hoje = hoje || new Date();
+      dias = (dias || [5, 15]).slice().map(function(d) { return parseInt(d, 10); }).filter(function(d) {
+        return d >= 1 && d <= 31;
+      }).sort(function(a, b) { return a - b; });
+      if (!dias.length) return null;
+      var dia = hoje.getDate();
+      var y = hoje.getFullYear();
+      var m = hoje.getMonth();
+      var last = null;
+      for (var i = 0; i < dias.length; i++) {
+        if (dias[i] <= dia) last = dias[i];
+      }
+      if (last != null) return chavePeriodoFolhaAuto(new Date(y, m, last));
+      var prevLast = dias[dias.length - 1];
+      return chavePeriodoFolhaAuto(new Date(y, m - 1, prevLast));
+    }
+
+    async function verificarFechamentoAutomaticoFolha() {
+      try {
+        if (!usuarioAtual) return;
+        var cfg = getFolhaAutoConfig();
+        if (!cfg.ativo) return;
+        var hoje = new Date();
+        var dia = hoje.getDate();
+        var periodo = periodoFolhaAutoVencido(hoje, cfg.dias);
+        if (!periodo) return;
+        if (jaFechouFolhaAutoHoje(periodo)) return;
+        var lista = plantaoesDoExtrato();
+        if (!lista.length) {
+          marcarFolhaAutoFeita(periodo);
+          return;
+        }
+        var r = await fecharFolhaInterno({ auto: true, periodo: periodo, statusPagamento: 'pago' });
+        if (r && r.ok) {
+          try { render(); } catch (e) {}
+          var msgDia = (cfg.dias.indexOf(dia) >= 0) ? ('dia ' + dia) : ('em atraso · ref. ' + periodo);
+          toast('Folha fechada automaticamente (' + msgDia + '): ' + r.qtd + ' plantão(ões)');
+          try {
+            notificarApp(
+              'VALIS · Folha fechada',
+              'Fechamento automático (' + msgDia + ') · ' + r.qtd + ' plantão(ões) · R$ ' + r.total.toFixed(2)
+            );
+          } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('folha auto', e);
+      }
+    }
+
+    function salvarConfigFolhaAutoUI() {
+      if (!podeVerTodosPlantaoes()) return alert('Só Admin / Supervisão / DEV.');
+      var ativo = !!(document.getElementById('folha-auto-ativo') && document.getElementById('folha-auto-ativo').checked);
+      var raw = (document.getElementById('folha-auto-dias') && document.getElementById('folha-auto-dias').value) || '5,15';
+      var dias = raw.split(/[,;\s]+/).map(function(x) { return parseInt(x, 10); }).filter(function(d) {
+        return d >= 1 && d <= 31;
+      });
+      if (!dias.length) dias = [5, 15];
+      salvarFolhaAutoConfig(ativo, dias);
+      try { salvar(); } catch (e) {}
+      toast('Fechamento automático: ' + (ativo ? ('ON · dias ' + dias.join(' e ')) : 'OFF'));
+      render();
+    }
+
+    function podeRestaurarFolha(f) {
+
+      if (!f || !usuarioAtual) return false;
+      if (podeVerTodosPlantaoes()) return true;
+      if (f.userLogin && f.userLogin === usuarioAtual.user) return true;
+      if (f.por && f.por === usuarioAtual.nome) return true;
+      return false;
+    }
+
+    async function restaurarFolhaArquivada(folhaId) {
+      try {
         if (!db.folhasArquivadas) db.folhasArquivadas = [];
-        db.folhasArquivadas.unshift({
-          id: Date.now(),
-          fechadoEm: new Date().toLocaleString('pt-BR'),
-          por: usuarioAtual ? usuarioAtual.nome : '—',
-          userLogin: usuarioAtual ? usuarioAtual.user : '',
-          total: total,
-          qtd: lista.length,
-          itens: lista.slice()
+        var idx = db.folhasArquivadas.findIndex(function(x) { return String(x.id) === String(folhaId); });
+        if (idx < 0) return alert('Folha não encontrada.');
+        var f = db.folhasArquivadas[idx];
+        if (!podeRestaurarFolha(f)) return alert('Sem permissão para restaurar esta folha.');
+        var itens = Array.isArray(f.itens) ? f.itens.slice() : [];
+        if (!itens.length) return alert('Esta folha não tem plantões para restaurar.');
+        if (!confirm(
+          'Restaurar ' + itens.length + ' plantão(ões) para a FOLHA ATUAL?\n\n' +
+          'A folha arquivada de ' + (f.fechadoEm || '') + ' será removida do arquivo.\n' +
+          'Total: R$ ' + (Number(f.total) || 0).toFixed(2)
+        )) return;
+        if (!db.plantaoes) db.plantaoes = [];
+        var existentes = {};
+        db.plantaoes.forEach(function(p) { existentes[String(p.id)] = true; });
+        var adicionados = 0;
+        itens.forEach(function(p) {
+          if (!p || p.id == null) return;
+          if (existentes[String(p.id)]) return; // já está na atual
+          db.plantaoes.unshift(p);
+          existentes[String(p.id)] = true;
+          adicionados++;
         });
-        const antes = (db.plantaoes || []).length;
-        db.plantaoes = (db.plantaoes || []).filter(function(x) { return !ids[String(x.id)]; });
-        const removidos = antes - (db.plantaoes || []).length;
-        addAtividade('Folha fechada: R$ ' + total.toFixed(2) + ' (' + lista.length + ' plantões)');
+        db.folhasArquivadas.splice(idx, 1);
+        addAtividade('Folha restaurada: ' + adicionados + ' plantão(ões) · ' + (f.fechadoEm || ''));
+        try { registrarAuditoria('folha_restaurar', adicionados + ' · ' + (f.fechadoEm || '')); } catch (e) {}
         await salvar();
         try {
           if (firebaseOk && fbDb && DataService.mode === 'firebase') {
@@ -5076,11 +5344,60 @@
             }, { merge: true });
           }
         } catch (e) { console.warn(e); }
-        try { await backupPlantaoesAuto('fechar_folha'); } catch (e) {}
+        try { await backupPlantaoesAuto('restaurar_folha'); } catch (e) {}
         render();
-        toast('Folha arquivada: ' + removidos + ' removido(s) da atual');
-        if (removidos === 0) {
-          alert('Nenhum plantão saiu da folha atual. Atualize a página e tente de novo.');
+        toast(adicionados + ' plantão(ões) de volta na folha atual');
+      } catch (err) {
+        alert('Erro ao restaurar: ' + (err && err.message ? err.message : err));
+      }
+    }
+
+    async function marcarFolhaPaga(folhaId, pago) {
+      try {
+        if (!db.folhasArquivadas) db.folhasArquivadas = [];
+        var f = db.folhasArquivadas.find(function(x) { return String(x.id) === String(folhaId); });
+        if (!f) return alert('Folha não encontrada.');
+        if (!podeRestaurarFolha(f) && !podeVerTodosPlantaoes()) {
+          return alert('Sem permissão.');
+        }
+        f.statusPagamento = pago ? 'pago' : 'pendente';
+        f.pagoEm = pago ? new Date().toLocaleString('pt-BR') : null;
+        f.pagoPor = pago && usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : null;
+        addAtividade('Folha ' + (pago ? 'paga' : 'pendente') + ': ' + (f.fechadoEm || f.id));
+        await salvar();
+        try {
+          if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+            await fbDb.collection('valis').doc('db_v42').set({
+              data: db,
+              updatedAt: new Date().toISOString(),
+              sec: 1
+            }, { merge: true });
+          }
+        } catch (e) { console.warn(e); }
+        render();
+        toast(pago ? 'Marcada como PAGA' : 'Marcada como pendente');
+      } catch (err) {
+        alert('Erro: ' + (err && err.message ? err.message : err));
+      }
+    }
+
+    async function fecharFolha() {
+      try {
+        const lista = plantaoesDoExtrato();
+        if (!lista.length) return alert('Sua folha atual está vazia.');
+        const label = podeVerTodosPlantaoes() ? 'a folha visível (todos da lista)' : 'a SUA folha';
+        if (!confirm(
+          'Confirmar que RECEBEU o pagamento e arquivar ' + label + '?\n\n' +
+          lista.length + ' plantão(ões) sairão da folha atual e vão para "Folhas anteriores".\n\n' +
+          'Se fechar por engano, use "Restaurar" na lista de folhas arquivadas.'
+        )) return;
+        const r = await fecharFolhaInterno({ auto: false, statusPagamento: 'pago' });
+        render();
+        if (r && r.ok) {
+          toast('Folha arquivada: ' + r.removidos + ' removido(s) da atual');
+          if (r.removidos === 0) {
+            alert('Nenhum plantão saiu da folha atual. Atualize a página e tente de novo.');
+          }
         }
       } catch (err) {
         alert('Erro ao fechar folha: ' + (err && err.message ? err.message : err));
@@ -5143,6 +5460,7 @@
       }
       if (name === 'extrato') {
         try { setTimeout(aplicarCollapseFolhaExtrato, 0); } catch (e) {}
+        try { setTimeout(function(){ verificarFechamentoAutomaticoFolha(); }, 500); } catch (e) {}
       }
       render();
     }
@@ -5257,12 +5575,55 @@
       const t = document.getElementById('ot').value.trim();
       if (!t) return alert('Descreva.');
       const tipo = document.getElementById('otp').value;
-      db.oco.unshift({ id: Date.now(), p: document.getElementById('op').value, tipo, t, d: new Date().toLocaleString('pt-BR'), por: usuarioAtual ? usuarioAtual.nome : '—' });
-      document.getElementById('ot').value = '';
-      addAtividade('Ocorrência: ' + tipo);
-      await salvar();
-      render();
-      toast('Registrada');
+      const posto = document.getElementById('op').value;
+      async function gravar(fotoData) {
+        db.oco.unshift({
+          id: Date.now(),
+          p: posto,
+          tipo: tipo,
+          t: t,
+          d: new Date().toLocaleString('pt-BR'),
+          por: usuarioAtual ? usuarioAtual.nome : '—',
+          foto: fotoData || null
+        });
+        document.getElementById('ot').value = '';
+        var fi = document.getElementById('ot-foto');
+        if (fi) fi.value = '';
+        addAtividade('Ocorrência: ' + tipo);
+        try { registrarAuditoria('ocorrencia', tipo + ' · ' + posto); } catch (e) {}
+        try {
+          await salvar();
+        } catch (e) {
+          try { enfileirarOffline('oco', {}); } catch (e2) {}
+        }
+        render();
+        toast('Registrada');
+      }
+      var fi = document.getElementById('ot-foto');
+      var file = fi && fi.files && fi.files[0];
+      if (!file) { await gravar(null); return; }
+      await new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          try {
+            var img = new Image();
+            img.onload = function() {
+              var c = document.createElement('canvas');
+              var max = 900;
+              var w = img.width, h = img.height;
+              if (w > max || h > max) {
+                var rr = Math.min(max / w, max / h);
+                w = Math.round(w * rr); h = Math.round(h * rr);
+              }
+              c.width = w; c.height = h;
+              c.getContext('2d').drawImage(img, 0, 0, w, h);
+              gravar(c.toDataURL('image/jpeg', 0.72)).then(resolve);
+            };
+            img.src = reader.result;
+          } catch (e) { gravar(reader.result).then(resolve); }
+        };
+        reader.readAsDataURL(file);
+      });
     }
     async function addMsg() {
       const t = document.getElementById('mt').value.trim();
@@ -5589,6 +5950,20 @@
       if (!db.postos) db.postos = [];
       if (!db.folhasArquivadas) db.folhasArquivadas = [];
     }
+    function registrarAuditoria(acao, detalhe) {
+      try {
+        if (!db.logsSensivel) db.logsSensivel = [];
+        db.logsSensivel.unshift({
+          id: Date.now(),
+          em: new Date().toISOString(),
+          por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—',
+          acao: String(acao || ''),
+          detalhe: String(detalhe || '')
+        });
+        db.logsSensivel = db.logsSensivel.slice(0, 300);
+        try { if (window.ValisDevLog) ValisDevLog.add(acao, detalhe); } catch (e) {}
+      } catch (e) {}
+    }
     function labLog(acao, detalhe) {
       try {
         labEnsureDb();
@@ -5707,6 +6082,30 @@
       try { await salvar(); } catch (e) {}
       try { notificarApp('VALIS · EMERGÊNCIA', txt); } catch (e) {}
       toast('Alerta enviado');
+    }
+    function exportarRelatorioMensalPDF(mes) {
+      try {
+        if (!mes) {
+          var d0 = new Date();
+          mes = d0.getFullYear() + '-' + String(d0.getMonth() + 1).padStart(2, '0');
+        }
+        var lista = (db.plantaoes || []).filter(function(x) {
+          return String(x.data || '').indexOf(mes) === 0;
+        });
+        var total = lista.reduce(function(s, x) { return s + (Number(x.valor) || 0); }, 0);
+        var w = window.open('', '_blank');
+        if (!w) return alert('Permita pop-up para gerar o relatório.');
+        var rows = lista.map(function(x) {
+          return '<tr><td>' + (x.data || '') + '</td><td>' + (x.por || x.userLogin || '') + '</td><td>' +
+            (x.tipo || '') + '</td><td>' + (x.posto || '') + '</td><td>R$ ' + (Number(x.valor) || 0).toFixed(2) + '</td></tr>';
+        }).join('');
+        w.document.write('<html><head><title>Relatorio ' + mes + '</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px;font-size:12px}h1{font-size:18px}</style></head><body>');
+        w.document.write('<h1>VALIS - Relatorio ' + mes + '</h1>');
+        w.document.write('<p>' + lista.length + ' plantoes - Total R$ ' + total.toFixed(2) + '</p>');
+        w.document.write('<table><thead><tr><th>Data</th><th>Por</th><th>Tipo</th><th>Posto</th><th>Valor</th></tr></thead><tbody>' + rows + '</tbody></table>');
+        w.document.write('<script>window.onload=function(){window.print()}<\/script></body></html>');
+        w.document.close();
+      } catch (e) { alert('Erro no relatorio: ' + (e && e.message ? e.message : e)); }
     }
     function labRelatorioMensal() {
       labEnsureDb();
@@ -5966,6 +6365,28 @@
       if (elQtd) elQtd.textContent = listaEx.length;
       try { aplicarCollapseFolhaExtrato(); } catch (e) {}
       try { labRender(); } catch (e) {}
+      try {
+        var box = document.getElementById('folha-auto-config-box');
+        if (box) {
+          if (podeVerTodosPlantaoes()) {
+            box.style.display = 'block';
+            var cfg = getFolhaAutoConfig();
+            var chk = document.getElementById('folha-auto-ativo');
+            var diasEl = document.getElementById('folha-auto-dias');
+            var st = document.getElementById('folha-auto-status');
+            if (chk) chk.checked = !!cfg.ativo;
+            if (diasEl && document.activeElement !== diasEl) diasEl.value = cfg.dias.join(',');
+            if (st) {
+              var hoje = new Date().getDate();
+              st.textContent = cfg.ativo
+                ? ('Ativo · dias ' + cfg.dias.join(' e ') + (cfg.dias.indexOf(hoje) >= 0 ? ' · HOJE é dia de fechamento' : ''))
+                : 'Desativado';
+            }
+          } else {
+            box.style.display = 'none';
+          }
+        }
+      } catch (e) {}
       const exLista = document.getElementById('ex-lista');
       if (exLista) {
         const labelTodos = podeVerTodosPlantaoes() ? ' (visão supervisão — todos)' : ' (somente os seus)';
@@ -5995,11 +6416,27 @@
       if (exArq) {
         const folhas = folhasDoExtrato();
         exArq.innerHTML = folhas.length
-          ? folhas.map(f => `
-            <div class="item">
-              <b>Folha · ${f.fechadoEm}</b>
-              <div class="meta">${f.qtd} plantão(ões) · <span style="color:var(--green)">${moneyBR(f.total)}</span> · por ${f.por}</div>
-            </div>`).join('')
+          ? folhas.map(f => {
+              const st = f.statusPagamento || 'pago';
+              const badge = st === 'pago'
+                ? '<span class="badge green">Pago</span>'
+                : '<span class="badge yellow">Pendente</span>';
+              const podeRest = podeRestaurarFolha(f);
+              const btns = podeRest
+                ? ('<div class="actions" style="margin-top:8px;flex-wrap:wrap;gap:6px">' +
+                   '<button type="button" class="btn yellow sm" onclick="restaurarFolhaArquivada(\'' + f.id + '\')">↺ Restaurar plantões</button>' +
+                   (st === 'pago'
+                     ? '<button type="button" class="btn dark sm" onclick="marcarFolhaPaga(\'' + f.id + '\', false)">Marcar pendente</button>'
+                     : '<button type="button" class="btn green sm" onclick="marcarFolhaPaga(\'' + f.id + '\', true)">Marcar pago</button>') +
+                   '</div>')
+                : '';
+              return '<div class="item">' +
+                '<b>Folha · ' + (f.fechadoEm || f.id) + '</b> ' + badge +
+                '<div class="meta">' + (f.qtd || 0) + ' plantão(ões) · <span style="color:var(--green)">' + moneyBR(f.total) + '</span> · por ' + (f.por || '—') + '</div>' +
+                (f.pagoEm ? ('<div class="meta">Confirmado em ' + f.pagoEm + (f.pagoPor ? (' · ' + f.pagoPor) : '') + '</div>') : '') +
+                btns +
+                '</div>';
+            }).join('')
           : '<div class="empty">Nenhuma folha arquivada</div>';
       }
 
@@ -6448,8 +6885,43 @@
           await tentarRecuperarPlantaoesSilencioso();
         }
       } catch (e) {}
-      return await DataService.save('db_v42', db);
+      try {
+        var rSave = await DataService.save('db_v42', db);
+        try { await flushFilaOffline(); } catch (e2) {}
+        return rSave;
+      } catch (err) {
+        try { enfileirarOffline('salvar_db', { em: new Date().toISOString() }); } catch (e) {}
+        throw err;
+      }
     }
+
+    function offlineQueueKey() { return 'valis_offline_queue_v2'; }
+    function enfileirarOffline(op, payload) {
+      try {
+        var q = JSON.parse(localStorage.getItem(offlineQueueKey()) || '[]');
+        q.push({ id: Date.now(), op: op, payload: payload || {}, em: new Date().toISOString() });
+        localStorage.setItem(offlineQueueKey(), JSON.stringify(q.slice(-80)));
+      } catch (e) {}
+    }
+    async function flushFilaOffline() {
+      if (!navigator.onLine) return;
+      var q = [];
+      try { q = JSON.parse(localStorage.getItem(offlineQueueKey()) || '[]'); } catch (e) {}
+      if (!q.length) return;
+      try {
+        await DataService.save('db_v42', db);
+        localStorage.setItem(offlineQueueKey(), '[]');
+        try { registrarAuditoria('offline_flush', q.length + ' itens'); } catch (e) {}
+      } catch (e) {
+        console.warn('flush offline', e);
+      }
+    }
+    try {
+      window.addEventListener('online', function() {
+        try { flushFilaOffline(); } catch (e) {}
+      });
+    } catch (e) {}
+
     async function carregar() {
       try { await initFirebase(); } catch (e) {}
       try { await ensureFirebaseAuth(); } catch (e) {}
@@ -7627,6 +8099,79 @@
       } catch (e) { console.warn(e); }
     }
 
+    async function ativarFCM() {
+      try {
+        if (!firebaseOk || typeof firebase === 'undefined') {
+          toast('Firebase offline');
+          return false;
+        }
+        var vapid = '';
+        try { vapid = localStorage.getItem('valis_fcm_vapid') || ''; } catch (e) {}
+        if (!vapid && db.labsConfig && db.labsConfig.fcmVapid) vapid = db.labsConfig.fcmVapid;
+        if (!vapid) {
+          toast('Configure a chave VAPID (FCM) no Firebase Console');
+          return false;
+        }
+        if (!firebase.messaging) {
+          try {
+            await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js', 10000);
+          } catch (e) {}
+        }
+        if (!firebase.messaging) {
+          toast('Messaging nao disponivel neste aparelho');
+          return false;
+        }
+        if (Notification.permission !== 'granted') {
+          var perm = await Notification.requestPermission();
+          if (perm !== 'granted') return false;
+        }
+        var messaging = firebase.messaging();
+        var reg = await navigator.serviceWorker.ready;
+        var token = await messaging.getToken({ vapidKey: vapid, serviceWorkerRegistration: reg });
+        if (!token) {
+          toast('Nao foi possivel obter token FCM');
+          return false;
+        }
+        try { localStorage.setItem('valis_fcm_token', token); } catch (e) {}
+        if (fbDb && usuarioAtual) {
+          var payload = { updatedAt: new Date().toISOString() };
+          payload[String(usuarioAtual.user || 'anon')] = {
+            token: token,
+            nome: usuarioAtual.nome || '',
+            em: new Date().toISOString()
+          };
+          await fbDb.collection('valis').doc('fcm_tokens').set(payload, { merge: true });
+        }
+        try {
+          messaging.onMessage(function(payload) {
+            var tt = (payload.notification && payload.notification.title) || 'VALIS';
+            var bb = (payload.notification && payload.notification.body) || '';
+            notificarApp(tt, bb, { requireInteraction: true });
+          });
+        } catch (e) {}
+        toast('FCM ativo neste aparelho');
+        try { registrarAuditoria('fcm_token', 'ok'); } catch (e) {}
+        return true;
+      } catch (e) {
+        console.warn('FCM', e);
+        toast('FCM: ' + (e && e.message ? e.message : 'erro'));
+        return false;
+      }
+    }
+    function salvarVapidFCM() {
+      if (!podeVerTodosPlantaoes()) return alert('So Admin/DEV');
+      var atual = '';
+      try { atual = localStorage.getItem('valis_fcm_vapid') || ''; } catch (e) {}
+      var v = prompt('Cole a chave VAPID publica (Firebase Console > Cloud Messaging > Web Push):', atual);
+      if (v == null) return;
+      v = String(v).trim();
+      try { localStorage.setItem('valis_fcm_vapid', v); } catch (e) {}
+      if (!db.labsConfig) db.labsConfig = {};
+      db.labsConfig.fcmVapid = v;
+      try { salvar(); } catch (e) {}
+      toast(v ? 'VAPID salva' : 'VAPID limpa');
+    }
+
     async function ativarNotificacoesPWA() {
       try {
         if (!('Notification' in window)) {
@@ -7649,6 +8194,7 @@
           }
         } catch (e) {}
         await notificarApp('VALIS · Notificações', 'Notificações ativas neste aparelho', { tag: 'valis-teste-perm' });
+        try { await ativarFCM(); } catch (e) {}
         toast('Notificações OK');
         return true;
       } catch (e) {
