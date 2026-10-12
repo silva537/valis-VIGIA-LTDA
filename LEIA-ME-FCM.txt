@@ -1,0 +1,24 @@
+VALIS VIGIA 8.2.0 — PACOTE COM A CHAVE VAPID
+
+O que foi alterado:
+1. Mantido o index.html original do ZIP recebido, com a interface e as demais funções preservadas.
+2. Inserida a chave pública VAPID enviada pelo usuário como padrão de ativação do FCM. Se existir uma chave manual salva no aparelho, ela continua tendo prioridade.
+3. Ajustado o tratamento do evento push no pwabuilder-sw.js para reconhecer payloads no formato comum do FCM (notification/data) e abrir o link informado.
+
+O que NÃO foi alterado:
+- Regras do Firestore/Storage.
+- Autenticação, funções de vigilante, Supervisão ou DEV.
+- Layout da interface.
+- Configurações de envio no servidor.
+
+IMPORTANTE: isso conecta a chave pública VAPID ao código, mas não prova que o envio FCM já está completo. Para receber notificações reais, o site precisa estar publicado em HTTPS, o usuário precisa conceder permissão e ativar FCM no aplicativo, o token precisa ser salvo no Firestore com regras que permitam a operação, e o envio precisa partir de um ambiente confiável usando Firebase Admin SDK ou FCM HTTP v1. Nunca coloque chave privada de conta de serviço no HTML.
+
+Como testar depois de publicar:
+1. Faça backup da versão atual antes de substituir arquivos.
+2. Publique index.html e pwabuilder-sw.js na mesma raiz do site.
+3. Abra o site no navegador, entre no app com um usuário autorizado e ative as notificações/FCM.
+4. Verifique no console do navegador se aparece erro de permissão, Service Worker ou Firestore.
+5. Confirme no Firebase se o token foi gravado. Se houver permission-denied, não abra as regras para todos; revise as regras com cuidado.
+6. O teste de mensagem de campanha do Console Firebase não substitui o teste do token Web e das regras do aplicativo.
+
+A chave VAPID é pública e não é uma credencial privada. Mesmo assim, não compartilhe chaves privadas de service account.

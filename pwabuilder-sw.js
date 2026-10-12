@@ -111,7 +111,16 @@ self.addEventListener("push", (event) => {
     icon: "/launchericon-192x192.png"
   };
   try {
-    if (event.data) data = Object.assign(data, event.data.json());
+    if (event.data) {
+      const raw = event.data.json();
+      const notification = raw && raw.notification ? raw.notification : {};
+      const customData = raw && raw.data ? raw.data : {};
+      data = Object.assign(data, raw || {}, notification || {});
+      if (!data.data || typeof data.data !== 'object') data.data = {};
+      data.data = Object.assign({}, data.data, customData);
+      if (customData.url) data.data.url = customData.url;
+      if (raw && raw.fcmOptions && raw.fcmOptions.link) data.data.url = raw.fcmOptions.link;
+    }
   } catch (e) {
     try {
       data.body = event.data ? event.data.text() : data.body;

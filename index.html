@@ -8105,8 +8105,13 @@
           toast('Firebase offline');
           return false;
         }
-        var vapid = '';
-        try { vapid = localStorage.getItem('valis_fcm_vapid') || ''; } catch (e) {}
+        // Chave pública VAPID gerada no Firebase Console para o VALIS VIGIA.
+        // Se a chave for rotacionada no futuro, a configuração salva no app tem prioridade.
+        var vapid = 'BOK5s6qeUXZupI2j7fTuVhvZ2LsfLNcF26Tv_OnG2mgBiKWM-mu-jDIgZaN_Y10NtiydpR_9Y3vAt1V42ucCIMo';
+        try {
+          var vapidSalva = localStorage.getItem('valis_fcm_vapid') || '';
+          if (vapidSalva) vapid = vapidSalva;
+        } catch (e) {}
         if (!vapid && db.labsConfig && db.labsConfig.fcmVapid) vapid = db.labsConfig.fcmVapid;
         if (!vapid) {
           toast('Configure a chave VAPID (FCM) no Firebase Console');
