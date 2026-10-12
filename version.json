@@ -1,5 +1,5 @@
 {
-  "v": "8.2.0",
+  "v": "8.2.2",
   "forceReload": true,
-  "msg": "8.2.0: seguranca, FCM base, folha atraso, offline, auditoria, valores, oco foto, PDF"
+  "msg": "Correcao: restaurar folha persiste (merge/backup nao desfaz mais)"
 }

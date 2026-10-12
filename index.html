@@ -1847,7 +1847,20 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '8.2.0';
+    const APP_VERSION = '8.2.2';
+    const APP_SECURITY_BUILD = 'sec-2026-10';
+    function verificarAmbienteSeguro() {
+      try {
+        var h = location.hostname || '';
+        var ok = h === 'localhost' || h === '127.0.0.1' || location.protocol === 'https:';
+        if (!ok && h) console.warn('[VALIS] Ambiente sem HTTPS — risco de segurança.');
+        if (location.protocol === 'https:' && h && h.indexOf('localhost') < 0) {
+          try { window.__VALIS_OWNER__ = 'VALIS VIGIA LTDA · uso autorizado'; } catch (e) {}
+        }
+        return ok;
+      } catch (e) { return true; }
+    }
+
     try { window.APP_VERSION = APP_VERSION; } catch (e) {}
 
     // ===== ValisDevLog (inline — sem pasta js/) =====
@@ -2215,7 +2228,20 @@
         }
         if (firebaseOk && fbDb && this.mode === 'firebase') {
           try {
-            await fbDb.collection('valis').doc(key).set({ data, updatedAt: new Date().toISOString(), sec: 1 }, { merge: true });
+            var dataSafe = data;
+            try {
+              if (data && Array.isArray(data.users)) {
+                dataSafe = Object.assign({}, data, {
+                  users: data.users.map(function(u) {
+                    if (!u) return u;
+                    var c = Object.assign({}, u);
+                    if (c.passHash) { try { delete c.pass; } catch (e) { c.pass = undefined; } }
+                    return c;
+                  })
+                });
+              }
+            } catch (e) { dataSafe = data; }
+            await fbDb.collection('valis').doc(key).set({ data: dataSafe, updatedAt: new Date().toISOString(), sec: 1 }, { merge: true });
             return true;
           } catch (e) {
             console.warn('Firebase save:', e);
@@ -2685,7 +2711,12 @@
         return mudou;
       } catch (e) { return false; }
     }
+    var _loginFail = { n: 0, until: 0 };
     async function fazerLogin() {
+      if (Date.now() < (_loginFail.until || 0)) {
+        var seg = Math.ceil((_loginFail.until - Date.now()) / 1000);
+        return msgLogin('Muitas tentativas. Aguarde ' + seg + 's.');
+      }
       const user = document.getElementById('login-user').value.trim().toLowerCase();
       const pass = String(document.getElementById('login-pass').value);
       if (!user || !pass) return msgLogin('Preencha usuário e senha.');
@@ -2735,7 +2766,15 @@
           await salvar();
         }
       }
-      if (!passOk) return msgLogin('Senha incorreta.');
+      if (!passOk) {
+        _loginFail.n = (_loginFail.n || 0) + 1;
+        if (_loginFail.n >= 5) {
+          _loginFail.until = Date.now() + Math.min(60000, _loginFail.n * 10000);
+          try { registrarAuditoria('login_bloqueio', user + ' · ' + _loginFail.n); } catch (e) {}
+        }
+        return msgLogin('Senha incorreta.' + (_loginFail.n >= 5 ? ' Bloqueio temporário.' : ''));
+      }
+      _loginFail.n = 0; _loginFail.until = 0;
       try { migrarSenhasLegadas(); } catch (e) {}
 
       const ativo = byUser.ativo === true || byUser.ativo === 'true' || byUser.ativo === 1;
@@ -3395,8 +3434,9 @@
             var lpl = (db.plantaoes || []).filter(function(p) { return !arqIds[String(p.id)]; });
             db.plantaoes = mergePlantaoes(lpl, rpl);
             if (Array.isArray(remote.folhasArquivadas) && remote.folhasArquivadas.length) {
-              db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], remote.folhasArquivadas);
+              db.folhasArquivadas = mergeFolhasArquivadas(db.folhasArquivadas || [], remote.folhasArquivadas);
             }
+            try { reconciliarFolhasComPlantaoes(); } catch (eR) {}
           }
           try {
             const json = JSON.stringify(db);
@@ -5254,6 +5294,7 @@
     async function verificarFechamentoAutomaticoFolha() {
       try {
         if (!usuarioAtual) return;
+        try { reconciliarFolhasComPlantaoes(); } catch (e) {}
         var cfg = getFolhaAutoConfig();
         if (!cfg.ativo) return;
         var hoje = new Date();
@@ -5326,17 +5367,29 @@
         var adicionados = 0;
         itens.forEach(function(p) {
           if (!p || p.id == null) return;
-          if (existentes[String(p.id)]) return; // já está na atual
+          if (existentes[String(p.id)]) return;
           db.plantaoes.unshift(p);
           existentes[String(p.id)] = true;
           adicionados++;
         });
+        // Remove a folha do arquivo e marca como restaurada (não volta no merge)
         db.folhasArquivadas.splice(idx, 1);
+        try { marcarFolhaComoRestaurada(folhaId); } catch (e) {}
+        try { reconciliarFolhasComPlantaoes(); } catch (e) {}
+        // Impede fechamento automático re-arquivar na hora
+        try {
+          var periodo = periodoFolhaAutoVencido(new Date(), getFolhaAutoConfig().dias);
+          if (periodo) marcarFolhaAutoFeita(periodo);
+          // também marca o dia de hoje
+          marcarFolhaAutoFeita(chavePeriodoFolhaAuto(new Date()));
+        } catch (e) {}
         addAtividade('Folha restaurada: ' + adicionados + ' plantão(ões) · ' + (f.fechadoEm || ''));
         try { registrarAuditoria('folha_restaurar', adicionados + ' · ' + (f.fechadoEm || '')); } catch (e) {}
+        // Persiste forte: salvar + backup local/nuvem
         await salvar();
         try {
           if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+            await ensureFirebaseAuth();
             await fbDb.collection('valis').doc('db_v42').set({
               data: db,
               updatedAt: new Date().toISOString(),
@@ -5345,8 +5398,21 @@
           }
         } catch (e) { console.warn(e); }
         try { await backupPlantaoesAuto('restaurar_folha'); } catch (e) {}
+        // reforça localStorage principal
+        try {
+          var raw = JSON.stringify(db);
+          if (typeof cifrarTexto === 'function') {
+            cifrarTexto(raw).then(function(enc) {
+              try { localStorage.setItem('valis_db_v42', enc || raw); } catch (e2) {}
+            }).catch(function() {
+              try { localStorage.setItem('valis_db_v42', raw); } catch (e2) {}
+            });
+          } else {
+            localStorage.setItem('valis_db_v42', raw);
+          }
+        } catch (e) {}
         render();
-        toast(adicionados + ' plantão(ões) de volta na folha atual');
+        toast(adicionados + ' plantão(ões) restaurados e salvos');
       } catch (err) {
         alert('Erro ao restaurar: ' + (err && err.message ? err.message : err));
       }
@@ -6675,9 +6741,74 @@
     // ---------- BACKUP PLANTÕES (local + Firebase) ----------
     function mergePlantaoes(a, b) {
       const map = new Map();
-      (a || []).forEach(x => { if (x && x.id != null) map.set(x.id, x); });
-      (b || []).forEach(x => { if (x && x.id != null) map.set(x.id, x); });
-      return Array.from(map.values()).sort((x, y) => (y.id || 0) - (x.id || 0));
+      (a || []).forEach(x => { if (x && x.id != null) map.set(String(x.id), x); });
+      (b || []).forEach(x => { if (x && x.id != null) map.set(String(x.id), x); });
+      return Array.from(map.values()).sort((x, y) => (Number(y.id) || 0) - (Number(x.id) || 0));
+    }
+
+    function marcarFolhaComoRestaurada(id) {
+      try {
+        var arr = JSON.parse(localStorage.getItem('valis_folhas_restauradas') || '[]');
+        var sid = String(id);
+        if (arr.indexOf(sid) < 0) arr.push(sid);
+        localStorage.setItem('valis_folhas_restauradas', JSON.stringify(arr.slice(-80)));
+      } catch (e) {}
+    }
+    function folhaFoiRestauradaLocal(id) {
+      try {
+        var arr = JSON.parse(localStorage.getItem('valis_folhas_restauradas') || '[]');
+        return arr.indexOf(String(id)) >= 0;
+      } catch (e) { return false; }
+    }
+
+    /** Une folhas arquivadas, ignorando IDs restaurados neste aparelho. */
+    function mergeFolhasArquivadas(a, b) {
+      const map = new Map();
+      function put(x) {
+        if (!x || x.id == null) return;
+        if (folhaFoiRestauradaLocal(x.id)) return;
+        map.set(String(x.id), x);
+      }
+      (a || []).forEach(put);
+      (b || []).forEach(put);
+      return Array.from(map.values()).sort((x, y) => (Number(y.id) || 0) - (Number(x.id) || 0));
+    }
+
+    /**
+     * Se um plantão está na FOLHA ATUAL, remove cópias dele das folhas arquivadas.
+     * Evita que backup/merge traga de volta o arquivo depois de restaurar.
+     */
+    function reconciliarFolhasComPlantaoes() {
+      try {
+        var ativos = {};
+        (db.plantaoes || []).forEach(function(p) {
+          if (p && p.id != null) ativos[String(p.id)] = true;
+        });
+        var folhas = db.folhasArquivadas || [];
+        var next = [];
+        folhas.forEach(function(f) {
+          if (!f) return;
+          if (folhaFoiRestauradaLocal(f.id)) return; // restaurada: não volta
+          var itens = Array.isArray(f.itens) ? f.itens : [];
+          var filtrados = itens.filter(function(p) {
+            return p && p.id != null && !ativos[String(p.id)];
+          });
+          if (!filtrados.length) return; // folha vazia após restauração
+          if (filtrados.length === itens.length) {
+            next.push(f);
+            return;
+          }
+          var copy = Object.assign({}, f, {
+            itens: filtrados,
+            qtd: filtrados.length,
+            total: filtrados.reduce(function(s, x) { return s + (Number(x.valor) || 0); }, 0)
+          });
+          next.push(copy);
+        });
+        db.folhasArquivadas = next;
+      } catch (e) {
+        console.warn('reconciliar folhas', e);
+      }
     }
     function atualizarStatusBackupUI(texto, ok) {
       const st = document.getElementById('pl-bk-status');
@@ -6823,7 +6954,7 @@
       const antes = (db.plantaoes || []).length;
       db.plantaoes = mergePlantaoes(db.plantaoes || [], best.plantaoes || []);
       if (best.folhasArquivadas && best.folhasArquivadas.length) {
-        db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], best.folhasArquivadas || []);
+        db.folhasArquivadas = mergeFolhasArquivadas(db.folhasArquivadas || [], best.folhasArquivadas || []);
       }
       await salvar();
       await backupPlantaoesAuto('pos_recuperar');
@@ -6854,7 +6985,7 @@
           if (!Array.isArray(lista)) throw new Error('Arquivo inválido');
           db.plantaoes = mergePlantaoes(db.plantaoes || [], lista);
           if (Array.isArray(data.folhasArquivadas)) {
-            db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], data.folhasArquivadas);
+            db.folhasArquivadas = mergeFolhasArquivadas(db.folhasArquivadas || [], data.folhasArquivadas);
           }
           await salvar();
           await backupPlantaoesAuto('import_json');
@@ -6868,7 +6999,21 @@
       reader.readAsText(file);
     }
 
+    function sanitizarDbAntesDeSalvar() {
+      try {
+        if (!db || !Array.isArray(db.users)) return;
+        db.users.forEach(function(u) {
+          if (!u) return;
+          if (u.passHash) {
+            try { delete u.pass; } catch (e) { u.pass = undefined; }
+          }
+          try { delete u._tmp; } catch (e) {}
+        });
+      } catch (e) {}
+    }
+
     async function salvar() {
+      try { sanitizarDbAntesDeSalvar(); } catch (e) {}
       // proteção: nunca sobrescrever nuvem com lista de users vazia
       try {
         if (firebaseOk && fbDb && DataService.mode === 'firebase' && (!db.users || !db.users.length)) {
@@ -6968,7 +7113,8 @@
       }
       // merge com backups locais e dedicados
       db.plantaoes = mergePlantaoes(db.plantaoes || [], localPlantaoes);
-      db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], localFolhas);
+      db.folhasArquivadas = mergeFolhasArquivadas(db.folhasArquivadas || [], localFolhas);
+      try { reconciliarFolhasComPlantaoes(); } catch (eR) {}
 
       // tenta backup dedicado no Firebase
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
@@ -6977,7 +7123,7 @@
           if (snap.exists) {
             const p = snap.data() || {};
             db.plantaoes = mergePlantaoes(db.plantaoes || [], p.plantaoes || []);
-            db.folhasArquivadas = mergePlantaoes(db.folhasArquivadas || [], p.folhasArquivadas || []);
+            db.folhasArquivadas = mergeFolhasArquivadas(db.folhasArquivadas || [], p.folhasArquivadas || []);
           }
         } catch (e) { console.warn(e); }
       }
