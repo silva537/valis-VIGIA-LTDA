@@ -767,6 +767,49 @@
     .plantao-vivo-geo .ok { color: #4ade80; }
     .plantao-vivo-geo .warn { color: #fbbf24; }
 
+    .pv-mapa-wrap {
+      margin-top: 10px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: #0b1220;
+    }
+    .pv-mapa-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+      background: rgba(15,23,42,0.9);
+    }
+    .pv-mapa-head b { color: #e2e8f0; }
+    .pv-mapa-head .pv-mapa-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pv-mapa-head button {
+      border: 0;
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      background: #1e293b;
+      color: #e2e8f0;
+    }
+    .pv-mapa-head button.primary { background: #166534; color: #fff; }
+    #pv-mapa {
+      width: 100%;
+      height: 220px;
+      background: #0f172a;
+    }
+    .pv-mapa-info {
+      padding: 8px 10px 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .pv-mapa-info b { color: #cbd5e1; }
+
+
     /* ---- Banner de atualização ---- */
     #update-banner {
       display: none;
@@ -952,9 +995,561 @@
       background: linear-gradient(90deg, #009C3B 0%, #009C3B 33%, #FFDF00 33%, #FFDF00 66%, #002776 66%, #002776 100%);
       box-shadow: 0 0 12px rgba(0,156,59,0.35);
     }
+  
+    /* ========== UI OPS 8.3 — visual operacional ========== */
+    body.ui-ops {
+      --ops-green: #16a34a;
+      --ops-green-2: #22c55e;
+      --ops-red: #dc2626;
+      --ops-amber: #d97706;
+      --ops-blue: #2563eb;
+      --ops-panel: #0b1220;
+      --ops-border: rgba(34, 197, 94, 0.28);
+    }
+    body.ui-ops .top {
+      background: linear-gradient(180deg, #0a1628 0%, #070b14 100%);
+      border-bottom: 2px solid rgba(34,197,94,0.35);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    }
+    body.ui-ops .top .brand {
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    body.ui-ops .top .brand span {
+      color: #86efac;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+    body.ui-ops .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    body.ui-ops .title::before {
+      content: '';
+      width: 4px;
+      height: 1.1em;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #22c55e, #facc15 55%, #3b82f6);
+      flex-shrink: 0;
+    }
+    body.ui-ops .ops-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    body.ui-ops .ops-hero-card {
+      background: linear-gradient(145deg, #0f1a2e 0%, #0a1220 100%);
+      border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    body.ui-ops .ops-hero-card::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--ops-accent, #22c55e);
+    }
+    body.ui-ops .ops-hero-card .lbl {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    body.ui-ops .ops-hero-card .val {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.2;
+    }
+    body.ui-ops .ops-hero-card .sub {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+    body.ui-ops .ops-hero-card.status-ativo { --ops-accent: #22c55e; border-color: rgba(34,197,94,0.4); }
+    body.ui-ops .ops-hero-card.status-almoco { --ops-accent: #f59e0b; border-color: rgba(245,158,11,0.4); }
+    body.ui-ops .ops-hero-card.status-idle { --ops-accent: #64748b; }
+    body.ui-ops .ops-hero-card.status-fim { --ops-accent: #ef4444; border-color: rgba(239,68,68,0.35); }
+
+    body.ui-ops .plantao-vivo-card {
+      background: linear-gradient(165deg, #0d1f17 0%, #0a1220 42%, #0b1220 100%);
+      border: 1px solid rgba(34,197,94,0.45);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.08), 0 12px 40px rgba(0,0,0,0.35);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    body.ui-ops .plantao-vivo-card::before {
+      background: linear-gradient(90deg, #16a34a, #facc15, #2563eb);
+      height: 3px;
+      opacity: 1;
+    }
+    body.ui-ops .plantao-vivo-head .titulo {
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      font-weight: 900;
+    }
+    body.ui-ops .plantao-vivo-badge {
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+    }
+    body.ui-ops .plantao-vivo-badge:not(.idle):not(.almoco):not(.fim) {
+      color: #4ade80;
+      border-color: rgba(74,222,128,0.5);
+      background: rgba(22,163,74,0.2);
+      box-shadow: 0 0 12px rgba(34,197,94,0.25);
+    }
+    body.ui-ops .btn-pl-in,
+    body.ui-ops .btn-pl-out,
+    body.ui-ops .btn-pl-almoco,
+    body.ui-ops .btn-pl-volta {
+      min-height: 48px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      border-radius: 12px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+    body.ui-ops .btn-pl-in {
+      background: linear-gradient(180deg, #22c55e, #15803d) !important;
+      border: 1px solid #4ade80;
+      color: #fff !important;
+    }
+    body.ui-ops .btn-pl-out {
+      background: linear-gradient(180deg, #ef4444, #b91c1c) !important;
+      border: 1px solid #f87171;
+      color: #fff !important;
+    }
+    body.ui-ops .btn-pl-almoco {
+      background: linear-gradient(180deg, #f59e0b, #b45309) !important;
+      border: 1px solid #fbbf24;
+      color: #111 !important;
+    }
+    body.ui-ops .btn-pl-volta {
+      background: linear-gradient(180deg, #f97316, #c2410c) !important;
+      border: 1px solid #fb923c;
+      color: #fff !important;
+    }
+    body.ui-ops .btn-pl-in:disabled,
+    body.ui-ops .btn-pl-out:disabled,
+    body.ui-ops .btn-pl-almoco:disabled,
+    body.ui-ops .btn-pl-volta:disabled {
+      opacity: 0.35;
+      filter: grayscale(0.4);
+      box-shadow: none;
+    }
+    body.ui-ops .plantao-vivo-geo {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(148,163,184,0.15);
+      margin-top: 8px;
+    }
+    body.ui-ops .pv-mapa-wrap {
+      border: 1px solid rgba(34,197,94,0.3);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+    }
+    body.ui-ops .pv-mapa-head {
+      background: linear-gradient(90deg, rgba(22,163,74,0.2), rgba(15,23,42,0.95));
+      border-bottom: 1px solid rgba(34,197,94,0.2);
+    }
+    body.ui-ops .inicio-pack {
+      border: 1px solid rgba(59,130,246,0.3);
+      background: linear-gradient(145deg, #0c1528, #0a1220);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    body.ui-ops .inicio-pack .ip-welcome {
+      font-weight: 800;
+      font-size: 15px;
+      color: #f8fafc;
+    }
+    body.ui-ops .inicio-pack .ip-head {
+      color: #93c5fd;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      margin: 8px 0 6px;
+    }
+    body.ui-ops .stats .stat-card {
+      background: linear-gradient(160deg, #0f172a, #0b1220);
+      border: 1px solid rgba(148,163,184,0.16);
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    body.ui-ops .stats .stat-card .n {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #4ade80;
+    }
+    body.ui-ops .card {
+      background: linear-gradient(165deg, #0f172a 0%, #0b1220 100%);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+    }
+    body.ui-ops .card-label {
+      color: #86efac;
+      border-left: 3px solid #22c55e;
+      padding-left: 8px;
+    }
+    body.ui-ops .btn.green {
+      background: linear-gradient(180deg, #22c55e, #15803d);
+      border: 1px solid #4ade80;
+      font-weight: 800;
+    }
+    body.ui-ops .btn.red {
+      background: linear-gradient(180deg, #ef4444, #b91c1c);
+      border: 1px solid #f87171;
+      font-weight: 800;
+    }
+    body.ui-ops .btn.purple {
+      background: linear-gradient(180deg, #7c3aed, #5b21b6);
+      border: 1px solid #a78bfa;
+      font-weight: 800;
+    }
+    body.ui-ops .btn.dark {
+      background: #1e293b;
+      border: 1px solid rgba(148,163,184,0.25);
+      font-weight: 700;
+    }
+    body.ui-ops #nav-bottom,
+    body.ui-ops .nav-bottom,
+    body.ui-ops nav.bottom {
+      background: rgba(7, 11, 20, 0.96) !important;
+      border-top: 2px solid rgba(34,197,94,0.35) !important;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 -8px 28px rgba(0,0,0,0.4);
+    }
+    body.ui-ops .nav-item.active,
+    body.ui-ops #nav-bottom button.active,
+    body.ui-ops .bottom-nav button.active {
+      color: #4ade80 !important;
+      background: rgba(22,163,74,0.15) !important;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+    body.ui-ops .perfil-chip {
+      border: 1px solid rgba(34,197,94,0.35);
+      background: rgba(15,23,42,0.95);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    body.ui-ops .perfil-chip .avatar {
+      background: linear-gradient(135deg, #16a34a, #2563eb);
+      font-weight: 900;
+    }
+    body.ui-ops .status-bar {
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.15);
+      border-radius: 12px;
+      padding: 8px 12px;
+    }
+    body.ui-ops .ops-quick {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+    body.ui-ops .ops-quick button {
+      min-height: 44px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border: 1px solid transparent;
+      cursor: pointer;
+      color: #f8fafc;
+    }
+    body.ui-ops .ops-quick .q-in { background: linear-gradient(180deg,#22c55e,#15803d); border-color:#4ade80; }
+    body.ui-ops .ops-quick .q-out { background: linear-gradient(180deg,#ef4444,#b91c1c); border-color:#f87171; }
+    body.ui-ops .ops-quick .q-ext { background: linear-gradient(180deg,#1e3a5f,#0f172a); border-color:rgba(56,189,248,0.4); }
+    body.ui-ops .ops-quick .q-msg { background: linear-gradient(180deg,#5b21b6,#3b0764); border-color:rgba(167,139,250,0.45); }
+
+
+    body.ui-ops .ops-plantao-teaser {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(120deg, #0d1f17 0%, #0a1628 55%, #0b1220 100%);
+      border: 1px solid rgba(34,197,94,0.45);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    }
+    body.ui-ops .ops-plantao-teaser:active { transform: scale(0.99); }
+    body.ui-ops .ops-plantao-teaser .teaser-title {
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #f0fdf4;
+    }
+    body.ui-ops .ops-plantao-teaser .teaser-sub {
+      font-size: 12px;
+      color: #86efac;
+      margin-top: 3px;
+    }
+    body.ui-ops .ops-plantao-teaser .teaser-go {
+      font-weight: 900;
+      font-size: 12px;
+      color: #4ade80;
+      background: rgba(22,163,74,0.2);
+      border: 1px solid rgba(74,222,128,0.4);
+      border-radius: 999px;
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+    body.ui-ops #tab-plantao .plantao-vivo-card {
+      margin-bottom: 4px;
+    }
+    body.ui-ops #pv-mapa { height: 260px; }
+
+
+    body.ui-ops .more-sheet {
+      max-height: min(72vh, 560px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 12px 14px;
+      border: 1px solid rgba(34,197,94,0.4);
+      background: linear-gradient(180deg, rgba(10,18,32,0.98), rgba(7,11,20,0.98));
+    }
+    body.ui-ops .more-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      padding: 0 2px 8px;
+      border-bottom: 1px solid rgba(34,197,94,0.2);
+    }
+    body.ui-ops .more-title {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e2e8f0;
+    }
+    body.ui-ops .more-role {
+      font-size: 10px;
+      font-weight: 800;
+      color: #86efac;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    body.ui-ops .more-hub {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    body.ui-ops .more-sec-title {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin: 2px 2px 0;
+    }
+    body.ui-ops .more-sec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    body.ui-ops .more-tile {
+      background: linear-gradient(160deg, #0f1a2e, #0a1220);
+      border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: left;
+      color: #f1f5f9;
+      cursor: pointer;
+      min-height: 72px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+    body.ui-ops .more-tile:active { transform: scale(0.98); }
+    body.ui-ops .more-tile .t-ico { font-size: 20px; line-height: 1; }
+    body.ui-ops .more-tile .t-label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+    body.ui-ops .more-tile .t-sub {
+      font-size: 10px;
+      color: #94a3b8;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+    body.ui-ops .more-tile.green { border-color: rgba(34,197,94,0.45); }
+    body.ui-ops .more-tile.amber { border-color: rgba(245,158,11,0.45); }
+    body.ui-ops .more-tile.red { border-color: rgba(239,68,68,0.4); }
+    body.ui-ops .more-tile.blue { border-color: rgba(56,189,248,0.4); }
+    body.ui-ops .more-tile.purple { border-color: rgba(167,139,250,0.45); }
+    body.ui-ops .more-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(148,163,184,0.12);
+    }
+
+
+    /* ========== Fase 4 · Extrato + Mensagens OPS ========== */
+    body.ui-ops #tab-extrato .title,
+    body.ui-ops #tab-mensagens .title {
+      margin-bottom: 10px;
+    }
+    body.ui-ops .ops-kpi-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    body.ui-ops .ops-kpi {
+      background: linear-gradient(145deg, #0f1a2e, #0a1220);
+      border: 1px solid rgba(34,197,94,0.35);
+      border-radius: 14px;
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    body.ui-ops .ops-kpi::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--ops-accent, #22c55e);
+    }
+    body.ui-ops .ops-kpi .k-lbl {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+    }
+    body.ui-ops .ops-kpi .k-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #f8fafc;
+      margin-top: 4px;
+      line-height: 1.1;
+    }
+    body.ui-ops .ops-kpi .k-sub {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+    body.ui-ops .ops-kpi.money { --ops-accent: #22c55e; border-color: rgba(34,197,94,0.4); }
+    body.ui-ops .ops-kpi.money .k-val { color: #4ade80; }
+    body.ui-ops .ops-kpi.count { --ops-accent: #38bdf8; border-color: rgba(56,189,248,0.35); }
+    body.ui-ops .ops-kpi.count .k-val { color: #7dd3fc; }
+
+    body.ui-ops #tab-extrato .card {
+      border-color: rgba(34,197,94,0.22);
+    }
+    body.ui-ops #tab-extrato .btn.green {
+      min-height: 46px;
+      font-size: 13px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    body.ui-ops #ex-lista .item,
+    body.ui-ops #ex-lista .pl-card,
+    body.ui-ops #ex-lista > div {
+      border-radius: 12px;
+    }
+    body.ui-ops #lm .msg-card,
+    body.ui-ops #lm > div {
+      border-radius: 12px;
+    }
+    body.ui-ops .ops-msg-compose {
+      background: linear-gradient(165deg, #15102a 0%, #0b1220 100%);
+      border: 1px solid rgba(167,139,250,0.4) !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    }
+    body.ui-ops .ops-msg-compose .card-label {
+      color: #c4b5fd;
+      border-left-color: #a78bfa;
+    }
+    body.ui-ops .ops-msg-compose .btn.purple {
+      min-height: 46px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-weight: 800;
+    }
+    body.ui-ops .ops-msg-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    body.ui-ops .ops-msg-head .ops-unread {
+      font-size: 11px;
+      font-weight: 800;
+      color: #fbbf24;
+      background: rgba(251,191,36,0.12);
+      border: 1px solid rgba(251,191,36,0.35);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+    body.ui-ops .ops-msg-head .ops-unread.zero {
+      color: #86efac;
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.3);
+    }
+    body.ui-ops #lm {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    body.ui-ops #tab-mensagens .ops-inbox-label {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin: 14px 2px 8px;
+    }
+    body.ui-ops #tab-extrato .ops-section-label {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin: 4px 2px 8px;
+    }
+
+    body.ui-ops .more-grid:empty { display: none; border: 0; margin: 0; padding: 0; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
-<body>
+<body class="ui-ops">
   <div id="toast"></div>
   <div id="update-done-banner" role="status" aria-live="polite">
     <button type="button" class="ud-close" onclick="esconderAvisoAtualizado()" aria-label="Fechar">×</button>
@@ -1224,7 +1819,7 @@
     <main>
       <!-- INÍCIO -->
       <section id="tab-inicio" class="tab active">
-        <div class="title">Dashboard</div>
+        <div class="title">Painel operacional</div>
         <div class="br-flag-strip"></div>
 
         <div id="update-banner" role="status" aria-live="polite">
@@ -1242,24 +1837,24 @@
           <div id="inicio-pack-items"></div>
         </div>
 
-        <div class="plantao-vivo-card" id="plantao-vivo-card">
-          <div class="plantao-vivo-head">
-            <div class="titulo">⚡ MODO PLANTÃO ATIVO</div>
-            <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
+        <div class="ops-hero" id="ops-hero">
+          <div class="ops-hero-card status-idle" id="ops-hero-status">
+            <div class="lbl">Status plantão</div>
+            <div class="val" id="ops-hero-status-val">INATIVO</div>
+            <div class="sub" id="ops-hero-status-sub">Selecione o posto</div>
           </div>
-          <div class="plantao-vivo-meta" id="pv-meta">
-            Selecione o posto e inicie o check-in (manual ou por GPS).
+          <div class="ops-hero-card" id="ops-hero-gps" style="--ops-accent:#38bdf8">
+            <div class="lbl">GPS / posto</div>
+            <div class="val" id="ops-hero-gps-val">—</div>
+            <div class="sub" id="ops-hero-gps-sub">Aguardando fix</div>
           </div>
-          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()">
-            <option value="">— Selecione o posto —</option>
-          </select>
-          <div class="plantao-vivo-btns">
-            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
-            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
-            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Registrar saída almoço / janta</button>
-            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Registrar volta do almoço / janta</button>
+        </div>
+        <div class="ops-plantao-teaser" id="ops-plantao-teaser" onclick="tab('plantao')">
+          <div class="teaser-left">
+            <div class="teaser-title">⚡ Ir para o Plantão</div>
+            <div class="teaser-sub" id="ops-teaser-sub">Ponto, GPS e mapa do posto</div>
           </div>
-          <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
+          <div class="teaser-go">Abrir →</div>
         </div>
 
         <div class="perfil-chip-wrap">
@@ -1288,17 +1883,8 @@
           <div class="stat-card"><div class="lbl">Ocorrências</div><div class="num" id="s3">0</div></div>
           <div class="stat-card"><div class="lbl">Usuários</div><div class="num" id="s4">0</div></div>
         </div>
-        <div class="card">
-          <div class="card-label">Ações rápidas</div>
-          <div class="btn-row">
-            <button class="btn green" onclick="tab('escalas')">📅 Escala</button>
-            <button class="btn yellow" onclick="tab('ocorrencias')">⚠ Ocorrência</button>
-          </div>
-          <div class="btn-row" style="margin-top:8px">
-            <button class="btn dark" onclick="tab('postos')">📍 Postos</button>
-            <div class="btn-msg-wrap"><button class="btn purple" id="btn-msg-rapido" onclick="tab('mensagens')" style="width:100%">✉ Mensagem</button><span class="msg-badge hidden" id="badge-msg-rapido">0</span></div>
-          </div>
-        </div>
+        <!-- badge msgs (oculto; atualizado por JS) -->
+        <span class="msg-badge hidden" id="badge-msg-rapido" style="display:none">0</span>
         <div class="card">
           <div class="collapse-box" id="collapse-atividades">
             <button type="button" class="collapse-head" onclick="toggleCollapse('collapse-atividades')">
@@ -1316,8 +1902,45 @@
 
       <!-- LANÇAMENTO DE PLANTÃO -->
       <section id="tab-plantao" class="tab">
-        <div class="title">Lançamento de plantão</div>
+        <div class="title">Plantão ao vivo</div>
         <div class="br-flag-strip"></div>
+<div class="plantao-vivo-card" id="plantao-vivo-card">
+          <div class="plantao-vivo-head">
+            <div class="titulo">⚡ MODO PLANTÃO ATIVO</div>
+            <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
+          </div>
+          <div class="plantao-vivo-meta" id="pv-meta">
+            Selecione o posto e inicie o check-in (manual ou por GPS).
+          </div>
+          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()">
+            <option value="">— Selecione o posto —</option>
+          </select>
+          <div class="plantao-vivo-btns">
+            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
+            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
+            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Registrar saída almoço / janta</button>
+            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Registrar volta do almoço / janta</button>
+          </div>
+          <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
+          <div class="pv-mapa-wrap" id="pv-mapa-wrap">
+            <div class="pv-mapa-head">
+              <span>📍 <b>Localização / rota até o posto</b></span>
+              <div class="pv-mapa-actions">
+                <button type="button" class="primary" onclick="pvCentralizarMapa()">Centralizar</button>
+                <button type="button" onclick="pvAbrirNoMaps()">Abrir no Maps</button>
+              </div>
+            </div>
+            <div id="pv-mapa"></div>
+            <div class="pv-mapa-info" id="pv-mapa-info">Aguardando GPS e posto com geofence…</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="card-label">Lançamento manual na folha</div>
+          <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4">
+            Use abaixo para lançar plantão no extrato. O ponto com GPS fica no bloco de cima.
+          </div>
+        </div>
         <div class="card">
           <div class="card-label">Novo lançamento</div>
           <div class="grid2">
@@ -1380,13 +2003,22 @@
       <section id="tab-extrato" class="tab">
         <div class="title">Extrato &amp; Folha</div>
         <div class="br-flag-strip"></div>
+        <div class="ops-kpi-row">
+          <div class="ops-kpi money">
+            <div class="k-lbl">Total da folha</div>
+            <div class="k-val" id="ex-total">R$ 0,00</div>
+            <div class="k-sub">Valor acumulado</div>
+          </div>
+          <div class="ops-kpi count">
+            <div class="k-lbl">Plantões</div>
+            <div class="k-val"><span id="ex-qtd">0</span></div>
+            <div class="k-sub">Na folha atual</div>
+          </div>
+        </div>
         <div class="card">
           <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
             <span>Folha atual</span>
             <button class="btn dark sm" onclick="exportarExtratoCSV()">📊 CSV</button>
-          </div>
-          <div class="status-bar" style="flex-wrap:wrap">
-            <span><b id="ex-total">R$ 0,00</b> · <span id="ex-qtd">0</span> plantão(ões)</span>
           </div>
           <button class="btn green" onclick="fecharFolha()">✓ Recebi / Fechar Folha Atual</button>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4">
@@ -1416,6 +2048,7 @@
             </div>
           </div>
         </div>
+        <div class="ops-section-label">Arquivo</div>
         <div class="card">
           <div class="card-label">Folhas anteriores arquivadas</div>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:8px">
@@ -1503,7 +2136,13 @@
       <!-- MENSAGENS -->
       <section id="tab-mensagens" class="tab">
         <div class="title">Mensagens</div>
-        <div class="card">
+        <div class="br-flag-strip"></div>
+        <div class="ops-msg-head">
+          <div class="ops-section-label" style="margin:0">Comunicados</div>
+          <span class="ops-unread zero" id="ops-msg-unread">Tudo lido</span>
+        </div>
+        <div class="card ops-msg-compose">
+          <div class="card-label">Nova mensagem</div>
           <div class="field"><label>Destino</label>
             <select id="md" class="select">
               <option value="Todos">Todos</option>
@@ -1518,6 +2157,7 @@
           <div class="field"><label>Mensagem</label><textarea id="mt" class="area" rows="3" placeholder="Digite a mensagem..."></textarea></div>
           <button class="btn purple" onclick="addMsg()">Enviar mensagem</button>
         </div>
+        <div class="ops-inbox-label">Caixa de entrada</div>
         <div id="lm"></div>
       </section>
 
@@ -1784,6 +2424,11 @@
       </div>
     </div>
     <div class="more-sheet" id="more-sheet">
+      <div class="more-head">
+        <div class="more-title">Hub de funções</div>
+        <div class="more-role" id="more-role-label">—</div>
+      </div>
+      <div id="more-hub" class="more-hub"></div>
       <div class="more-grid" id="more-grid"></div>
     </div>
     <div class="nav-wrap">
@@ -1820,7 +2465,8 @@
   </div>
   <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarArquivo(event)">
 
-<script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
     // ========== CAMADA DE SEGURANÇA ==========
     const _S = {
       // partes ofuscadas (não é inviolável no cliente, mas dificulta leitura casual)
@@ -1847,7 +2493,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '8.2.2';
+    const APP_VERSION = '8.3.4';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -3623,16 +4269,110 @@
         const NAV_ITEMS = [
       /* Barra principal (máx. 4 + Mais) */
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      { tab: 'plantao', roles: ['vigilante','equipe','dev'], icon: '📋', label: 'Plantão', primary: true },
+      { tab: 'plantao', roles: ['all'], icon: '📋', label: 'Plantão', primary: true },
       { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
       { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      /* Menu Mais */
+      /* Menu Mais — abas */
       { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escalas', primary: false },
       { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
       { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorrências', primary: false },
       { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: false },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
     ];
+
+    function hubMaisItens(role) {
+      var itens = [];
+      // Só o que NÃO está na barra inferior (Início / Plantão / Extrato / Msgs)
+      itens.push({ sec: 'Operação', icon: '⚠', label: 'Ocorrências', sub: 'Registrar evento', color: 'amber',
+        go: function() { fecharMore(); tab('ocorrencias'); } });
+      itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
+        go: function() { fecharMore(); tab('postos'); } });
+      itens.push({ sec: 'Operação', icon: '📅', label: 'Escalas', sub: 'Grade de serviço', color: 'blue',
+        go: function() { fecharMore(); tab('escalas'); } });
+      itens.push({ sec: 'Conta', icon: '👤', label: 'Meu perfil', sub: 'Dados da conta', color: '',
+        go: function() { fecharMore(); tab('config'); } });
+
+      if (role === 'supervisor' || role === 'admin' || role === 'dev') {
+        itens.push({ sec: 'Supervisão', icon: '📡', label: 'Painel ao vivo', sub: 'Indicadores do dia', color: 'green',
+          go: function() { fecharMore(); try { if (typeof supFn === 'function') supFn(1); else tab('inicio'); } catch (e) { tab('inicio'); } } });
+        itens.push({ sec: 'Supervisão', icon: '📊', label: 'Resumo do dia', sub: 'Números operacionais', color: 'blue',
+          go: function() { fecharMore(); try { if (typeof supFn === 'function') supFn(8); } catch (e) {} } });
+        itens.push({ sec: 'Supervisão', icon: '👥', label: 'Equipe', sub: 'Ativos e cadastros', color: 'purple',
+          go: function() { fecharMore(); tab('usuarios'); } });
+        itens.push({ sec: 'Supervisão', icon: '⏳', label: 'Pendências', sub: 'Aprovar cadastros', color: 'amber',
+          go: function() { fecharMore(); try { if (typeof supFn === 'function') supFn(12); } catch (e) {} } });
+        itens.push({ sec: 'Supervisão', icon: '📋', label: 'Auditoria', sub: 'Ações sensíveis', color: 'red',
+          go: function() { fecharMore(); try { if (typeof supFn === 'function') supFn(41); } catch (e) {} } });
+        itens.push({ sec: 'Supervisão', icon: '🛠', label: 'Ferramentas Sup', sub: 'Ronda, relatório…', color: 'amber',
+          go: function() { fecharMore(); try { if (typeof supFn === 'function') supFn(40); } catch (e) {} } });
+      }
+
+      if (role === 'admin' || role === 'dev') {
+        itens.push({ sec: 'Admin', icon: '🔐', label: 'Menu DEV', sub: 'Configurações avançadas', color: 'purple',
+          go: function() {
+            fecharMore();
+            try {
+              var b = document.querySelector('.btn-dev, #btn-dev, .hamburger');
+              if (b) b.click();
+              else if (typeof abrirMenuDev === 'function') abrirMenuDev();
+            } catch (e) {}
+          } });
+        itens.push({ sec: 'Admin', icon: '🛠', label: 'Ferramentas', sub: 'Labs e utilitários', color: 'purple',
+          go: function() { fecharMore(); try { if (typeof devFn === 'function') devFn(40); } catch (e) {} } });
+      }
+
+      if (role === 'dev') {
+        itens.push({ sec: 'DEV', icon: '🧪', label: 'Painel DEV', sub: 'Todas as funções', color: 'red',
+          go: function() {
+            fecharMore();
+            try {
+              var b = document.querySelector('.btn-dev, #btn-dev');
+              if (b) b.click();
+            } catch (e) {}
+          } });
+      }
+      return itens;
+    }
+
+    function renderHubMais(role) {
+      var hub = document.getElementById('more-hub');
+      var roleEl = document.getElementById('more-role-label');
+      if (roleEl) {
+        roleEl.textContent = role === 'dev' ? 'DEV' : role === 'admin' ? 'Admin' : role === 'supervisor' ? 'Supervisão' : role === 'equipe' ? 'Equipe' : 'Vigilante';
+      }
+      if (!hub) return;
+      var itens = hubMaisItens(role || 'vigilante');
+      var secs = [];
+      var map = {};
+      itens.forEach(function(it) {
+        if (!map[it.sec]) { map[it.sec] = []; secs.push(it.sec); }
+        map[it.sec].push(it);
+      });
+      hub.innerHTML = '';
+      secs.forEach(function(sec) {
+        var wrap = document.createElement('div');
+        var t = document.createElement('div');
+        t.className = 'more-sec-title';
+        t.textContent = sec;
+        wrap.appendChild(t);
+        var grid = document.createElement('div');
+        grid.className = 'more-sec-grid';
+        map[sec].forEach(function(it) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'more-tile' + (it.color ? (' ' + it.color) : '');
+          b.innerHTML = '<div class="t-ico">' + it.icon + '</div><div class="t-label">' + it.label + '</div><div class="t-sub">' + (it.sub || '') + '</div>';
+          b.onclick = function(e) {
+            e.preventDefault();
+            try { it.go(); } catch (err) { console.warn(err); }
+          };
+          grid.appendChild(b);
+        });
+        wrap.appendChild(grid);
+        hub.appendChild(wrap);
+      });
+    }
+
 
     function rolePode(roles, role) {
       // DEV vê e acessa tudo
@@ -3678,6 +4418,20 @@
         localStorage.setItem(msgSeenKey(), JSON.stringify(uniq));
       } catch (e) {}
     }
+    function opsSyncMsgUnread() {
+      try {
+        var el = document.getElementById('ops-msg-unread');
+        if (!el) return;
+        var n = contarMsgsNaoLidas();
+        if (n > 0) {
+          el.textContent = n + (n === 1 ? ' não lida' : ' não lidas');
+          el.classList.remove('zero');
+        } else {
+          el.textContent = 'Tudo lido';
+          el.classList.add('zero');
+        }
+      } catch (e) {}
+    }
     function contarMsgsNaoLidas() {
       var list = mensagensDoUsuario();
       var seen = carregarMsgsLidas();
@@ -3690,6 +4444,7 @@
       return n;
     }
     function marcarMsgsComoLidas() {
+      try { setTimeout(opsSyncMsgUnread, 0); } catch (e) {}
       var list = mensagensDoUsuario();
       var seen = carregarMsgsLidas();
       list.forEach(function(m) {
@@ -3715,7 +4470,7 @@
             badge.remove();
           }
         });
-        var br = document.getElementById('badge-msg-rapido');
+        var br = document.getElementById('badge-msg-rapido'); try{opsSyncMsgUnread();}catch(e){}
         if (br) {
           if (n > 0) {
             br.textContent = label;
@@ -3835,15 +4590,11 @@
         more.onclick = function(e) { e.stopPropagation(); toggleMore(); };
         nav.appendChild(more);
         moreGrid.innerHTML = '';
-        secondary.forEach(i => {
-          const b = document.createElement('button');
-          b.setAttribute('data-tab', i.tab);
-          b.innerHTML = '<span>' + i.icon + '</span>' + i.label;
-          b.onclick = function() { fecharMore(); tab(i.tab); };
-          moreGrid.appendChild(b);
-        });
+        try { renderHubMais(role); } catch (e) { console.warn(e); }
+        // Abas secundárias já entram no hub — não duplicar botões
       } else {
         moreGrid.innerHTML = '';
+        try { renderHubMais(role); } catch (e) {}
       }
       const telCard = document.getElementById('card-tel-sup');
       if (telCard) telCard.style.display = (role === 'supervisor' || role === 'admin') ? '' : 'none';
@@ -3858,7 +4609,16 @@
       try { atualizarBadgeMensagens(); } catch (e) {}
     }
     function toggleMore() {
-      document.getElementById('more-sheet').classList.toggle('open');
+      var sheet = document.getElementById('more-sheet');
+      if (!sheet) return;
+      var opening = !sheet.classList.contains('open');
+      sheet.classList.toggle('open');
+      if (opening) {
+        try {
+          var role = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
+          renderHubMais(role);
+        } catch (e) {}
+      }
     }
     function fecharMore() {
       document.getElementById('more-sheet').classList.remove('open');
@@ -5515,6 +6275,7 @@
         }
       }
       if (name === 'mensagens') {
+        try { opsSyncMsgUnread(); } catch (e) {}
         try { marcarMsgsComoLidas(); } catch (e) {}
         try { labMarcarMsgLida(); } catch (e) {}
       }
@@ -5522,7 +6283,17 @@
         try { labRender(); } catch (e) {}
       }
       if (name === 'inicio' || name === 'plantao') {
-        try { setTimeout(function(){ if (usuarioAtual) pvBoot(); }, 200); } catch (e) {}
+        try {
+          setTimeout(function(){
+            if (usuarioAtual) {
+              try { pvBoot(); } catch (e) {}
+              if (name === 'plantao') {
+                try { pvEnsureMap(); pvAtualizarMapa(); } catch (e) {}
+                try { if (typeof _pvMap !== 'undefined' && _pvMap) _pvMap.invalidateSize(); } catch (e) {}
+              }
+            }
+          }, 250);
+        } catch (e) {}
       }
       if (name === 'extrato') {
         try { setTimeout(aplicarCollapseFolhaExtrato, 0); } catch (e) {}
@@ -6165,13 +6936,18 @@
           return '<tr><td>' + (x.data || '') + '</td><td>' + (x.por || x.userLogin || '') + '</td><td>' +
             (x.tipo || '') + '</td><td>' + (x.posto || '') + '</td><td>R$ ' + (Number(x.valor) || 0).toFixed(2) + '</td></tr>';
         }).join('');
-        w.document.write('<html><head><title>Relatorio ' + mes + '</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px;font-size:12px}h1{font-size:18px}</style></head><body>');
-        w.document.write('<h1>VALIS - Relatorio ' + mes + '</h1>');
-        w.document.write('<p>' + lista.length + ' plantoes - Total R$ ' + total.toFixed(2) + '</p>');
-        w.document.write('<table><thead><tr><th>Data</th><th>Por</th><th>Tipo</th><th>Posto</th><th>Valor</th></tr></thead><tbody>' + rows + '</tbody></table>');
-        w.document.write('<script>window.onload=function(){window.print()}<\/script></body></html>');
+        var css = 'body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px;font-size:12px}h1{font-size:18px}';
+        var htmlDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatorio ' + mes + '</title><style>' + css + '</style></head><body>' +
+          '<h1>VALIS - Relatorio ' + mes + '</h1>' +
+          '<p>' + lista.length + ' plantoes - Total R$ ' + total.toFixed(2) + '</p>' +
+          '<table><thead><tr><th>Data</th><th>Por</th><th>Tipo</th><th>Posto</th><th>Valor</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+          '<script>window.onload=function(){window.print()}<\/script></body></html>';
+        w.document.open();
+        w.document.write(htmlDoc);
         w.document.close();
-      } catch (e) { alert('Erro no relatorio: ' + (e && e.message ? e.message : e)); }
+      } catch (e) {
+        alert('Erro no relatorio: ' + (e && e.message ? e.message : e));
+      }
     }
     function labRelatorioMensal() {
       labEnsureDb();
@@ -7661,7 +8437,246 @@
     // ========== MODO PLANTÃO ATIVO (check-in / almoço / GPS) ==========
     var _pvWatchId = null;
     var _pvTickTimer = null;
+
     var _pvLastPos = null;
+    var _pvMap = null;
+    var _pvMarkerMe = null;
+    var _pvMarkerPosto = null;
+    var _pvLine = null;
+    var _pvTrailLine = null;
+    var _pvMapReady = false;
+    var _pvRouteTimer = null;
+
+    function pvTrailKey(sess) {
+      var id = (sess && (sess.postoId || sess.checkIn)) || 'idle';
+      return 'valis_pv_trail_' + String(id);
+    }
+    function pvLoadTrail(sess) {
+      try {
+        var raw = localStorage.getItem(pvTrailKey(sess));
+        var arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
+    }
+    function pvSaveTrail(sess, arr) {
+      try {
+        // limita pontos
+        if (arr.length > 200) arr = arr.slice(arr.length - 200);
+        localStorage.setItem(pvTrailKey(sess), JSON.stringify(arr));
+      } catch (e) {}
+    }
+    function pvPushTrailPoint(lat, lng) {
+      try {
+        var sess = pvLoad() || { status: 'idle' };
+        if (sess.status !== 'ativo' && sess.status !== 'almoco') return;
+        var arr = pvLoadTrail(sess);
+        var last = arr.length ? arr[arr.length - 1] : null;
+        // só grava se andou ~15m
+        if (last) {
+          var d = pvHaversine(last[0], last[1], lat, lng);
+          if (d < 15) return;
+        }
+        arr.push([lat, lng, Date.now()]);
+        pvSaveTrail(sess, arr);
+      } catch (e) {}
+    }
+
+    function pvEnsureMap() {
+      var el = document.getElementById('pv-mapa');
+      if (!el) return null;
+      if (typeof L === 'undefined') {
+        var info = document.getElementById('pv-mapa-info');
+        if (info) info.textContent = 'Mapa indisponível (Leaflet não carregou).';
+        return null;
+      }
+      if (_pvMap) {
+        try { _pvMap.invalidateSize(); } catch (e) {}
+        return _pvMap;
+      }
+      _pvMap = L.map('pv-mapa', {
+        zoomControl: true,
+        attributionControl: true
+      }).setView([-22.5, -43.2], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(_pvMap);
+      _pvMapReady = true;
+      setTimeout(function() { try { _pvMap.invalidateSize(); } catch (e) {} }, 250);
+      return _pvMap;
+    }
+
+    function pvAtualizarMapa() {
+      try {
+        var map = pvEnsureMap();
+        if (!map) return;
+        var sess = pvLoad() || { status: 'idle' };
+        var sel = document.getElementById('pv-posto');
+        var postoId = (sess.postoId) || (sel && sel.value) || '';
+        var p = postoId ? pvPostoById(postoId) : null;
+        var bounds = [];
+        var info = document.getElementById('pv-mapa-info');
+
+        if (_pvLastPos) {
+          var meLatLng = [_pvLastPos.lat, _pvLastPos.lng];
+          if (!_pvMarkerMe) {
+            _pvMarkerMe = L.circleMarker(meLatLng, {
+              radius: 8,
+              color: '#22c55e',
+              fillColor: '#4ade80',
+              fillOpacity: 0.9,
+              weight: 2
+            }).addTo(map).bindPopup('Você');
+          } else {
+            _pvMarkerMe.setLatLng(meLatLng);
+          }
+          bounds.push(meLatLng);
+          pvPushTrailPoint(_pvLastPos.lat, _pvLastPos.lng);
+        }
+
+        if (p && p.lat != null && p.lng != null) {
+          var postoLL = [Number(p.lat), Number(p.lng)];
+          if (!_pvMarkerPosto) {
+            _pvMarkerPosto = L.marker(postoLL).addTo(map).bindPopup((p.n || 'Posto'));
+          } else {
+            _pvMarkerPosto.setLatLng(postoLL);
+          }
+          bounds.push(postoLL);
+        } else if (_pvMarkerPosto) {
+          try { map.removeLayer(_pvMarkerPosto); } catch (e) {}
+          _pvMarkerPosto = null;
+        }
+
+        // linha reta você → posto
+        if (_pvLastPos && p && p.lat != null && p.lng != null) {
+          var linePts = [[_pvLastPos.lat, _pvLastPos.lng], [Number(p.lat), Number(p.lng)]];
+          if (!_pvLine) {
+            _pvLine = L.polyline(linePts, { color: '#38bdf8', weight: 3, dashArray: '6 6', opacity: 0.85 }).addTo(map);
+          } else {
+            _pvLine.setLatLngs(linePts);
+          }
+        } else if (_pvLine) {
+          try { map.removeLayer(_pvLine); } catch (e) {}
+          _pvLine = null;
+        }
+
+        // trilha percorrida no plantão
+        var trail = pvLoadTrail(sess).map(function(t) { return [t[0], t[1]]; });
+        if (trail.length >= 2) {
+          if (!_pvTrailLine) {
+            _pvTrailLine = L.polyline(trail, { color: '#fbbf24', weight: 4, opacity: 0.9 }).addTo(map);
+          } else {
+            _pvTrailLine.setLatLngs(trail);
+          }
+          trail.forEach(function(pt) { bounds.push(pt); });
+        } else if (_pvTrailLine) {
+          try { map.removeLayer(_pvTrailLine); } catch (e) {}
+          _pvTrailLine = null;
+        }
+
+        if (bounds.length) {
+          try {
+            if (bounds.length === 1) map.setView(bounds[0], 16);
+            else map.fitBounds(bounds, { padding: [28, 28], maxZoom: 17 });
+          } catch (e) {}
+        }
+
+        if (info) {
+          var parts = [];
+          if (_pvLastPos) {
+            parts.push('Você: <b>' + _pvLastPos.lat.toFixed(5) + ', ' + _pvLastPos.lng.toFixed(5) + '</b> (±' + Math.round(_pvLastPos.acc || 0) + ' m)');
+          } else {
+            parts.push('GPS ainda não fixou sua posição.');
+          }
+          if (p && p.lat != null && p.lng != null) {
+            parts.push('Posto: <b>' + (p.n || '—') + '</b>');
+            if (_pvLastPos) {
+              var dist = pvHaversine(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
+              parts.push('Distância em linha reta: <b>' + Math.round(dist) + ' m</b>');
+            }
+          } else {
+            parts.push('Selecione um posto com GPS cadastrado para ver a rota.');
+          }
+          if (trail.length) parts.push('Pontos da rota do plantão: <b>' + trail.length + '</b>');
+          info.innerHTML = parts.join('<br>');
+        }
+
+        // rota por ruas (OSRM) a cada ~20s quando tem posto e posição
+        if (_pvLastPos && p && p.lat != null && p.lng != null) {
+          if (!_pvRouteTimer) {
+            _pvRouteTimer = setTimeout(function() {
+              _pvRouteTimer = null;
+              pvBuscarRotaRuas(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
+            }, 1200);
+          }
+        }
+      } catch (e) {
+        console.warn('pvAtualizarMapa', e);
+      }
+    }
+
+    var _pvRouteLayer = null;
+    async function pvBuscarRotaRuas(lat1, lng1, lat2, lng2) {
+      try {
+        // OSRM público — rota por vias (sem API key)
+        var url = 'https://router.project-osrm.org/route/v1/driving/' +
+          lng1 + ',' + lat1 + ';' + lng2 + ',' + lat2 +
+          '?overview=full&geometries=geojson';
+        var res = await fetch(url);
+        if (!res.ok) return;
+        var data = await res.json();
+        if (!data.routes || !data.routes[0]) return;
+        var coords = data.routes[0].geometry.coordinates.map(function(c) {
+          return [c[1], c[0]];
+        });
+        var map = pvEnsureMap();
+        if (!map) return;
+        if (_pvRouteLayer) {
+          try { map.removeLayer(_pvRouteLayer); } catch (e) {}
+        }
+        _pvRouteLayer = L.polyline(coords, { color: '#a78bfa', weight: 5, opacity: 0.75 }).addTo(map);
+        var info = document.getElementById('pv-mapa-info');
+        if (info && data.routes[0].distance != null) {
+          var km = (data.routes[0].distance / 1000).toFixed(2);
+          var min = Math.round((data.routes[0].duration || 0) / 60);
+          info.innerHTML = (info.innerHTML || '') +
+            '<br>Rota por vias: <b>' + km + ' km</b> · ~<b>' + min + ' min</b> <span style="color:#a78bfa">(roxo)</span>';
+        }
+      } catch (e) {
+        // offline / bloqueio de rede — mantém linha reta
+      }
+    }
+
+    function pvCentralizarMapa() {
+      try {
+        pvAtualizarMapa();
+        var map = pvEnsureMap();
+        if (map) setTimeout(function() { map.invalidateSize(); }, 100);
+      } catch (e) {}
+    }
+
+    function pvAbrirNoMaps() {
+      var sess = pvLoad() || {};
+      var sel = document.getElementById('pv-posto');
+      var postoId = sess.postoId || (sel && sel.value) || '';
+      var p = postoId ? pvPostoById(postoId) : null;
+      var url = '';
+      if (_pvLastPos && p && p.lat != null && p.lng != null) {
+        // direções: origem = você, destino = posto
+        url = 'https://www.google.com/maps/dir/?api=1&origin=' +
+          encodeURIComponent(_pvLastPos.lat + ',' + _pvLastPos.lng) +
+          '&destination=' + encodeURIComponent(p.lat + ',' + p.lng);
+      } else if (p && p.lat != null && p.lng != null) {
+        url = 'https://www.google.com/maps?q=' + encodeURIComponent(p.lat + ',' + p.lng);
+      } else if (_pvLastPos) {
+        url = 'https://www.google.com/maps?q=' + encodeURIComponent(_pvLastPos.lat + ',' + _pvLastPos.lng);
+      } else {
+        return toast('Sem coordenadas para abrir no Maps');
+      }
+      window.open(url, '_blank');
+    }
+
+
     var _pvAutoBusy = false;
     /** Após check-out: não reinicia automático por este tempo (ms) */
     var PV_COOLDOWN_MS = 90000;
@@ -7839,6 +8854,7 @@
       try { if (sel.value) localStorage.setItem('valis_pv_ultimo_posto', String(sel.value)); } catch (e) {}
       pvRender();
       pvStartGeoWatch();
+      try { setTimeout(pvAtualizarMapa, 200); } catch (e) {}
     }
     function pvRender() {
       var card = document.getElementById('plantao-vivo-card');
@@ -7904,6 +8920,45 @@
         clearInterval(_pvTickTimer);
         _pvTickTimer = null;
       }
+      try { opsSyncHero(sess, st); } catch (e) {}
+    }
+    function opsSyncHero(sess, st) {
+      sess = sess || pvLoad() || {};
+      st = st || sess.status || 'idle';
+      var card = document.getElementById('ops-hero-status');
+      var val = document.getElementById('ops-hero-status-val');
+      var sub = document.getElementById('ops-hero-status-sub');
+      if (card) {
+        card.classList.remove('status-ativo', 'status-almoco', 'status-idle', 'status-fim');
+        if (st === 'ativo') card.classList.add('status-ativo');
+        else if (st === 'almoco') card.classList.add('status-almoco');
+        else if (st === 'finalizado') card.classList.add('status-fim');
+        else card.classList.add('status-idle');
+      }
+      if (val) {
+        val.textContent = st === 'ativo' ? 'EM SERVIÇO' : st === 'almoco' ? 'EM ALMOÇO' : st === 'finalizado' ? 'FINALIZADO' : 'INATIVO';
+      }
+      if (sub) {
+        sub.textContent = sess.postoNome || 'Selecione o posto';
+      }
+      var teaser = document.getElementById('ops-teaser-sub');
+      if (teaser) {
+        if (st === 'ativo') teaser.textContent = 'Em serviço' + (sess.postoNome ? (' · ' + sess.postoNome) : '');
+        else if (st === 'almoco') teaser.textContent = 'Em almoço' + (sess.postoNome ? (' · ' + sess.postoNome) : '');
+        else if (st === 'finalizado') teaser.textContent = 'Último plantão finalizado';
+        else teaser.textContent = 'Ponto, GPS e mapa do posto';
+      }
+      var gVal = document.getElementById('ops-hero-gps-val');
+      var gSub = document.getElementById('ops-hero-gps-sub');
+      if (gVal) {
+        if (typeof _pvLastPos !== 'undefined' && _pvLastPos) {
+          gVal.textContent = Math.round(_pvLastPos.acc || 0) + ' m prec.';
+        } else gVal.textContent = 'Sem fix';
+      }
+      if (gSub) {
+        var geo = document.getElementById('pv-geo');
+        gSub.textContent = geo ? String(geo.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 48) : '—';
+      }
     }
     function pvGetPosicao() {
       return new Promise(function(resolve, reject) {
@@ -7958,8 +9013,13 @@
         needsLeaveBeforeAuto: false
       };
       pvSave(sess);
+      try { localStorage.removeItem(pvTrailKey(sess)); } catch (e) {}
+      if (_pvLastPos) {
+        try { pvSaveTrail(sess, [[_pvLastPos.lat, _pvLastPos.lng, Date.now()]]); } catch (e) {}
+      }
       pvRender();
       pvStartGeoWatch();
+      try { setTimeout(pvAtualizarMapa, 200); } catch (e) {}
       addAtividade('Check-in plantão: ' + (p ? p.n : 'posto') + (auto ? ' (GPS auto)' : ''));
       try { await salvar(); } catch (e) {}
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
@@ -8078,6 +9138,7 @@
           acc: pos.coords.accuracy
         };
         pvOnGeoTick();
+        try { pvAtualizarMapa(); } catch (eM) {}
       };
       var onErr = function(err) {
         var msg = 'erro';
@@ -8197,6 +9258,7 @@
         pvPreencherSelectPostos();
         pvRender();
         pvStartGeoWatch();
+        try { setTimeout(function(){ pvEnsureMap(); pvAtualizarMapa(); }, 400); } catch (e) {}
         // Reavalia ao voltar para o app (abertura / 2º plano)
         if (!window._pvVisBound) {
           window._pvVisBound = true;
