@@ -1,5 +1,5 @@
 {
-  "v": "9.2.1",
+  "v": "9.2.2",
   "forceReload": true,
-  "msg": "Apos aprovar cadastro some da lista de pendentes"
+  "msg": "Status pago/pendente das folhas arquivadas agora persiste"
 }

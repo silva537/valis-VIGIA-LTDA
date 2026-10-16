@@ -3101,7 +3101,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '9.2.1';
+    const APP_VERSION = '9.2.2';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4709,6 +4709,7 @@
             if (Array.isArray(remote.folhasArquivadas) && remote.folhasArquivadas.length) {
               db.folhasArquivadas = mergeFolhasArquivadas(db.folhasArquivadas || [], remote.folhasArquivadas);
             }
+            try { aplicarStatusFolhasLocais(); } catch (eS) {}
             try { reconciliarFolhasComPlantaoes(); } catch (eR) {}
           }
           try {
@@ -6764,8 +6765,9 @@
         qtd: lista.length,
         itens: lista.slice(),
         statusPagamento: opts.statusPagamento || 'pago',
-        pagoEm: new Date().toLocaleString('pt-BR'),
-        pagoPor: opts.auto ? 'Sistema (auto)' : (usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—'),
+        statusAtualizadoEm: new Date().toISOString(),
+        pagoEm: (opts.statusPagamento === 'pendente') ? null : new Date().toLocaleString('pt-BR'),
+        pagoPor: (opts.statusPagamento === 'pendente') ? null : (opts.auto ? 'Sistema (auto)' : (usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—')),
         autoFechamento: !!opts.auto,
         periodoAuto: opts.auto ? periodo : null
       });
@@ -6946,9 +6948,18 @@
           return alert('Sem permissão.');
         }
         f.statusPagamento = pago ? 'pago' : 'pendente';
+        f.statusAtualizadoEm = new Date().toISOString();
         f.pagoEm = pago ? new Date().toLocaleString('pt-BR') : null;
         f.pagoPor = pago && usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : null;
         addAtividade('Folha ' + (pago ? 'paga' : 'pendente') + ': ' + (f.fechadoEm || f.id));
+        try {
+          localStorage.setItem('valis_folha_status_' + String(f.id), JSON.stringify({
+            statusPagamento: f.statusPagamento,
+            statusAtualizadoEm: f.statusAtualizadoEm,
+            pagoEm: f.pagoEm,
+            pagoPor: f.pagoPor
+          }));
+        } catch (e) {}
         await salvar();
         try {
           if (firebaseOk && fbDb && DataService.mode === 'firebase') {
@@ -6959,8 +6970,9 @@
             }, { merge: true });
           }
         } catch (e) { console.warn(e); }
+        try { await backupPlantaoesAuto('folha_status'); } catch (e) {}
         render();
-        toast(pago ? 'Marcada como PAGA' : 'Marcada como pendente');
+        toast(pago ? 'Marcada como PAGA' : 'Marcada como PENDENTE (salva)');
       } catch (err) {
         alert('Erro: ' + (err && err.message ? err.message : err));
       }
@@ -7860,6 +7872,22 @@
       var f = (db.folhasArquivadas||[]).find(function(x){return String(x.id)===String(id);});
       if (!f) return;
       f.statusPagamento = st;
+      f.statusAtualizadoEm = new Date().toISOString();
+      if (st === 'pago') {
+        f.pagoEm = new Date().toLocaleString('pt-BR');
+        f.pagoPor = usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—';
+      } else {
+        f.pagoEm = null;
+        f.pagoPor = null;
+      }
+      try {
+        localStorage.setItem('valis_folha_status_' + String(f.id), JSON.stringify({
+          statusPagamento: f.statusPagamento,
+          statusAtualizadoEm: f.statusAtualizadoEm,
+          pagoEm: f.pagoEm,
+          pagoPor: f.pagoPor
+        }));
+      } catch (e) {}
       labLog('folha_status', id+' → '+st);
       try { await salvar(); } catch (e) {}
       labRender(); toast('Folha: '+st);
@@ -8142,12 +8170,13 @@
           exLista.innerHTML = listaEx.map(htmlItemPlantaoExtrato).join('');
         }
       }
+      try { aplicarStatusFolhasLocais(); } catch (e) {}
       const exArq = document.getElementById('ex-arquivadas');
       if (exArq) {
         const folhas = folhasDoExtrato();
         exArq.innerHTML = folhas.length
           ? folhas.map(f => {
-              const st = f.statusPagamento || 'pago';
+              const st = f.statusPagamento || (f.pagoEm ? 'pago' : 'pendente');
               const badge = st === 'pago'
                 ? '<span class="badge green">Pago</span>'
                 : '<span class="badge yellow">Pendente</span>';
@@ -8448,17 +8477,86 @@
       } catch (e) { return false; }
     }
 
-    /** Une folhas arquivadas, ignorando IDs restaurados neste aparelho. */
+    function aplicarStatusFolhasLocais() {
+      try {
+        (db.folhasArquivadas || []).forEach(function(f) {
+          if (!f || f.id == null) return;
+          var raw = localStorage.getItem('valis_folha_status_' + String(f.id));
+          if (!raw) return;
+          var o = JSON.parse(raw);
+          if (!o || !o.statusPagamento) return;
+          var tLocal = Date.parse(o.statusAtualizadoEm || '') || 0;
+          var tCloud = Date.parse(f.statusAtualizadoEm || '') || 0;
+          if (!tCloud || tLocal >= tCloud) {
+            f.statusPagamento = o.statusPagamento;
+            f.statusAtualizadoEm = o.statusAtualizadoEm || f.statusAtualizadoEm;
+            f.pagoEm = o.pagoEm;
+            f.pagoPor = o.pagoPor;
+          }
+        });
+      } catch (e) {}
+    }
+
+    /** Une folhas arquivadas, preservando status pago/pendente mais recente. */
     function mergeFolhasArquivadas(a, b) {
       const map = new Map();
+      function tsStatus(f) {
+        if (!f) return 0;
+        var t = Date.parse(f.statusAtualizadoEm || '') || 0;
+        if (t) return t;
+        t = Date.parse(f.pagoEm || '') || 0;
+        if (t) return t;
+        return Number(f.id) || 0;
+      }
       function put(x) {
         if (!x || x.id == null) return;
         if (folhaFoiRestauradaLocal(x.id)) return;
-        map.set(String(x.id), x);
+        var key = String(x.id);
+        var prev = map.get(key);
+        if (!prev) {
+          map.set(key, Object.assign({}, x));
+          return;
+        }
+        var merged = Object.assign({}, prev, x);
+        var sp = prev.statusPagamento;
+        var sx = x.statusPagamento;
+        if (sp && sx && sp !== sx) {
+          if (tsStatus(prev) >= tsStatus(x)) {
+            merged.statusPagamento = sp;
+            merged.pagoEm = prev.pagoEm;
+            merged.pagoPor = prev.pagoPor;
+            merged.statusAtualizadoEm = prev.statusAtualizadoEm;
+          } else {
+            merged.statusPagamento = sx;
+            merged.pagoEm = x.pagoEm;
+            merged.pagoPor = x.pagoPor;
+            merged.statusAtualizadoEm = x.statusAtualizadoEm;
+          }
+        } else if (sp && !sx) {
+          merged.statusPagamento = sp;
+          merged.pagoEm = prev.pagoEm;
+          merged.pagoPor = prev.pagoPor;
+          merged.statusAtualizadoEm = prev.statusAtualizadoEm || merged.statusAtualizadoEm;
+        } else if (!sp && sx) {
+          merged.statusPagamento = sx;
+          merged.pagoEm = x.pagoEm;
+          merged.pagoPor = x.pagoPor;
+          merged.statusAtualizadoEm = x.statusAtualizadoEm || merged.statusAtualizadoEm;
+        }
+        var ia = Array.isArray(prev.itens) ? prev.itens : [];
+        var ib = Array.isArray(x.itens) ? x.itens : [];
+        if (ia.length > ib.length) {
+          merged.itens = ia;
+          merged.qtd = prev.qtd != null ? prev.qtd : ia.length;
+          merged.total = prev.total != null ? prev.total : merged.total;
+        }
+        map.set(key, merged);
       }
       (a || []).forEach(put);
       (b || []).forEach(put);
-      return Array.from(map.values()).sort((x, y) => (Number(y.id) || 0) - (Number(x.id) || 0));
+      return Array.from(map.values()).sort(function(x, y) {
+        return (Number(y.id) || 0) - (Number(x.id) || 0);
+      });
     }
 
     /**
