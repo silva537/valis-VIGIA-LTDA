@@ -1,5 +1,5 @@
 {
-  "v": "8.3.4",
+  "v": "9.1.0",
   "forceReload": true,
-  "msg": "Remove atalhos duplicados; rodape + hub Mais limpos"
+  "msg": "Lembrete diario de ponto 17:55 + sync FCM para app fechado"
 }

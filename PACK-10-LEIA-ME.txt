@@ -1,0 +1,12 @@
+VALIS 8.4.0 — Pack das 10 melhorias
+
+1. FCM servidor: veja functions-fcm-sample.js (deploy no Firebase Functions)
+2. GPS 24h: aviso no plantão sobre limite do PWA + caminho nativo
+3. Segurança: HTTPS reminder + rules já no pacote (Auth por usuário = fase futura)
+4. Relatório do turno: Mais → Relatório do turno (copia + abre texto)
+5. Checklist do posto: na aba Plantão (item + foto + horário)
+6. Troca de posto: histórico na aba Plantão
+7. Offline: barra sticky com fila pendente
+8. Visual ops: Postos / Ocorrências / Escalas
+9. Tema claro/escuro: Mais → Tema claro/escuro
+10. Onboarding: 3 passos no primeiro login
