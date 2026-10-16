@@ -1,5 +1,5 @@
 {
-  "v": "9.2.2",
+  "v": "9.3.1",
   "forceReload": true,
-  "msg": "Status pago/pendente das folhas arquivadas agora persiste"
+  "msg": "Removidos nomes de exemplo nos textos de folguista"
 }

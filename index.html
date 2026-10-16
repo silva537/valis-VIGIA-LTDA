@@ -2511,12 +2511,12 @@
             <div class="field"><label>Fim</label><input id="pl-fim" type="time" class="input" value="18:00" onchange="plantaoCalcHoras()"></div>
           </div>
           <div class="grid2">
-            <div class="field"><label>Tipo</label>
-              <select id="pl-tipo" class="select">
-                <option>Plantão Próprio</option>
-                <option>Cobertura</option>
-                <option>Hora Extra</option>
-                <option>Folga Trabalhada</option>
+            <div class="field"><label>Tipo de serviço</label>
+              <select id="pl-tipo" class="select" onchange="atualizarUITipoPlantao()">
+                <option value="Plantão Fixo">Plantão Fixo (escala própria)</option>
+                <option value="Cobertura">Cobertura / Folguista</option>
+                <option value="Folga Trabalhada">Folga Trabalhada</option>
+                <option value="Hora Extra">Hora Extra</option>
               </select>
             </div>
             <div class="field"><label>Valor (R$)</label><input id="pl-valor" class="input" type="number" min="0" step="0.01" value="100"></div>
@@ -2525,7 +2525,11 @@
             <div class="field"><label>Total horas</label><input id="pl-horas" class="input" readonly value="12 hrs" style="color:var(--green);font-weight:700"></div>
             <div class="field"><label>Sono prévio (h)</label><input id="pl-sono" class="input" type="number" min="0" step="0.5" value="0"></div>
           </div>
-          <div class="field"><label>Quem cobriu / nome</label><input id="pl-cobriu" class="input" placeholder="Nome (se cobertura)"></div>
+          <div class="field" id="pl-cobriu-wrap">
+            <label id="pl-cobriu-label">Titular coberto (quem você substituiu)</label>
+            <input id="pl-cobriu" class="input" placeholder="Nome de quem você está cobrindo (se for cobertura)">
+            <div class="meta" style="font-size:10px;margin-top:4px;color:var(--muted)">Folguista: informe o nome de quem você está tirando o serviço.</div>
+          </div>
           <div class="field"><label>Observação</label><textarea id="pl-obs" class="area" rows="2" placeholder="Detalhes ou anotações..."></textarea></div>
           <div class="btn-row">
             <button type="button" class="btn green" id="pl-btn-salvar" onclick="salvarPlantao()">💾 Salvar Plantão</button>
@@ -2816,6 +2820,22 @@
           <div id="meu-perfil-config" class="item">—</div>
         </div>
 
+        <div class="card" id="card-regime-servico">
+          <div class="card-label">🛡️ Tipo de atuação</div>
+          <div class="meta" style="font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:10px">
+            <b>Plantão fixo:</b> escala própria no posto.<br>
+            <b>Folguista:</b> cobre o serviço de outro vigilante quando ele não pode comparecer.
+          </div>
+          <div class="field"><label>Seu regime</label>
+            <select id="cfg-regime" class="select">
+              <option value="fixo">Plantão fixo</option>
+              <option value="folguista">Folguista (coberturas)</option>
+            </select>
+          </div>
+          <button type="button" class="btn green" onclick="salvarRegimeServico()">Salvar tipo de atuação</button>
+          <div class="meta" id="cfg-regime-status" style="margin-top:8px;font-size:11px;color:var(--muted)"></div>
+        </div>
+
         <div class="card" id="card-tel-sup">
           <div class="card-label">Telefone supervisão (WhatsApp)</div>
           <div class="field"><input id="cfg-tel" class="input" type="tel" placeholder="21999999999"></div>
@@ -3101,7 +3121,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '9.2.2';
+    const APP_VERSION = '9.3.1';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -6427,6 +6447,100 @@
       }
       plantaoCalcHoras();
     }
+
+    function regimeDoUsuario(u) {
+      u = u || usuarioAtual;
+      if (!u) return 'fixo';
+      var r = String(u.regimeServico || u.regime || '').toLowerCase();
+      if (r === 'folguista' || r === 'cobertura' || r === 'folga') return 'folguista';
+      return 'fixo';
+    }
+    function labelRegime(r) {
+      return r === 'folguista' ? 'Folguista' : 'Plantão fixo';
+    }
+    function tipoPlantaoPadraoDoUsuario() {
+      return regimeDoUsuario() === 'folguista' ? 'Cobertura' : 'Plantão Fixo';
+    }
+    function normalizarTipoPlantao(t) {
+      t = String(t || '').trim();
+      if (!t) return tipoPlantaoPadraoDoUsuario();
+      if (t === 'Plantão Próprio' || t === 'Plantao Proprio') return 'Plantão Fixo';
+      if (t.indexOf('Cobertura') >= 0 || t.indexOf('Folguista') >= 0) return 'Cobertura';
+      return t;
+    }
+    function atualizarUITipoPlantao() {
+      try {
+        var sel = document.getElementById('pl-tipo');
+        var wrap = document.getElementById('pl-cobriu-wrap');
+        var lab = document.getElementById('pl-cobriu-label');
+        var tipo = sel ? normalizarTipoPlantao(sel.value) : '';
+        var isCob = tipo === 'Cobertura' || tipo === 'Folga Trabalhada';
+        if (lab) {
+          lab.textContent = isCob
+            ? 'Titular coberto (quem você substituiu)'
+            : 'Referência / nome (opcional)';
+        }
+        if (wrap) {
+          wrap.style.borderLeft = isCob ? '3px solid #f59e0b' : '';
+          wrap.style.paddingLeft = isCob ? '8px' : '';
+        }
+      } catch (e) {}
+    }
+    function aplicarPadraoTipoPlantaoForm() {
+      try {
+        var sel = document.getElementById('pl-tipo');
+        if (!sel) return;
+        var pad = tipoPlantaoPadraoDoUsuario();
+        // só aplica se ainda está no default genérico
+        var cur = sel.value;
+        if (!cur || cur === 'Plantão Próprio' || cur === 'Plantão Fixo' || cur === 'Cobertura') {
+          sel.value = pad;
+        }
+        atualizarUITipoPlantao();
+      } catch (e) {}
+    }
+    async function salvarRegimeServico() {
+      if (!usuarioAtual) return toast('Faça login');
+      var sel = document.getElementById('cfg-regime');
+      var regime = sel ? sel.value : 'fixo';
+      if (regime !== 'folguista') regime = 'fixo';
+      usuarioAtual.regimeServico = regime;
+      var u = (db.users || []).find(function(x) {
+        return String(x.user || '').toLowerCase() === String(usuarioAtual.user || '').toLowerCase();
+      });
+      if (u) u.regimeServico = regime;
+      try {
+        if (typeof salvarUsersSeguro === 'function') await salvarUsersSeguro({ forcarLocal: true });
+        else await salvar();
+      } catch (e) {}
+      try { aplicarPadraoTipoPlantaoForm(); } catch (e) {}
+      var st = document.getElementById('cfg-regime-status');
+      if (st) st.innerHTML = 'Salvo: <b>' + labelRegime(regime) + '</b>';
+      toast('Atuação: ' + labelRegime(regime));
+      try { render(); } catch (e) {}
+    }
+    function preencherUIRegimeServico() {
+      try {
+        var sel = document.getElementById('cfg-regime');
+        var st = document.getElementById('cfg-regime-status');
+        var r = regimeDoUsuario();
+        if (sel) sel.value = r;
+        if (st) st.innerHTML = 'Atual: <b>' + labelRegime(r) + '</b>';
+      } catch (e) {}
+    }
+    async function atualizarRegimeUser(login, regime) {
+      if (!podeGerenciarUsers()) return toast('Sem permissão');
+      regime = (regime === 'folguista') ? 'folguista' : 'fixo';
+      var u = (db.users || []).find(function(x) {
+        return String(x.user || '').toLowerCase() === String(login || '').toLowerCase();
+      });
+      if (!u) return toast('Usuário não encontrado');
+      u.regimeServico = regime;
+      try { await salvarUsersSeguro({ forcarLocal: true }); } catch (e) {}
+      try { render(); } catch (e) {}
+      toast('@' + login + ' → ' + labelRegime(regime));
+    }
+
     function plantaoCalcHoras() {
       const a = document.getElementById('pl-inicio').value;
       const b = document.getElementById('pl-fim').value;
@@ -6495,6 +6609,7 @@
               (x.sono ? ('<div class="meta">💤 ' + x.sono + 'h sono</div>') : '') +
               (x.obs ? ('<div class="meta">Obs: ' + x.obs + '</div>') : '') +
               '<div class="meta">' + (x.turno || '') + ' · ' + (x.inicio || '') + ' – ' + (x.fim || '') + ' · ' + (x.tipo || '') + ' · ' + (x.horas || '') + '</div>' +
+              ((x.tipo && String(x.tipo).indexOf('Cobertura') >= 0 && x.cobriu) ? ('<div class="meta" style="color:#fbbf24">🛟 Cobriu: <b>' + x.cobriu + '</b></div>') : '') +
             '</div>' +
             '<div style="text-align:right">' +
               '<div style="font-weight:900;color:var(--green)">' + moneyBR(x.valor) + '</div>' +
@@ -6565,7 +6680,7 @@
         el = document.getElementById('pl-turno'); if (el) el.value = item.turno || 'Diurno';
         el = document.getElementById('pl-inicio'); if (el) el.value = item.inicio || '06:00';
         el = document.getElementById('pl-fim'); if (el) el.value = item.fim || '18:00';
-        el = document.getElementById('pl-tipo'); if (el) el.value = item.tipo || 'Plantão Próprio';
+        el = document.getElementById('pl-tipo'); if (el) { el.value = normalizarTipoPlantao(item.tipo || tipoPlantaoPadraoDoUsuario()); try { atualizarUITipoPlantao(); } catch (e) {} }
         el = document.getElementById('pl-valor'); if (el) el.value = (item.valor != null ? item.valor : 0);
         el = document.getElementById('pl-horas'); if (el) el.value = item.horas || '';
         el = document.getElementById('pl-sono'); if (el) el.value = (item.sono != null ? item.sono : 0);
@@ -6593,6 +6708,7 @@
         else if (String(tipoPl).indexOf('Cobertura') >= 0 && tabV.Cobertura != null) valor = Number(tabV.Cobertura) || 0;
         else if (String(tipoPl).indexOf('Noturno') >= 0 && tabV.Noturno != null) valor = Number(tabV.Noturno) || 0;
         else if (String(tipoPl).indexOf('Diurno') >= 0 && tabV.Diurno != null) valor = Number(tabV.Diurno) || 0;
+        else if (tabV['Plantão Fixo'] != null) valor = Number(tabV['Plantão Fixo']) || 0;
         else if (tabV['Plantão Próprio'] != null) valor = Number(tabV['Plantão Próprio']) || 0;
       }
       if (!data) return alert('Informe a data.');
@@ -6602,7 +6718,7 @@
         turno: document.getElementById('pl-turno').value,
         inicio: document.getElementById('pl-inicio').value,
         fim: document.getElementById('pl-fim').value,
-        tipo: tipoPl,
+        tipo: normalizarTipoPlantao(tipoPl),
         valor: valor,
         horas: document.getElementById('pl-horas').value,
         sono: parseFloat(document.getElementById('pl-sono').value) || 0,
@@ -7072,6 +7188,10 @@
       }
       if (name === 'config') {
         try { setTimeout(preencherUILembretePonto, 0); } catch (e) {}
+        try { setTimeout(preencherUIRegimeServico, 0); } catch (e) {}
+      }
+      if (name === 'plantao' || name === 'extrato') {
+        try { setTimeout(aplicarPadraoTipoPlantaoForm, 50); } catch (e) {}
       }
       render();
     }
@@ -8227,7 +8347,17 @@
               ? ('<div class="meta">📍 ' + postosNomes.join(' · ') + '</div>')
               : '<div class="meta">📍 Sem posto vinculado</div>';
             const postosSel = (typeof htmlSelectPostosUser === 'function') ? htmlSelectPostosUser(u) : '';
-            return `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${pend}${inat}<div class="meta">@${u.user}</div>${postosMeta}${actions}${postosSel}</div>`;
+            const reg = (typeof regimeDoUsuario === 'function') ? regimeDoUsuario(u) : 'fixo';
+            const regBadge = reg === 'folguista'
+              ? ' <span class="badge yellow">Folguista</span>'
+              : ' <span class="badge gray">Fixo</span>';
+            const regSel = podeGerenciarUsers()
+              ? ('<div class="field" style="margin-top:6px;margin-bottom:0"><label style="font-size:10px">Regime</label>' +
+                 '<select class="select" style="padding:6px 8px;font-size:12px" onchange="atualizarRegimeUser(\'' + String(u.user||'').toLowerCase().replace(/"/g,'') + '\', this.value)">' +
+                 '<option value="fixo"' + (reg==='fixo'?' selected':'') + '>Plantão fixo</option>' +
+                 '<option value="folguista"' + (reg==='folguista'?' selected':'') + '>Folguista</option></select></div>')
+              : '';
+            return `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${regBadge}${pend}${inat}<div class="meta">@${u.user}</div>${postosMeta}${actions}${regSel}${postosSel}</div>`;
           }).join('')
         : '<div class="empty">Nenhum.</div>';
       const listaUsers = document.getElementById('lista-users');
@@ -10298,7 +10428,7 @@
             turno: (ini.getHours() < 12 ? 'Diurno' : 'Noturno'),
             inicio: hIni,
             fim: hFim,
-            tipo: 'Plantão Próprio',
+            tipo: (typeof tipoPlantaoPadraoDoUsuario === 'function' ? tipoPlantaoPadraoDoUsuario() : 'Plantão Fixo'),
             valor: 0,
             horas: horasNum.toFixed(2) + ' hrs',
             sono: 0,
