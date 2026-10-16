@@ -2788,6 +2788,21 @@
           </div>
           <button class="btn green" onclick="addUserAdmin()">Cadastrar</button>
         </div>
+        <div class="card" id="card-equipe-postos">
+          <div class="card-label">📍 Equipe por posto</div>
+          <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4">
+            Vincule cada login aos postos e visualize a equipe separada por posto.
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:8px">
+            <input type="checkbox" id="equipe-agrupar-posto" checked style="width:18px;height:18px" onchange="render()">
+            Agrupar lista por posto
+          </label>
+          <div class="field"><label>Filtrar por posto</label>
+            <select id="equipe-filtro-posto" class="select" onchange="render()">
+              <option value="">Todos os postos</option>
+            </select>
+          </div>
+        </div>
         <div id="lista-users"></div>
       </section>
 
@@ -3086,7 +3101,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '9.1.0';
+    const APP_VERSION = '9.2.1';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -3640,17 +3655,20 @@
           merged.passHash = u.passHash;
           merged.passSalt = u.passSalt;
         }
-        // se qualquer cópia está pendente e a outra não aprovou explicitamente depois...
         const prevPend = prev.pendente === true || prev.pendente === 'true' || prev.pendente === 1;
         const uPend = u.pendente === true || u.pendente === 'true' || u.pendente === 1;
         const prevAtivo = prev.ativo === true || prev.ativo === 'true' || prev.ativo === 1;
         const uAtivo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
-        // se um está aprovado (ativo e não pendente), mantém aprovado
-        if ((prevAtivo && !prevPend) || (uAtivo && !uPend)) {
+        const prevAprovado = !!(prev.aprovadoEm) || (prevAtivo && !prevPend);
+        const uAprovado = !!(u.aprovadoEm) || (uAtivo && !uPend);
+        // Aprovado vence sempre — não deixa espelho de pendentes reabrir o pedido
+        if (prevAprovado || uAprovado) {
           merged.pendente = false;
           merged.ativo = true;
-          if (uAtivo && !uPend && u.funcao) merged.funcao = u.funcao;
-          if (prevAtivo && !prevPend && prev.funcao && !merged.funcao) merged.funcao = prev.funcao;
+          merged.cargoSolicitado = null;
+          if (uAprovado && u.funcao) merged.funcao = u.funcao;
+          else if (prevAprovado && prev.funcao) merged.funcao = prev.funcao || merged.funcao;
+          merged.aprovadoEm = u.aprovadoEm || prev.aprovadoEm || merged.aprovadoEm;
         } else if (prevPend || uPend) {
           merged.pendente = true;
           merged.ativo = false;
@@ -3754,8 +3772,23 @@
         if (!snap.exists) return 0;
         const items = (snap.data() || {}).items;
         if (!Array.isArray(items) || !items.length) return 0;
+        // Só mescla quem AINDA está pendente e não existe como aprovado/ativo
+        var soPend = (items || []).filter(function(it) {
+          if (!it) return false;
+          var key = String(it.user || '').toLowerCase();
+          var ja = (db.users || []).find(function(x) {
+            return String(x.user || '').toLowerCase() === key;
+          });
+          if (ja) {
+            var jaPend = ja.pendente === true || ja.pendente === 'true' || ja.pendente === 1;
+            var jaAtivo = ja.ativo === true || ja.ativo === 'true' || ja.ativo === 1;
+            if (jaAtivo && !jaPend) return false; // já aprovado — ignora espelho pendente
+            if (ja.aprovadoEm) return false;
+          }
+          return it.pendente === true || it.pendente === 'true' || it.pendente === 1 || it.pendente === '1';
+        });
         const antes = (db.users || []).length;
-        db.users = mergeUsers(db.users || [], items);
+        db.users = mergeUsers(db.users || [], soPend);
         return (db.users || []).length - antes;
       } catch (e) {
         console.warn('puxarCadastrosPendentesNuvem:', e);
@@ -4262,7 +4295,8 @@
         s.aprovadoEm = new Date().toISOString();
         s.aprovadoPor = usuarioAtual ? usuarioAtual.user : '—';
 
-        var okUsers = await salvarUsersSeguro();
+        var okUsers = await salvarUsersSeguro({ forcarLocal: true });
+        try { await removerDeCadastrosPendentesNuvem(s.user); } catch (e) {}
         var okSol = await salvarSolicitacoesNuvem();
         addAtividade('Aprovado (novo sistema): ' + s.nome + ' → ' + cargo, 'admin');
         await atualizarPainelSolicitacoes(false);
@@ -4766,11 +4800,46 @@
       if (!u) return false;
       const user = String(u.user || '').toLowerCase();
       if (user === 'admin' || user === 'dev') return false;
+      // Somente quem ainda está marcado como pendente aparece para aprovar/recusar
       if (isPendenteUser(u)) return true;
-      // inativo também pode ser cadastro aguardando (mensagem de login mistura os dois)
-      const ativo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
-      if (!ativo) return true;
       return false;
+    }
+    /** Remove flag pendente de quem já está ativo/aprovado e limpa espelho na nuvem */
+    function normalizarUsersAposAprovacao() {
+      var mudou = false;
+      (db.users || []).forEach(function(u) {
+        if (!u) return;
+        var ativo = u.ativo === true || u.ativo === 'true' || u.ativo === 1;
+        var pend = isPendenteUser(u);
+        // se está ativo e ainda veio pendente por sync, limpa
+        if (ativo && pend && u.aprovadoEm) {
+          u.pendente = false;
+          u.cargoSolicitado = null;
+          mudou = true;
+        }
+      });
+      return mudou;
+    }
+    async function removerDeCadastrosPendentesNuvem(login) {
+      try {
+        if (!firebaseOk) await initFirebase();
+        await ensureFirebaseAuth();
+        if (!firebaseOk || !fbDb) return;
+        var ref = fbDb.collection('valis').doc('cadastros_pendentes');
+        var snap = await ref.get();
+        if (!snap.exists) return;
+        var items = (snap.data() || {}).items;
+        if (!Array.isArray(items)) return;
+        var key = String(login || '').toLowerCase();
+        var rest = items.filter(function(x) {
+          return String(x.user || '').toLowerCase() !== key;
+        });
+        // também remove quem já não está pendente
+        rest = rest.filter(function(x) {
+          return x && (x.pendente === true || x.pendente === 'true' || x.pendente === 1 || x.pendente === '1');
+        });
+        await ref.set({ items: rest, updatedAt: new Date().toISOString() }, { merge: false });
+      } catch (e) { console.warn('removerDeCadastrosPendentesNuvem', e); }
     }
     async function garantirAdmin() {
       if (!Array.isArray(db.users)) db.users = [];
@@ -7230,24 +7299,30 @@
       u.pendente = false;
       u.cargoSolicitado = null;
       u.ativo = true;
+      u.aprovadoEm = new Date().toISOString();
+      u.aprovadoPor = usuarioAtual ? usuarioAtual.user : '—';
       u.user = String(u.user || '').toLowerCase().trim();
-      // não mexer em pass/passHash — senão quebra login após aprovação
       if (u.passHash) delete u.pass;
       addAtividade('Cadastro aprovado: ' + u.nome + ' → ' + u.funcao, 'admin');
-      const ok = await salvarUsersSeguro();
-      // tira da lista dedicada de pendentes
+      // forcarLocal evita o merge trazer o espelho pendente de volta
+      const ok = await salvarUsersSeguro({ forcarLocal: true });
+      try { await removerDeCadastrosPendentesNuvem(u.user); } catch (e) {}
+      // marca solicitacao nova (se houver) como aprovada
       try {
-        if (firebaseOk && fbDb) {
-          const ref = fbDb.collection('valis').doc('cadastros_pendentes');
-          const snap = await ref.get();
-          if (snap.exists && Array.isArray((snap.data() || {}).items)) {
-            const rest = snap.data().items.filter(x => String(x.user || '').toLowerCase() !== String(u.user || '').toLowerCase());
-            await ref.set({ items: rest, updatedAt: new Date().toISOString() });
+        await carregarSolicitacoes();
+        (db.solicitacoes || []).forEach(function(s) {
+          if (s && String(s.user || '').toLowerCase() === String(u.user || '').toLowerCase() && s.status === 'pendente') {
+            s.status = 'aprovado';
+            s.aprovadoEm = u.aprovadoEm;
+            s.aprovadoPor = u.aprovadoPor;
           }
-        }
+        });
+        await salvarSolicitacoesNuvem();
       } catch (e) {}
+      try { normalizarUsersAposAprovacao(); } catch (e) {}
+      try { await atualizarPainelSolicitacoes(false); } catch (e) {}
       render();
-      toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado e salvo no Firebase');
+      toast(ok === false ? 'Aprovado local (Firebase falhou)' : 'Aprovado — sumiu da lista de pendentes');
       } catch (err) {
         console.error(err);
         alert('Erro ao aprovar: ' + (err && err.message ? err.message : err));
@@ -7281,6 +7356,121 @@
         alert('Erro ao recusar: ' + (err && err.message ? err.message : err));
       }
     }
+
+    function getUserPostosIds(u) {
+      if (!u) return [];
+      var raw = u.postosIds || u.postos || u.postoIds || [];
+      if (!Array.isArray(raw)) {
+        if (raw != null && raw !== '') raw = [raw];
+        else raw = [];
+      }
+      return raw.map(function(x) { return String(x); }).filter(Boolean);
+    }
+    function nomesPostosDoUser(u) {
+      var ids = getUserPostosIds(u);
+      if (!ids.length) return [];
+      var postos = db.postos || [];
+      return ids.map(function(id) {
+        var p = postos.find(function(x) { return String(x.id) === String(id); });
+        return p ? (p.n || p.nome || ('Posto ' + id)) : ('Posto #' + id);
+      });
+    }
+    function htmlSelectPostosUser(u) {
+      if (!podeGerenciarUsers()) return '';
+      var loginAttr = String(u.user || '').toLowerCase().replace(/"/g, '');
+      var ids = getUserPostosIds(u);
+      var postos = (db.postos || []).slice();
+      if (!postos.length) {
+        return '<div class="meta" style="margin-top:6px">Nenhum posto cadastrado para vincular.</div>';
+      }
+      var opts = postos.map(function(p) {
+        var id = String(p.id);
+        var sel = ids.indexOf(id) >= 0 ? ' selected' : '';
+        var nome = String(p.n || p.nome || id).replace(/</g, '');
+        return '<option value="' + id.replace(/"/g, '') + '"' + sel + '>' + nome + '</option>';
+      }).join('');
+      return '<div class="field" style="margin-top:8px;margin-bottom:0">' +
+        '<label style="font-size:10px">Postos vinculados</label>' +
+        '<select class="select" multiple size="' + Math.min(4, Math.max(2, postos.length)) + '" ' +
+        'style="min-height:64px" onchange="atualizarPostosUser(\'' + loginAttr + '\', this)">' +
+        opts + '</select>' +
+        '<div class="meta" style="font-size:10px;margin-top:4px">Segure Ctrl/Cmd (ou toque longo) para marcar vários</div></div>';
+    }
+    async function atualizarPostosUser(login, selectEl) {
+      if (!podeGerenciarUsers()) return toast('Sem permissão');
+      var u = (db.users || []).find(function(x) {
+        return String(x.user || '').toLowerCase() === String(login || '').toLowerCase();
+      });
+      if (!u) return toast('Usuário não encontrado');
+      var ids = [];
+      if (selectEl && selectEl.options) {
+        for (var i = 0; i < selectEl.options.length; i++) {
+          if (selectEl.options[i].selected) ids.push(String(selectEl.options[i].value));
+        }
+      }
+      u.postosIds = ids;
+      try { await salvarUsersSeguro({ forcarLocal: true }); } catch (e) {}
+      try { render(); } catch (e) {}
+      toast('Postos de @' + login + ' atualizados (' + ids.length + ')');
+    }
+    function preencherFiltroPostosEquipe() {
+      var sel = document.getElementById('equipe-filtro-posto');
+      if (!sel) return;
+      var cur = sel.value || '';
+      var opts = '<option value="">Todos os postos</option>';
+      opts += '<option value="__sem__">Sem posto vinculado</option>';
+      (db.postos || []).forEach(function(p) {
+        opts += '<option value="' + String(p.id).replace(/"/g, '') + '">' +
+          String(p.n || p.nome || p.id).replace(/</g, '') + '</option>';
+      });
+      sel.innerHTML = opts;
+      try { if (cur) sel.value = cur; } catch (e) {}
+    }
+    function htmlListaUsersAgrupada(ordenados, userHtmlOne) {
+      var postos = (db.postos || []).slice();
+      var filtro = '';
+      try {
+        var f = document.getElementById('equipe-filtro-posto');
+        if (f) filtro = f.value || '';
+      } catch (e) {}
+      var groups = [];
+      postos.forEach(function(p) {
+        var id = String(p.id);
+        var membros = ordenados.filter(function(u) {
+          return getUserPostosIds(u).indexOf(id) >= 0;
+        });
+        groups.push({
+          key: id,
+          title: '📍 ' + (p.n || p.nome || ('Posto ' + id)),
+          sub: (p.d || p.destino || ''),
+          membros: membros
+        });
+      });
+      var sem = ordenados.filter(function(u) { return getUserPostosIds(u).length === 0; });
+      groups.push({
+        key: '__sem__',
+        title: '⚪ Sem posto vinculado',
+        sub: 'Usuários ainda não associados a um posto',
+        membros: sem
+      });
+      if (filtro) {
+        groups = groups.filter(function(g) { return g.key === filtro; });
+      } else {
+        groups = groups.filter(function(g) { return g.membros.length > 0 || g.key === '__sem__'; });
+      }
+      if (!groups.length) return '<div class="empty">Nenhum usuário neste filtro.</div>';
+      return groups.map(function(g) {
+        var body = g.membros.length
+          ? g.membros.map(userHtmlOne).join('')
+          : '<div class="empty" style="padding:8px">Ninguém neste posto.</div>';
+        return '<details class="ex-user-group" ' + (g.membros.length ? 'open' : '') + '>' +
+          '<summary><span class="ex-ug-name">' + g.title + '</span>' +
+          '<span class="ex-ug-meta">' + g.membros.length + ' pessoa(s)' +
+          (g.sub ? (' · ' + String(g.sub).slice(0, 40)) : '') + '</span></summary>' +
+          '<div class="ex-ug-body">' + body + '</div></details>';
+      }).join('');
+    }
+
     async function alterarFuncaoUser(id, funcao) {
       if (!funcao || !podeGerenciarUsers()) return;
       const u = acharUsuarioPorId(id) || acharUsuarioPorLogin(id);
@@ -8003,7 +8193,12 @@
                 </select>
               </div>`;
             }
-            return `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${pend}${inat}<div class="meta">@${u.user}</div>${actions}</div>`;
+            const postosNomes = (typeof nomesPostosDoUser === 'function') ? nomesPostosDoUser(u) : [];
+            const postosMeta = postosNomes.length
+              ? ('<div class="meta">📍 ' + postosNomes.join(' · ') + '</div>')
+              : '<div class="meta">📍 Sem posto vinculado</div>';
+            const postosSel = (typeof htmlSelectPostosUser === 'function') ? htmlSelectPostosUser(u) : '';
+            return `<div class="item"><b>${u.nome}</b> ${funcaoBadge(u.funcao)}${pend}${inat}<div class="meta">@${u.user}</div>${postosMeta}${actions}${postosSel}</div>`;
           }).join('')
         : '<div class="empty">Nenhum.</div>';
       const listaUsers = document.getElementById('lista-users');
@@ -8014,9 +8209,27 @@
           return ap - bp;
         });
         const pendQtd = ordenados.filter(precisaAprovacaoUser).length;
-        listaUsers.innerHTML =
-          (pendQtd ? '<div class="item" style="border-color:var(--yellow)"><b>⏳ ' + pendQtd + ' cadastro(s) aguardando aprovação</b><div class="meta">Atualize a lista se alguém acabou de se cadastrar</div><button class="btn dark sm" style="margin-top:8px" onclick="sincronizarUsersDoFirebase().then(function(){render();toast(\'Lista atualizada\')})">🔄 Atualizar lista</button></div>' : '')
-          + userHtml(ordenados);
+        try { preencherFiltroPostosEquipe(); } catch (e) {}
+        var pendBanner = '';
+        if (pendQtd) {
+          pendBanner = '<div class="item" style="border-color:var(--yellow)"><b>⏳ ' + pendQtd +
+            ' cadastro(s) aguardando aprovação</b><div class="meta">Atualize a lista se alguém acabou de se cadastrar</div>' +
+            '<button class="btn dark sm" style="margin-top:8px" onclick="sincronizarUsersDoFirebase().then(function(){render();toast(String.fromCharCode(76,105,115,116,97,32,97,116,117,97,108,105,122,97,100,97))})">🔄 Atualizar lista</button></div>';
+        }
+        var agrupar = true;
+        try {
+          var chk = document.getElementById('equipe-agrupar-posto');
+          if (chk) agrupar = !!chk.checked;
+        } catch (e) {}
+        var corpo;
+        if (agrupar && typeof htmlListaUsersAgrupada === 'function') {
+          corpo = htmlListaUsersAgrupada(ordenados, function(u) {
+            return userHtml([u]);
+          });
+        } else {
+          corpo = userHtml(ordenados);
+        }
+        listaUsers.innerHTML = pendBanner + corpo;
       }
 
       if (usuarioAtual) {
