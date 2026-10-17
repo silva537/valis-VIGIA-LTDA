@@ -296,6 +296,37 @@
     }
     .tab { display: none; }
     .tab.active { display: block; animation: fadeIn .2s ease; }
+
+    .login-auto-status {
+      display: none;
+      margin: 0 0 14px;
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(15, 23, 42, 0.6));
+      text-align: left;
+    }
+    .login-auto-status.show { display: block; animation: fadeIn 0.35s ease; }
+    .login-auto-status .las-title {
+      font-size: 13px; font-weight: 800; color: #7dd3fc; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .login-auto-status .las-msg { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .login-auto-status .las-spin {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid rgba(125, 211, 252, 0.25);
+      border-top-color: #7dd3fc;
+      animation: lasSpin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes lasSpin { to { transform: rotate(360deg); } }
+    .login-auto-status.ok { border-color: rgba(34, 197, 94, 0.4); }
+    .login-auto-status.ok .las-title { color: #86efac; }
+    .login-auto-status.err { border-color: rgba(248, 113, 113, 0.4); }
+    .login-auto-status.err .las-title { color: #fca5a5; }
+    .login-auto-status.err .las-spin { display: none; }
+
+
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
     .title {
       font-size: 1.35rem;
@@ -2135,6 +2166,10 @@
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
       <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
+      <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
+        <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
+        <div class="las-msg" id="login-auto-msg">Coletando dados de acesso neste aparelho...</div>
+      </div>
       <div class="login-alert" id="login-alert" role="status"></div>
       <div class="br-flag-strip"></div>
       <div class="login-tabs">
@@ -3121,7 +3156,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '9.3.1';
+    const APP_VERSION = '9.4.1';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -3647,6 +3682,29 @@
         }
       } catch (e) {}
     }
+
+    function setLoginAutoStatus(visivel, titulo, msg, estado) {
+      try {
+        var box = document.getElementById('login-auto-status');
+        var t = document.getElementById('login-auto-title');
+        var m = document.getElementById('login-auto-msg');
+        if (!box) return;
+        if (titulo && t) t.textContent = titulo;
+        if (msg && m) m.textContent = msg;
+        box.classList.remove('ok', 'err', 'show');
+        if (visivel) {
+          box.classList.add('show');
+          if (estado === 'ok') box.classList.add('ok');
+          if (estado === 'err') box.classList.add('err');
+        }
+      } catch (e) {}
+    }
+    function temSessaoSalvaLogin() {
+      try {
+        return !!(sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist'));
+      } catch (e) { return false; }
+    }
+
     function msgLogin(texto, ok) {
       const el = document.getElementById('login-msg');
       el.textContent = texto;
@@ -4012,6 +4070,7 @@
       const user = document.getElementById('login-user').value.trim().toLowerCase();
       const pass = String(document.getElementById('login-pass').value);
       if (!user || !pass) return msgLogin('Preencha usuário e senha.');
+      setLoginAutoStatus(true, 'Entrando...', 'Coletando e validando dados de login...', null);
       msgLogin('Preparando login...', true);
       try {
         await initFirebase();
@@ -4109,8 +4168,12 @@
       if (window.ValisDevLog) ValisDevLog.add('login_ok', { user: byUser.user, funcao: byUser.funcao });
       pedirPermissaoNotificacoes();
       try { pvBoot(); } catch (e) {}
-      entrarApp();
-      try { setTimeout(function() { atualizarPainelInicio(); }, 300); } catch (e) {}
+      setLoginAutoStatus(true, 'Login concluido', 'Abrindo o aplicativo...', 'ok');
+      setTimeout(function() {
+        try { setLoginAutoStatus(false); } catch (e) {}
+        entrarApp();
+        try { setTimeout(function() { atualizarPainelInicio(); }, 300); } catch (e) {}
+      }, 350);
     }
 
 
@@ -9255,22 +9318,32 @@
       try {
         const sess = sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist');
         if (sess) {
+          setLoginAutoStatus(true, 'Login automatico', 'Validando usuario salvo e permissoes...', null);
           const s = JSON.parse(sess);
-          const u = db.users.find(x => {
+          const u = (db.users || []).find(x => {
             if (String(x.user || '').toLowerCase() !== String(s.user || '').toLowerCase()) return false;
             const ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1;
             const pend = x.pendente === true || x.pendente === 'true' || x.pendente === 1;
             return ativo && !pend;
           });
           if (u) {
+            setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
             usuarioAtual = u;
             sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
             pedirPermissaoNotificacoes();
-            entrarApp();
+            setTimeout(function() {
+              try { setLoginAutoStatus(false); } catch (e) {}
+              entrarApp();
+            }, 450);
             return;
           }
+          setLoginAutoStatus(true, 'Login automatico indisponivel', 'Sessao salva nao e valida. Faca login manualmente.', 'err');
+        } else {
+          setLoginAutoStatus(false);
         }
-      } catch (e) {}
+      } catch (e) {
+        try { setLoginAutoStatus(true, 'Login automatico', 'Nao foi possivel restaurar a sessao. Entre com usuario e senha.', 'err'); } catch (e2) {}
+      }
     }
 
     // ---------- PERFIL — 10 FUNÇÕES ----------
@@ -11012,6 +11085,11 @@
       try { registrarServiceWorker(); } catch (e) {}
       try { if (usuarioAtual) pvBoot(); } catch (e) {}
       if (window.ValisDevLog) ValisDevLog.add('app_boot', { ver: APP_VERSION, href: location.href });
+      try {
+        if (temSessaoSalvaLogin() && !usuarioAtual) {
+          setLoginAutoStatus(true, 'Aguardando login automatico', 'Coletando dados de login neste aparelho...', null);
+        }
+      } catch (e) {}
       try { verificarAtualizacaoConcluida(); } catch (e) {}
       try { atualizarPainelLogin(); } catch (e) {}
       try { setTimeout(function() { if (usuarioAtual) atualizarPainelInicio(); }, 400); } catch (e) {}
@@ -11035,6 +11113,9 @@
       } catch (e) {}
       try { await initFirebase(); } catch (e) { firebaseOk = false; }
       try {
+        if (temSessaoSalvaLogin() && !usuarioAtual) {
+          setLoginAutoStatus(true, 'Aguardando login automatico', 'Sincronizando dados e validando sessao...', null);
+        }
         await carregar();
       } catch (e) {
         console.warn('carregar falhou, modo local', e);

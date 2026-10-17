@@ -1,5 +1,5 @@
 {
-  "v": "9.3.1",
+  "v": "9.4.1",
   "forceReload": true,
-  "msg": "Removidos nomes de exemplo nos textos de folguista"
+  "msg": "Removida saude/sono do plantao; login automatico mantido"
 }
