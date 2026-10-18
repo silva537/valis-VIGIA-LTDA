@@ -90,14 +90,21 @@
     }
     .login-box { width: 100%; max-width: 400px; padding: 28px 22px 22px; text-align: center; }
     .login-logo {
-      width: 64px; height: 64px;
-      background: linear-gradient(145deg, #009C3B 0%, #0b6b3a 40%, #002776 100%);
+      width: 72px; height: 72px;
       border-radius: 18px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 30px;
       margin: 0 auto 14px;
-      box-shadow: 0 0 28px rgba(0,156,59,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.08);
+      padding: 0;
+      overflow: hidden;
+      background: #0b1220;
+      box-shadow: 0 0 28px rgba(0,156,59,0.4), 0 4px 16px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .login-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .login-box h1 { font-size: 22px; font-weight: 900; letter-spacing: 0.5px; }
     .login-box .sub { color: var(--muted); font-size: 13px; margin: 6px 0 8px; }
@@ -832,6 +839,27 @@
       height: 220px;
       background: #0f172a;
     }
+
+    .pv-mapa-details {
+      margin-top: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: rgba(15,23,42,0.35);
+      overflow: hidden;
+    }
+    .pv-mapa-summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      list-style: none;
+    }
+    .pv-mapa-summary::-webkit-details-marker { display: none; }
+    .pv-mapa-details[open] .pv-mapa-summary { border-bottom: 1px solid rgba(148,163,184,0.15); color: #e2e8f0; }
+    .pv-mapa-details .pv-mapa-wrap { margin: 0; border: none; border-radius: 0; }
+    #tab-inicio .plantao-vivo-card { margin-bottom: 14px; }
+
     .pv-mapa-info {
       padding: 8px 10px 10px;
       font-size: 11px;
@@ -1774,15 +1802,7 @@
       padding: 28px 22px 24px;
       box-shadow: 0 24px 60px rgba(0,0,0,0.5);
     }
-    body.ui-solid .login-logo {
-      width: 64px; height: 64px;
-      margin: 0 auto 12px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #16a34a, #0ea5e9);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 10px 30px rgba(22,163,74,0.35);
-    }
+    body.ui-solid .login-logo { background: #0b1220; }
     body.ui-solid .login-box h1 {
       text-align: center;
       font-size: 1.35rem;
@@ -2161,7 +2181,7 @@
   <!-- LOGIN -->
   <section id="login" class="login">
     <div class="login-box">
-      <div class="login-logo">V</div>
+      <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
       <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
@@ -2426,25 +2446,40 @@
           <div id="inicio-pack-items"></div>
         </div>
 
-        <div class="ops-hero" id="ops-hero">
-          <div class="ops-hero-card status-idle" id="ops-hero-status">
-            <div class="lbl">Status plantão</div>
-            <div class="val" id="ops-hero-status-val">INATIVO</div>
-            <div class="sub" id="ops-hero-status-sub">Selecione o posto</div>
+        <div class="plantao-vivo-card" id="plantao-vivo-card">
+          <div class="plantao-vivo-head">
+            <div class="titulo">MODO PLANTÃO ATIVO</div>
+            <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
           </div>
-          <div class="ops-hero-card" id="ops-hero-gps" style="--ops-accent:#38bdf8">
-            <div class="lbl">GPS / posto</div>
-            <div class="val" id="ops-hero-gps-val">—</div>
-            <div class="sub" id="ops-hero-gps-sub">Aguardando fix</div>
+          <div class="plantao-vivo-meta" id="pv-meta">
+            Selecione o posto e faça o check-in (manual ou automático por GPS).
           </div>
+          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()">
+            <option value="">— Selecione o posto —</option>
+          </select>
+          <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
+          <div class="plantao-vivo-btns">
+            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
+            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
+            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
+            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
+          </div>
+          <details class="pv-mapa-details" id="pv-mapa-details">
+            <summary class="pv-mapa-summary">Localização e mapa do posto</summary>
+            <div class="pv-mapa-wrap" id="pv-mapa-wrap">
+              <div class="pv-mapa-head">
+                <span>Rota / geofence</span>
+                <div class="pv-mapa-actions">
+                  <button type="button" class="primary" onclick="pvCentralizarMapa()">Centralizar</button>
+                  <button type="button" onclick="pvAbrirNoMaps()">Abrir no Maps</button>
+                </div>
+              </div>
+              <div id="pv-mapa"></div>
+              <div class="pv-mapa-info" id="pv-mapa-info">Aguardando GPS e posto…</div>
+            </div>
+          </details>
         </div>
-        <div class="ops-plantao-teaser" id="ops-plantao-teaser" onclick="tab('plantao')">
-          <div class="teaser-left">
-            <div class="teaser-title">⚡ Ir para o Plantão</div>
-            <div class="teaser-sub" id="ops-teaser-sub">Ponto, GPS e mapa do posto</div>
-          </div>
-          <div class="teaser-go">Abrir →</div>
-        </div>
+
 
         <div class="perfil-chip-wrap">
           <div>
@@ -2491,40 +2526,13 @@
 
       <!-- LANÇAMENTO DE PLANTÃO -->
       <section id="tab-plantao" class="tab">
-        <div class="title">Plantão ao vivo</div>
+        <div class="title">Lançamento de plantão</div>
         <div class="br-flag-strip"></div>
-<div class="plantao-vivo-card" id="plantao-vivo-card">
-          <div class="plantao-vivo-head">
-            <div class="titulo">⚡ MODO PLANTÃO ATIVO</div>
-            <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
-          </div>
-          <div class="plantao-vivo-meta" id="pv-meta">
-            Selecione o posto e inicie o check-in (manual ou por GPS).
-          </div>
-          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()">
-            <option value="">— Selecione o posto —</option>
-          </select>
-          <div class="plantao-vivo-btns">
-            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
-            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
-            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Registrar saída almoço / janta</button>
-            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Registrar volta do almoço / janta</button>
-          </div>
-          <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
-          <div class="pv-mapa-wrap" id="pv-mapa-wrap">
-            <div class="pv-mapa-head">
-              <span>📍 <b>Localização / rota até o posto</b></span>
-              <div class="pv-mapa-actions">
-                <button type="button" class="primary" onclick="pvCentralizarMapa()">Centralizar</button>
-                <button type="button" onclick="pvAbrirNoMaps()">Abrir no Maps</button>
-              </div>
-            </div>
-            <div id="pv-mapa"></div>
-            <div class="pv-mapa-info" id="pv-mapa-info">Aguardando GPS e posto com geofence…</div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
+        <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px;line-height:1.45">
+          O <b>plantão ao vivo</b> (check-in, GPS e posto) fica na aba <b>Início</b>.
+          Aqui você lança ou edita plantões na folha manualmente.
+        </p>
+<div class="card" style="margin-top:12px">
           <div class="card-label">Lançamento manual na folha</div>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4">
             Use abaixo para lançar plantão no extrato. O ponto com GPS fica no bloco de cima.
@@ -3156,7 +3164,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '9.4.1';
+    const APP_VERSION = '1.1.1';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -10520,9 +10528,13 @@
         }
       } catch (e) { console.warn(e); }
     }
+    var _pvLastGeoHtml = '';
+    var _pvGeoDentroSticky = null;
     function pvUpdateGeoLabel(txt) {
       var el = document.getElementById('pv-geo');
       if (!el) return;
+      if (String(txt) === _pvLastGeoHtml) return; // evita piscar a cada tick do GPS
+      _pvLastGeoHtml = String(txt);
       el.innerHTML = txt;
     }
     function pvStartGeoWatch() {
@@ -10530,11 +10542,17 @@
         pvUpdateGeoLabel('<span class="warn">GPS: não disponível neste aparelho</span>');
         return;
       }
-      pvUpdateGeoLabel('GPS: obtendo localização…');
+      // se já está acompanhando, não reinicia (evita ativar/desativar em loop)
       if (_pvWatchId != null) {
-        try { navigator.geolocation.clearWatch(_pvWatchId); } catch (e) {}
-        _pvWatchId = null;
+        try {
+          navigator.geolocation.getCurrentPosition(function(pos) {
+            _pvLastPos = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+            pvOnGeoTick();
+          }, function() {}, { enableHighAccuracy: true, maximumAge: 15000, timeout: 12000 });
+        } catch (e) {}
+        return;
       }
+      pvUpdateGeoLabel('GPS: obtendo localização…');
       var onOk = function(pos) {
         _pvLastPos = {
           lat: pos.coords.latitude,
@@ -10622,20 +10640,32 @@
       }
       var dist = pvHaversine(_pvLastPos.lat, _pvLastPos.lng, Number(p.lat), Number(p.lng));
       var raio = (p.raio && p.raio >= 30) ? Number(p.raio) : 150;
-      var dentro = dist <= raio;
+      // histerese: evita alternar dentro/fora na borda do geofence
+      var dentro;
+      if (_pvGeoDentroSticky === true) {
+        dentro = dist <= (raio * 1.12);
+      } else if (_pvGeoDentroSticky === false) {
+        dentro = dist <= (raio * 0.92);
+      } else {
+        dentro = dist <= raio;
+      }
+      _pvGeoDentroSticky = !!dentro;
       var extra = '';
       var until = Number(sess.noAutoUntil || 0);
       if ((st === 'finalizado' || st === 'idle') && until && Date.now() < until) {
-        var rest = Math.ceil((until - Date.now()) / 1000);
-        extra = ' · auto em ' + rest + 's';
+        var rest = Math.ceil((until - Date.now()) / 5000) * 5; // atualiza de 5 em 5s
+        if (rest < 0) rest = 0;
+        extra = ' · auto em ~' + rest + 's';
       } else if ((st === 'finalizado' || st === 'idle') && sess.needsLeaveBeforeAuto && dentro) {
         extra = ' · saia do raio para liberar auto';
       }
+      var distRound = Math.round(dist / 5) * 5; // arredonda 5m — menos flicker
+      var accRound = Math.round(acc / 5) * 5;
       pvUpdateGeoLabel(
         (dentro
           ? '<span class="ok">Dentro do posto</span>'
           : '<span class="warn">Fora do posto</span>') +
-        ' · ' + Math.round(dist) + ' m (raio ' + raio + ' m) · ±' + acc + ' m' + extra
+        ' · ' + distRound + ' m (raio ' + raio + ' m) · ±' + accRound + ' m' + extra
       );
 
       if ((st === 'finalizado' || st === 'idle') && sess.needsLeaveBeforeAuto && !dentro) {
@@ -10657,11 +10687,24 @@
         pvCheckOut(true).finally(function() { _pvAutoBusy = false; });
       }
     }
+    function pvBindMapaDetails() {
+      try {
+        var d = document.getElementById('pv-mapa-details');
+        if (!d || d._pvBound) return;
+        d._pvBound = true;
+        d.addEventListener('toggle', function() {
+          if (d.open) {
+            try { setTimeout(function(){ pvEnsureMap(); pvAtualizarMapa(); pvCentralizarMapa(); }, 120); } catch (e) {}
+          }
+        });
+      } catch (e) {}
+    }
     function pvBoot() {
       try {
         pvPreencherSelectPostos();
         pvRender();
         pvStartGeoWatch();
+        try { pvBindMapaDetails(); } catch (e) {}
         try { setTimeout(function(){ pvEnsureMap(); pvAtualizarMapa(); }, 400); } catch (e) {}
         // Reavalia ao voltar para o app (abertura / 2º plano)
         if (!window._pvVisBound) {
