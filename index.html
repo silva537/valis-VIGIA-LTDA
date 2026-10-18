@@ -2723,15 +2723,25 @@
         <div class="title">Ocorrências</div>
         <div class="br-flag-strip"></div>
         <div class="card">
+          <div class="meta" style="font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:10px">
+            Selecione o <b>posto</b> da ocorrência. Cada vigilante vê só as ocorrências dos <b>postos em que está vinculado</b>
+            (Admin / Supervisão / DEV veem todas).
+          </div>
           <div class="field"><label>Posto</label><select id="op" class="select"></select></div>
           <div class="field"><label>Tipo</label>
             <select id="otp" class="select">
               <option>Rotina</option><option>Incidente</option><option>Suspeito</option><option>Emergência</option>
             </select>
           </div>
-          <div class="field"><label>Descrição</label><textarea id="ot" class="area" rows="3" placeholder="Descreva o ocorrido..."></textarea></div>
+          <div class="field"><label>Descrição</label><textarea id="ot" class="area" rows="3" placeholder="Descreva o ocorrido neste posto..."></textarea></div>
           <div class="field"><label>Foto (opcional)</label><input id="ot-foto" class="input" type="file" accept="image/*"></div>
           <button class="btn green" onclick="addOco()">Registrar ocorrência</button>
+        </div>
+        <div class="field" style="margin:10px 0 6px">
+          <label style="font-size:11px;color:var(--muted)">Filtrar lista</label>
+          <select id="oco-filtro-posto" class="select" onchange="render()">
+            <option value="">Meus postos (padrão)</option>
+          </select>
         </div>
         <div id="lo"></div>
       </section>
@@ -3164,7 +3174,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '1.1.1';
+    const APP_VERSION = '1.2.0';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -6053,7 +6063,7 @@
           db.postos.push({ id: Date.now(), n: 'UFV São Miguel', d: 'Paracambi/RJ' });
           db.postos.push({ id: Date.now() + 1, n: 'Portaria Norte', d: 'Acesso principal' });
           db.esc.push({ id: Date.now() + 2, d: new Date().toISOString().slice(0, 10), t: 'Diurno', h: '06:00 às 18:00', e: 'Vigilante', n: 'Teste Silva', p: 'UFV São Miguel', s: 'Plantão' });
-          db.oco.unshift({ id: Date.now() + 3, p: 'UFV São Miguel', tipo: 'Rotina', t: 'Ronda de teste OK', d: new Date().toLocaleString('pt-BR'), por: 'DEV' });
+          db.oco.unshift({ id: Date.now() + 3, p: 'Posto exemplo', tipo: 'Rotina', t: 'Ronda de teste OK', d: new Date().toLocaleString('pt-BR'), por: 'DEV' });
           addAtividade('Dados de teste injetados');
           salvar();
           render();
@@ -7373,19 +7383,125 @@
       render();
       toast('Escala OK');
     }
+
+    function podeVerTodasOcorrencias() {
+      if (!usuarioAtual) return false;
+      var f = String(usuarioAtual.funcao || '').toLowerCase();
+      return f === 'admin' || f === 'dev' || f === 'supervisor' || f === 'supervisao' || !!devLiberado;
+    }
+    function postosDoUsuarioAtual() {
+      var ids = (typeof getUserPostosIds === 'function') ? getUserPostosIds(usuarioAtual) : [];
+      var all = db.postos || [];
+      if (!ids.length) return [];
+      return all.filter(function(p) { return ids.indexOf(String(p.id)) >= 0; });
+    }
+    function nomesPostosUsuarioAtual() {
+      return postosDoUsuarioAtual().map(function(p) { return String(p.n || p.nome || '').trim(); }).filter(Boolean);
+    }
+    function ocorrenciaDoPostoUsuario(o) {
+      if (!o) return false;
+      if (podeVerTodasOcorrencias()) return true;
+      var ids = (typeof getUserPostosIds === 'function') ? getUserPostosIds(usuarioAtual) : [];
+      var nomes = nomesPostosUsuarioAtual().map(function(n) { return n.toLowerCase(); });
+      // match por id
+      if (o.postoId != null && ids.indexOf(String(o.postoId)) >= 0) return true;
+      // match por nome do posto
+      var nome = String(o.p || o.posto || '').trim().toLowerCase();
+      if (nome && nomes.indexOf(nome) >= 0) return true;
+      // se o usuario nao tem posto vinculado: nao ve nenhuma (exceto as que ele mesmo registrou)
+      if (!ids.length) {
+        var por = String(o.por || '').toLowerCase();
+        var me = usuarioAtual ? String(usuarioAtual.nome || '').toLowerCase() : '';
+        var login = usuarioAtual ? String(usuarioAtual.user || '').toLowerCase() : '';
+        if (me && por === me) return true;
+        if (o.userLogin && String(o.userLogin).toLowerCase() === login) return true;
+        return false;
+      }
+      return false;
+    }
+    function ocorrenciasVisiveis() {
+      var list = (db.oco || []).filter(ocorrenciaDoPostoUsuario);
+      var filtro = '';
+      try {
+        var sel = document.getElementById('oco-filtro-posto');
+        if (sel) filtro = sel.value || '';
+      } catch (e) {}
+      if (filtro) {
+        list = list.filter(function(o) {
+          if (String(o.postoId || '') === String(filtro)) return true;
+          var p = (db.postos || []).find(function(x) { return String(x.id) === String(filtro); });
+          var nome = p ? String(p.n || p.nome || '') : '';
+          return nome && String(o.p || '') === nome;
+        });
+      }
+      return list;
+    }
+    function preencherSelectsOcorrencias() {
+      var postosUser = postosDoUsuarioAtual();
+      var postosOpts = podeVerTodasOcorrencias() ? (db.postos || []) : postosUser;
+      // se admin sem filtro de vinculo, usa todos; vigilante so os vinculados
+      if (!postosOpts.length && podeVerTodasOcorrencias()) postosOpts = db.postos || [];
+      var op = document.getElementById('op');
+      if (op) {
+        if (!postosOpts.length) {
+          op.innerHTML = '<option value="">Sem posto vinculado — peca ao admin</option>';
+        } else {
+          op.innerHTML = postosOpts.map(function(x) {
+            var nome = String(x.n || x.nome || '').replace(/"/g, '');
+            var id = String(x.id);
+            return '<option value="' + nome + '" data-id="' + id + '">' + nome + '</option>';
+          }).join('');
+        }
+      }
+      var fil = document.getElementById('oco-filtro-posto');
+      if (fil) {
+        var cur = fil.value || '';
+        var base = podeVerTodasOcorrencias() ? (db.postos || []) : postosUser;
+        var htmlOpt = '<option value="">' + (podeVerTodasOcorrencias() ? 'Todos os postos' : 'Meus postos') + '</option>';
+        base.forEach(function(x) {
+          htmlOpt += '<option value="' + String(x.id).replace(/"/g, '') + '">' + String(x.n || x.nome || x.id).replace(/</g, '') + '</option>';
+        });
+        fil.innerHTML = htmlOpt;
+        try { if (cur) fil.value = cur; } catch (e) {}
+      }
+    }
+
     async function addOco() {
       const t = document.getElementById('ot').value.trim();
-      if (!t) return alert('Descreva.');
+      if (!t) return alert('Descreva a ocorrencia.');
       const tipo = document.getElementById('otp').value;
-      const posto = document.getElementById('op').value;
+      const opEl = document.getElementById('op');
+      const posto = opEl ? opEl.value : '';
+      if (!posto) return alert('Selecione o posto da ocorrencia.');
+      // vigilante so pode registrar nos postos vinculados
+      if (!podeVerTodasOcorrencias()) {
+        var nomesOk = nomesPostosUsuarioAtual().map(function(n) { return n.toLowerCase(); });
+        if (!nomesOk.length) return alert('Voce nao tem posto vinculado. Peca ao admin/supervisao para vincular seu login a um posto.');
+        if (nomesOk.indexOf(String(posto).toLowerCase()) < 0) {
+          return alert('Voce so pode registrar ocorrencia nos seus postos vinculados.');
+        }
+      }
+      var postoId = '';
+      try {
+        var opt = opEl && opEl.options[opEl.selectedIndex];
+        if (opt && opt.getAttribute('data-id')) postoId = opt.getAttribute('data-id');
+        if (!postoId) {
+          var found = (db.postos || []).find(function(x) {
+            return String(x.n || x.nome || '') === String(posto);
+          });
+          if (found) postoId = String(found.id);
+        }
+      } catch (e) {}
       async function gravar(fotoData) {
         db.oco.unshift({
           id: Date.now(),
           p: posto,
+          postoId: postoId || null,
           tipo: tipo,
           t: t,
           d: new Date().toLocaleString('pt-BR'),
           por: usuarioAtual ? usuarioAtual.nome : '—',
+          userLogin: usuarioAtual ? usuarioAtual.user : '',
           foto: fotoData || null
         });
         document.getElementById('ot').value = '';
@@ -8229,12 +8345,15 @@
     function render() {
       document.getElementById('s1').textContent = db.postos.length;
       document.getElementById('s2').textContent = db.esc.length;
-      document.getElementById('s3').textContent = db.oco.length;
+      try { document.getElementById('s3').textContent = (typeof ocorrenciasVisiveis === 'function' ? ocorrenciasVisiveis().length : db.oco.length); } catch (e) { document.getElementById('s3').textContent = (db.oco||[]).length; }
       document.getElementById('s4').textContent = db.users.filter(u => u.ativo !== false).length;
 
       const opts = db.postos.map(x => `<option value="${x.n}">${x.n}</option>`).join('') || '<option value="">Sem posto</option>';
-      document.getElementById('ep').innerHTML = opts;
-      document.getElementById('op').innerHTML = opts;
+      try {
+        const ep = document.getElementById('ep');
+        if (ep) ep.innerHTML = opts;
+      } catch (e) {}
+      try { preencherSelectsOcorrencias(); } catch (e) {}
 
       const podePostos = typeof podeGerenciarPostos === 'function' && podeGerenciarPostos();
       try {
@@ -8259,9 +8378,23 @@
         ? db.esc.map(x => `<div class="item"><b>${x.d} — ${x.n}</b> ${statusBadge(x.s)}<div class="meta">${x.t} · ${x.h} · ${x.p||'—'}</div><div class="actions"><button class="btn dark sm" onclick="remover('esc',${x.id})">Excluir</button></div></div>`).join('')
         : '<div class="empty">Nenhuma escala.</div>';
 
-      document.getElementById('lo').innerHTML = db.oco.length
-        ? db.oco.map(x => `<div class="item"><b>${x.p||'—'}</b> ${tipoBadge(x.tipo||'Rotina')}<div class="meta">${x.t}</div><div class="meta">${x.d}</div><div class="actions"><button class="btn dark sm" onclick="remover('oco',${x.id})">Excluir</button></div></div>`).join('')
-        : '<div class="empty">Nenhuma ocorrência.</div>';
+      try {
+        const listaOco = (typeof ocorrenciasVisiveis === 'function') ? ocorrenciasVisiveis() : (db.oco || []);
+        const loEl = document.getElementById('lo');
+        if (loEl) {
+          loEl.innerHTML = listaOco.length
+            ? listaOco.map(x => {
+                const podeDel = podeVerTodasOcorrencias() || (usuarioAtual && (x.userLogin === usuarioAtual.user || x.por === usuarioAtual.nome));
+                const delBtn = podeDel
+                  ? `<div class="actions"><button class="btn dark sm" onclick="remover('oco',${x.id})">Excluir</button></div>`
+                  : '';
+                return `<div class="item"><b>${x.p||'—'}</b> ${tipoBadge(x.tipo||'Rotina')}<div class="meta">${x.t}</div><div class="meta">${x.d}${x.por ? (' · ' + x.por) : ''}</div>${delBtn}</div>`;
+              }).join('')
+            : '<div class="empty">Nenhuma ocorrência neste posto (ou sem posto vinculado).</div>';
+        }
+      } catch (e) {
+        console.warn('render oco', e);
+      }
 
       const msgsView = typeof mensagensDoUsuario === 'function' ? mensagensDoUsuario() : (db.msg || []);
       const lmEl = document.getElementById('lm');
