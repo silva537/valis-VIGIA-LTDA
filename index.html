@@ -304,8 +304,80 @@
     .tab { display: none; }
     .tab.active { display: block; animation: fadeIn .2s ease; }
 
+
+
+    /* Pack 0.0.0 */
+    .ver-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+      color: #94a3b8; background: rgba(15,23,42,0.7);
+      border: 1px solid rgba(148,163,184,0.25); border-radius: 999px;
+      padding: 2px 8px; margin-left: 6px; vertical-align: middle;
+    }
+    .quick-actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin: 0 0 14px;
+    }
+    .quick-actions button {
+      border-radius: 12px; padding: 12px 10px; font-size: 12px; font-weight: 700;
+      border: 1px solid rgba(148,163,184,0.22);
+      background: rgba(15,23,42,0.65); color: #e2e8f0; cursor: pointer;
+    }
+    .quick-actions button:active { transform: scale(0.98); }
+    .quick-actions button .qa-ico { display: block; font-size: 18px; margin-bottom: 4px; }
+    .quick-actions button .qa-sub { font-size: 10px; font-weight: 500; color: #94a3b8; margin-top: 2px; }
+    .sync-meta {
+      font-size: 11px; color: #64748b; text-align: center; margin: 6px 0 12px;
+    }
+    .rd-val.live { color: #4ade80; }
+    #pv-timer-live {
+      font-size: 13px; font-weight: 800; color: #4ade80; margin: 6px 0 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Pack 1.3.0 */
+    .resumo-dia-card {
+      margin: 0 0 14px; padding: 12px 14px; border-radius: 14px;
+      border: 1px solid rgba(56,189,248,0.25);
+      background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(15,23,42,0.5));
+    }
+    .resumo-dia-card .rd-title { font-size: 12px; font-weight: 800; color: #7dd3fc; margin-bottom: 8px; }
+    .resumo-dia-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .resumo-dia-grid .rd-cell {
+      background: rgba(15,23,42,0.55); border-radius: 10px; padding: 8px 10px;
+      border: 1px solid rgba(148,163,184,0.15);
+    }
+    .resumo-dia-grid .rd-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .resumo-dia-grid .rd-val { font-size: 16px; font-weight: 800; color: #e2e8f0; margin-top: 2px; }
+    .pv-checklist {
+      margin: 8px 0 4px; padding: 10px; border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.2); background: rgba(15,23,42,0.4);
+    }
+    .pv-checklist label {
+      display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1;
+      margin: 4px 0; cursor: pointer;
+    }
+    .pv-checklist input { width: 16px; height: 16px; }
+    .pv-extra-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .pv-extra-actions button { flex: 1; min-width: 120px; font-size: 11px; padding: 8px 10px; }
+    .inicio-offline-card {
+      margin: 0 0 12px; padding: 10px 12px; border-radius: 12px;
+      border: 1px solid rgba(251,146,60,0.35); background: rgba(154,52,18,0.2);
+      font-size: 12px; color: #fdba74; display: none;
+    }
+    .inicio-offline-card.show { display: block; }
+    body.modo-campo .plantao-vivo-btns button,
+    body.modo-campo .btn-pl-in, body.modo-campo .btn-pl-out {
+      min-height: 48px; font-size: 14px; font-weight: 800;
+    }
+    body.modo-campo .plantao-vivo-card { border-width: 2px; }
+    body.modo-campo #tab-inicio, body.modo-campo #tab-plantao { font-size: 15px; }
+    body.modo-campo .input, body.modo-campo .select { min-height: 44px; font-size: 15px; }
+    .msg-ciente-btn { font-size: 11px; padding: 4px 8px; margin-top: 4px; }
+    .msg-ciente-ok { color: #86efac; font-size: 11px; margin-top: 4px; }
+
     .login-auto-status {
-      display: none;
+      display: none !important;
       margin: 0 0 14px;
       padding: 14px 12px;
       border-radius: 12px;
@@ -313,7 +385,12 @@
       background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(15, 23, 42, 0.6));
       text-align: left;
     }
-    .login-auto-status.show { display: block; animation: fadeIn 0.35s ease; }
+    .login-auto-status.show {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      animation: fadeIn 0.35s ease;
+    }
     .login-auto-status .las-title {
       font-size: 13px; font-weight: 800; color: #7dd3fc; margin-bottom: 4px;
       display: flex; align-items: center; gap: 8px;
@@ -2184,7 +2261,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2242,29 +2319,51 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico • organizado por seções · v6.7</div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.3</span></div>
     <div class="br-flag-strip"></div>
 
-    <div class="collapse-box open" id="dev-sec-users">
+    <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
+      <b style="color:#e2e8f0">Visão rápida</b>
+      <div id="dev-dash-body">Toque em atualizar painel…</div>
+      <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="devFn(50)">Atualizar painel DEV</button>
+    </div>
+
+    <div class="collapse-box open" id="dev-sec-overview">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-overview')">
+        <span>📊 Visão geral<small>Diagnóstico, sessão, versão</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(50)"><span class="ico">📊</span><div>Painel resumo DEV<small>Contagens e estado do sistema</small></div></button>
+        <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
+        <button class="func-btn" onclick="devFn(23)"><span class="ico">📋</span><div>Copiar diagnóstico<small>Texto para WhatsApp/suporte</small></div></button>
+        <button class="func-btn" onclick="devFn(53)"><span class="ico">🔍</span><div>Inspecionar sessão<small>Usuário, tokens, storage</small></div></button>
+        <button class="func-btn" onclick="devFn(29)"><span class="ico">🏷️</span><div>Versão do app<small>Changelog VALIS</small></div></button>
+        <button class="func-btn" onclick="devFn(22)"><span class="ico">🟢</span><div>Status da conexão<small>Bolinha + último estado</small></div></button>
+        <button class="func-btn" onclick="devFn(30)"><span class="ico">📜</span><div>Log do sistema<small>Boots, login, updates, sync</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="dev-sec-users">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-users')">
         <span>👥 Usuários e acesso<small>Senhas, código, pendentes</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
         <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
         <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
-        <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
-        <button class="func-btn" onclick="devFn(33)"><span class="ico">🧹</span><div>Limpar logins (só admin/dev)<small>Apaga todos os outros usuários</small></div></button>
-        <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login na nuvem ON/OFF<small>Ativa ou bloqueia sync de login no Firebase</small></div></button>
-        <button class="func-btn" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Permite ou bloqueia novos pedidos</small></div></button>
-        <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
         <button class="func-btn" onclick="devFn(25)"><span class="ico">🔧</span><div>Reparar usuários<small>Normaliza flags e hashes</small></div></button>
+        <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
+        <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login na nuvem ON/OFF<small>Ativa ou bloqueia sync de login</small></div></button>
+        <button class="func-btn" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Permite ou bloqueia novos pedidos</small></div></button>
+        <button class="func-btn" onclick="devFn(33)"><span class="ico">🧹</span><div>Limpar logins (só admin/dev)<small>Apaga todos os outros usuários</small></div></button>
       </div></div>
     </div>
 
     <div class="collapse-box" id="dev-sec-manut">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-manut')">
-        <span>🚧 Manutenção e sistema<small>Firebase, diagnóstico, emergência</small></span>
+        <span>🚧 Manutenção e sistema<small>Firebase, emergência, reload</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
@@ -2273,56 +2372,53 @@
         <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado no Firebase</small></div></button>
         <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar Firebase<small>Mode local ↔ cloud</small></div></button>
         <button class="func-btn" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sync agora<small>Sobe e baixa dados do Firebase</small></div></button>
-        <button class="func-btn" onclick="devFn(22)"><span class="ico">🟢</span><div>Status da conexão<small>Bolinha + último estado</small></div></button>
-        <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
-        <button class="func-btn" onclick="devFn(23)"><span class="ico">📋</span><div>Copiar diagnóstico<small>Texto para WhatsApp/suporte</small></div></button>
-        <button class="func-btn" onclick="devFn(29)"><span class="ico">🏷️</span><div>Versão do app<small>Changelog VALIS</small></div></button>
+        <button class="func-btn" onclick="devFn(52)"><span class="ico">♻️</span><div>Recarregar app + limpar cache<small>Service Worker e hard refresh</small></div></button>
         <button class="func-btn" onclick="devFn(26)"><span class="ico">🚨</span><div>Modo emergência<small>Só login, msgs e ocorrência</small></div></button>
-        <button class="func-btn" onclick="devFn(30)"><span class="ico">📜</span><div>Log do sistema (DEV)<small>Boots, login, updates, sync</small></div></button>
         <button class="func-btn" onclick="devFn(31)"><span class="ico">🧹</span><div>Limpar log DEV<small>Apaga histórico técnico</small></div></button>
       </div></div>
     </div>
 
     <div class="collapse-box" id="dev-sec-backup">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-backup')">
-        <span>💾 Backup e dados<small>Exportar, limpar, zerar</small></span>
+        <span>💾 Backup e dados<small>Exportar, fila offline, zerar</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(1)"><span class="ico">📤</span><div>Exportar backup<small>JSON completo do sistema</small></div></button>
-        <button class="func-btn" onclick="devFn(2)"><span class="ico">📥</span><div>Importar backup<small>Restaurar dados de arquivo</small></div></button>
-        <button class="func-btn" onclick="devFn(18)"><span class="ico">🗑</span><div>Apagar todos os backups<small>Plantões + meta (app inteiro)</small></div></button>
-        <button class="func-btn" onclick="devFn(19)"><span class="ico">💥</span><div>Zerar plantões de todos<small>2 etapas + senha DEV</small></div></button>
-        <button class="func-btn" onclick="devFn(24)"><span class="ico">📱</span><div>Limpar só localStorage<small>Não apaga Firebase</small></div></button>
-        <button class="func-btn" onclick="devFn(3)"><span class="ico">🗑</span><div>Zerar todos os dados<small>Reset total local</small></div></button>
-        <button class="func-btn" onclick="devFn(6)"><span class="ico">💾</span><div>Info de armazenamento<small>Tamanho e chaves salvas</small></div></button>
+        <button class="func-btn" onclick="devFn(54)"><span class="ico">📦</span><div>Exportar backup JSON<small>Download completo do banco local</small></div></button>
+        <button class="func-btn" onclick="devFn(51)"><span class="ico">📤</span><div>Limpar fila offline<small>Remove itens pendentes de sync</small></div></button>
+        <button class="func-btn" onclick="devFn(56)"><span class="ico">🗂️</span><div>Plantões e folhas<small>Resumo e inconsistências</small></div></button>
+        <button class="func-btn" onclick="devFn(1)"><span class="ico">💾</span><div>Backup rápido<small>Salva snapshot local</small></div></button>
+        <button class="func-btn" onclick="devFn(2)"><span class="ico">📥</span><div>Restaurar backup<small>Importa snapshot</small></div></button>
+        <button class="func-btn" onclick="devFn(3)"><span class="ico">⚠️</span><div>Zerar dados locais<small>Cuidado — apaga base local</small></div></button>
+        <button class="func-btn" onclick="devFn(55)"><span class="ico">🎛️</span><div>Reset preferências do aparelho<small>Tema, vibração, onboarding</small></div></button>
       </div></div>
     </div>
 
     <div class="collapse-box" id="dev-sec-feed">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-feed')">
-        <span>📋 Feed e logs<small>Atividades e auditoria</small></span>
+        <span>📡 Operação e feed<small>Atividades, auditoria, avisos</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(5)"><span class="ico">📋</span><div>Ver logs do sistema<small>Últimas atividades técnicas</small></div></button>
-        <button class="func-btn" onclick="devFn(14)"><span class="ico">🧹</span><div>Limpar últimas atividades<small>Apaga o feed do início</small></div></button>
-        <button class="func-btn" onclick="devFn(15)"><span class="ico">⏱️</span><div>Tempo do feed de atividades<small>Minutos visíveis no início</small></div></button>
+        <button class="func-btn" onclick="devFn(5)"><span class="ico">📡</span><div>Feed de atividades<small>Últimos eventos do sistema</small></div></button>
+        <button class="func-btn" onclick="devFn(6)"><span class="ico">⏱️</span><div>Tempo do feed<small>Minutos visíveis no início</small></div></button>
         <button class="func-btn" onclick="devFn(28)"><span class="ico">🔎</span><div>Auditoria rápida<small>Users, plantões, inconsistências</small></div></button>
+        <button class="func-btn" onclick="devFn(14)"><span class="ico">📢</span><div>Aviso global<small>Banner para todos</small></div></button>
+        <button class="func-btn" onclick="devFn(15)"><span class="ico">🔕</span><div>Limpar aviso global<small>Remove banner</small></div></button>
       </div></div>
     </div>
 
     <div class="collapse-box" id="dev-sec-test">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-test')">
-        <span>🧪 Testes<small>Mock data e avisos</small></span>
+        <span>🧪 Testes e ferramentas<small>Mock, push, labs</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
         <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências</small></div></button>
         <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
-        <button class="func-btn" onclick="devFn(34)"><span class="ico">⏱️</span><div>Tempo das notificações<small>Duração global (todos os aparelhos)</small></div></button>
+        <button class="func-btn" onclick="devFn(34)"><span class="ico">⏱️</span><div>Tempo das notificações<small>Duração global</small></div></button>
         <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso Firebase<small>Envia no doc aviso</small></div></button>
-        <button class="func-btn" onclick="devFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, 2FA, relatório, emergência…</small></div></button>
+        <button class="func-btn" onclick="devFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, 2FA, relatório…</small></div></button>
       </div></div>
     </div>
 
@@ -2415,7 +2511,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.3</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -2458,11 +2554,23 @@
             <option value="">— Selecione o posto —</option>
           </select>
           <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
+          <div class="pv-checklist" id="pv-checklist">
+            <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de entrada (opcional)</div>
+            <label><input type="checkbox" class="pv-chk" data-item="Portão / acesso"> Portão / acesso</label>
+            <label><input type="checkbox" class="pv-chk" data-item="Câmeras"> Câmeras</label>
+            <label><input type="checkbox" class="pv-chk" data-item="Iluminação"> Iluminação</label>
+            <label><input type="checkbox" class="pv-chk" data-item="Ronda inicial"> Ronda inicial</label>
+            <label><input type="checkbox" class="pv-chk" data-item="Rádio / comunicação"> Rádio / comunicação</label>
+          </div>
           <div class="plantao-vivo-btns">
             <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
             <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
             <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
             <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
+          </div>
+          <div class="pv-extra-actions">
+            <button type="button" class="btn dark sm" id="pv-btn-troca" onclick="pvTrocarPostoAgora()" disabled>Trocar posto</button>
+            <button type="button" class="btn dark sm" onclick="copiarRelatorioTurnoAgora()">Relatório do turno</button>
           </div>
           <details class="pv-mapa-details" id="pv-mapa-details">
             <summary class="pv-mapa-summary">Localização e mapa do posto</summary>
@@ -2480,6 +2588,26 @@
           </details>
         </div>
 
+        <div class="resumo-dia-card" id="resumo-dia-card">
+          <div class="rd-title">Resumo do dia</div>
+          <div id="pv-timer-live" class="hidden"></div>
+          <div class="resumo-dia-grid">
+            <div class="rd-cell"><div class="rd-lbl">Status</div><div class="rd-val" id="rd-status">—</div></div>
+            <div class="rd-cell"><div class="rd-lbl">Horas hoje</div><div class="rd-val" id="rd-horas">0h</div></div>
+            <div class="rd-cell"><div class="rd-lbl">Ocorrências</div><div class="rd-val" id="rd-oco">0</div></div>
+            <div class="rd-cell"><div class="rd-lbl">Plantões (folha)</div><div class="rd-val" id="rd-pl">0</div></div>
+          </div>
+          <div class="pv-extra-actions" style="margin-top:10px">
+            <button type="button" class="btn dark sm" onclick="copiarRelatorioTurnoAgora()">Copiar relatório do turno</button>
+          </div>
+        </div>
+
+        <div class="sync-meta" id="sync-meta">Sync: —</div>
+        <div class="inicio-offline-card" id="inicio-offline-card">
+          <b>Fila offline</b>
+          <div id="inicio-offline-txt" style="margin:4px 0 8px">—</div>
+          <button type="button" class="btn dark sm" onclick="flushFilaOffline().then(function(){toast('Sync tentado');atualizarUIOfflinePack();})">Tentar sincronizar</button>
+        </div>
 
         <div class="perfil-chip-wrap">
           <div>
@@ -2643,6 +2771,17 @@
           <button type="button" class="btn dark" id="btn-ex-folha-min" onclick="toggleExFolhaLista()">
             <span id="ex-folha-min-label">📋 Minimizar lista de plantões</span>
           </button>
+          <div class="field" style="margin-top:10px">
+            <label>Filtrar por tipo de serviço</label>
+            <select id="ex-filtro-tipo" class="select" onchange="render()">
+              <option value="">Todos os tipos</option>
+              <option value="Plantão Fixo">Plantão Fixo</option>
+              <option value="Cobertura">Cobertura / Folguista</option>
+              <option value="Folga Trabalhada">Folga Trabalhada</option>
+              <option value="Hora Extra">Hora Extra</option>
+              <option value="Plantão Próprio">Plantão Próprio (legado)</option>
+            </select>
+          </div>
           <div id="collapse-ex-folha" class="collapse-box" style="margin-top:8px">
             <div class="collapse-body" id="ex-lista-body">
               <div id="ex-lista"></div>
@@ -2871,6 +3010,19 @@
         <div class="card">
           <div class="card-label">Dados da conta</div>
           <div id="meu-perfil-config" class="item">—</div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Modo campo</div>
+          <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:8px">Botões maiores e contraste alto no plantão (útil de noite).</div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="cfg-modo-campo" style="width:18px;height:18px" onchange="toggleModoCampo(this.checked)">
+            Ativar modo campo
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-top:10px">
+            <input type="checkbox" id="cfg-vibrar" style="width:18px;height:18px" onchange="toggleVibrarNotif(this.checked)" checked>
+            Vibrar em ações (check-in / alertas)
+          </label>
         </div>
 
         <div class="card" id="card-regime-servico">
@@ -3174,7 +3326,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '1.2.0';
+    const APP_VERSION = '0.0.3';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -3712,8 +3864,15 @@
         box.classList.remove('ok', 'err', 'show');
         if (visivel) {
           box.classList.add('show');
+          box.style.display = 'block';
+          box.style.visibility = 'visible';
+          box.style.opacity = '1';
           if (estado === 'ok') box.classList.add('ok');
           if (estado === 'err') box.classList.add('err');
+        } else {
+          box.style.display = '';
+          box.style.visibility = '';
+          box.style.opacity = '';
         }
       } catch (e) {}
     }
@@ -4191,7 +4350,7 @@
         try { setLoginAutoStatus(false); } catch (e) {}
         entrarApp();
         try { setTimeout(function() { atualizarPainelInicio(); }, 300); } catch (e) {}
-      }, 350);
+      }, 1800);
     }
 
 
@@ -5255,6 +5414,12 @@
 
     function atualizarPainelInicio() {
       try {
+        try { atualizarResumoDia(); } catch (e0) {}
+        try { atualizarUIOfflinePack(); } catch (e0) {}
+        try { atualizarSyncMeta(); } catch (e0) {}
+        try { atualizarTimerPlantaoLive(); } catch (e0) {}
+        try { atualizarBadgeVersao(); } catch (e0) {}
+        try { verificarOcoNovasDoPosto(); } catch (e0) {}
         var pack = document.getElementById('inicio-pack');
         var items = document.getElementById('inicio-pack-items');
         var welcome = document.getElementById('inicio-pack-welcome');
@@ -5487,6 +5652,21 @@
 
     // DEV MENU
     function liberarSessaoDevAposSenha() {
+      try {
+        setTimeout(function() {
+          try {
+            var el = document.getElementById('dev-dash-body');
+            var dv = document.getElementById('dev-drawer-ver');
+            if (dv && typeof APP_VERSION !== 'undefined') dv.textContent = 'v' + APP_VERSION;
+            if (el && typeof db !== 'undefined') {
+              el.innerHTML = 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') +
+                ' · users ' + ((db.users||[]).length) +
+                ' · plantões ' + ((db.plantaoes||[]).length) +
+                ' · FB ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? 'OK' : 'off');
+            }
+          } catch (e) {}
+        }, 150);
+      } catch (e) {}
       devLiberado = true;
       const ov = document.getElementById('manutencao-overlay');
       if (ov) {
@@ -6090,6 +6270,147 @@
             'Users: ' + db.users.length
           );
           break;
+        case 50: {
+          try {
+            var pend = (db.users || []).filter(function(u) {
+              return u && (u.pendente === true || u.pendente === 'true' || u.pendente === 1);
+            }).length;
+            var offlineQ = [];
+            try {
+              offlineQ = JSON.parse(localStorage.getItem(typeof offlineQueueKey === 'function' ? offlineQueueKey() : 'valis_offline_queue_v2') || '[]');
+            } catch (e) {}
+            var body =
+              'Versão: ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') + '\n' +
+              'Firebase: ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? ('OK · ' + ((typeof DataService !== 'undefined' && DataService.mode) || 'cloud')) : 'Offline/local') + '\n' +
+              'Online: ' + (navigator.onLine ? 'sim' : 'não') + '\n' +
+              'Usuário: ' + (usuarioAtual ? ('@' + usuarioAtual.user + ' · ' + usuarioAtual.funcao) : '—') + '\n' +
+              'Users: ' + (db.users || []).length + ' · pendentes: ' + pend + '\n' +
+              'Postos: ' + (db.postos || []).length +
+              ' · Escalas: ' + (db.esc || []).length +
+              ' · Ocorrências: ' + (db.oco || []).length + '\n' +
+              'Plantões: ' + (db.plantaoes || []).length +
+              ' · Folhas arq.: ' + (db.folhasArquivadas || []).length + '\n' +
+              'Msgs: ' + (db.msg || []).length +
+              ' · Fila offline: ' + (Array.isArray(offlineQ) ? offlineQ.length : 0);
+            var el = document.getElementById('dev-dash-body');
+            if (el) el.innerHTML = String(body).replace(/\n/g, '<br>');
+            var dv = document.getElementById('dev-drawer-ver');
+            if (dv && typeof APP_VERSION !== 'undefined') dv.textContent = 'v' + APP_VERSION;
+            try { toast('Painel DEV atualizado'); } catch (e) {}
+          } catch (e) {
+            alert('Erro painel: ' + (e && e.message ? e.message : e));
+          }
+          break;
+        }
+        case 51: {
+          try {
+            var key = typeof offlineQueueKey === 'function' ? offlineQueueKey() : 'valis_offline_queue_v2';
+            var q = [];
+            try { q = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+            var n = Array.isArray(q) ? q.length : 0;
+            if (!n) { toast('Fila offline já está vazia'); break; }
+            if (!confirm('Limpar ' + n + ' item(ns) da fila offline?')) break;
+            localStorage.setItem(key, '[]');
+            try { localStorage.setItem('valis_offline_queue', '[]'); } catch (e) {}
+            try { if (typeof atualizarUIOfflinePack === 'function') atualizarUIOfflinePack(); } catch (e) {}
+            try { if (typeof atualizarBarraOffline === 'function') atualizarBarraOffline(); } catch (e) {}
+            try { registrarAuditoria('dev_limpar_offline', n + ' itens'); } catch (e) {}
+            toast('Fila offline limpa (' + n + ')');
+          } catch (e) {
+            alert('Erro: ' + (e && e.message ? e.message : e));
+          }
+          break;
+        }
+        case 52: {
+          if (!confirm('Recarregar o app e limpar cache do Service Worker?')) break;
+          try {
+            if (navigator.serviceWorker) {
+              navigator.serviceWorker.getRegistrations().then(function(regs) {
+                regs.forEach(function(r) { r.unregister(); });
+              });
+            }
+          } catch (e) {}
+          try {
+            if (window.caches && caches.keys) {
+              caches.keys().then(function(keys) {
+                keys.forEach(function(k) { caches.delete(k); });
+              });
+            }
+          } catch (e) {}
+          try { registrarAuditoria('dev_hard_reload', 'sw+cache'); } catch (e) {}
+          setTimeout(function() { location.reload(); }, 400);
+          break;
+        }
+        case 53: {
+          try {
+            var sess = sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist') || '—';
+            var lines = [];
+            lines.push('Sessão atual: ' + (usuarioAtual ? JSON.stringify({ user: usuarioAtual.user, funcao: usuarioAtual.funcao, nome: usuarioAtual.nome }) : 'null'));
+            lines.push('Storage sessão: ' + String(sess).slice(0, 300));
+            lines.push('devLiberado: ' + !!devLiberado);
+            lines.push('localStorage keys: ' + Object.keys(localStorage).filter(function(k){ return k.indexOf('valis') === 0; }).join(', '));
+            try {
+              var tok = localStorage.getItem('valis_fcm_token') || localStorage.getItem('fcm_token') || '';
+              lines.push('FCM token local: ' + (tok ? (tok.slice(0, 24) + '…') : 'não encontrado'));
+            } catch (e) {}
+            alert(lines.join('\n\n'));
+          } catch (e) {
+            alert('Erro sessão: ' + (e && e.message ? e.message : e));
+          }
+          break;
+        }
+        case 54: {
+          try {
+            var payload = {
+              v: typeof APP_VERSION !== 'undefined' ? APP_VERSION : '0',
+              exportedAt: new Date().toISOString(),
+              by: usuarioAtual ? usuarioAtual.user : '—',
+              db: db
+            };
+            var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'valis-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            try { registrarAuditoria('dev_export_json', 'backup'); } catch (e) {}
+            toast('Backup JSON gerado');
+          } catch (e) {
+            alert('Erro export: ' + (e && e.message ? e.message : e));
+          }
+          break;
+        }
+        case 55: {
+          if (!confirm('Resetar preferências deste aparelho (tema, vibração, onboarding, modo campo)?\nDados de plantão/users NÃO são apagados.')) break;
+          try {
+            ['valis_tema_claro','valis_tema_compacto','valis_modo_campo','valis_vibrar','valis_onboarding_v1','valis_modo_foco'].forEach(function(k) {
+              try { localStorage.removeItem(k); } catch (e) {}
+            });
+            document.body.classList.remove('tema-claro', 'tema-compacto', 'modo-campo', 'modo-foco');
+            try { registrarAuditoria('dev_reset_prefs', 'aparelho'); } catch (e) {}
+            toast('Preferências resetadas');
+          } catch (e) {
+            alert('Erro: ' + (e && e.message ? e.message : e));
+          }
+          break;
+        }
+        case 56: {
+          try {
+            var pl = db.plantaoes || [];
+            var folhas = db.folhasArquivadas || [];
+            var semUser = pl.filter(function(p) { return !p.userLogin && !p.por; }).length;
+            var semData = pl.filter(function(p) { return !p.data; }).length;
+            var txt =
+              'Plantões na folha: ' + pl.length + '\n' +
+              'Sem userLogin/por: ' + semUser + '\n' +
+              'Sem data: ' + semData + '\n' +
+              'Folhas arquivadas: ' + folhas.length + '\n' +
+              'Trocas de posto: ' + ((db.trocasPostoPlantao || []).length);
+            alert(txt);
+          } catch (e) {
+            alert('Erro: ' + (e && e.message ? e.message : e));
+          }
+          break;
+        }
       }
     }
 
@@ -7270,6 +7591,12 @@
       if (name === 'config') {
         try { setTimeout(preencherUILembretePonto, 0); } catch (e) {}
         try { setTimeout(preencherUIRegimeServico, 0); } catch (e) {}
+        try {
+          var mc = document.getElementById('cfg-modo-campo');
+          if (mc) mc.checked = localStorage.getItem('valis_modo_campo') === '1';
+          var vb = document.getElementById('cfg-vibrar');
+          if (vb) vb.checked = localStorage.getItem('valis_vibrar') !== '0';
+        } catch (e) {}
       }
       if (name === 'plantao' || name === 'extrato') {
         try { setTimeout(aplicarPadraoTipoPlantaoForm, 50); } catch (e) {}
@@ -7516,6 +7843,12 @@
         }
         render();
         toast('Registrada');
+        try {
+          if (tipo === 'Emergência' || tipo === 'Incidente') {
+            notificarApp('VALIS · Ocorrência', tipo + ' · ' + posto + ': ' + String(t).slice(0, 80));
+          }
+        } catch (e) {}
+        try { verificarOcoNovasDoPosto(); } catch (e) {}
       }
       var fi = document.getElementById('ot-foto');
       var file = fi && fi.files && fi.files[0];
@@ -7928,6 +8261,15 @@
       toast('Lista limpa: só admin e dev');
     }
 
+    document.addEventListener('click', function(ev) {
+      var t = ev.target;
+      if (!t || !t.getAttribute) return;
+      var id = t.getAttribute('data-ciencia-id');
+      if (id != null && id !== '') {
+        ev.preventDefault();
+        if (typeof marcarCienciaMsg === 'function') marcarCienciaMsg(id);
+      }
+    }, true);
     window.__valisUserAct = function(act, who) {
       try {
         act = String(act || '').trim();
@@ -8248,7 +8590,7 @@
       };
       reader.readAsDataURL(file);
     }
-    function labOfflineKey() { return 'valis_offline_queue'; }
+    function labOfflineKey() { return (typeof offlineQueueKey === 'function' ? offlineQueueKey() : 'valis_offline_queue_v2'); }
     async function labFlushOffline() {
       var q = []; try { q = JSON.parse(localStorage.getItem(labOfflineKey())||'[]'); } catch (e) {}
       if (!q.length) { toast('Fila vazia'); return; }
@@ -8408,7 +8750,17 @@
               const acoesMsg = podeDelMsg
                 ? `<div class="actions"><button class="btn red sm" onclick="remover('msg',${x.id})">Excluir</button></div>`
                 : '';
-              return `<div class="item"${unread ? ' style="border-color:var(--yellow)"' : ''}><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}${unread ? ' <span class="badge yellow">Nova</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div>${acoesMsg}</div>`;
+              const ciencias = (typeof carregarCiencias === 'function') ? carregarCiencias() : {};
+              const temCiencia = x && x.id != null && ciencias[String(x.id)];
+              let cienciaHtml = '';
+              if (x && x.id != null) {
+                if (temCiencia) {
+                  cienciaHtml = '<div class="msg-ciente-ok">Ciência em ' + new Date(ciencias[String(x.id)]).toLocaleString('pt-BR') + '</div>';
+                } else {
+                  cienciaHtml = '<button type="button" class="btn dark sm msg-ciente-btn" data-ciencia-id="' + String(x.id).replace(/"/g, '') + '">Confirmar ciência</button>';
+                }
+              }
+              return `<div class="item"${unread ? ' style="border-color:var(--yellow)"' : ''}><b>Para: ${x.d}</b>${x.de ? ' <span class="meta">de ' + x.de + '</span>' : ''}${unread ? ' <span class="badge yellow">Nova</span>' : ''}<div class="meta">${x.t}</div><div class="meta">${x.h}</div>${cienciaHtml}${acoesMsg}</div>`;
             }).join('')
           : '<div class="empty">Nenhuma mensagem para o seu cargo.</div>';
       }
@@ -8435,8 +8787,9 @@
       if (!db.chamados) db.chamados = [];
       if (!db.trocasPosto) db.trocasPosto = [];
       if (!db.folhasArquivadas) db.folhasArquivadas = [];
-      const listaEx = plantaoesDoExtrato();
-      const totalFolha = listaEx.reduce((s, x) => s + (x.valor || 0), 0);
+      const listaExAll = plantaoesDoExtrato();
+      const listaEx = (typeof plantaoesFiltradosExtrato === 'function') ? plantaoesFiltradosExtrato(listaExAll) : listaExAll;
+      const totalFolha = listaExAll.reduce((s, x) => s + (x.valor || 0), 0);
       const elTot = document.getElementById('ex-total');
       const elQtd = document.getElementById('ex-qtd');
       if (elTot) elTot.textContent = moneyBR(totalFolha);
@@ -9160,6 +9513,333 @@
     }
 
 
+
+
+    /* ===== Pack 0.0.0 ===== */
+    function atualizarBadgeVersao() {
+      try {
+        var el = document.getElementById('app-ver-badge');
+        if (el && typeof APP_VERSION !== 'undefined') el.textContent = 'v' + APP_VERSION;
+        var ft = document.getElementById('footer-ver');
+        if (ft && typeof APP_VERSION !== 'undefined') ft.textContent = 'v' + APP_VERSION;
+      } catch (e) {}
+    }
+    var _pvLiveTimer = null;
+    function formatDuracaoMS(ms) {
+      if (!ms || ms < 0) ms = 0;
+      var s = Math.floor(ms / 1000);
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      var sec = s % 60;
+      function p(n) { return (n < 10 ? '0' : '') + n; }
+      return p(h) + ':' + p(m) + ':' + p(sec);
+    }
+    function atualizarTimerPlantaoLive() {
+      try {
+        var el = document.getElementById('pv-timer-live');
+        var hh = document.getElementById('rd-horas');
+        var sess = (typeof pvLoad === 'function') ? (pvLoad() || {}) : {};
+        if (!el) return;
+        if (sess.checkIn && (sess.status === 'ativo' || sess.status === 'almoco')) {
+          var ms = Date.now() - new Date(sess.checkIn).getTime();
+          el.textContent = '⏱ Em serviço · ' + formatDuracaoMS(ms);
+          el.classList.remove('hidden');
+          if (hh) {
+            hh.textContent = (ms / 3600000).toFixed(1) + 'h';
+            hh.classList.add('live');
+          }
+        } else if (sess.checkIn && sess.checkOut) {
+          var ms2 = new Date(sess.checkOut).getTime() - new Date(sess.checkIn).getTime();
+          el.textContent = 'Turno · ' + formatDuracaoMS(ms2);
+          el.classList.remove('hidden');
+          if (hh) { hh.textContent = (ms2 / 3600000).toFixed(1) + 'h'; hh.classList.remove('live'); }
+        } else {
+          el.textContent = '';
+          el.classList.add('hidden');
+          if (hh) hh.classList.remove('live');
+        }
+      } catch (e) {}
+    }
+    function iniciarTimerPlantaoLive() {
+      try {
+        if (_pvLiveTimer) clearInterval(_pvLiveTimer);
+        atualizarTimerPlantaoLive();
+        _pvLiveTimer = setInterval(atualizarTimerPlantaoLive, 1000);
+      } catch (e) {}
+    }
+    function atualizarSyncMeta() {
+      try {
+        var el = document.getElementById('sync-meta');
+        if (!el) return;
+        var t = '';
+        try { t = localStorage.getItem('valis_last_sync') || ''; } catch (e) {}
+        var online = navigator.onLine !== false;
+        var fb = (typeof firebaseOk !== 'undefined' && firebaseOk) ? 'Firebase OK' : 'Local';
+        if (t) {
+          try {
+            var d = new Date(t);
+            el.textContent = fb + ' · último sync ' + d.toLocaleTimeString('pt-BR');
+          } catch (e) {
+            el.textContent = fb + (online ? ' · online' : ' · offline');
+          }
+        } else {
+          el.textContent = fb + (online ? ' · online' : ' · offline');
+        }
+      } catch (e) {}
+    }
+    function marcarSyncAgora() {
+      try { localStorage.setItem('valis_last_sync', new Date().toISOString()); } catch (e) {}
+      try { atualizarSyncMeta(); } catch (e) {}
+    }
+    function preferenciaVibrar() {
+      try { return localStorage.getItem('valis_vibrar') !== '0'; } catch (e) { return true; }
+    }
+    function toggleVibrarNotif(on) {
+      try { localStorage.setItem('valis_vibrar', on ? '1' : '0'); } catch (e) {}
+      toast(on ? 'Vibração ligada' : 'Vibração desligada');
+    }
+    function feedbackAcaoLeve() {
+      try {
+        if (preferenciaVibrar() && navigator.vibrate) navigator.vibrate(12);
+      } catch (e) {}
+    }
+    // confirmação de checkout
+    var _pvCheckOutOriginal = null;
+
+
+    /* ===== Pack 1.3.0 features ===== */
+    function pvLerChecklistMarcados() {
+      var itens = [];
+      try {
+        document.querySelectorAll('.pv-chk:checked').forEach(function(el) {
+          var t = el.getAttribute('data-item') || '';
+          if (t) itens.push(t);
+        });
+      } catch (e) {}
+      return itens;
+    }
+    function pvLimparChecklist() {
+      try {
+        document.querySelectorAll('.pv-chk').forEach(function(el) { el.checked = false; });
+      } catch (e) {}
+    }
+    async function pvTrocarPostoAgora() {
+      try {
+        var sess = pvLoad();
+        if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) {
+          return toast('Inicie o plantão antes de trocar o posto');
+        }
+        var postos = db.postos || [];
+        if (!postos.length) return alert('Nenhum posto cadastrado.');
+        var nomes = postos.map(function(p, i) { return (i + 1) + ') ' + (p.n || p.nome || p.id); }).join('\n');
+        var escolha = prompt('Trocar para qual posto?\nDigite o número:\n' + nomes);
+        if (!escolha) return;
+        var idx = parseInt(escolha, 10) - 1;
+        if (isNaN(idx) || idx < 0 || idx >= postos.length) return alert('Opção inválida.');
+        var novo = postos[idx];
+        var de = sess.postoNome || '';
+        sess.postoId = String(novo.id);
+        sess.postoNome = novo.n || novo.nome || '';
+        pvSave(sess);
+        var sel = document.getElementById('pv-posto');
+        if (sel) sel.value = String(novo.id);
+        if (!db.trocasPostoPlantao) db.trocasPostoPlantao = [];
+        db.trocasPostoPlantao.unshift({
+          id: Date.now(),
+          de: de,
+          para: sess.postoNome,
+          por: usuarioAtual ? usuarioAtual.nome : '—',
+          userLogin: usuarioAtual ? usuarioAtual.user : '',
+          em: new Date().toISOString()
+        });
+        if (db.trocasPostoPlantao.length > 200) db.trocasPostoPlantao.length = 200;
+        try { registrarAuditoria('troca_posto', de + ' → ' + sess.postoNome); } catch (e) {}
+        addAtividade('Troca de posto: ' + de + ' → ' + sess.postoNome);
+        try { await salvar(); } catch (e) {}
+        pvRender();
+        toast('Posto alterado para ' + sess.postoNome);
+      } catch (e) {
+        alert('Erro ao trocar posto: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function copiarRelatorioTurnoAgora() {
+      try {
+        var sess = (typeof pvLoad === 'function') ? (pvLoad() || {}) : {};
+        var hoje = new Date();
+        var ds = hoje.toISOString().slice(0, 10);
+        var login = usuarioAtual ? String(usuarioAtual.user || '').toLowerCase() : '';
+        var pl = (db.plantaoes || []).filter(function(p) {
+          if (!p) return false;
+          if (p.data && String(p.data).slice(0, 10) === ds) {
+            if (!login) return true;
+            return String(p.userLogin || '').toLowerCase() === login || (usuarioAtual && p.por === usuarioAtual.nome);
+          }
+          return false;
+        });
+        var oco = (typeof ocorrenciasVisiveis === 'function' ? ocorrenciasVisiveis() : (db.oco || [])).filter(function(o) {
+          return String(o.d || '').indexOf(hoje.toLocaleDateString('pt-BR').slice(0, 5)) >= 0 || String(o.d || '').indexOf(String(hoje.getDate())) >= 0;
+        }).slice(0, 15);
+        var linhas = [];
+        linhas.push('*VALIS — Relatório do turno*');
+        linhas.push('Data: ' + hoje.toLocaleString('pt-BR'));
+        linhas.push('Vigilante: ' + (usuarioAtual ? (usuarioAtual.nome + ' (@' + usuarioAtual.user + ')') : '—'));
+        linhas.push('Status: ' + (sess.status || 'idle') + (sess.postoNome ? (' · ' + sess.postoNome) : ''));
+        if (sess.checkIn) linhas.push('Check-in: ' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.checkIn) : sess.checkIn));
+        if (sess.almocoInicio) linhas.push('Almoço: ' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.almocoInicio) : sess.almocoInicio) + (sess.almocoFim ? ('–' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.almocoFim) : sess.almocoFim)) : ''));
+        if (sess.checkOut) linhas.push('Check-out: ' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.checkOut) : sess.checkOut));
+        if (sess.checklistEntrada && sess.checklistEntrada.length) {
+          linhas.push('Checklist: ' + sess.checklistEntrada.join(', '));
+        }
+        linhas.push('Plantões na folha (hoje): ' + pl.length);
+        pl.forEach(function(p) {
+          linhas.push('- ' + (p.turno || '') + ' ' + (p.inicio || '') + '-' + (p.fim || '') + ' · ' + (p.tipo || '') + ' · ' + (p.posto || ''));
+        });
+        linhas.push('Ocorrências (amostra): ' + oco.length);
+        oco.slice(0, 8).forEach(function(o) {
+          linhas.push('- [' + (o.tipo || '') + '] ' + (o.p || '') + ': ' + String(o.t || '').slice(0, 80));
+        });
+        var txt = linhas.join('\n');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function() { toast('Relatório copiado'); }).catch(function() { alert(txt); });
+        } else {
+          alert(txt);
+        }
+        try { registrarAuditoria('relatorio_turno', 'copiado'); } catch (e) {}
+      } catch (e) {
+        alert('Erro relatório: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function atualizarResumoDia() {
+      try {
+        var st = document.getElementById('rd-status');
+        var hh = document.getElementById('rd-horas');
+        var oc = document.getElementById('rd-oco');
+        var pl = document.getElementById('rd-pl');
+        if (!st) return;
+        var sess = (typeof pvLoad === 'function') ? (pvLoad() || {}) : {};
+        var statusMap = { idle: 'Inativo', ativo: 'Em serviço', almoco: 'Almoço', finalizado: 'Finalizado' };
+        st.textContent = statusMap[sess.status] || (sess.status || 'Inativo');
+        var horas = 0;
+        if (sess.checkIn && (sess.status === 'ativo' || sess.status === 'almoco')) {
+          horas = Math.max(0, (Date.now() - new Date(sess.checkIn).getTime()) / 3600000);
+        } else if (sess.checkIn && sess.checkOut) {
+          horas = Math.max(0, (new Date(sess.checkOut).getTime() - new Date(sess.checkIn).getTime()) / 3600000);
+        }
+        if (hh) hh.textContent = horas ? (horas.toFixed(1) + 'h') : '0h';
+        var ocoN = 0;
+        try {
+          var list = typeof ocorrenciasVisiveis === 'function' ? ocorrenciasVisiveis() : (db.oco || []);
+          var hojeStr = new Date().toLocaleDateString('pt-BR');
+          ocoN = list.filter(function(o) { return String(o.d || '').indexOf(hojeStr.split('/')[0]) >= 0 || String(o.d || '').indexOf(hojeStr) >= 0; }).length;
+          if (!ocoN) ocoN = Math.min(list.length, list.filter(function(o) { return true; }).length > 0 ? list.slice(0, 5).length : 0);
+          // better: count from today ISO-ish
+          ocoN = list.filter(function(o) {
+            var d = String(o.d || '');
+            var now = new Date();
+            return d.indexOf(String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0')) >= 0
+              || d.indexOf(now.toISOString().slice(0,10)) >= 0;
+          }).length;
+        } catch (e) {}
+        if (oc) oc.textContent = String(ocoN);
+        var login = usuarioAtual ? String(usuarioAtual.user || '').toLowerCase() : '';
+        var ds = new Date().toISOString().slice(0, 10);
+        var plN = (db.plantaoes || []).filter(function(p) {
+          if (!p || String(p.data || '').slice(0, 10) !== ds) return false;
+          if (!login) return true;
+          return String(p.userLogin || '').toLowerCase() === login || (usuarioAtual && p.por === usuarioAtual.nome);
+        }).length;
+        if (pl) pl.textContent = String(plN);
+        // enable troca button
+        var btnT = document.getElementById('pv-btn-troca');
+        if (btnT) btnT.disabled = !(sess.status === 'ativo' || sess.status === 'almoco');
+      } catch (e) {}
+    }
+    function atualizarUIOfflinePack() {
+      try {
+        atualizarBarraOffline();
+        var card = document.getElementById('inicio-offline-card');
+        var txt = document.getElementById('inicio-offline-txt');
+        var q = [];
+        try { q = JSON.parse(localStorage.getItem(offlineQueueKey()) || '[]'); } catch (e) {}
+        var n = Array.isArray(q) ? q.length : 0;
+        var online = navigator.onLine !== false;
+        if (card) {
+          if (!online || n > 0) {
+            card.classList.add('show');
+            if (txt) txt.textContent = (!online ? 'Sem conexão. ' : '') + (n ? (n + ' item(ns) aguardando envio.') : 'Modo offline ativo.');
+          } else {
+            card.classList.remove('show');
+          }
+        }
+      } catch (e) {}
+    }
+    function toggleModoCampo(on) {
+      if (on) document.body.classList.add('modo-campo');
+      else document.body.classList.remove('modo-campo');
+      try { localStorage.setItem('valis_modo_campo', on ? '1' : '0'); } catch (e) {}
+      toast(on ? 'Modo campo ativo' : 'Modo campo desligado');
+    }
+    try {
+      if (localStorage.getItem('valis_modo_campo') === '1') {
+        document.body.classList.add('modo-campo');
+      }
+    } catch (e) {}
+    function cienciaKey() {
+      var u = usuarioAtual && usuarioAtual.user ? usuarioAtual.user : 'anon';
+      return 'valis_msg_ciencia_' + u;
+    }
+    function carregarCiencias() {
+      try {
+        var raw = localStorage.getItem(cienciaKey());
+        var o = raw ? JSON.parse(raw) : {};
+        return o && typeof o === 'object' ? o : {};
+      } catch (e) { return {}; }
+    }
+    function marcarCienciaMsg(id) {
+      try {
+        var o = carregarCiencias();
+        o[String(id)] = new Date().toISOString();
+        localStorage.setItem(cienciaKey(), JSON.stringify(o));
+        try { registrarAuditoria('msg_ciencia', String(id)); } catch (e) {}
+        toast('Ciência registrada');
+        try { render(); } catch (e) {}
+      } catch (e) {}
+    }
+    function plantaoesFiltradosExtrato(lista) {
+      var tipo = '';
+      try {
+        var sel = document.getElementById('ex-filtro-tipo');
+        if (sel) tipo = sel.value || '';
+      } catch (e) {}
+      if (!tipo) return lista || [];
+      return (lista || []).filter(function(x) {
+        var t = String(x.tipo || '');
+        if (tipo === 'Cobertura') return t.indexOf('Cobertura') >= 0 || t.indexOf('Folguista') >= 0;
+        if (tipo === 'Plantão Fixo') return t === 'Plantão Fixo' || t === 'Plantão Próprio';
+        return t === tipo;
+      });
+    }
+    function verificarOcoNovasDoPosto() {
+      try {
+        if (!usuarioAtual) return;
+        var list = typeof ocorrenciasVisiveis === 'function' ? ocorrenciasVisiveis() : [];
+        if (!list.length) return;
+        var key = 'valis_oco_seen_' + (usuarioAtual.user || 'x');
+        var last = localStorage.getItem(key) || '';
+        var top = list[0];
+        if (!top || String(top.id) === String(last)) return;
+        // only notify if newer than last and recent
+        if (last && Number(top.id) < Number(last)) return;
+        localStorage.setItem(key, String(top.id));
+        if (top.tipo === 'Emergência' || top.tipo === 'Incidente') {
+          try {
+            notificarApp('VALIS · Ocorrência', (top.tipo || '') + ' · ' + (top.p || '') + ': ' + String(top.t || '').slice(0, 80));
+          } catch (e) {}
+        }
+      } catch (e) {}
+    }
+
+
     /* ===== Pack 10: offline bar, onboarding, tema, checklist, relatorio, trocas ===== */
     function atualizarBarraOffline() {
       try {
@@ -9192,7 +9872,7 @@
     var _obStep = 0;
     var _obPages = [
       { t: 'Bem-vindo ao VALIS', x: 'Painel operacional dos vigilantes. No rodapé: Início, Plantão, Extrato, Mensagens e Mais.' },
-      { t: 'Plantão e GPS', x: 'Na aba Plantão você faz check-in/out, almoço e vê o mapa até o posto. O ponto automático depende da localização liberada.' },
+      { t: 'Plantão e GPS', x: 'No Início você faz check-in/out, almoço e vê o mapa até o posto. Na aba Plantão fica o lançamento manual na folha. O ponto automático depende da localização liberada.' },
       { t: 'Extrato e Mais', x: 'No Extrato fica a folha. Em Mais estão Ocorrências, Postos, Escalas e (se for sup/admin) ferramentas de gestão.' }
     ];
     function mostrarOnboardingSePreciso() {
@@ -9368,6 +10048,7 @@
         await DataService.save('db_v42', db);
         localStorage.setItem(offlineQueueKey(), '[]');
         try { registrarAuditoria('offline_flush', q.length + ' itens'); } catch (e) {}
+        try { marcarSyncAgora(); } catch (e) {}
       } catch (e) {
         console.warn('flush offline', e);
       }
@@ -9475,12 +10156,12 @@
             setTimeout(function() {
               try { setLoginAutoStatus(false); } catch (e) {}
               entrarApp();
-            }, 450);
+            }, 2200);
             return;
           }
           setLoginAutoStatus(true, 'Login automatico indisponivel', 'Sessao salva nao e valida. Faca login manualmente.', 'err');
         } else {
-          setLoginAutoStatus(false);
+          setLoginAutoStatus(true, 'Pronto para entrar', 'Digite usuario e senha, ou aguarde se houver sessao neste aparelho.', null);
         }
       } catch (e) {
         try { setLoginAutoStatus(true, 'Login automatico', 'Nao foi possivel restaurar a sessao. Entre com usuario e senha.', 'err'); } catch (e2) {}
@@ -9779,7 +10460,7 @@
     function salvarConfig() {
       db.telSup = document.getElementById('cfg-tel').value.trim();
       salvar();
-      toast('Salvo');
+      toast('Salvo'); try { marcarSyncAgora(); } catch (e) {};
     }
     function exportar() {
       const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
@@ -10466,6 +11147,8 @@
         _pvTickTimer = null;
       }
       try { opsSyncHero(sess, st); } catch (e) {}
+      try { atualizarResumoDia(); } catch (e) {}
+      try { atualizarUIOfflinePack(); } catch (e) {}
     }
     function opsSyncHero(sess, st) {
       sess = sess || pvLoad() || {};
@@ -10542,6 +11225,8 @@
         if (auto) return;
         if (!confirm('GPS indisponível. Registrar check-in sem localização?')) return;
       }
+      var chkItens = [];
+      try { chkItens = pvLerChecklistMarcados(); } catch (e) {}
       var sess = {
         status: 'ativo',
         postoId: sel.value,
@@ -10555,9 +11240,26 @@
         checkInAcc: acc,
         autoIn: !!auto,
         noAutoUntil: 0,
-        needsLeaveBeforeAuto: false
+        needsLeaveBeforeAuto: false,
+        checklistEntrada: chkItens
       };
       pvSave(sess);
+      try {
+        if (chkItens.length) {
+          if (!db.checklists) db.checklists = [];
+          db.checklists.unshift({
+            id: Date.now(),
+            posto: sess.postoNome || '',
+            item: chkItens.join(' · '),
+            itens: chkItens.slice(),
+            tipo: 'entrada',
+            por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—',
+            em: new Date().toISOString()
+          });
+          if (db.checklists.length > 120) db.checklists.length = 120;
+          try { registrarAuditoria('checklist_entrada', sess.postoNome + ' · ' + chkItens.length + ' itens'); } catch (e) {}
+        }
+      } catch (e) {}
       try { localStorage.removeItem(pvTrailKey(sess)); } catch (e) {}
       if (_pvLastPos) {
         try { pvSaveTrail(sess, [[_pvLastPos.lat, _pvLastPos.lng, Date.now()]]); } catch (e) {}
@@ -10568,6 +11270,8 @@
       addAtividade('Check-in plantão: ' + (p ? p.n : 'posto') + (auto ? ' (GPS auto)' : ''));
       try { await salvar(); } catch (e) {}
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
+      try { feedbackAcaoLeve(); } catch (e) {}
+      try { iniciarTimerPlantaoLive(); } catch (e) {}
       try { labRegPresenca('check-in', sess.postoNome, sess.checkInLat, sess.checkInLng); } catch (e) {}
       try { notificarApp('VALIS · Check-in', (p ? p.n + ' · ' : '') + pvFmtHora(sess.checkIn)); } catch (e) {}
     }
@@ -10596,6 +11300,11 @@
     async function pvCheckOut(auto) {
       var sess = pvLoad();
       if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
+      if (!auto) {
+        var postoNome = sess.postoNome || 'posto';
+        if (!confirm('Confirmar check-out (saída) em ' + postoNome + '?')) return;
+      }
+      try { feedbackAcaoLeve(); } catch (e) {}
       var lat = null, lng = null, acc = null;
       try {
         var pos = await pvGetPosicao();
@@ -10646,6 +11355,7 @@
             valor: 0,
             horas: horasNum.toFixed(2) + ' hrs',
             sono: 0,
+            checklistEntrada: (sess.checklistEntrada || []).slice(),
             cobriu: usuarioAtual ? usuarioAtual.nome : '—',
             obs: obs,
             posto: sess.postoNome || '',
@@ -10838,6 +11548,9 @@
         pvRender();
         pvStartGeoWatch();
         try { pvBindMapaDetails(); } catch (e) {}
+        try { iniciarTimerPlantaoLive(); } catch (e) {}
+        try { atualizarBadgeVersao(); } catch (e) {}
+        try { atualizarSyncMeta(); } catch (e) {}
         try { setTimeout(function(){ pvEnsureMap(); pvAtualizarMapa(); }, 400); } catch (e) {}
         // Reavalia ao voltar para o app (abertura / 2º plano)
         if (!window._pvVisBound) {
@@ -11262,8 +11975,12 @@
       try { if (usuarioAtual) pvBoot(); } catch (e) {}
       if (window.ValisDevLog) ValisDevLog.add('app_boot', { ver: APP_VERSION, href: location.href });
       try {
-        if (temSessaoSalvaLogin() && !usuarioAtual) {
-          setLoginAutoStatus(true, 'Aguardando login automatico', 'Coletando dados de login neste aparelho...', null);
+        if (!usuarioAtual) {
+          if (temSessaoSalvaLogin()) {
+            setLoginAutoStatus(true, 'Aguardando login automatico', 'Coletando dados de login neste aparelho...', null);
+          } else {
+            setLoginAutoStatus(true, 'Preparando entrada', 'Carregando aplicativo...', null);
+          }
         }
       } catch (e) {}
       try { verificarAtualizacaoConcluida(); } catch (e) {}
