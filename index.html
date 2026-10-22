@@ -2438,7 +2438,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.7</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.8</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2496,7 +2496,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.7</span></div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.8</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
@@ -2712,7 +2712,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.7</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.8</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3557,7 +3557,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.7';
+    const APP_VERSION = '0.0.8';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -9486,27 +9486,55 @@
 
     // ---------- MANUTENÇÃO GLOBAL (Firebase) ----------
     async function lerManutencao() {
-      if (!firebaseOk || !fbDb) return { ativo: false, msg: '' };
+      var local = null;
       try {
-        const snap = await fbDb.collection('valis').doc('manutencao').get();
-        if (snap.exists) return snap.data();
-      } catch (e) { console.warn(e); }
-      return { ativo: false, msg: '' };
+        local = JSON.parse(localStorage.getItem('valis_manutencao') || 'null');
+      } catch (e) { local = null; }
+      var cloud = null;
+      if (typeof firebaseOk !== 'undefined' && firebaseOk && typeof fbDb !== 'undefined' && fbDb) {
+        try {
+          var snap = await fbDb.collection('valis').doc('manutencao').get();
+          if (snap.exists) cloud = snap.data() || null;
+        } catch (e) {
+          console.warn('lerManutencao cloud', e);
+        }
+      }
+      function score(m) {
+        if (!m || typeof m !== 'object') return 0;
+        var fr = Number(m.forceReload || 0);
+        if (fr) return fr;
+        try { return m.em ? Date.parse(m.em) : 0; } catch (e) { return 0; }
+      }
+      var chosen = null;
+      if (cloud && local) {
+        chosen = score(cloud) >= score(local) ? cloud : local;
+      } else {
+        chosen = cloud || local || { ativo: false, msg: '' };
+      }
+      // Nunca interpretar "falha de rede" como desligar se o local ainda está ativo
+      if ((!cloud || cloud.ativo === undefined) && local && local.ativo) {
+        chosen = local;
+      }
+      return chosen || { ativo: false, msg: '' };
     }
     async function aplicarManutencaoUI() {
-      const m = await lerManutencao();
-      const ov = document.getElementById('manutencao-overlay');
-      if (!ov) return;
-      const modalDev = document.getElementById('modal-dev');
-      const modalAberto = modalDev && !modalDev.classList.contains('hidden');
-      // Espelha no localStorage para WebInto não “esquecer” após minimizar
-      try {
-        if (m && m.ativo) localStorage.setItem('valis_manutencao', JSON.stringify(m));
-      } catch (e) {}
-      if (m.ativo && !devLiberado) {
-        const msgEl = document.getElementById('manutencao-msg');
-        if (msgEl) msgEl.textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
+      var m = { ativo: false, msg: '' };
+      try { m = await lerManutencao(); } catch (e) {
         try {
+          m = JSON.parse(localStorage.getItem('valis_manutencao') || '{"ativo":false}');
+        } catch (e2) { m = { ativo: false }; }
+      }
+      var ov = document.getElementById('manutencao-overlay');
+      if (!ov) return;
+      var ativo = !!(m && (m.ativo === true || m.ativo === 'true' || m.ativo === 1));
+      // Espelha estado ativo no localStorage
+      try {
+        if (ativo) localStorage.setItem('valis_manutencao', JSON.stringify(m));
+      } catch (e) {}
+      if (ativo && !devLiberado) {
+        try {
+          var msgEl = document.getElementById('manutencao-msg');
+          if (msgEl) msgEl.textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
           var tit = document.getElementById('manutencao-titulo');
           if (tit) tit.textContent = m.titulo || 'Sistema em manutenção';
           var meta = document.getElementById('manutencao-meta');
@@ -9523,20 +9551,28 @@
         ov.style.display = 'flex';
         ov.style.zIndex = '99999';
         ov.style.pointerEvents = 'auto';
-        const app = document.getElementById('app');
+        try { sessionStorage.setItem('valis_manut_ui_lock', '1'); } catch (e) {}
+        var app = document.getElementById('app');
         if (app) {
           app.classList.remove('show');
           app.style.display = 'none';
         }
-        // bloqueia uso: some com login também
-        const loginEl = document.getElementById('login');
+        var loginEl = document.getElementById('login');
         if (loginEl) loginEl.style.display = 'none';
-        if (modalAberto && modalDev) {
-          // permite DEV abrir menu por cima se já estiver liberado — senão mantém bloqueio
-        }
       } else {
+        // Só fecha overlay se manutenção NÃO está ativa (ou DEV liberado nesta sessão)
         ov.classList.add('hidden');
+        ov.style.display = '';
         ov.style.pointerEvents = '';
+        try { sessionStorage.removeItem('valis_manut_ui_lock'); } catch (e) {}
+        // Se DEV liberado com manutenção global ativa, mantém o app utilizável
+        if (ativo && devLiberado) {
+          var app2 = document.getElementById('app');
+          if (app2 && usuarioAtual) {
+            app2.classList.add('show');
+            app2.style.display = 'flex';
+          }
+        }
       }
     }
     function abrirPainelManutencao() {
@@ -9663,14 +9699,32 @@
       } else {
         toast(ativo ? 'Manutenção ativada (local)' : 'Manutenção desativada (local)');
       }
-      // neste aparelho (DEV): se ativou, também aplica overlay; se desligou, libera
-      if (ativo && !devLiberado) {
+      // Garante token e UI a partir do payload local (não depende só da nuvem)
+      try {
         sessionStorage.setItem('valis_manut_token', String(payload.forceReload));
-        setTimeout(() => location.reload(), 400);
-        return;
-      }
+      } catch (e) {}
       if (!ativo) {
-        sessionStorage.removeItem('valis_manut_token');
+        try { sessionStorage.removeItem('valis_manut_token'); } catch (e) {}
+        try { sessionStorage.removeItem('valis_manut_ui_lock'); } catch (e) {}
+      }
+      if (ativo && !devLiberado) {
+        // Bloqueia este aparelho também (não só os outros)
+        try {
+          var ov = document.getElementById('manutencao-overlay');
+          if (ov) {
+            var msgEl = document.getElementById('manutencao-msg');
+            if (msgEl) msgEl.textContent = payload.msg || '';
+            var tit = document.getElementById('manutencao-titulo');
+            if (tit) tit.textContent = payload.titulo || 'Sistema em manutenção';
+            ov.classList.remove('hidden');
+            ov.style.display = 'flex';
+            ov.style.zIndex = '99999';
+          }
+          var app = document.getElementById('app');
+          if (app) { app.classList.remove('show'); app.style.display = 'none'; }
+        } catch (e) {}
+        setTimeout(function() { location.reload(); }, 500);
+        return;
       }
       await aplicarManutencaoUI();
     }
@@ -9688,9 +9742,31 @@
       if (!firebaseOk || !fbDb) return;
       try {
         fbDb.collection('valis').doc('manutencao').onSnapshot((snap) => {
-          const m = snap.exists ? (snap.data() || {}) : { ativo: false };
+          var m = snap.exists ? (snap.data() || {}) : null;
+          // Snapshot vazio/ausente: não desliga se o local ainda está ativo
+          if (!m) {
+            try {
+              var loc = JSON.parse(localStorage.getItem('valis_manutencao') || 'null');
+              if (loc && loc.ativo) m = loc;
+              else m = { ativo: false };
+            } catch (e) { m = { ativo: false }; }
+          } else {
+            try {
+              var loc2 = JSON.parse(localStorage.getItem('valis_manutencao') || 'null');
+              if (loc2 && loc2.ativo && !m.ativo) {
+                var sc = Number(m.forceReload || 0);
+                var sl = Number(loc2.forceReload || 0);
+                // só aceita desligar se o sinal da nuvem for mais novo
+                if (sl && sc && sc < sl) m = loc2;
+                else if (sl && !sc) m = loc2;
+              }
+              if (m.ativo) localStorage.setItem('valis_manutencao', JSON.stringify(m));
+              else if (m.ativo === false) localStorage.setItem('valis_manutencao', JSON.stringify(m));
+            } catch (e) {}
+          }
           const token = String(m.forceReload || m.em || '');
           const visto = sessionStorage.getItem('valis_manut_token') || '';
+          const ativo = !!(m.ativo === true || m.ativo === 'true' || m.ativo === 1);
 
           // DEV liberado nesta sessão: só atualiza UI, não reinicia
           if (devLiberado) {
@@ -9698,21 +9774,19 @@
             return;
           }
 
-          if (m.ativo) {
-            // novo sinal de manutenção → reinicia 1 vez para carregar o painel limpo
+          if (ativo) {
             if (token && token !== visto) {
               sessionStorage.setItem('valis_manut_token', token);
-              // pequena espera para gravar sessionStorage
-              setTimeout(() => location.reload(), 300);
+              setTimeout(function() { location.reload(); }, 300);
               return;
             }
             aplicarManutencaoUI();
           } else {
-            // manutenção desligada
+            // manutenção desligada de forma explícita
             if (visto) {
               sessionStorage.removeItem('valis_manut_token');
-              // reinicia uma vez para voltar ao app normal
-              setTimeout(() => location.reload(), 300);
+              try { localStorage.setItem('valis_manutencao', JSON.stringify(m)); } catch (e) {}
+              setTimeout(function() { location.reload(); }, 300);
               return;
             }
             aplicarManutencaoUI();
