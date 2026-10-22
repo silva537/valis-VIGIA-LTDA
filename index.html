@@ -1123,6 +1123,98 @@
     }
     .modal-bg.hidden { display: none; }
     .modal { padding: 22px; width: 100%; max-width: 360px; }
+
+    /* Manutenção 0.0.7 */
+    #manutencao-overlay.modal-bg {
+      background: radial-gradient(ellipse at 50% 20%, rgba(234,179,8,0.18), transparent 50%),
+                  linear-gradient(160deg, #020617 0%, #0f172a 45%, #1c1917 100%);
+      backdrop-filter: blur(8px);
+      padding: 16px;
+    }
+    .manut-card {
+      width: 100%; max-width: 400px;
+      border-radius: 20px;
+      border: 1px solid rgba(251,191,36,0.35);
+      background: linear-gradient(165deg, rgba(15,23,42,0.98), rgba(30,27,22,0.95));
+      box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      padding: 28px 22px 22px;
+      text-align: center;
+      animation: fadeIn 0.35s ease;
+    }
+    .manut-ico {
+      width: 72px; height: 72px; margin: 0 auto 14px;
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px;
+      background: linear-gradient(145deg, rgba(251,191,36,0.25), rgba(234,88,12,0.2));
+      border: 1px solid rgba(251,191,36,0.4);
+      box-shadow: 0 0 28px rgba(251,191,36,0.2);
+    }
+    .manut-card h3 {
+      font-size: 18px; font-weight: 800; margin: 0 0 6px;
+      color: #fde68a; letter-spacing: 0.02em;
+    }
+    .manut-badge {
+      display: inline-block; font-size: 10px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #78350f; background: #fbbf24;
+      border-radius: 999px; padding: 3px 10px; margin-bottom: 12px;
+    }
+    .manut-msg {
+      color: #cbd5e1; font-size: 14px; line-height: 1.55;
+      margin: 0 0 10px; white-space: pre-wrap;
+    }
+    .manut-meta {
+      font-size: 11px; color: #64748b; margin: 0 0 16px; line-height: 1.4;
+    }
+    .manut-card .btn {
+      width: 100%; margin-top: 6px;
+    }
+    .manut-dev-box {
+      margin-top: 18px; padding-top: 16px;
+      border-top: 1px solid rgba(148,163,184,0.15);
+      text-align: left;
+    }
+    .manut-dev-box .card-label { color: #94a3b8; }
+    #painel-manut-bg.valis-modal-bg { z-index: 100000; align-items: center; }
+    #painel-manut-bg .valis-modal { max-width: 440px; }
+    .manut-ctrl-status {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; border-radius: 12px; margin-bottom: 12px;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: rgba(15,23,42,0.6);
+    }
+    .manut-ctrl-status.on {
+      border-color: rgba(251,191,36,0.45);
+      background: rgba(120,53,15,0.25);
+    }
+    .manut-ctrl-status .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #22c55e; box-shadow: 0 0 8px #22c55e;
+      flex-shrink: 0;
+    }
+    .manut-ctrl-status.on .dot {
+      background: #fbbf24; box-shadow: 0 0 10px #fbbf24;
+    }
+    .manut-ctrl-status .txt { font-size: 13px; color: #e2e8f0; font-weight: 700; }
+    .manut-ctrl-status .sub { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+    .manut-btn-on {
+      background: linear-gradient(135deg, #b45309, #dc2626) !important;
+      border: 0 !important; color: #fff !important;
+      font-weight: 800 !important; min-height: 48px;
+    }
+    .manut-btn-off {
+      background: linear-gradient(135deg, #15803d, #16a34a) !important;
+      border: 0 !important; color: #fff !important;
+      font-weight: 800 !important; min-height: 48px;
+    }
+    .manut-preview {
+      margin-top: 12px; padding: 10px 12px; border-radius: 10px;
+      border: 1px dashed rgba(251,191,36,0.35);
+      background: rgba(15,23,42,0.5);
+      font-size: 12px; color: #cbd5e1; line-height: 1.4;
+    }
+
     .modal h3 { font-size: 15px; font-weight: 800; margin-bottom: 14px; }
     .hidden { display: none !important; }
 
@@ -2276,18 +2368,52 @@
     <div class="ud-msg" id="update-done-msg">O aplicativo foi atualizado para a versão <span class="ud-ver" id="update-done-ver">—</span>.</div>
   </div>
   <div id="manutencao-overlay" class="modal-bg hidden" style="z-index:99999">
-    <div class="modal" style="text-align:center;max-width:360px">
-      <h3>🚧 Sistema em manutenção</h3>
-      <p id="manutencao-msg" style="color:var(--muted);font-size:14px;line-height:1.5;margin:12px 0 18px">O aplicativo está temporariamente suspenso pela administração.</p>
-      <button type="button" class="btn dark" onclick="location.reload()">Tentar novamente</button>
-      <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);text-align:left">
-        <div class="card-label" style="margin-bottom:8px">Acesso DEV</div>
+    <div class="manut-card">
+      <div class="manut-ico" aria-hidden="true">🛠️</div>
+      <div class="manut-badge">Indisponível temporariamente</div>
+      <h3 id="manutencao-titulo">Sistema em manutenção</h3>
+      <p class="manut-msg" id="manutencao-msg">O aplicativo está temporariamente suspenso pela administração. Voltamos em breve.</p>
+      <div class="manut-meta" id="manutencao-meta">—</div>
+      <button type="button" class="btn dark" onclick="location.reload()">Atualizar e tentar de novo</button>
+      <div class="manut-dev-box">
+        <div class="card-label" style="margin-bottom:8px">Acesso autorizado</div>
         <div class="field" style="margin:0 0 8px">
-          <label>Senha DEV</label>
-          <input id="manut-dev-pass" class="input" type="password" placeholder="Senha do desenvolvedor" autocomplete="off" onkeydown="if(event.key==='Enter')validarDevManutencao()">
+          <label>Senha de desbloqueio</label>
+          <input id="manut-dev-pass" class="input" type="password" placeholder="Digite a senha" autocomplete="off" onkeydown="if(event.key==='Enter')validarDevManutencao()">
         </div>
         <p id="manut-dev-erro" class="erro" style="min-height:18px;margin:0 0 8px"></p>
-        <button type="button" class="btn purple" onclick="validarDevManutencao()">Desbloquear com senha DEV</button>
+        <button type="button" class="btn purple" onclick="validarDevManutencao()">Desbloquear nesta sessão</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="valis-modal-bg" id="painel-manut-bg" onclick="if(event.target===this)fecharPainelManutencao()">
+    <div class="valis-modal" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
+      <h3>Controle de manutenção</h3>
+      <div class="manut-ctrl-status" id="manut-ctrl-status">
+        <div class="dot"></div>
+        <div>
+          <div class="txt" id="manut-ctrl-txt">Carregando…</div>
+          <div class="sub" id="manut-ctrl-sub">—</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Título na tela</label>
+        <input id="manut-ctrl-titulo" class="input" maxlength="80" placeholder="Sistema em manutenção">
+      </div>
+      <div class="field">
+        <label>Mensagem para os usuários</label>
+        <textarea id="manut-ctrl-msg" class="area" rows="3" placeholder="Estamos atualizando o sistema. Voltamos em breve."></textarea>
+      </div>
+      <div class="field">
+        <label>Previsão de retorno (opcional)</label>
+        <input id="manut-ctrl-eta" class="input" maxlength="60" placeholder="Ex: 22:30 ou em cerca de 30 min">
+      </div>
+      <div class="manut-preview" id="manut-ctrl-preview">Pré-visualização da mensagem…</div>
+      <div class="vm-actions" style="flex-direction:column;margin-top:14px">
+        <button type="button" class="btn manut-btn-on" id="manut-btn-ativar" onclick="confirmarAtivarManutencao()">Ativar manutenção para todos</button>
+        <button type="button" class="btn manut-btn-off" id="manut-btn-desativar" onclick="confirmarDesativarManutencao()">Desativar e liberar o app</button>
+        <button type="button" class="btn dark" onclick="fecharPainelManutencao()">Fechar</button>
       </div>
     </div>
   </div>
@@ -2312,7 +2438,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.6</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.7</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2370,7 +2496,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.6</span></div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.7</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
@@ -2442,9 +2568,9 @@
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Ativar manutenção<small>Suspende o app para todos</small></div></button>
-        <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Desativar manutenção<small>Libera o app para todos</small></div></button>
-        <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado da manutenção</small></div></button>
+        <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Painel de manutenção<small>Ativar, desativar e mensagem</small></div></button>
+        <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Liberar app agora<small>Desativa manutenção em 1 toque</small></div></button>
+        <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado atual</small></div></button>
         <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar modo nuvem<small>Local ↔ sincronizado</small></div></button>
         <button class="func-btn" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sync agora<small>Sobe e baixa dados da nuvem</small></div></button>
         <button class="func-btn" onclick="devFn(52)"><span class="ico">♻️</span><div>Recarregar app + limpar cache<small>Limpa cache e recarrega o app</small></div></button>
@@ -2586,7 +2712,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.6</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.7</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3431,7 +3557,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.6';
+    const APP_VERSION = '0.0.7';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5990,30 +6116,18 @@
           render();
           break;
         case 11: {
-          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode ativar manutenção global.'); break; }
-          const msg = prompt('Mensagem para os usuários na tela de manutenção:', 'Sistema em manutenção. Voltamos em breve.') 
-            || 'Sistema em manutenção. Voltamos em breve.';
-          if (!confirm('ATIVAR manutenção agora?\n\nTodos os aparelhos vão reiniciar e ficar bloqueados.')) break;
-          setManutencao(true, msg);
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV pode gerenciar manutenção global.'); break; }
+          abrirPainelControleManutencao();
           break;
         }
         case 12: {
           if (!podeDevPerigoso()) { alert('Só o cargo DEV pode desativar manutenção.'); break; }
-          if (!confirm('DESATIVAR manutenção agora?\n\nO app será liberado para todos.')) break;
-          setManutencao(false, '');
+          abrirPainelControleManutencao({ foco: 'desativar' });
           break;
         }
         case 13: {
-          (async () => {
-            const m = await lerManutencao();
-            alert(
-              'Status da manutenção\n\n' +
-              'Ativo: ' + (m.ativo ? 'SIM' : 'NÃO') + '\n' +
-              'Mensagem: ' + (m.msg || '—') + '\n' +
-              'Por: ' + (m.por || '—') + '\n' +
-              'Em: ' + (m.em || '—')
-            );
-          })();
+          if (!podeDevPerigoso()) { alert('Só o cargo DEV.'); break; }
+          abrirPainelControleManutencao({ foco: 'status' });
           break;
         }
         case 14: {
@@ -9392,6 +9506,19 @@
       if (m.ativo && !devLiberado) {
         const msgEl = document.getElementById('manutencao-msg');
         if (msgEl) msgEl.textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
+        try {
+          var tit = document.getElementById('manutencao-titulo');
+          if (tit) tit.textContent = m.titulo || 'Sistema em manutenção';
+          var meta = document.getElementById('manutencao-meta');
+          if (meta) {
+            var parts = [];
+            if (m.eta) parts.push('Retorno previsto: ' + m.eta);
+            if (m.em) {
+              try { parts.push('Atualizado em ' + new Date(m.em).toLocaleString('pt-BR')); } catch (e) {}
+            }
+            meta.textContent = parts.length ? parts.join(' · ') : 'Aguarde o retorno do sistema';
+          }
+        } catch (e) {}
         ov.classList.remove('hidden');
         ov.style.display = 'flex';
         ov.style.zIndex = '99999';
@@ -9413,6 +9540,8 @@
       }
     }
     function abrirPainelManutencao() {
+      try { if (typeof abrirPainelControleManutencao === 'function') return abrirPainelControleManutencao(); } catch (e) {}
+      // fallback legado
       const box = document.getElementById('perfil-painel') || document.getElementById('sup-resultado');
       // usa modal simples via prompt flow no drawer context
       const ativo = confirm('MANUTENÇÃO\\n\\nOK = ATIVAR manutenção (suspende o app para todos)\\nCancelar = ver opções de desligar');
@@ -9423,26 +9552,116 @@
         if (confirm('Desligar manutenção agora?')) setManutencao(false, '');
       }
     }
-    async function setManutencao(ativo, msg) {
+
+    function fecharPainelManutencao() {
+      try {
+        var bg = document.getElementById('painel-manut-bg');
+        if (bg) bg.classList.remove('show');
+      } catch (e) {}
+    }
+    function atualizarPreviewManutencao() {
+      try {
+        var msg = ((document.getElementById('manut-ctrl-msg') || {}).value || '').trim();
+        var eta = ((document.getElementById('manut-ctrl-eta') || {}).value || '').trim();
+        var titulo = ((document.getElementById('manut-ctrl-titulo') || {}).value || '').trim();
+        var el = document.getElementById('manut-ctrl-preview');
+        if (!el) return;
+        el.innerHTML = '<b>' + (titulo || 'Sistema em manutenção') + '</b><br>' +
+          (msg || 'O aplicativo está temporariamente suspenso.') +
+          (eta ? ('<br><span style="color:#fbbf24">Retorno previsto: ' + eta.replace(/</g,'') + '</span>') : '');
+      } catch (e) {}
+    }
+    async function abrirPainelControleManutencao(opts) {
+      opts = opts || {};
+      try {
+        if (!podeDevPerigoso()) return alert('Só o cargo DEV pode gerenciar manutenção.');
+        var m = {};
+        try { m = await lerManutencao(); } catch (e) { m = {}; }
+        var st = document.getElementById('manut-ctrl-status');
+        var txt = document.getElementById('manut-ctrl-txt');
+        var sub = document.getElementById('manut-ctrl-sub');
+        var ativo = !!(m && m.ativo);
+        if (st) st.classList.toggle('on', ativo);
+        if (txt) txt.textContent = ativo ? 'Manutenção ATIVA' : 'App liberado';
+        if (sub) {
+          sub.textContent = (m.por ? ('Por ' + m.por + ' · ') : '') +
+            (m.em ? new Date(m.em).toLocaleString('pt-BR') : 'sem registro recente') +
+            (m.eta ? (' · retorno: ' + m.eta) : '');
+        }
+        var ti = document.getElementById('manut-ctrl-titulo');
+        var msg = document.getElementById('manut-ctrl-msg');
+        var eta = document.getElementById('manut-ctrl-eta');
+        if (ti) ti.value = m.titulo || 'Sistema em manutenção';
+        if (msg) msg.value = m.msg || 'Estamos realizando melhorias. Voltamos em breve.';
+        if (eta) eta.value = m.eta || '';
+        atualizarPreviewManutencao();
+        ['manut-ctrl-titulo','manut-ctrl-msg','manut-ctrl-eta'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && !el._manutBound) {
+            el.addEventListener('input', atualizarPreviewManutencao);
+            el._manutBound = true;
+          }
+        });
+        var bg = document.getElementById('painel-manut-bg');
+        if (bg) bg.classList.add('show');
+        try { fecharDrawer(); } catch (e) {}
+        if (opts.foco === 'desativar' && ativo) {
+          setTimeout(function() {
+            var b = document.getElementById('manut-btn-desativar');
+            if (b) b.focus();
+          }, 100);
+        }
+      } catch (e) {
+        alert('Erro ao abrir painel: ' + (e && e.message ? e.message : e));
+      }
+    }
+    async function confirmarAtivarManutencao() {
+      try {
+        if (!podeDevPerigoso()) return alert('Só o cargo DEV.');
+        var titulo = ((document.getElementById('manut-ctrl-titulo') || {}).value || '').trim() || 'Sistema em manutenção';
+        var msg = ((document.getElementById('manut-ctrl-msg') || {}).value || '').trim() || 'Estamos realizando melhorias. Voltamos em breve.';
+        var eta = ((document.getElementById('manut-ctrl-eta') || {}).value || '').trim();
+        if (!confirm('Ativar manutenção para TODOS os aparelhos?\n\nA tela de bloqueio será exibida em instantes.')) return;
+        await setManutencao(true, msg, { titulo: titulo, eta: eta });
+        fecharPainelManutencao();
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    async function confirmarDesativarManutencao() {
+      try {
+        if (!podeDevPerigoso()) return alert('Só o cargo DEV.');
+        if (!confirm('Desativar manutenção e liberar o aplicativo para todos?')) return;
+        await setManutencao(false, '', {});
+        fecharPainelManutencao();
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+
+
+    async function setManutencao(ativo, msg, extra) {
+      extra = extra || {};
       const payload = {
         ativo: !!ativo,
         msg: msg || '',
-        por: usuarioAtual ? usuarioAtual.nome : 'DEV',
+        titulo: extra.titulo || (ativo ? 'Sistema em manutenção' : ''),
+        eta: extra.eta || '',
+        por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : 'DEV',
         em: new Date().toISOString(),
-        // token único para forçar reload nos outros aparelhos
         forceReload: Date.now()
       };
       localStorage.setItem('valis_manutencao', JSON.stringify(payload));
       if (firebaseOk && fbDb) {
         try {
           await fbDb.collection('valis').doc('manutencao').set(payload, { merge: true });
-          toast(ativo ? 'Manutenção ATIVADA — outros apps vão reiniciar' : 'Manutenção DESLIGADA');
+          toast(ativo ? 'Manutenção ativada — aparelhos serão bloqueados' : 'Manutenção desativada — app liberado');
         } catch (e) {
           console.warn(e);
-          toast('Salvo local — Firebase falhou');
+          toast('Salvo neste aparelho — sincronização falhou');
         }
       } else {
-        toast(ativo ? 'Manutenção local ON' : 'Manutenção local OFF');
+        toast(ativo ? 'Manutenção ativada (local)' : 'Manutenção desativada (local)');
       }
       // neste aparelho (DEV): se ativou, também aplica overlay; se desligou, libera
       if (ativo && !devLiberado) {
