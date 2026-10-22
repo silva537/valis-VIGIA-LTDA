@@ -2269,7 +2269,7 @@
 </head>
 <body class="ui-ops ui-solid">
   <div id="toast"></div>
-  <div id="offline-bar" role="status">Sem conexão · fila offline ativa</div>
+  <div id="offline-bar" role="status">Sem conexão · sincronização pendente</div>
   <div id="update-done-banner" role="status" aria-live="polite">
     <button type="button" class="ud-close" onclick="esconderAvisoAtualizado()" aria-label="Fechar">×</button>
     <div class="ud-title">✅ Aplicativo atualizado</div>
@@ -2312,7 +2312,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.5</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.6</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2370,7 +2370,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.5</span></div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.6</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
@@ -2391,10 +2391,10 @@
         <button class="func-btn" onclick="devFn(61)"><span class="ico">✅</span><div>Histórico de aprovações<small>Cadastros aprovados/recusados</small></div></button>
         <button class="func-btn" onclick="devFn(63)"><span class="ico">📅</span><div>Forçar fechamento de folha<small>Arquivar período atual</small></div></button>
         <button class="func-btn" onclick="devFn(64)"><span class="ico">🧹</span><div>Sanitizar banco<small>Limpa dados inconsistentes</small></div></button>
-        <button class="func-btn" onclick="devFn(65)"><span class="ico">📲</span><div>Tokens FCM / push<small>Status local e dicas</small></div></button>
+        <button class="func-btn" onclick="devFn(65)"><span class="ico">📲</span><div>Notificações push<small>Status neste aparelho</small></div></button>
         <button class="func-btn" onclick="devFn(66)"><span class="ico">📍</span><div>Simular GPS<small>Testar geofence sem estar no posto</small></div></button>
         <button class="func-btn" onclick="devFn(67)"><span class="ico">🔒</span><div>Modo somente leitura<small>Trava edições neste aparelho</small></div></button>
-        <button class="func-btn" onclick="devFn(68)"><span class="ico">⚖️</span><div>Comparar local × Firebase<small>Contagens lado a lado</small></div></button>
+        <button class="func-btn" onclick="devFn(68)"><span class="ico">⚖️</span><div>Comparar local × nuvem<small>Contagens lado a lado</small></div></button>
         <button class="func-btn" onclick="devFn(69)"><span class="ico">📝</span><div>Changelog da versão<small>O que há de novo</small></div></button>
         <button class="func-btn" onclick="devFn(70)"><span class="ico">🏆</span><div>Ranking do mês<small>Plantões por vigilante</small></div></button>
         <button class="func-btn" onclick="devFn(71)"><span class="ico">🔎</span><div>Busca global<small>Plantão, ocorrência, usuário</small></div></button>
@@ -2430,7 +2430,7 @@
         <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
         <button class="func-btn" onclick="devFn(25)"><span class="ico">🔧</span><div>Reparar usuários<small>Normaliza flags e hashes</small></div></button>
         <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
-        <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login na nuvem ON/OFF<small>Ativa ou bloqueia sync de login</small></div></button>
+        <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login sincronizado ON/OFF<small>Ativa ou bloqueia sync de login</small></div></button>
         <button class="func-btn" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Permite ou bloqueia novos pedidos</small></div></button>
         <button class="func-btn" onclick="devFn(33)"><span class="ico">🧹</span><div>Limpar logins (só admin/dev)<small>Apaga todos os outros usuários</small></div></button>
       </div></div>
@@ -2438,16 +2438,16 @@
 
     <div class="collapse-box" id="dev-sec-manut">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-manut')">
-        <span>🚧 Manutenção e sistema<small>Firebase, emergência, reload</small></span>
+        <span>🚧 Manutenção e sistema<small>Sistema, emergência, recarregar</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
         <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Ativar manutenção<small>Suspende o app para todos</small></div></button>
         <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Desativar manutenção<small>Libera o app para todos</small></div></button>
-        <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado no Firebase</small></div></button>
-        <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar Firebase<small>Mode local ↔ cloud</small></div></button>
-        <button class="func-btn" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sync agora<small>Sobe e baixa dados do Firebase</small></div></button>
-        <button class="func-btn" onclick="devFn(52)"><span class="ico">♻️</span><div>Recarregar app + limpar cache<small>Service Worker e hard refresh</small></div></button>
+        <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado da manutenção</small></div></button>
+        <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar modo nuvem<small>Local ↔ sincronizado</small></div></button>
+        <button class="func-btn" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sync agora<small>Sobe e baixa dados da nuvem</small></div></button>
+        <button class="func-btn" onclick="devFn(52)"><span class="ico">♻️</span><div>Recarregar app + limpar cache<small>Limpa cache e recarrega o app</small></div></button>
         <button class="func-btn" onclick="devFn(26)"><span class="ico">🚨</span><div>Modo emergência<small>Só login, msgs e ocorrência</small></div></button>
         <button class="func-btn" onclick="devFn(31)"><span class="ico">🧹</span><div>Limpar log DEV<small>Apaga histórico técnico</small></div></button>
       </div></div>
@@ -2455,12 +2455,12 @@
 
     <div class="collapse-box" id="dev-sec-backup">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-backup')">
-        <span>💾 Backup e dados<small>Exportar, fila offline, zerar</small></span>
+        <span>💾 Backup e dados<small>Exportar, fila pendente, zerar</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
         <button class="func-btn" onclick="devFn(54)"><span class="ico">📦</span><div>Exportar backup JSON<small>Download completo do banco local</small></div></button>
-        <button class="func-btn" onclick="devFn(51)"><span class="ico">📤</span><div>Limpar fila offline<small>Remove itens pendentes de sync</small></div></button>
+        <button class="func-btn" onclick="devFn(51)"><span class="ico">📤</span><div>Limpar fila pendente<small>Remove itens aguardando envio</small></div></button>
         <button class="func-btn" onclick="devFn(56)"><span class="ico">🗂️</span><div>Plantões e folhas<small>Resumo e inconsistências</small></div></button>
         <button class="func-btn" onclick="devFn(1)"><span class="ico">💾</span><div>Backup rápido<small>Salva snapshot local</small></div></button>
         <button class="func-btn" onclick="devFn(2)"><span class="ico">📥</span><div>Restaurar backup<small>Importa snapshot</small></div></button>
@@ -2492,7 +2492,7 @@
         <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências</small></div></button>
         <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
         <button class="func-btn" onclick="devFn(34)"><span class="ico">⏱️</span><div>Tempo das notificações<small>Duração global</small></div></button>
-        <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso Firebase<small>Envia no doc aviso</small></div></button>
+        <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso global<small>Envia aviso de teste</small></div></button>
         <button class="func-btn" onclick="devFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, 2FA, relatório…</small></div></button>
       </div></div>
     </div>
@@ -2586,12 +2586,12 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.5</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.6</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
         <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
-        <span id="conn-dot" class="conn-dot green" title="Conexão Firebase: OK — toque para reconectar" onclick="recuperarApp(false)"></span>
+        <span id="conn-dot" class="conn-dot green" title="Conexão com a nuvem — toque para reconectar" onclick="recuperarApp(false)"></span>
         <button class="btn dark sm" onclick="sair()">Sair</button>
       </div>
     </header>
@@ -2707,7 +2707,7 @@
         </div>
 
         <div class="inicio-offline-card" id="inicio-offline-card">
-          <b>Fila offline</b>
+          <b>Sincronização pendente</b>
           <div id="inicio-offline-txt" style="margin:4px 0 8px">—</div>
           <button type="button" class="btn dark sm" onclick="flushFilaOffline().then(function(){toast('Sync tentado');atualizarUIOfflinePack();})">Tentar sincronizar</button>
         </div>
@@ -2730,7 +2730,7 @@
         <div class="status-bar">
           <div class="dot" id="status-dot"></div>
           <span id="status-text">Sistema operacional</span>
-          <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="status-fb">Firebase</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="status-fb">Nuvem</span>
         </div>
         <div class="stats">
           <div class="stat-card"><div class="lbl">Postos</div><div class="num" id="s1">0</div></div>
@@ -2814,7 +2814,7 @@
         <div class="card">
           <div class="card-label">Backup e recuperação de plantões</div>
           <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:10px">
-            Todo plantão salvo gera backup automático (celular + Firebase). Use recuperar se atualizar o app e a lista sumir.
+            Todo plantão salvo gera backup automático neste aparelho e na nuvem. Use recuperar se a lista sumir após atualizar o app.
           </p>
           <div class="status-bar" style="margin-bottom:10px">
             <div class="dot" id="pl-bk-dot"></div>
@@ -3157,7 +3157,7 @@
           <div class="meta" style="font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:10px">
             Aviso diário para bater o ponto ao ir para a usina.<br>
             <b>Com o app aberto ou em segundo plano:</b> funciona neste aparelho.<br>
-            <b>Com o app totalmente fechado:</b> precisa do FCM + agendamento no Firebase (botão abaixo).
+            <b>Com o app totalmente fechado:</b> precisa ativar as notificações e o envio em segundo plano (botão abaixo).
           </div>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px;cursor:pointer">
             <input type="checkbox" id="lemb-ativo" style="width:18px;height:18px"> Ativar lembrete diário
@@ -3173,7 +3173,7 @@
             <button type="button" class="btn dark" onclick="testarLembretePonto()">Testar agora</button>
           </div>
           <button type="button" class="btn purple" style="margin-top:8px" onclick="ativarFCM().then(function(ok){ if(ok!==false) sincronizarLembreteFCM(); })">
-            Ativar push (app fechado) + sincronizar
+            Ativar notificações (app fechado) + sincronizar
           </button>
           <div class="meta" id="lemb-status" style="margin-top:8px;font-size:11px;color:var(--muted)"></div>
         </div>
@@ -3221,12 +3221,12 @@
         <div class="card">
           <div class="card-label">🔔 Notificações em segundo plano</div>
           <div class="meta" style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4">
-            Permita notificações e use o PWA <b>instalado</b>. No Android, não force o fechamento do app.
-            iPhone (iOS) limita bastante notificação de PWA com o app fechado.
+            Permita notificações e use o aplicativo <b>instalado</b>. No Android, não force o fechamento do app.
+            iPhone (iOS) limita bastante notificação com o aplicativo fechado.
           </div>
           <button class="btn green" onclick="ativarNotificacoesPWA()">Ativar / testar notificações</button>
-          <button class="btn dark" style="margin-top:8px" onclick="salvarVapidFCM()">Configurar VAPID (FCM)</button>
-          <button class="btn purple" style="margin-top:8px" onclick="ativarFCM()">Ativar FCM (app fechado)</button>
+          <button class="btn dark" style="margin-top:8px" onclick="salvarVapidFCM()">Configurar chave de notificações</button>
+          <button class="btn purple" style="margin-top:8px" onclick="ativarFCM()">Ativar notificações (app fechado)</button>
         </div>
         <div class="card"><div class="card-label">1 · Ronda digital</div>
           <div class="field"><label>Posto</label><select id="lab-ronda-posto" class="select"></select></div>
@@ -3287,12 +3287,12 @@
           <div class="field"><label>Foto</label><input id="lab-oco-foto" class="input" type="file" accept="image/*"></div>
           <button class="btn yellow" onclick="labOcoFoto()">Registrar</button>
         </div>
-        <div class="card"><div class="card-label">14 · Fila offline</div>
+        <div class="card"><div class="card-label">14 · Fila de sincronização</div>
           <div id="lab-offline-q" class="meta" style="font-size:12px">—</div>
           <button class="btn dark sm" style="width:auto;margin-top:8px" onclick="labFlushOffline()">Reenviar fila</button>
         </div>
-        <div class="card"><div class="card-label">15 · Atalho PWA</div>
-          <div class="meta" style="font-size:12px;color:var(--muted)">Instale o PWA no Android (menu → Instalar app). Use o Plantão vivo no Início.</div>
+        <div class="card"><div class="card-label">15 · Instalar aplicativo</div>
+          <div class="meta" style="font-size:12px;color:var(--muted)">Instale o app no Android (menu do navegador → Instalar aplicativo). Use o Plantão vivo no Início.</div>
           <button class="btn green" onclick="tab('inicio')">Ir ao Início</button>
         </div>
         <div class="card"><div class="card-label">16 · Tema compacto</div>
@@ -3334,7 +3334,7 @@
           <h4>4. Uso dos dados</h4>
           <p>Os dados são utilizados para operação do serviço, controle de ponto/plantão, comunicação interna, supervisão, segurança patrimonial e melhoria do sistema. Não vendemos dados pessoais a terceiros.</p>
           <h4>5. Armazenamento e proteção</h4>
-          <p>As informações podem ser salvas no aparelho (armazenamento local cifrado) e na nuvem (Firebase/Google), com controle de acesso por login, cargos e regras de segurança. Senhas são armazenadas de forma criptografada (hash).</p>
+          <p>As informações podem ser salvas no aparelho (armazenamento local cifrado) e na nuvem, com controle de acesso por login, cargos e regras de segurança. Senhas são armazenadas de forma criptografada (hash).</p>
           <h4>6. Compartilhamento</h4>
           <p>Dados operacionais podem ser visíveis a administradores e supervisores autorizados. Postos e informações globais podem ser compartilhados entre usuários do mesmo sistema, conforme permissão de cargo.</p>
           <h4>7. Responsabilidades do usuário</h4>
@@ -3431,7 +3431,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.5';
+    const APP_VERSION = '0.0.6';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4667,7 +4667,7 @@
         await atualizarPainelSolicitacoes(false);
         render();
         try { registrarAprovacaoLog('aprovado', s.user, (s.nome || '') + ' → ' + cargo); } catch (e) {}
-        toast(okUsers !== false && okSol ? 'Aprovado e liberado para login' : 'Aprovado (verifique conexão Firebase)');
+        toast(okUsers !== false && okSol ? 'Aprovado e liberado para login' : 'Aprovado (verifique a conexão com a nuvem)');
       } catch (e) {
         alert('Erro ao aprovar: ' + (e && e.message ? e.message : e));
       }
@@ -5772,7 +5772,7 @@
               el.innerHTML = 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') +
                 ' · users ' + ((db.users||[]).length) +
                 ' · plantões ' + ((db.plantaoes||[]).length) +
-                ' · FB ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? 'OK' : 'off');
+                ' · nuvem ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? 'OK' : 'local');
             }
           } catch (e) {}
         }, 150);
@@ -6125,7 +6125,7 @@
                 try { render(); } catch (e) {}
               }
               setConnStatus(firebaseOk ? 'green' : 'red');
-              toast(firebaseOk ? 'Sync concluído' : 'Sync local (FB offline)');
+              toast(firebaseOk ? 'Sync concluído' : 'Sync local (modo local)');
             } catch (e) {
               setConnStatus('red');
               alert('Falha no sync: ' + (e.message || e));
@@ -6215,7 +6215,7 @@
           (async () => {
             const t = prompt('Texto do aviso de teste:', 'Teste VALIS — ' + new Date().toLocaleTimeString('pt-BR'));
             if (!t) return;
-            if (!firebaseOk || !fbDb) { alert('Firebase offline'); return; }
+            if (!firebaseOk || !fbDb) { alert('Sem conexão com a nuvem'); return; }
             try {
               await fbDb.collection('valis').doc('aviso').set({
                 texto: t,
@@ -6322,7 +6322,7 @@
             var ok = await salvarConfigApp({ notifDurSec: n });
             toast(ok !== false
               ? ('Tempo de notificação: ' + n + 's (global)')
-              : ('Salvo local: ' + n + 's (Firebase offline)'));
+              : ('Salvo local: ' + n + 's (Sem conexão com a nuvem)'));
           })();
           break;
         }
@@ -6391,7 +6391,7 @@
             } catch (e) {}
             var body =
               'Versão: ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') + '\n' +
-              'Firebase: ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? ('OK · ' + ((typeof DataService !== 'undefined' && DataService.mode) || 'cloud')) : 'Offline/local') + '\n' +
+              'Nuvem: ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? 'ativa' : 'modo local') + '\n' +
               'Online: ' + (navigator.onLine ? 'sim' : 'não') + '\n' +
               'Usuário: ' + (usuarioAtual ? ('@' + usuarioAtual.user + ' · ' + usuarioAtual.funcao) : '—') + '\n' +
               'Users: ' + (db.users || []).length + ' · pendentes: ' + pend + '\n' +
@@ -6418,21 +6418,21 @@
             var q = [];
             try { q = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
             var n = Array.isArray(q) ? q.length : 0;
-            if (!n) { toast('Fila offline já está vazia'); break; }
-            if (!confirm('Limpar ' + n + ' item(ns) da fila offline?')) break;
+            if (!n) { toast('Nada pendente para enviar'); break; }
+            if (!confirm('Limpar ' + n + ' item(ns) pendentes de envio?')) break;
             localStorage.setItem(key, '[]');
             try { localStorage.setItem('valis_offline_queue', '[]'); } catch (e) {}
             try { if (typeof atualizarUIOfflinePack === 'function') atualizarUIOfflinePack(); } catch (e) {}
             try { if (typeof atualizarBarraOffline === 'function') atualizarBarraOffline(); } catch (e) {}
             try { registrarAuditoria('dev_limpar_offline', n + ' itens'); } catch (e) {}
-            toast('Fila offline limpa (' + n + ')');
+            toast('Fila de envio limpa (' + n + ')');
           } catch (e) {
             alert('Erro: ' + (e && e.message ? e.message : e));
           }
           break;
         }
         case 52: {
-          if (!confirm('Recarregar o app e limpar cache do Service Worker?')) break;
+          if (!confirm('Recarregar o app e limpar o cache local?')) break;
           try {
             if (navigator.serviceWorker) {
               navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -6642,10 +6642,10 @@
             try { tok = localStorage.getItem('valis_fcm_token') || localStorage.getItem('fcm_token') || ''; } catch (e) {}
             var htmlT =
               '<div class="vm-item"><b>Token neste aparelho</b><div class="meta">' +
-              (tok ? (String(tok).slice(0, 48) + '…') : 'Não encontrado — use Ativar push no perfil') +
+              (tok ? (String(tok).slice(0, 48) + '…') : 'Não encontrado — ative as notificações no perfil') +
               '</div></div>' +
-              '<div class="vm-item"><b>Firestore</b><div class="meta">Tokens de todos ficam em valis/fcm_tokens após sync push.</div></div>' +
-              '<div class="vm-item"><b>Lembrete</b><div class="meta">Push com app fechado exige Cloud Functions + Blaze.</div></div>';
+              '<div class="vm-item"><b>Servidor</b><div class="meta">Os tokens de notificação são sincronizados automaticamente após ativar o envio.</div></div>' +
+              '<div class="vm-item"><b>Lembrete</b><div class="meta">Notificação com o app fechado depende da configuração de envio em segundo plano no servidor.</div></div>';
             abrirValisModal('Tokens FCM', htmlT);
           } catch (e) { alert(e); }
           break;
@@ -6681,7 +6681,7 @@
                 '\nOco: ' + (db.oco||[]).length +
                 '\nPostos: ' + (db.postos||[]).length +
                 '\nMsgs: ' + (db.msg||[]).length;
-              var remoteTxt = 'FIREBASE\n';
+              var remoteTxt = 'NUVEM\n';
               if (typeof firebaseOk !== 'undefined' && firebaseOk && typeof fbDb !== 'undefined' && fbDb) {
                 try {
                   var snap = await fbDb.collection('valis').doc('db_v42').get();
@@ -9358,7 +9358,7 @@
       } catch (e) {}
 
       const statusFb = document.getElementById('status-fb');
-      if (statusFb) statusFb.textContent = firebaseOk ? ('FB · ' + DataService.mode) : 'Offline';
+      if (statusFb) statusFb.textContent = firebaseOk ? 'Nuvem · ativa' : 'Modo local';
 
       // painel novo de solicitações
       if (podeGerenciarUsers()) {
@@ -9944,7 +9944,7 @@
       var warn = [];
       try {
         ok.push('Versão ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '?'));
-        ok.push((typeof firebaseOk !== 'undefined' && firebaseOk) ? 'Firebase OK' : 'Firebase offline/local');
+        ok.push((typeof firebaseOk !== 'undefined' && firebaseOk) ? 'Nuvem OK' : 'Modo local');
         ok.push(navigator.onLine ? 'Navegador online' : 'Navegador offline');
         ok.push('Users: ' + ((db.users || []).length));
         ok.push('Plantões: ' + ((db.plantaoes || []).length));
@@ -10271,11 +10271,11 @@
         var t = '';
         try { t = localStorage.getItem('valis_last_sync') || ''; } catch (e) {}
         var online = navigator.onLine !== false;
-        var fb = (typeof firebaseOk !== 'undefined' && firebaseOk) ? 'Firebase OK' : 'Local';
+        var fb = (typeof firebaseOk !== 'undefined' && firebaseOk) ? 'Nuvem OK' : 'Local';
         if (t) {
           try {
             var d = new Date(t);
-            el.textContent = fb + ' · último sync ' + d.toLocaleTimeString('pt-BR');
+            el.textContent = 'Nuvem' + ' · último sync ' + d.toLocaleTimeString('pt-BR');
           } catch (e) {
             el.textContent = fb + (online ? ' · online' : ' · offline');
           }
@@ -10463,7 +10463,7 @@
         if (card) {
           if (!online || n > 0) {
             card.classList.add('show');
-            if (txt) txt.textContent = (!online ? 'Sem conexão. ' : '') + (n ? (n + ' item(ns) aguardando envio.') : 'Modo offline ativo.');
+            if (txt) txt.textContent = (!online ? 'Sem conexão. ' : '') + (n ? (n + ' item(ns) aguardando envio.') : 'Modo local ativo.');
           } else {
             card.classList.remove('show');
           }
@@ -10548,8 +10548,8 @@
         var n = Array.isArray(q) ? q.length : 0;
         if (!online || n > 0) {
           bar.classList.add('show');
-          if (!online) bar.textContent = n > 0 ? ('Sem conexão · ' + n + ' item(ns) na fila offline') : 'Sem conexão · modo offline';
-          else bar.textContent = n + ' item(ns) na fila offline · sincronizando quando possível';
+          if (!online) bar.textContent = n > 0 ? ('Sem conexão · ' + n + ' item(ns) aguardando envio') : 'Sem conexão · modo local';
+          else bar.textContent = n + ' item(ns) aguardando envio · sincronizando quando possível';
         } else {
           bar.classList.remove('show');
         }
@@ -12434,7 +12434,7 @@
         var st = document.getElementById('lemb-status');
         if (st && cfg.ativo) {
           st.innerHTML += token
-            ? '<br><span style="color:#86efac">Token FCM sincronizado para o servidor.</span>'
+            ? '<br><span style="color:#86efac">Notificações sincronizadas com o servidor.</span>'
             : '<br><span style="color:#fbbf24">Sem token FCM — toque em Ativar push.</span>';
         }
       } catch (e) { console.warn('sync lemb FCM', e); }
@@ -12443,7 +12443,7 @@
     async function ativarFCM() {
       try {
         if (!firebaseOk || typeof firebase === 'undefined') {
-          toast('Firebase offline');
+          toast('Sem conexão com a nuvem');
           return false;
         }
         // Chave pública VAPID gerada no Firebase Console para o VALIS VIGIA.
@@ -12455,7 +12455,7 @@
         } catch (e) {}
         if (!vapid && db.labsConfig && db.labsConfig.fcmVapid) vapid = db.labsConfig.fcmVapid;
         if (!vapid) {
-          toast('Configure a chave VAPID (FCM) no Firebase Console');
+          toast('Configure a chave de notificações nas definições do servidor');
           return false;
         }
         if (!firebase.messaging) {
@@ -12495,7 +12495,7 @@
             notificarApp(tt, bb, { requireInteraction: true });
           });
         } catch (e) {}
-        toast('FCM ativo neste aparelho');
+        toast('Notificações ativas neste aparelho');
         try { registrarAuditoria('fcm_token', 'ok'); } catch (e) {}
         return true;
       } catch (e) {
@@ -12508,7 +12508,7 @@
       if (!podeVerTodosPlantaoes()) return alert('So Admin/DEV');
       var atual = '';
       try { atual = localStorage.getItem('valis_fcm_vapid') || ''; } catch (e) {}
-      var v = prompt('Cole a chave VAPID publica (Firebase Console > Cloud Messaging > Web Push):', atual);
+      var v = prompt('Cole a chave pública de notificações (painel do servidor > Web Push):', atual);
       if (v == null) return;
       v = String(v).trim();
       try { localStorage.setItem('valis_fcm_vapid', v); } catch (e) {}
@@ -12563,14 +12563,14 @@
       d.classList.remove('green', 'yellow', 'red');
       d.classList.add(estado || 'yellow');
       const labels = {
-        green: 'Conexão Firebase: OK',
+        green: 'Conexão com a nuvem',
         yellow: 'Reconectando...',
         red: 'Sem conexão — toque para tentar de novo'
       };
       d.title = titulo || labels[estado] || 'Status da conexão';
       const st = document.getElementById('status-fb');
       if (st) {
-        if (estado === 'green') st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Local';
+        if (estado === 'green') st.textContent = firebaseOk ? 'Nuvem · ativa' : 'Local';
         else if (estado === 'yellow') st.textContent = 'Reconectando...';
         else st.textContent = 'Offline';
       }
@@ -12725,7 +12725,7 @@
         try { await garantirAdmin(); render(); } catch (e2) {}
       }
       const st = document.getElementById('status-fb');
-      if (st) st.textContent = firebaseOk ? ('FB · ' + (DataService.mode || 'local')) : 'Offline';
+      if (st) st.textContent = firebaseOk ? ('Nuvem · ativa') : 'Modo local';
       setConnStatus(firebaseOk ? 'green' : 'red');
       try { if (localStorage.getItem('valis_modo_emergencia') === '1') { document.body.classList.add('modo-emergencia'); aplicarModoEmergencia(); } } catch (e) {}
       setInterval(() => {
