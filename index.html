@@ -1208,6 +1208,13 @@
       border: 0 !important; color: #fff !important;
       font-weight: 800 !important; min-height: 48px;
     }
+    .manut-timer {
+      margin: 4px 0 16px; padding: 12px 14px; border-radius: 14px;
+      border: 1px solid rgba(251,191,36,0.4);
+      background: rgba(120,53,15,0.25);
+    }
+    .manut-timer-lbl { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fcd34d; margin-bottom: 4px; }
+    .manut-timer-val { font-size: 28px; font-weight: 800; color: #fef3c7; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
     .manut-preview {
       margin-top: 12px; padding: 10px 12px; border-radius: 10px;
       border: 1px dashed rgba(251,191,36,0.35);
@@ -2374,6 +2381,10 @@
       <h3 id="manutencao-titulo">Sistema em manutenção</h3>
       <p class="manut-msg" id="manutencao-msg">O aplicativo está temporariamente suspenso pela administração. Voltamos em breve.</p>
       <div class="manut-meta" id="manutencao-meta">—</div>
+      <div class="manut-timer" id="manutencao-timer" style="display:none">
+        <div class="manut-timer-lbl">Tempo restante</div>
+        <div class="manut-timer-val" id="manutencao-timer-val">--:--:--</div>
+      </div>
       <button type="button" class="btn dark" onclick="location.reload()">Atualizar e tentar de novo</button>
       <div class="manut-dev-box">
         <div class="card-label" style="margin-bottom:8px">Acesso autorizado</div>
@@ -2406,8 +2417,13 @@
         <textarea id="manut-ctrl-msg" class="area" rows="3" placeholder="Estamos atualizando o sistema. Voltamos em breve."></textarea>
       </div>
       <div class="field">
-        <label>Previsão de retorno (opcional)</label>
-        <input id="manut-ctrl-eta" class="input" maxlength="60" placeholder="Ex: 22:30 ou em cerca de 30 min">
+        <label>Duração da manutenção (minutos)</label>
+        <input id="manut-ctrl-duracao" class="input" type="number" min="1" max="1440" step="1" value="30" placeholder="30">
+        <div class="meta" style="font-size:11px;margin-top:4px;color:var(--muted)">Cronômetro na tela. Ao zerar, a manutenção desliga sozinha.</div>
+      </div>
+      <div class="field">
+        <label>Texto de previsão (opcional)</label>
+        <input id="manut-ctrl-eta" class="input" maxlength="60" placeholder="Ex: voltamos às 22:30">
       </div>
       <div class="manut-preview" id="manut-ctrl-preview">Pré-visualização da mensagem…</div>
       <div class="vm-actions" style="flex-direction:column;margin-top:14px">
@@ -2438,7 +2454,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.8</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.9</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2496,7 +2512,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.8</span></div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.9</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
@@ -2712,7 +2728,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.8</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.9</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3557,7 +3573,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.8';
+    const APP_VERSION = '0.0.9';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5821,6 +5837,7 @@
           }
         } catch (e) {}
         if (usuarioAtual && String(usuarioAtual.funcao || '') === 'dev') {
+          // Acesso ao menu DEV — NÃO desbloqueia tela de manutenção sozinho
           devLiberado = true;
         }
         try { aplicarPermissoes(); } catch (e) { console.warn('aplicarPermissoes', e); }
@@ -5865,6 +5882,7 @@
     }
 
     function sair() {
+      try { setManutSessaoDesbloqueada(false); } catch (e) {}
       usuarioAtual = null;
       devLiberado = false;
       sessionStorage.removeItem('valis_user');
@@ -5903,6 +5921,7 @@
           } catch (e) {}
         }, 150);
       } catch (e) {}
+      try { setManutSessaoDesbloqueada(true); } catch (e) {}
       devLiberado = true;
       const ov = document.getElementById('manutencao-overlay');
       if (ov) {
@@ -9487,17 +9506,15 @@
     // ---------- MANUTENÇÃO GLOBAL (Firebase) ----------
     async function lerManutencao() {
       var local = null;
-      try {
-        local = JSON.parse(localStorage.getItem('valis_manutencao') || 'null');
-      } catch (e) { local = null; }
+      try { local = JSON.parse(localStorage.getItem('valis_manutencao') || 'null'); } catch (e) { local = null; }
       var cloud = null;
       if (typeof firebaseOk !== 'undefined' && firebaseOk && typeof fbDb !== 'undefined' && fbDb) {
         try {
-          var snap = await fbDb.collection('valis').doc('manutencao').get();
-          if (snap.exists) cloud = snap.data() || null;
-        } catch (e) {
-          console.warn('lerManutencao cloud', e);
-        }
+          var snap = await fbDb.collection('valis').doc('manutencao').get({ source: 'server' }).catch(function() {
+            return fbDb.collection('valis').doc('manutencao').get();
+          });
+          if (snap && snap.exists) cloud = snap.data() || null;
+        } catch (e) { console.warn('lerManutencao cloud', e); }
       }
       function score(m) {
         if (!m || typeof m !== 'object') return 0;
@@ -9505,33 +9522,103 @@
         if (fr) return fr;
         try { return m.em ? Date.parse(m.em) : 0; } catch (e) { return 0; }
       }
-      var chosen = null;
+      var chosen;
       if (cloud && local) {
-        chosen = score(cloud) >= score(local) ? cloud : local;
+        // Se local está ativo e cloud diz inativo mas é MAIS ANTIGO, mantém local
+        if (local.ativo && !cloud.ativo && score(local) > score(cloud)) chosen = local;
+        else if (cloud.ativo && !local.ativo && score(cloud) >= score(local)) chosen = cloud;
+        else chosen = score(cloud) >= score(local) ? cloud : local;
       } else {
         chosen = cloud || local || { ativo: false, msg: '' };
       }
-      // Nunca interpretar "falha de rede" como desligar se o local ainda está ativo
-      if ((!cloud || cloud.ativo === undefined) && local && local.ativo) {
-        chosen = local;
-      }
+      if ((!cloud) && local && local.ativo) chosen = local;
       return chosen || { ativo: false, msg: '' };
+    }
+    function manutSessaoDesbloqueada() {
+      try { return sessionStorage.getItem('valis_manut_unlocked') === '1'; } catch (e) { return false; }
+    }
+    function setManutSessaoDesbloqueada(on) {
+      try {
+        if (on) sessionStorage.setItem('valis_manut_unlocked', '1');
+        else sessionStorage.removeItem('valis_manut_unlocked');
+      } catch (e) {}
+    }
+    function formatManutCountdown(ms) {
+      if (ms < 0) ms = 0;
+      var s = Math.floor(ms / 1000);
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      var sec = s % 60;
+      function p(n) { return (n < 10 ? '0' : '') + n; }
+      return p(h) + ':' + p(m) + ':' + p(sec);
+    }
+    var __manutTimerInterval = null;
+    function pararManutCountdown() {
+      try { if (__manutTimerInterval) clearInterval(__manutTimerInterval); } catch (e) {}
+      __manutTimerInterval = null;
+      try {
+        var box = document.getElementById('manutencao-timer');
+        if (box) box.style.display = 'none';
+      } catch (e) {}
+    }
+    function iniciarManutCountdown(m) {
+      pararManutCountdown();
+      var box = document.getElementById('manutencao-timer');
+      var val = document.getElementById('manutencao-timer-val');
+      if (!box || !val) return;
+      var ate = m && m.ate ? Number(m.ate) : 0;
+      if (!ate || isNaN(ate)) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      function tick() {
+        var rest = ate - Date.now();
+        if (rest <= 0) {
+          val.textContent = '00:00:00';
+          pararManutCountdown();
+          // Auto-desliga quando o tempo acaba
+          (async function() {
+            try {
+              var cur = await lerManutencao();
+              if (cur && cur.ativo) {
+                await setManutencao(false, '', { auto: true });
+              }
+            } catch (e) {}
+          })();
+          return;
+        }
+        val.textContent = formatManutCountdown(rest);
+      }
+      tick();
+      __manutTimerInterval = setInterval(tick, 1000);
     }
     async function aplicarManutencaoUI() {
       var m = { ativo: false, msg: '' };
       try { m = await lerManutencao(); } catch (e) {
-        try {
-          m = JSON.parse(localStorage.getItem('valis_manutencao') || '{"ativo":false}');
-        } catch (e2) { m = { ativo: false }; }
+        try { m = JSON.parse(localStorage.getItem('valis_manutencao') || '{"ativo":false}'); }
+        catch (e2) { m = { ativo: false }; }
       }
       var ov = document.getElementById('manutencao-overlay');
       if (!ov) return;
       var ativo = !!(m && (m.ativo === true || m.ativo === 'true' || m.ativo === 1));
-      // Espelha estado ativo no localStorage
+
+      // Auto-expirar se passou do horário
+      if (ativo && m.ate && Number(m.ate) > 0 && Date.now() >= Number(m.ate)) {
+        try { await setManutencao(false, '', { auto: true }); } catch (e) {}
+        ativo = false;
+        m.ativo = false;
+      }
+
       try {
         if (ativo) localStorage.setItem('valis_manutencao', JSON.stringify(m));
       } catch (e) {}
-      if (ativo && !devLiberado) {
+
+      // IMPORTANTE: cargo DEV logado NÃO bypassa a tela.
+      // Só quem desbloqueou com senha nesta sessão (valis_manut_unlocked).
+      var liberadoAqui = manutSessaoDesbloqueada();
+
+      if (ativo && !liberadoAqui) {
         try {
           var msgEl = document.getElementById('manutencao-msg');
           if (msgEl) msgEl.textContent = m.msg || 'O aplicativo está temporariamente suspenso pela administração.';
@@ -9540,9 +9627,10 @@
           var meta = document.getElementById('manutencao-meta');
           if (meta) {
             var parts = [];
-            if (m.eta) parts.push('Retorno previsto: ' + m.eta);
+            if (m.eta) parts.push(m.eta);
+            if (m.duracaoMin) parts.push('Duração: ' + m.duracaoMin + ' min');
             if (m.em) {
-              try { parts.push('Atualizado em ' + new Date(m.em).toLocaleString('pt-BR')); } catch (e) {}
+              try { parts.push('Desde ' + new Date(m.em).toLocaleString('pt-BR')); } catch (e) {}
             }
             meta.textContent = parts.length ? parts.join(' · ') : 'Aguarde o retorno do sistema';
           }
@@ -9551,22 +9639,17 @@
         ov.style.display = 'flex';
         ov.style.zIndex = '99999';
         ov.style.pointerEvents = 'auto';
-        try { sessionStorage.setItem('valis_manut_ui_lock', '1'); } catch (e) {}
         var app = document.getElementById('app');
-        if (app) {
-          app.classList.remove('show');
-          app.style.display = 'none';
-        }
+        if (app) { app.classList.remove('show'); app.style.display = 'none'; }
         var loginEl = document.getElementById('login');
         if (loginEl) loginEl.style.display = 'none';
+        try { iniciarManutCountdown(m); } catch (e) {}
       } else {
-        // Só fecha overlay se manutenção NÃO está ativa (ou DEV liberado nesta sessão)
         ov.classList.add('hidden');
         ov.style.display = '';
         ov.style.pointerEvents = '';
-        try { sessionStorage.removeItem('valis_manut_ui_lock'); } catch (e) {}
-        // Se DEV liberado com manutenção global ativa, mantém o app utilizável
-        if (ativo && devLiberado) {
+        try { pararManutCountdown(); } catch (e) {}
+        if (ativo && liberadoAqui) {
           var app2 = document.getElementById('app');
           if (app2 && usuarioAtual) {
             app2.classList.add('show');
@@ -9630,6 +9713,8 @@
         if (ti) ti.value = m.titulo || 'Sistema em manutenção';
         if (msg) msg.value = m.msg || 'Estamos realizando melhorias. Voltamos em breve.';
         if (eta) eta.value = m.eta || '';
+        var durEl = document.getElementById('manut-ctrl-duracao');
+        if (durEl) durEl.value = m.duracaoMin || 30;
         atualizarPreviewManutencao();
         ['manut-ctrl-titulo','manut-ctrl-msg','manut-ctrl-eta'].forEach(function(id) {
           var el = document.getElementById(id);
@@ -9678,20 +9763,29 @@
 
     async function setManutencao(ativo, msg, extra) {
       extra = extra || {};
+      var agora = Date.now();
+      var duracaoMin = extra.duracaoMin != null ? Number(extra.duracaoMin) : 0;
+      var ate = 0;
+      if (ativo && duracaoMin > 0) {
+        ate = agora + Math.round(duracaoMin * 60 * 1000);
+      }
       const payload = {
         ativo: !!ativo,
         msg: msg || '',
         titulo: extra.titulo || (ativo ? 'Sistema em manutenção' : ''),
         eta: extra.eta || '',
+        duracaoMin: ativo && duracaoMin > 0 ? duracaoMin : 0,
+        ate: ativo ? ate : 0,
         por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : 'DEV',
         em: new Date().toISOString(),
-        forceReload: Date.now()
+        forceReload: agora,
+        auto: !!extra.auto
       };
       localStorage.setItem('valis_manutencao', JSON.stringify(payload));
       if (firebaseOk && fbDb) {
         try {
           await fbDb.collection('valis').doc('manutencao').set(payload, { merge: true });
-          toast(ativo ? 'Manutenção ativada — aparelhos serão bloqueados' : 'Manutenção desativada — app liberado');
+          toast(ativo ? ('Manutenção ativada' + (duracaoMin ? (' · ' + duracaoMin + ' min') : '') + ' — bloqueando aparelhos') : (extra.auto ? 'Manutenção encerrada (tempo esgotado)' : 'Manutenção desativada — app liberado'));
         } catch (e) {
           console.warn(e);
           toast('Salvo neste aparelho — sincronização falhou');
