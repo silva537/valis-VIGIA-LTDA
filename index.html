@@ -306,6 +306,43 @@
 
 
 
+
+    /* Pack 0.0.4 */
+    .valis-modal-bg {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(2,6,23,0.72); display: none;
+      align-items: flex-end; justify-content: center;
+      padding: 12px;
+    }
+    .valis-modal-bg.show { display: flex; }
+    .valis-modal {
+      width: 100%; max-width: 480px; max-height: 85vh; overflow: auto;
+      background: #0f172a; border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 16px 16px 12px 12px; padding: 14px 14px 18px;
+      color: #e2e8f0;
+    }
+    .valis-modal h3 { margin: 0 0 8px; font-size: 15px; }
+    .valis-modal .vm-body { font-size: 12px; line-height: 1.45; color: #cbd5e1; }
+    .valis-modal .vm-item {
+      padding: 8px 0; border-bottom: 1px solid rgba(148,163,184,0.12);
+    }
+    .valis-modal .vm-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .valis-modal .vm-actions button { flex: 1; min-width: 100px; }
+    body.valis-readonly .btn.green,
+    body.valis-readonly .btn-pl-in,
+    body.valis-readonly button[onclick*="addOco"],
+    body.valis-readonly button[onclick*="addMsg"],
+    body.valis-readonly button[onclick*="salvarPlantao"] {
+      opacity: 0.55; pointer-events: none;
+    }
+    .impersonate-bar {
+      display: none; position: sticky; top: 0; z-index: 90;
+      background: #7c2d12; color: #ffedd5; text-align: center;
+      font-size: 12px; font-weight: 700; padding: 6px 10px;
+    }
+    .impersonate-bar.show { display: block; }
+    .busca-global-box { margin: 0 0 12px; }
+
     /* Pack 0.0.0 */
     .ver-badge {
       display: inline-flex; align-items: center; gap: 4px;
@@ -2256,12 +2293,26 @@
   </div>
 
   <!-- LOGIN -->
+
+  <div class="impersonate-bar" id="impersonate-bar">
+    Modo teste como outro usuário · <button type="button" class="linkish" style="color:#fff;text-decoration:underline;background:none;border:0;font-weight:800" onclick="devSairImpersonate()">Sair do modo</button>
+  </div>
+  <div class="valis-modal-bg" id="valis-modal-bg" onclick="if(event.target===this)fecharValisModal()">
+    <div class="valis-modal" role="dialog" aria-modal="true">
+      <h3 id="valis-modal-title">—</h3>
+      <div class="vm-body" id="valis-modal-body"></div>
+      <div class="vm-actions">
+        <button type="button" class="btn dark" onclick="fecharValisModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <section id="login" class="login">
     <div class="login-box">
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.5</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2319,7 +2370,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.3</span></div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.5</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
@@ -2328,7 +2379,31 @@
       <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="devFn(50)">Atualizar painel DEV</button>
     </div>
 
-    <div class="collapse-box open" id="dev-sec-overview">
+    
+    <div class="collapse-box open" id="dev-sec-novas">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-novas')">
+        <span>⚡ Funções novas<small>Monitor, impersonar, sanitizar…</small></span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="collapse-body"><div class="func-list">
+        <button class="func-btn" onclick="devFn(62)"><span class="ico">📡</span><div>Plantões ao vivo<small>Quem está em serviço agora</small></div></button>
+        <button class="func-btn" onclick="devFn(60)"><span class="ico">🎭</span><div>Impersonar vigilante<small>Ver o app como outro login</small></div></button>
+        <button class="func-btn" onclick="devFn(61)"><span class="ico">✅</span><div>Histórico de aprovações<small>Cadastros aprovados/recusados</small></div></button>
+        <button class="func-btn" onclick="devFn(63)"><span class="ico">📅</span><div>Forçar fechamento de folha<small>Arquivar período atual</small></div></button>
+        <button class="func-btn" onclick="devFn(64)"><span class="ico">🧹</span><div>Sanitizar banco<small>Limpa dados inconsistentes</small></div></button>
+        <button class="func-btn" onclick="devFn(65)"><span class="ico">📲</span><div>Tokens FCM / push<small>Status local e dicas</small></div></button>
+        <button class="func-btn" onclick="devFn(66)"><span class="ico">📍</span><div>Simular GPS<small>Testar geofence sem estar no posto</small></div></button>
+        <button class="func-btn" onclick="devFn(67)"><span class="ico">🔒</span><div>Modo somente leitura<small>Trava edições neste aparelho</small></div></button>
+        <button class="func-btn" onclick="devFn(68)"><span class="ico">⚖️</span><div>Comparar local × Firebase<small>Contagens lado a lado</small></div></button>
+        <button class="func-btn" onclick="devFn(69)"><span class="ico">📝</span><div>Changelog da versão<small>O que há de novo</small></div></button>
+        <button class="func-btn" onclick="devFn(70)"><span class="ico">🏆</span><div>Ranking do mês<small>Plantões por vigilante</small></div></button>
+        <button class="func-btn" onclick="devFn(71)"><span class="ico">🔎</span><div>Busca global<small>Plantão, ocorrência, usuário</small></div></button>
+        <button class="func-btn" onclick="devFn(72)"><span class="ico">🔄</span><div>Pedidos de troca<small>Aceitar / recusar plantão</small></div></button>
+        <button class="func-btn" onclick="devFn(73)"><span class="ico">🩺</span><div>Saúde do app<small>Checklist rápido de diagnóstico</small></div></button>
+      </div></div>
+    </div>
+
+    <div class="collapse-box" id="dev-sec-overview">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-overview')">
         <span>📊 Visão geral<small>Diagnóstico, sessão, versão</small></span>
         <span class="chev">▼</span>
@@ -2511,7 +2586,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.3</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.5</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -2568,9 +2643,17 @@
             <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
             <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
           </div>
+          <div class="pv-checklist" id="pv-checklist-saida" style="display:none">
+            <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de saída</div>
+            <label><input type="checkbox" class="pv-chk-out" data-item="Portão fechado"> Portão fechado</label>
+            <label><input type="checkbox" class="pv-chk-out" data-item="Equipamentos OK"> Equipamentos OK</label>
+            <label><input type="checkbox" class="pv-chk-out" data-item="Ocorrências registradas"> Ocorrências registradas</label>
+            <label><input type="checkbox" class="pv-chk-out" data-item="Área conferida"> Área conferida</label>
+          </div>
           <div class="pv-extra-actions">
             <button type="button" class="btn dark sm" id="pv-btn-troca" onclick="pvTrocarPostoAgora()" disabled>Trocar posto</button>
             <button type="button" class="btn dark sm" onclick="copiarRelatorioTurnoAgora()">Relatório do turno</button>
+            <button type="button" class="btn dark sm" onclick="abrirPedidoTrocaPlantao()">Pedir troca de plantão</button>
           </div>
           <details class="pv-mapa-details" id="pv-mapa-details">
             <summary class="pv-mapa-summary">Localização e mapa do posto</summary>
@@ -2603,6 +2686,26 @@
         </div>
 
         <div class="sync-meta" id="sync-meta">Sync: —</div>
+
+        <div class="collapse-box" id="inicio-extras-ops">
+          <button type="button" class="collapse-head" onclick="toggleCollapse('inicio-extras-ops')">
+            <span>🧰 Ferramentas e escala<small>Busca, silencioso, escala</small></span>
+            <span class="chev">▼</span>
+          </button>
+          <div class="collapse-body">
+            <div class="field"><label>Busca global</label>
+              <input id="busca-global-input" class="input" placeholder="Plantão, ocorrência, usuário..." onkeydown="if(event.key==='Enter')buscaGlobalApp()">
+            </div>
+            <button type="button" class="btn dark sm" onclick="buscaGlobalApp()">Buscar</button>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;cursor:pointer">
+              <input type="checkbox" id="cfg-modo-silencioso" style="width:16px;height:16px" onchange="toggleModoSilencioso(this.checked)">
+              Modo silencioso no plantão (menos alertas)
+            </label>
+            <div id="inicio-escala-semana" class="meta" style="margin-top:10px;font-size:12px;color:var(--muted)">Escala: —</div>
+            <div id="inicio-trocas-box" style="margin-top:12px"></div>
+          </div>
+        </div>
+
         <div class="inicio-offline-card" id="inicio-offline-card">
           <b>Fila offline</b>
           <div id="inicio-offline-txt" style="margin:4px 0 8px">—</div>
@@ -2771,6 +2874,8 @@
           <button type="button" class="btn dark" id="btn-ex-folha-min" onclick="toggleExFolhaLista()">
             <span id="ex-folha-min-label">📋 Minimizar lista de plantões</span>
           </button>
+          <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="assinarFolhaAtual()">Assinar / confirmar ciência da folha</button>
+          <div class="meta" id="folha-ciencia-status" style="font-size:11px;margin-top:6px;color:var(--muted)">—</div>
           <div class="field" style="margin-top:10px">
             <label>Filtrar por tipo de serviço</label>
             <select id="ex-filtro-tipo" class="select" onchange="render()">
@@ -3326,7 +3431,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.3';
+    const APP_VERSION = '0.0.5';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4561,6 +4666,7 @@
         addAtividade('Aprovado (novo sistema): ' + s.nome + ' → ' + cargo, 'admin');
         await atualizarPainelSolicitacoes(false);
         render();
+        try { registrarAprovacaoLog('aprovado', s.user, (s.nome || '') + ' → ' + cargo); } catch (e) {}
         toast(okUsers !== false && okSol ? 'Aprovado e liberado para login' : 'Aprovado (verifique conexão Firebase)');
       } catch (e) {
         alert('Erro ao aprovar: ' + (e && e.message ? e.message : e));
@@ -4579,6 +4685,7 @@
         await salvarSolicitacoesNuvem();
         addAtividade('Pedido recusado: ' + s.nome, 'admin');
         await atualizarPainelSolicitacoes(false);
+        try { registrarAprovacaoLog('recusado', s.user, s.nome || ''); } catch (e) {}
         toast('Pedido recusado');
       } catch (e) {
         alert('Erro ao recusar: ' + (e && e.message ? e.message : e));
@@ -5419,6 +5526,9 @@
         try { atualizarSyncMeta(); } catch (e0) {}
         try { atualizarTimerPlantaoLive(); } catch (e0) {}
         try { atualizarBadgeVersao(); } catch (e0) {}
+        try { atualizarEscalaSemanaInicio(); } catch (e0) {}
+        try { aplicarReadonlyUI(); } catch (e0) {}
+        try { renderPedidosTrocaInicio(); } catch (e0) {}
         try { verificarOcoNovasDoPosto(); } catch (e0) {}
         var pack = document.getElementById('inicio-pack');
         var items = document.getElementById('inicio-pack-items');
@@ -6411,6 +6521,253 @@
           }
           break;
         }
+
+        case 60: {
+          try {
+            var users = (db.users || []).filter(function(u) {
+              return u && u.ativo !== false && !(u.pendente === true || u.pendente === 'true');
+            });
+            if (!users.length) { toast('Sem usuários'); break; }
+            var lista = users.map(function(u, i) {
+              return (i + 1) + ') @' + u.user + ' · ' + (u.nome || '') + ' · ' + (u.funcao || '');
+            }).join('\n');
+            var escolha = prompt('Impersonar qual usuário?\nDigite o número:\n' + lista);
+            if (!escolha) break;
+            var idx = parseInt(escolha, 10) - 1;
+            if (isNaN(idx) || idx < 0 || idx >= users.length) { alert('Opção inválida'); break; }
+            if (!usuarioAtual || usuarioAtual.funcao !== 'dev') {
+              if (!devLiberado) { toast('Só DEV'); break; }
+            }
+            sessionStorage.setItem('valis_impersonate_real', JSON.stringify({ user: usuarioAtual.user }));
+            usuarioAtual = users[idx];
+            sessionStorage.setItem('valis_user', JSON.stringify({ user: usuarioAtual.user }));
+            var bar = document.getElementById('impersonate-bar');
+            if (bar) {
+              bar.classList.add('show');
+              bar.childNodes[0].textContent = 'Testando como @' + usuarioAtual.user + ' · ';
+            }
+            try { fecharDrawer(); render(); tab('inicio'); } catch (e) {}
+            toast('Impersonando @' + usuarioAtual.user);
+          } catch (e) { alert('Erro: ' + (e && e.message ? e.message : e)); }
+          break;
+        }
+        case 61: {
+          try {
+            var log = db.aprovacoesLog || [];
+            if (!log.length) {
+              abrirValisModal('Aprovações', '<div class="empty">Nenhum registro ainda. Aprovações futuras serão listadas aqui.</div>');
+              break;
+            }
+            abrirValisModal('Histórico de aprovações', log.slice(0, 40).map(function(x) {
+              return '<div class="vm-item"><b>' + (x.acao || '') + '</b> · ' + (x.alvo || '') +
+                '<div class="meta">' + (x.por || '') + ' · ' + (x.em ? new Date(x.em).toLocaleString('pt-BR') : '') + '</div>' +
+                (x.detalhe ? ('<div class="meta">' + String(x.detalhe).replace(/</g,'') + '</div>') : '') + '</div>';
+            }).join(''));
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 62: {
+          try {
+            var list = db.sessoesPlantao || [];
+            // merge local session
+            try {
+              var sess = typeof pvLoad === 'function' ? pvLoad() : null;
+              if (sess && (sess.status === 'ativo' || sess.status === 'almoco') && usuarioAtual) {
+                list = list.filter(function(s) { return String(s.userLogin) !== String(usuarioAtual.user); });
+                list = [{
+                  userLogin: usuarioAtual.user,
+                  nome: usuarioAtual.nome,
+                  status: sess.status,
+                  postoNome: sess.postoNome,
+                  checkIn: sess.checkIn,
+                  updatedAt: new Date().toISOString()
+                }].concat(list);
+              }
+            } catch (e) {}
+            if (!list.length) {
+              abrirValisModal('Plantões ao vivo', '<div class="empty">Ninguém em serviço registrado agora.</div>');
+              break;
+            }
+            abrirValisModal('Plantões ao vivo', list.slice(0, 30).map(function(s) {
+              return '<div class="vm-item"><b>@' + (s.userLogin || '') + '</b> · ' + (s.nome || '') +
+                '<div class="meta">' + (s.status || '') + ' · ' + (s.postoNome || '—') +
+                (s.checkIn ? (' · desde ' + new Date(s.checkIn).toLocaleTimeString('pt-BR')) : '') + '</div></div>';
+            }).join(''));
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 63: {
+          try {
+            if (typeof fecharFolhaAtual === 'function') {
+              if (!confirm('Forçar fechamento/arquivamento da folha atual?')) break;
+              fecharFolhaAtual();
+              toast('Fechamento solicitado');
+            } else if (typeof arquivarFolhaAtual === 'function') {
+              if (!confirm('Arquivar folha atual?')) break;
+              arquivarFolhaAtual();
+            } else {
+              alert('Use a tela Extrato para fechar a folha (função nativa).');
+            }
+          } catch (e) { alert('Erro: ' + (e && e.message ? e.message : e)); }
+          break;
+        }
+        case 64: {
+          try {
+            if (!confirm('Sanitizar banco?\nRemove plantões sem data, msgs vazias e normaliza flags de users.')) break;
+            var n = 0;
+            db.plantaoes = (db.plantaoes || []).filter(function(p) {
+              if (!p || !p.data) { n++; return false; }
+              return true;
+            });
+            db.msg = (db.msg || []).filter(function(m) {
+              if (!m || !String(m.t || '').trim()) { n++; return false; }
+              return true;
+            });
+            (db.users || []).forEach(function(u) {
+              if (u.ativo === 'true') { u.ativo = true; n++; }
+              if (u.ativo === 'false') { u.ativo = false; n++; }
+              if (u.pendente === 'true') { u.pendente = true; n++; }
+              if (u.pendente === 'false') { u.pendente = false; n++; }
+            });
+            try { Promise.resolve(salvar()).catch(function(){}); } catch (e) {}
+            try { registrarAuditoria('dev_sanitizar', n + ' ajustes'); } catch (e) {}
+            toast('Sanitizado (' + n + ' ajustes)');
+            try { render(); } catch (e) {}
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 65: {
+          try {
+            var tok = '';
+            try { tok = localStorage.getItem('valis_fcm_token') || localStorage.getItem('fcm_token') || ''; } catch (e) {}
+            var htmlT =
+              '<div class="vm-item"><b>Token neste aparelho</b><div class="meta">' +
+              (tok ? (String(tok).slice(0, 48) + '…') : 'Não encontrado — use Ativar push no perfil') +
+              '</div></div>' +
+              '<div class="vm-item"><b>Firestore</b><div class="meta">Tokens de todos ficam em valis/fcm_tokens após sync push.</div></div>' +
+              '<div class="vm-item"><b>Lembrete</b><div class="meta">Push com app fechado exige Cloud Functions + Blaze.</div></div>';
+            abrirValisModal('Tokens FCM', htmlT);
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 66: {
+          try {
+            var lat = prompt('Latitude para simular:', _pvLastPos && _pvLastPos.lat != null ? String(_pvLastPos.lat) : '-23.55');
+            if (lat == null) break;
+            var lng = prompt('Longitude para simular:', _pvLastPos && _pvLastPos.lng != null ? String(_pvLastPos.lng) : '-46.63');
+            if (lng == null) break;
+            _pvLastPos = { lat: Number(lat), lng: Number(lng), acc: 5 };
+            try { if (typeof pvOnGeoTick === 'function') pvOnGeoTick(); } catch (e) {}
+            try { if (typeof pvAtualizarMapa === 'function') pvAtualizarMapa(); } catch (e) {}
+            toast('GPS simulado');
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 67: {
+          try {
+            var on = !valisReadonlyAtivo();
+            localStorage.setItem('valis_readonly', on ? '1' : '0');
+            aplicarReadonlyUI();
+            toast(on ? 'Somente leitura ATIVO' : 'Somente leitura desligado');
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 68: {
+          (async function() {
+            try {
+              var localTxt =
+                'LOCAL\nUsers: ' + (db.users||[]).length +
+                '\nPlantões: ' + (db.plantaoes||[]).length +
+                '\nOco: ' + (db.oco||[]).length +
+                '\nPostos: ' + (db.postos||[]).length +
+                '\nMsgs: ' + (db.msg||[]).length;
+              var remoteTxt = 'FIREBASE\n';
+              if (typeof firebaseOk !== 'undefined' && firebaseOk && typeof fbDb !== 'undefined' && fbDb) {
+                try {
+                  var snap = await fbDb.collection('valis').doc('db_v42').get();
+                  var d = snap.exists ? snap.data() : null;
+                  if (d) {
+                    remoteTxt += 'Users: ' + ((d.users||[]).length) +
+                      '\nPlantões: ' + ((d.plantaoes||[]).length) +
+                      '\nOco: ' + ((d.oco||[]).length) +
+                      '\nPostos: ' + ((d.postos||[]).length) +
+                      '\nMsgs: ' + ((d.msg||[]).length);
+                  } else remoteTxt += 'Documento vazio ou inexistente';
+                } catch (e) {
+                  remoteTxt += 'Erro: ' + (e.message || e);
+                }
+              } else remoteTxt += 'Indisponível (offline)';
+              alert(localTxt + '\n\n' + remoteTxt);
+            } catch (e) { alert(e); }
+          })();
+          break;
+        }
+        case 69: {
+          alert(changelogTexto());
+          break;
+        }
+        case 70: {
+          try {
+            var mes = new Date().toISOString().slice(0, 7);
+            var map = {};
+            (db.plantaoes || []).forEach(function(p) {
+              if (!p || String(p.data || '').slice(0, 7) !== mes) return;
+              var k = p.userLogin || p.por || '—';
+              if (!map[k]) map[k] = { n: 0, valor: 0 };
+              map[k].n++;
+              map[k].valor += Number(p.valor || 0);
+            });
+            var rows = Object.keys(map).map(function(k) {
+              return { k: k, n: map[k].n, valor: map[k].valor };
+            }).sort(function(a, b) { return b.n - a.n; });
+            if (!rows.length) {
+              abrirValisModal('Ranking ' + mes, '<div class="empty">Sem plantões neste mês.</div>');
+              break;
+            }
+            abrirValisModal('Ranking ' + mes, rows.slice(0, 30).map(function(r, i) {
+              return '<div class="vm-item"><b>#' + (i+1) + ' ' + r.k + '</b><div class="meta">' + r.n + ' plantões · R$ ' + (r.valor||0).toFixed(2) + '</div></div>';
+            }).join(''));
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 71: {
+          try {
+            fecharDrawer();
+            tab('inicio');
+            try { toggleCollapse('inicio-extras-ops'); } catch (e) {}
+            var box = document.getElementById('inicio-extras-ops');
+            if (box) box.classList.add('open');
+            var inp = document.getElementById('busca-global-input');
+            if (inp) { inp.focus(); toast('Digite na busca global e Enter'); }
+            else buscaGlobalApp();
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 72: {
+          try {
+            fecharDrawer();
+            tab('inicio');
+            var box = document.getElementById('inicio-extras-ops');
+            if (box) box.classList.add('open');
+            renderPedidosTrocaInicio();
+            var list = (db.pedidosTrocaPlantao || []).slice(0, 30);
+            if (!list.length) {
+              abrirValisModal('Trocas de plantão', '<div class="empty">Nenhum pedido registrado.</div>');
+              break;
+            }
+            abrirValisModal('Trocas de plantão', list.map(function(p) {
+              return '<div class="vm-item"><b>@' + (p.de||'') + ' → @' + (p.para||'') + '</b> · ' + (p.status||'') +
+                '<div class="meta">' + String(p.motivo||'').replace(/</g,'') + '</div>' +
+                '<div class="meta">' + (p.em ? new Date(p.em).toLocaleString('pt-BR') : '') + '</div></div>';
+            }).join(''));
+          } catch (e) { alert(e); }
+          break;
+        }
+        case 73: {
+          try { mostrarDiagnosticoSaude(); } catch (e) { alert(e); }
+          break;
+        }
+
       }
     }
 
@@ -7794,9 +8151,14 @@
     }
 
     async function addOco() {
+      if (guardReadonly()) return;
       const t = document.getElementById('ot').value.trim();
       if (!t) return alert('Descreva a ocorrencia.');
       const tipo = document.getElementById('otp').value;
+      var fi0 = document.getElementById('ot-foto');
+      if ((tipo === 'Emergência' || tipo === 'Suspeito') && !(fi0 && fi0.files && fi0.files[0])) {
+        return alert('Para ' + tipo + ' é obrigatório anexar uma foto.');
+      }
       const opEl = document.getElementById('op');
       const posto = opEl ? opEl.value : '';
       if (!posto) return alert('Selecione o posto da ocorrencia.');
@@ -9513,6 +9875,341 @@
     }
 
 
+
+
+
+
+    /* ===== Pack 0.0.5 polish ===== */
+    function podeGerirTrocasPlantao() {
+      if (!usuarioAtual) return false;
+      var f = String(usuarioAtual.funcao || '').toLowerCase();
+      return f === 'dev' || f === 'admin' || f === 'supervisor' || f === 'supervisao' || !!devLiberado;
+    }
+    function renderPedidosTrocaInicio() {
+      try {
+        var box = document.getElementById('inicio-trocas-box');
+        if (!box) return;
+        var login = usuarioAtual ? String(usuarioAtual.user || '').toLowerCase() : '';
+        var list = db.pedidosTrocaPlantao || [];
+        var meus = list.filter(function(p) {
+          if (!p || p.status !== 'pendente') return false;
+          var para = String(p.para || '').toLowerCase();
+          var de = String(p.de || '').toLowerCase();
+          if (podeGerirTrocasPlantao()) return true;
+          return para === login || de === login;
+        }).slice(0, 8);
+        if (!meus.length) {
+          box.innerHTML = '';
+          return;
+        }
+        box.innerHTML = '<div class="card-label" style="margin-bottom:6px">Pedidos de troca de plantão</div>' +
+          meus.map(function(p) {
+            var podeAgir = podeGerirTrocasPlantao() || String(p.para || '').toLowerCase() === login;
+            var acoes = podeAgir
+              ? '<div class="actions">' +
+                '<button class="btn green sm" onclick="responderPedidoTrocaPlantao(\'' + p.id + '\',\'aceito\')">Aceitar</button>' +
+                '<button class="btn dark sm" onclick="responderPedidoTrocaPlantao(\'' + p.id + '\',\'recusado\')">Recusar</button>' +
+                '</div>'
+              : '<div class="meta">Aguardando resposta</div>';
+            return '<div class="item"><b>@' + (p.de || '') + ' → @' + (p.para || '') + '</b>' +
+              '<div class="meta">' + String(p.motivo || '').replace(/</g,'') + '</div>' +
+              '<div class="meta">' + (p.em ? new Date(p.em).toLocaleString('pt-BR') : '') + ' · ' + (p.status || '') + '</div>' +
+              acoes + '</div>';
+          }).join('');
+      } catch (e) {}
+    }
+    async function responderPedidoTrocaPlantao(id, status) {
+      try {
+        if (guardReadonly()) return;
+        var p = (db.pedidosTrocaPlantao || []).find(function(x) { return String(x.id) === String(id); });
+        if (!p) return toast('Pedido não encontrado');
+        if (p.status !== 'pendente') return toast('Pedido já respondido');
+        var login = usuarioAtual ? String(usuarioAtual.user || '').toLowerCase() : '';
+        var pode = podeGerirTrocasPlantao() || String(p.para || '').toLowerCase() === login;
+        if (!pode) return toast('Sem permissão');
+        p.status = status;
+        p.respondidoEm = new Date().toISOString();
+        p.respondidoPor = usuarioAtual ? usuarioAtual.user : '—';
+        try { await salvar(); } catch (e) {}
+        try { registrarAuditoria('troca_plantao_' + status, (p.de || '') + ' → ' + (p.para || '')); } catch (e) {}
+        try { addAtividade('Troca de plantão ' + status + ': @' + (p.de || '') + ' → @' + (p.para || '')); } catch (e) {}
+        renderPedidosTrocaInicio();
+        toast(status === 'aceito' ? 'Troca aceita' : 'Troca recusada');
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function diagnosticoSaudeApp() {
+      var ok = [];
+      var warn = [];
+      try {
+        ok.push('Versão ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '?'));
+        ok.push((typeof firebaseOk !== 'undefined' && firebaseOk) ? 'Firebase OK' : 'Firebase offline/local');
+        ok.push(navigator.onLine ? 'Navegador online' : 'Navegador offline');
+        ok.push('Users: ' + ((db.users || []).length));
+        ok.push('Plantões: ' + ((db.plantaoes || []).length));
+        ok.push('Postos: ' + ((db.postos || []).length));
+        var q = [];
+        try { q = JSON.parse(localStorage.getItem(typeof offlineQueueKey === 'function' ? offlineQueueKey() : 'valis_offline_queue_v2') || '[]'); } catch (e) {}
+        if (q.length) warn.push('Fila offline com ' + q.length + ' item(ns)');
+        else ok.push('Fila offline vazia');
+        var semPosto = (db.users || []).filter(function(u) {
+          if (!u || u.funcao === 'dev' || u.funcao === 'admin') return false;
+          var ids = typeof getUserPostosIds === 'function' ? getUserPostosIds(u) : (u.postosIds || []);
+          return !ids || !ids.length;
+        }).length;
+        if (semPosto) warn.push(semPosto + ' vigilante(s)/equipe sem posto vinculado');
+        var pend = (db.solicitacoes || []).filter(function(s) { return s && s.status === 'pendente'; }).length;
+        if (pend) warn.push(pend + ' cadastro(s) pendente(s)');
+        var trocas = (db.pedidosTrocaPlantao || []).filter(function(p) { return p && p.status === 'pendente'; }).length;
+        if (trocas) warn.push(trocas + ' troca(s) de plantão pendente(s)');
+        if (!usuarioAtual) warn.push('Sem usuário logado');
+        else ok.push('Logado como @' + usuarioAtual.user);
+      } catch (e) {
+        warn.push('Erro no diagnóstico: ' + (e && e.message ? e.message : e));
+      }
+      return { ok: ok, warn: warn };
+    }
+    function mostrarDiagnosticoSaude() {
+      var d = diagnosticoSaudeApp();
+      var html =
+        '<div class="vm-item"><b>OK</b><div class="meta">' + d.ok.map(function(x){ return '• ' + x; }).join('<br>') + '</div></div>' +
+        (d.warn.length
+          ? '<div class="vm-item"><b>Atenção</b><div class="meta">' + d.warn.map(function(x){ return '• ' + x; }).join('<br>') + '</div></div>'
+          : '<div class="vm-item"><b>Atenção</b><div class="meta">Nenhum alerta.</div></div>');
+      abrirValisModal('Saúde do app', html);
+    }
+
+
+    /* ===== Pack 0.0.4 — DEV + app ===== */
+    function abrirValisModal(titulo, htmlBody) {
+      try {
+        var bg = document.getElementById('valis-modal-bg');
+        var t = document.getElementById('valis-modal-title');
+        var b = document.getElementById('valis-modal-body');
+        if (t) t.textContent = titulo || '—';
+        if (b) b.innerHTML = htmlBody || '';
+        if (bg) bg.classList.add('show');
+      } catch (e) {}
+    }
+    function fecharValisModal() {
+      try {
+        var bg = document.getElementById('valis-modal-bg');
+        if (bg) bg.classList.remove('show');
+      } catch (e) {}
+    }
+    function valisReadonlyAtivo() {
+      try { return localStorage.getItem('valis_readonly') === '1'; } catch (e) { return false; }
+    }
+    function aplicarReadonlyUI() {
+      try {
+        if (valisReadonlyAtivo()) document.body.classList.add('valis-readonly');
+        else document.body.classList.remove('valis-readonly');
+      } catch (e) {}
+    }
+    function guardReadonly(acao) {
+      if (valisReadonlyAtivo() && !(usuarioAtual && usuarioAtual.funcao === 'dev') && !devLiberado) {
+        toast('Modo somente leitura ativo');
+        return true;
+      }
+      return false;
+    }
+    function modoSilenciosoAtivo() {
+      try { return localStorage.getItem('valis_silencioso') === '1'; } catch (e) { return false; }
+    }
+    function toggleModoSilencioso(on) {
+      try { localStorage.setItem('valis_silencioso', on ? '1' : '0'); } catch (e) {}
+      toast(on ? 'Modo silencioso ligado' : 'Modo silencioso desligado');
+    }
+    function notificarAppSafe(title, body) {
+      try {
+        if (modoSilenciosoAtivo()) {
+          try { toast((title || '') + ' — ' + (body || '')); } catch (e) {}
+          return;
+        }
+        if (typeof notificarApp === 'function') notificarApp(title, body);
+      } catch (e) {}
+    }
+    function registrarAprovacaoLog(acao, alvo, detalhe) {
+      try {
+        if (!db.aprovacoesLog) db.aprovacoesLog = [];
+        db.aprovacoesLog.unshift({
+          id: Date.now(),
+          acao: acao,
+          alvo: alvo || '',
+          detalhe: detalhe || '',
+          por: usuarioAtual ? usuarioAtual.user : '—',
+          em: new Date().toISOString()
+        });
+        if (db.aprovacoesLog.length > 200) db.aprovacoesLog.length = 200;
+      } catch (e) {}
+    }
+    function registrarSessaoPlantaoVivo(status, sess) {
+      try {
+        if (!db.sessoesPlantao) db.sessoesPlantao = [];
+        var login = usuarioAtual ? String(usuarioAtual.user || '') : '';
+        db.sessoesPlantao = (db.sessoesPlantao || []).filter(function(s) {
+          return String(s.userLogin || '') !== login;
+        });
+        if (status === 'ativo' || status === 'almoco') {
+          db.sessoesPlantao.unshift({
+            userLogin: login,
+            nome: usuarioAtual ? usuarioAtual.nome : '',
+            status: status,
+            postoNome: sess && sess.postoNome || '',
+            postoId: sess && sess.postoId || '',
+            checkIn: sess && sess.checkIn || null,
+            updatedAt: new Date().toISOString()
+          });
+        }
+        if (db.sessoesPlantao.length > 80) db.sessoesPlantao.length = 80;
+      } catch (e) {}
+    }
+    function devSairImpersonate() {
+      try {
+        var raw = sessionStorage.getItem('valis_impersonate_real');
+        if (!raw) {
+          toast('Não está impersonando');
+          return;
+        }
+        var real = JSON.parse(raw);
+        var u = (db.users || []).find(function(x) {
+          return String(x.user || '').toLowerCase() === String(real.user || '').toLowerCase();
+        });
+        sessionStorage.removeItem('valis_impersonate_real');
+        var bar = document.getElementById('impersonate-bar');
+        if (bar) bar.classList.remove('show');
+        if (u) {
+          usuarioAtual = u;
+          sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
+          try { render(); entrarApp(); } catch (e) {}
+          toast('Voltou como @' + u.user);
+        }
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function pvLerChecklistSaida() {
+      var itens = [];
+      try {
+        document.querySelectorAll('.pv-chk-out:checked').forEach(function(el) {
+          var t = el.getAttribute('data-item') || '';
+          if (t) itens.push(t);
+        });
+      } catch (e) {}
+      return itens;
+    }
+    function atualizarEscalaSemanaInicio() {
+      try {
+        var el = document.getElementById('inicio-escala-semana');
+        if (!el || !usuarioAtual) return;
+        var nome = String(usuarioAtual.nome || usuarioAtual.user || '').toLowerCase();
+        var login = String(usuarioAtual.user || '').toLowerCase();
+        var lista = (db.esc || []).filter(function(e) {
+          var n = String(e.n || e.nome || e.user || '').toLowerCase();
+          return n && (n.indexOf(nome) >= 0 || n.indexOf(login) >= 0 || nome.indexOf(n) >= 0);
+        }).slice(0, 5);
+        if (!lista.length) {
+          el.textContent = 'Escala: nenhuma escala encontrada para você nesta base.';
+          return;
+        }
+        el.innerHTML = '<b>Sua escala</b><br>' + lista.map(function(e) {
+          return (e.d || '') + ' · ' + (e.t || '') + ' · ' + (e.h || '') + ' · ' + (e.p || e.posto || '');
+        }).join('<br>');
+      } catch (e) {}
+    }
+    function buscaGlobalApp() {
+      try {
+        var q = ((document.getElementById('busca-global-input') || {}).value || '').trim().toLowerCase();
+        if (!q) return toast('Digite algo para buscar');
+        var hits = [];
+        (db.plantaoes || []).forEach(function(p) {
+          var blob = JSON.stringify(p).toLowerCase();
+          if (blob.indexOf(q) >= 0) hits.push({ tipo: 'Plantão', txt: (p.data || '') + ' · ' + (p.por || p.userLogin || '') + ' · ' + (p.posto || '') + ' · ' + (p.tipo || '') });
+        });
+        (db.oco || []).forEach(function(o) {
+          var blob = JSON.stringify(o).toLowerCase();
+          if (blob.indexOf(q) >= 0) hits.push({ tipo: 'Ocorrência', txt: (o.p || '') + ' · ' + (o.tipo || '') + ' · ' + String(o.t || '').slice(0, 80) });
+        });
+        (db.users || []).forEach(function(u) {
+          var blob = (String(u.user || '') + ' ' + String(u.nome || '') + ' ' + String(u.funcao || '')).toLowerCase();
+          if (blob.indexOf(q) >= 0) hits.push({ tipo: 'Usuário', txt: '@' + (u.user || '') + ' · ' + (u.nome || '') + ' · ' + (u.funcao || '') });
+        });
+        hits = hits.slice(0, 40);
+        if (!hits.length) return abrirValisModal('Busca', '<div class="empty">Nada encontrado para \"' + q.replace(/</g,'') + '\".</div>');
+        abrirValisModal('Busca: ' + q, hits.map(function(h) {
+          return '<div class="vm-item"><b>' + h.tipo + '</b><div class="meta">' + String(h.txt).replace(/</g,'') + '</div></div>';
+        }).join(''));
+      } catch (e) {
+        alert('Erro busca: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function assinarFolhaAtual() {
+      try {
+        if (!usuarioAtual) return toast('Faça login');
+        if (guardReadonly()) return;
+        if (!db.folhasCiencia) db.folhasCiencia = [];
+        var mes = new Date().toISOString().slice(0, 7);
+        var login = String(usuarioAtual.user || '');
+        db.folhasCiencia = (db.folhasCiencia || []).filter(function(x) {
+          return !(String(x.userLogin) === login && String(x.mes) === mes);
+        });
+        db.folhasCiencia.unshift({
+          id: Date.now(),
+          userLogin: login,
+          nome: usuarioAtual.nome || '',
+          mes: mes,
+          em: new Date().toISOString()
+        });
+        try { salvar(); } catch (e) {}
+        try { registrarAuditoria('folha_ciencia', mes + ' · ' + login); } catch (e) {}
+        var st = document.getElementById('folha-ciencia-status');
+        if (st) st.textContent = 'Ciência registrada em ' + new Date().toLocaleString('pt-BR');
+        toast('Ciência da folha registrada');
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function abrirPedidoTrocaPlantao() {
+      try {
+        if (!usuarioAtual) return toast('Faça login');
+        if (guardReadonly()) return;
+        var alvo = prompt('Login de quem deve cobrir / receber a troca:');
+        if (!alvo) return;
+        var motivo = prompt('Motivo / observação:', 'Solicito troca de plantão') || '';
+        if (!db.pedidosTrocaPlantao) db.pedidosTrocaPlantao = [];
+        db.pedidosTrocaPlantao.unshift({
+          id: Date.now(),
+          de: usuarioAtual.user,
+          deNome: usuarioAtual.nome || '',
+          para: String(alvo).trim(),
+          motivo: motivo,
+          status: 'pendente',
+          em: new Date().toISOString()
+        });
+        if (db.pedidosTrocaPlantao.length > 100) db.pedidosTrocaPlantao.length = 100;
+        try { salvar(); } catch (e) {}
+        try { registrarAuditoria('pedido_troca_plantao', usuarioAtual.user + ' → ' + alvo); } catch (e) {}
+        toast('Pedido de troca enviado');
+        try { renderPedidosTrocaInicio(); } catch (e) {}
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function changelogTexto() {
+      return [
+        'VALIS v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : ''),
+        '',
+        '• Menu DEV reorganizado + painel resumo',
+        '• Plantão ao vivo no Início, checklist entrada/saída',
+        '• Ocorrências por posto vinculado',
+        '• Login automático com status visível',
+        '• Impersonar, sanitizar, simular GPS, readonly',
+        '• Busca global, ciência da folha, modo silencioso',
+        '• Pedido de troca de plantão, ranking do mês',
+        '• Monitor de sessões de plantão ao vivo'
+      ].join('\n');
+    }
 
 
     /* ===== Pack 0.0.0 ===== */
@@ -11272,6 +11969,8 @@
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
       try { feedbackAcaoLeve(); } catch (e) {}
       try { iniciarTimerPlantaoLive(); } catch (e) {}
+      try { registrarSessaoPlantaoVivo('ativo', sess); } catch (e) {}
+      try { var saida = document.getElementById('pv-checklist-saida'); if (saida) saida.style.display = 'block'; } catch (e) {}
       try { labRegPresenca('check-in', sess.postoNome, sess.checkInLat, sess.checkInLng); } catch (e) {}
       try { notificarApp('VALIS · Check-in', (p ? p.n + ' · ' : '') + pvFmtHora(sess.checkIn)); } catch (e) {}
     }
@@ -11300,11 +11999,16 @@
     async function pvCheckOut(auto) {
       var sess = pvLoad();
       if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
+      if (guardReadonly()) return;
       if (!auto) {
         var postoNome = sess.postoNome || 'posto';
         if (!confirm('Confirmar check-out (saída) em ' + postoNome + '?')) return;
       }
+      try {
+        sess.checklistSaida = pvLerChecklistSaida();
+      } catch (e) {}
       try { feedbackAcaoLeve(); } catch (e) {}
+      try { registrarSessaoPlantaoVivo('finalizado', sess); } catch (e) {}
       var lat = null, lng = null, acc = null;
       try {
         var pos = await pvGetPosicao();
@@ -11551,6 +12255,12 @@
         try { iniciarTimerPlantaoLive(); } catch (e) {}
         try { atualizarBadgeVersao(); } catch (e) {}
         try { atualizarSyncMeta(); } catch (e) {}
+        try { aplicarReadonlyUI(); } catch (e) {}
+        try { atualizarEscalaSemanaInicio(); } catch (e) {}
+        try {
+          var ms = document.getElementById('cfg-modo-silencioso');
+          if (ms) ms.checked = modoSilenciosoAtivo();
+        } catch (e) {}
         try { setTimeout(function(){ pvEnsureMap(); pvAtualizarMapa(); }, 400); } catch (e) {}
         // Reavalia ao voltar para o app (abertura / 2º plano)
         if (!window._pvVisBound) {
