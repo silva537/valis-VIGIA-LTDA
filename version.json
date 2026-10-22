@@ -1,5 +1,5 @@
 {
-  "v": "0.0.9",
+  "v": "0.1.0",
   "forceReload": true,
-  "msg": "Manutencao firme + cronometro de duracao"
+  "msg": "Manutencao por horario + checkout automatico do plantao vivo"
 }

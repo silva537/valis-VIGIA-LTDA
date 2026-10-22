@@ -2382,7 +2382,7 @@
       <p class="manut-msg" id="manutencao-msg">O aplicativo está temporariamente suspenso pela administração. Voltamos em breve.</p>
       <div class="manut-meta" id="manutencao-meta">—</div>
       <div class="manut-timer" id="manutencao-timer" style="display:none">
-        <div class="manut-timer-lbl">Tempo restante</div>
+        <div class="manut-timer-lbl">Liberação do app em</div>
         <div class="manut-timer-val" id="manutencao-timer-val">--:--:--</div>
       </div>
       <button type="button" class="btn dark" onclick="location.reload()">Atualizar e tentar de novo</button>
@@ -2417,13 +2417,16 @@
         <textarea id="manut-ctrl-msg" class="area" rows="3" placeholder="Estamos atualizando o sistema. Voltamos em breve."></textarea>
       </div>
       <div class="field">
-        <label>Duração da manutenção (minutos)</label>
-        <input id="manut-ctrl-duracao" class="input" type="number" min="1" max="1440" step="1" value="30" placeholder="30">
-        <div class="meta" style="font-size:11px;margin-top:4px;color:var(--muted)">Cronômetro na tela. Ao zerar, a manutenção desliga sozinha.</div>
+        <label>Liberar o aplicativo em</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <input id="manut-ctrl-data" class="input" type="date">
+          <input id="manut-ctrl-hora" class="input" type="time" value="14:30">
+        </div>
+        <div class="meta" style="font-size:11px;margin-top:6px;color:var(--muted)">Escolha a data e o horário (ex.: 14:30). Na tela aparece o tempo que falta até liberar.</div>
       </div>
       <div class="field">
-        <label>Texto de previsão (opcional)</label>
-        <input id="manut-ctrl-eta" class="input" maxlength="60" placeholder="Ex: voltamos às 22:30">
+        <label>Texto extra (opcional)</label>
+        <input id="manut-ctrl-eta" class="input" maxlength="60" placeholder="Ex: Atualização de sistema">
       </div>
       <div class="manut-preview" id="manut-ctrl-preview">Pré-visualização da mensagem…</div>
       <div class="vm-actions" style="flex-direction:column;margin-top:14px">
@@ -2454,7 +2457,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.9</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2512,7 +2515,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.0.9</span></div>
+    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.1.0</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
@@ -2542,6 +2545,7 @@
         <button class="func-btn" onclick="devFn(71)"><span class="ico">🔎</span><div>Busca global<small>Plantão, ocorrência, usuário</small></div></button>
         <button class="func-btn" onclick="devFn(72)"><span class="ico">🔄</span><div>Pedidos de troca<small>Aceitar / recusar plantão</small></div></button>
         <button class="func-btn" onclick="devFn(73)"><span class="ico">🩺</span><div>Saúde do app<small>Checklist rápido de diagnóstico</small></div></button>
+        <button class="func-btn" onclick="devFn(74)"><span class="ico">🕕</span><div>Horário check-out automático<small>Fecha check-in vivo sem lançar folha</small></div></button>
       </div></div>
     </div>
 
@@ -2728,7 +2732,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.0.9</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.1.0</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3573,7 +3577,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.9';
+    const APP_VERSION = '0.1.0';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -6900,6 +6904,24 @@
           try { mostrarDiagnosticoSaude(); } catch (e) { alert(e); }
           break;
         }
+        case 74: {
+          try {
+            var atual = getHoraCheckoutAuto();
+            var v = prompt('Horário de check-out automático (24h, ex: 06:00)\n\nFecha o check-in vivo sem salvar plantão na folha.\nFunciona com o app aberto ou na próxima abertura/sincronização.', atual);
+            if (v === null) break;
+            v = String(v).trim();
+            if (!/^\d{1,2}:\d{2}$/.test(v)) { alert('Use o formato HH:MM'); break; }
+            var p = v.split(':');
+            var hh = Math.min(23, Math.max(0, parseInt(p[0],10)));
+            var mm = Math.min(59, Math.max(0, parseInt(p[1],10)));
+            var norm = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+            setHoraCheckoutAuto(norm);
+            try { Promise.resolve(salvar()).catch(function(){}); } catch (e) {}
+            toast('Check-out automático às ' + norm);
+            try { checarCheckoutAutomatico(); } catch (e) {}
+          } catch (e) { alert(e); }
+          break;
+        }
 
       }
     }
@@ -9574,10 +9596,11 @@
       box.style.display = 'block';
       function tick() {
         var rest = ate - Date.now();
+        var meta = document.getElementById('manutencao-meta');
         if (rest <= 0) {
           val.textContent = '00:00:00';
+          if (meta) meta.textContent = 'Liberando o aplicativo…';
           pararManutCountdown();
-          // Auto-desliga quando o tempo acaba
           (async function() {
             try {
               var cur = await lerManutencao();
@@ -9589,6 +9612,12 @@
           return;
         }
         val.textContent = formatManutCountdown(rest);
+        try {
+          if (meta) {
+            var libera = new Date(ate).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            meta.textContent = 'Liberação prevista: ' + libera + (m.eta && m.eta.indexOf('Liberação') < 0 ? (' · ' + m.eta) : '');
+          }
+        } catch (e) {}
       }
       tick();
       __manutTimerInterval = setInterval(tick, 1000);
@@ -9713,8 +9742,14 @@
         if (ti) ti.value = m.titulo || 'Sistema em manutenção';
         if (msg) msg.value = m.msg || 'Estamos realizando melhorias. Voltamos em breve.';
         if (eta) eta.value = m.eta || '';
-        var durEl = document.getElementById('manut-ctrl-duracao');
-        if (durEl) durEl.value = m.duracaoMin || 30;
+        try {
+          var dt = document.getElementById('manut-ctrl-data');
+          var hr = document.getElementById('manut-ctrl-hora');
+          var base = m.ate ? new Date(Number(m.ate)) : new Date(Date.now() + 30*60000);
+          if (isNaN(base.getTime())) base = new Date(Date.now() + 30*60000);
+          if (dt) dt.value = base.getFullYear() + '-' + String(base.getMonth()+1).padStart(2,'0') + '-' + String(base.getDate()).padStart(2,'0');
+          if (hr) hr.value = String(base.getHours()).padStart(2,'0') + ':' + String(base.getMinutes()).padStart(2,'0');
+        } catch (e) {}
         atualizarPreviewManutencao();
         ['manut-ctrl-titulo','manut-ctrl-msg','manut-ctrl-eta'].forEach(function(id) {
           var el = document.getElementById(id);
@@ -9741,9 +9776,29 @@
         if (!podeDevPerigoso()) return alert('Só o cargo DEV.');
         var titulo = ((document.getElementById('manut-ctrl-titulo') || {}).value || '').trim() || 'Sistema em manutenção';
         var msg = ((document.getElementById('manut-ctrl-msg') || {}).value || '').trim() || 'Estamos realizando melhorias. Voltamos em breve.';
-        var eta = ((document.getElementById('manut-ctrl-eta') || {}).value || '').trim();
-        if (!confirm('Ativar manutenção para TODOS os aparelhos?\n\nA tela de bloqueio será exibida em instantes.')) return;
-        await setManutencao(true, msg, { titulo: titulo, eta: eta });
+        var etaTxt = ((document.getElementById('manut-ctrl-eta') || {}).value || '').trim();
+        var dataV = ((document.getElementById('manut-ctrl-data') || {}).value || '').trim();
+        var horaV = ((document.getElementById('manut-ctrl-hora') || {}).value || '').trim();
+        if (!horaV) return alert('Escolha o horário de liberação no relógio.');
+        if (!dataV) {
+          var n = new Date();
+          dataV = n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
+        }
+        var liberacao = new Date(dataV + 'T' + horaV + ':00');
+        if (isNaN(liberacao.getTime())) return alert('Data/hora inválidas.');
+        if (liberacao.getTime() <= Date.now() + 60000) {
+          if (!((document.getElementById('manut-ctrl-data') || {}).value || '').trim()) {
+            liberacao.setDate(liberacao.getDate() + 1);
+          } else {
+            return alert('O horário de liberação precisa ser no futuro (pelo menos 1 minuto).');
+          }
+        }
+        var ate = liberacao.getTime();
+        var liberaTxt = liberacao.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        if (!confirm('Ativar manutenção até ' + liberaTxt + ' para TODOS?\n\nNa tela das pessoas aparecerá o tempo que falta para liberar.')) return;
+        try { setManutSessaoDesbloqueada(false); } catch (e) {}
+        var etaFinal = etaTxt || ('Liberação prevista: ' + liberaTxt);
+        await setManutencao(true, msg, { titulo: titulo, eta: etaFinal, ate: ate, liberacaoEm: liberacao.toISOString() });
         fecharPainelManutencao();
       } catch (e) {
         alert('Erro: ' + (e && e.message ? e.message : e));
@@ -9764,18 +9819,23 @@
     async function setManutencao(ativo, msg, extra) {
       extra = extra || {};
       var agora = Date.now();
-      var duracaoMin = extra.duracaoMin != null ? Number(extra.duracaoMin) : 0;
       var ate = 0;
-      if (ativo && duracaoMin > 0) {
-        ate = agora + Math.round(duracaoMin * 60 * 1000);
+      if (ativo) {
+        if (extra.ate) ate = Number(extra.ate);
+        else if (extra.duracaoMin) ate = agora + Math.round(Number(extra.duracaoMin) * 60 * 1000);
       }
+      if (ativo && (!ate || ate <= agora)) {
+        // fallback 1h se não veio horário
+        ate = agora + 60 * 60 * 1000;
+      }
+      var liberaIso = extra.liberacaoEm || (ate ? new Date(ate).toISOString() : '');
       const payload = {
         ativo: !!ativo,
         msg: msg || '',
         titulo: extra.titulo || (ativo ? 'Sistema em manutenção' : ''),
         eta: extra.eta || '',
-        duracaoMin: ativo && duracaoMin > 0 ? duracaoMin : 0,
         ate: ativo ? ate : 0,
+        liberacaoEm: ativo ? liberaIso : '',
         por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : 'DEV',
         em: new Date().toISOString(),
         forceReload: agora,
@@ -9785,7 +9845,7 @@
       if (firebaseOk && fbDb) {
         try {
           await fbDb.collection('valis').doc('manutencao').set(payload, { merge: true });
-          toast(ativo ? ('Manutenção ativada' + (duracaoMin ? (' · ' + duracaoMin + ' min') : '') + ' — bloqueando aparelhos') : (extra.auto ? 'Manutenção encerrada (tempo esgotado)' : 'Manutenção desativada — app liberado'));
+          toast(ativo ? ('Manutenção até ' + (ate ? new Date(ate).toLocaleString('pt-BR') : '—') + ' — bloqueando') : (extra.auto ? 'Manutenção encerrada (horário de liberação)' : 'Manutenção desativada — app liberado'));
         } catch (e) {
           console.warn(e);
           toast('Salvo neste aparelho — sincronização falhou');
@@ -11991,6 +12051,93 @@
     /** Após check-out: não reinicia automático por este tempo (ms) */
     var PV_COOLDOWN_MS = 90000;
 
+
+    /* ===== Check-out automático por horário ===== */
+    function getHoraCheckoutAuto() {
+      try {
+        if (db && db.labsConfig && db.labsConfig.autoCheckoutHora) return String(db.labsConfig.autoCheckoutHora);
+      } catch (e) {}
+      try { return localStorage.getItem('valis_auto_checkout_hora') || '06:00'; } catch (e) { return '06:00'; }
+    }
+    function setHoraCheckoutAuto(hhmm) {
+      try {
+        if (!db.labsConfig) db.labsConfig = {};
+        db.labsConfig.autoCheckoutHora = hhmm;
+      } catch (e) {}
+      try { localStorage.setItem('valis_auto_checkout_hora', hhmm); } catch (e) {}
+    }
+    function alvoCheckoutAposCheckIn(checkInIso, hhmm) {
+      try {
+        var parts = String(hhmm || '06:00').split(':');
+        var h = parseInt(parts[0], 10) || 6;
+        var mi = parseInt(parts[1], 10) || 0;
+        var ci = new Date(checkInIso);
+        if (isNaN(ci.getTime())) return null;
+        var target = new Date(ci.getTime());
+        target.setHours(h, mi, 0, 0);
+        // se o horário de fechamento já passou em relação ao check-in, é no dia seguinte
+        if (target.getTime() <= ci.getTime()) target.setDate(target.getDate() + 1);
+        return target;
+      } catch (e) { return null; }
+    }
+    function pvFecharCheckinAutomatico(motivo) {
+      try {
+        var sess = pvLoad();
+        if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return false;
+        sess.status = 'finalizado';
+        sess.checkOut = new Date().toISOString();
+        sess.fechadoAuto = true;
+        sess.fechadoMotivo = motivo || 'horario_automatico';
+        // NÃO lança plantão na folha — só encerra o check-in vivo
+        try {
+          if (!sess.cooldownUntil) sess.cooldownUntil = Date.now() + (typeof PV_COOLDOWN_MS === 'number' ? PV_COOLDOWN_MS : 90000);
+        } catch (e) {
+          sess.cooldownUntil = Date.now() + 90000;
+        }
+        // cooldown mais longo para não reabrir sozinho (2h)
+        sess.cooldownUntil = Date.now() + 2 * 60 * 60 * 1000;
+        pvSave(sess);
+        try { registrarSessaoPlantaoVivo('finalizado', sess); } catch (e) {}
+        try { if (typeof salvar === 'function') Promise.resolve(salvar()).catch(function(){}); } catch (e) {}
+        try { if (typeof pvRender === 'function') pvRender(); } catch (e) {}
+        try { if (typeof atualizarResumoDia === 'function') atualizarResumoDia(); } catch (e) {}
+        try { if (typeof atualizarTimerPlantaoLive === 'function') atualizarTimerPlantaoLive(); } catch (e) {}
+        try { toast('Check-in finalizado automaticamente (' + (motivo || 'horário') + ')'); } catch (e) {}
+        return true;
+      } catch (e) {
+        console.warn('pvFecharCheckinAutomatico', e);
+        return false;
+      }
+    }
+    function checarCheckoutAutomatico() {
+      try {
+        if (!usuarioAtual) return;
+        var sess = pvLoad();
+        if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
+        if (sess.fechadoAuto) return;
+        var hhmm = getHoraCheckoutAuto();
+        var alvo = alvoCheckoutAposCheckIn(sess.checkIn, hhmm);
+        if (!alvo) return;
+        if (Date.now() >= alvo.getTime()) {
+          pvFecharCheckinAutomatico('horário ' + hhmm);
+        }
+      } catch (e) {}
+    }
+    var __checkoutAutoTimer = null;
+    function iniciarWatcherCheckoutAuto() {
+      try {
+        if (__checkoutAutoTimer) clearInterval(__checkoutAutoTimer);
+        checarCheckoutAutomatico();
+        __checkoutAutoTimer = setInterval(checarCheckoutAutomatico, 30000);
+      } catch (e) {}
+      try {
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'visible') checarCheckoutAutomatico();
+        });
+      } catch (e) {}
+    }
+
+
     function pvKey() {
       var u = usuarioAtual && usuarioAtual.user ? usuarioAtual.user : 'anon';
       return 'valis_plantao_vivo_' + u;
@@ -12640,6 +12787,7 @@
         pvStartGeoWatch();
         try { pvBindMapaDetails(); } catch (e) {}
         try { iniciarTimerPlantaoLive(); } catch (e) {}
+        try { iniciarWatcherCheckoutAuto(); } catch (e) {}
         try { atualizarBadgeVersao(); } catch (e) {}
         try { atualizarSyncMeta(); } catch (e) {}
         try { aplicarReadonlyUI(); } catch (e) {}
