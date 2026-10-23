@@ -1124,6 +1124,31 @@
     .modal-bg.hidden { display: none; }
     .modal { padding: 22px; width: 100%; max-width: 360px; }
 
+
+    .dev-dash {
+      margin: 0 0 12px; padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(15,23,42,0.6);
+    }
+    .dev-dash-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 8px;
+    }
+    .dev-dash-top b { font-size: 13px; color: #e2e8f0; }
+    .dev-dash-body { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+    .dev-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .dev-chip {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.03em;
+      padding: 3px 8px; border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(30,41,59,0.8); color: #cbd5e1;
+    }
+    .dev-chip.ok { border-color: rgba(34,197,94,0.4); color: #86efac; }
+    .dev-chip.warn { border-color: rgba(251,191,36,0.45); color: #fde68a; }
+    .dev-chip.bad { border-color: rgba(248,113,113,0.45); color: #fca5a5; }
+    .func-btn.dev-hide { display: none !important; }
+
     /* Manutenção 0.0.7 */
     #manutencao-overlay.modal-bg {
       background: radial-gradient(ellipse at 50% 20%, rgba(234,179,8,0.18), transparent 50%),
@@ -2457,7 +2482,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.2</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2515,135 +2540,83 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Acesso técnico · organizado · <span id="dev-drawer-ver">v0.1.0</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.2</span></div>
     <div class="br-flag-strip"></div>
 
-    <div class="dev-dash" id="dev-dash" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.55);font-size:11px;color:#94a3b8;line-height:1.5">
-      <b style="color:#e2e8f0">Visão rápida</b>
-      <div id="dev-dash-body">Toque em atualizar painel…</div>
-      <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="devFn(50)">Atualizar painel DEV</button>
+    <div class="dev-dash" id="dev-dash">
+      <div class="dev-dash-top">
+        <b>Status</b>
+        <button type="button" class="btn dark sm" onclick="atualizarPainelDevUI(true)">Atualizar</button>
+      </div>
+      <div class="dev-chips" id="dev-chips"></div>
+      <div id="dev-dash-body" class="dev-dash-body">—</div>
     </div>
 
-    
-    <div class="collapse-box open" id="dev-sec-novas">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-novas')">
-        <span>⚡ Funções novas<small>Monitor, impersonar, sanitizar…</small></span>
+    <div class="field" style="margin:0 0 12px">
+      <input id="dev-menu-busca" class="input" placeholder="Buscar…" oninput="filtrarMenuDev(this.value)" autocomplete="off">
+    </div>
+
+    <div class="collapse-box open" id="dev-sec-ops">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-ops')">
+        <span>🚦 Operação<small>Dia a dia</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(62)"><span class="ico">📡</span><div>Plantões ao vivo<small>Quem está em serviço agora</small></div></button>
-        <button class="func-btn" onclick="devFn(60)"><span class="ico">🎭</span><div>Impersonar vigilante<small>Ver o app como outro login</small></div></button>
-        <button class="func-btn" onclick="devFn(61)"><span class="ico">✅</span><div>Histórico de aprovações<small>Cadastros aprovados/recusados</small></div></button>
-        <button class="func-btn" onclick="devFn(63)"><span class="ico">📅</span><div>Forçar fechamento de folha<small>Arquivar período atual</small></div></button>
-        <button class="func-btn" onclick="devFn(64)"><span class="ico">🧹</span><div>Sanitizar banco<small>Limpa dados inconsistentes</small></div></button>
-        <button class="func-btn" onclick="devFn(65)"><span class="ico">📲</span><div>Notificações push<small>Status neste aparelho</small></div></button>
-        <button class="func-btn" onclick="devFn(66)"><span class="ico">📍</span><div>Simular GPS<small>Testar geofence sem estar no posto</small></div></button>
-        <button class="func-btn" onclick="devFn(67)"><span class="ico">🔒</span><div>Modo somente leitura<small>Trava edições neste aparelho</small></div></button>
-        <button class="func-btn" onclick="devFn(68)"><span class="ico">⚖️</span><div>Comparar local × nuvem<small>Contagens lado a lado</small></div></button>
-        <button class="func-btn" onclick="devFn(69)"><span class="ico">📝</span><div>Changelog da versão<small>O que há de novo</small></div></button>
-        <button class="func-btn" onclick="devFn(70)"><span class="ico">🏆</span><div>Ranking do mês<small>Plantões por vigilante</small></div></button>
-        <button class="func-btn" onclick="devFn(71)"><span class="ico">🔎</span><div>Busca global<small>Plantão, ocorrência, usuário</small></div></button>
-        <button class="func-btn" onclick="devFn(72)"><span class="ico">🔄</span><div>Pedidos de troca<small>Aceitar / recusar plantão</small></div></button>
-        <button class="func-btn" onclick="devFn(73)"><span class="ico">🩺</span><div>Saúde do app<small>Checklist rápido de diagnóstico</small></div></button>
-        <button class="func-btn" onclick="devFn(74)"><span class="ico">🕕</span><div>Horário check-out automático<small>Fecha check-in vivo sem lançar folha</small></div></button>
-      </div></div>
-    </div>
-
-    <div class="collapse-box" id="dev-sec-overview">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-overview')">
-        <span>📊 Visão geral<small>Diagnóstico, sessão, versão</small></span>
-        <span class="chev">▼</span>
-      </button>
-      <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(50)"><span class="ico">📊</span><div>Painel resumo DEV<small>Contagens e estado do sistema</small></div></button>
-        <button class="func-btn" onclick="devFn(10)"><span class="ico">ℹ️</span><div>Diagnóstico do app<small>Versão, FB, sessão</small></div></button>
-        <button class="func-btn" onclick="devFn(23)"><span class="ico">📋</span><div>Copiar diagnóstico<small>Texto para WhatsApp/suporte</small></div></button>
-        <button class="func-btn" onclick="devFn(53)"><span class="ico">🔍</span><div>Inspecionar sessão<small>Usuário, tokens, storage</small></div></button>
-        <button class="func-btn" onclick="devFn(29)"><span class="ico">🏷️</span><div>Versão do app<small>Changelog VALIS</small></div></button>
-        <button class="func-btn" onclick="devFn(22)"><span class="ico">🟢</span><div>Status da conexão<small>Bolinha + último estado</small></div></button>
-        <button class="func-btn" onclick="devFn(30)"><span class="ico">📜</span><div>Log do sistema<small>Boots, login, updates, sync</small></div></button>
+        <button class="func-btn" data-dev-q="manutenção liberar bloquear" onclick="devFn(11)"><span class="ico">🚧</span><div>Manutenção<small>Ativar, desativar e horário</small></div></button>
+        <button class="func-btn" data-dev-q="cadastros pendentes aprovar" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar</small></div></button>
+        <button class="func-btn" data-dev-q="plantões ao vivo" onclick="devFn(62)"><span class="ico">📡</span><div>Plantões ao vivo<small>Quem está em serviço</small></div></button>
+        <button class="func-btn" data-dev-q="troca plantão" onclick="devFn(72)"><span class="ico">🔄</span><div>Pedidos de troca<small>Aceitar ou recusar</small></div></button>
+        <button class="func-btn" data-dev-q="checkout automático" onclick="devFn(74)"><span class="ico">🕕</span><div>Check-out automático<small>Fecha check-in no horário</small></div></button>
       </div></div>
     </div>
 
     <div class="collapse-box" id="dev-sec-users">
       <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-users')">
-        <span>👥 Usuários e acesso<small>Senhas, código, pendentes</small></span>
+        <span>👥 Usuários<small>Acesso e senhas</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(17)"><span class="ico">⏳</span><div>Cadastros pendentes<small>Aprovar ou recusar solicitações</small></div></button>
-        <button class="func-btn" onclick="devFn(20)"><span class="ico">🔑</span><div>Ver / editar senhas<small>Lista usuários e corrige senha</small></div></button>
-        <button class="func-btn" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Define código p/ Supervisor/Admin</small></div></button>
-        <button class="func-btn" onclick="devFn(25)"><span class="ico">🔧</span><div>Reparar usuários<small>Normaliza flags e hashes</small></div></button>
-        <button class="func-btn" onclick="devFn(9)"><span class="ico">👤</span><div>Listar usuários (raw)<small>Debug de contas</small></div></button>
-        <button class="func-btn" onclick="devFn(31)"><span class="ico">☁️</span><div>Login sincronizado ON/OFF<small>Ativa ou bloqueia sync de login</small></div></button>
-        <button class="func-btn" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Permite ou bloqueia novos pedidos</small></div></button>
-        <button class="func-btn" onclick="devFn(33)"><span class="ico">🧹</span><div>Limpar logins (só admin/dev)<small>Apaga todos os outros usuários</small></div></button>
+        <button class="func-btn" data-dev-q="senhas" onclick="devFn(20)"><span class="ico">🔑</span><div>Senhas<small>Ver e corrigir</small></div></button>
+        <button class="func-btn" data-dev-q="código autorização" onclick="devFn(16)"><span class="ico">🔐</span><div>Código de autorização<small>Supervisor / Admin</small></div></button>
+        <button class="func-btn" data-dev-q="aprovações histórico" onclick="devFn(61)"><span class="ico">✅</span><div>Histórico de aprovações<small>Aceitos e recusados</small></div></button>
+        <button class="func-btn" data-dev-q="impersonar" onclick="devFn(60)"><span class="ico">🎭</span><div>Impersonar<small>Testar como outro login</small></div></button>
+        <button class="func-btn" data-dev-q="cadastro público" onclick="devFn(32)"><span class="ico">📝</span><div>Cadastro público ON/OFF<small>Novos pedidos</small></div></button>
+        <button class="func-btn" data-dev-q="login sincronizado nuvem" onclick="devFn(75)"><span class="ico">☁️</span><div>Login sincronizado ON/OFF<small>Sync de login</small></div></button>
       </div></div>
     </div>
 
-    <div class="collapse-box" id="dev-sec-manut">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-manut')">
-        <span>🚧 Manutenção e sistema<small>Sistema, emergência, recarregar</small></span>
+    <div class="collapse-box" id="dev-sec-dados">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-dados')">
+        <span>💾 Dados<small>Sync e backup</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(11)"><span class="ico">🚧</span><div>Painel de manutenção<small>Ativar, desativar e mensagem</small></div></button>
-        <button class="func-btn" onclick="devFn(12)"><span class="ico">✅</span><div>Liberar app agora<small>Desativa manutenção em 1 toque</small></div></button>
-        <button class="func-btn" onclick="devFn(13)"><span class="ico">📡</span><div>Status da manutenção<small>Consulta estado atual</small></div></button>
-        <button class="func-btn" onclick="devFn(4)"><span class="ico">🔥</span><div>Alternar modo nuvem<small>Local ↔ sincronizado</small></div></button>
-        <button class="func-btn" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sync agora<small>Sobe e baixa dados da nuvem</small></div></button>
-        <button class="func-btn" onclick="devFn(52)"><span class="ico">♻️</span><div>Recarregar app + limpar cache<small>Limpa cache e recarrega o app</small></div></button>
-        <button class="func-btn" onclick="devFn(26)"><span class="ico">🚨</span><div>Modo emergência<small>Só login, msgs e ocorrência</small></div></button>
-        <button class="func-btn" onclick="devFn(31)"><span class="ico">🧹</span><div>Limpar log DEV<small>Apaga histórico técnico</small></div></button>
+        <button class="func-btn" data-dev-q="sincronizar" onclick="devFn(21)"><span class="ico">🔄</span><div>Forçar sincronização<small>Sobe e baixa dados</small></div></button>
+        <button class="func-btn" data-dev-q="exportar backup" onclick="devFn(54)"><span class="ico">📦</span><div>Exportar backup<small>Download JSON</small></div></button>
+        <button class="func-btn" data-dev-q="folha fechar" onclick="devFn(63)"><span class="ico">📅</span><div>Fechar folha<small>Arquivar período</small></div></button>
+        <button class="func-btn" data-dev-q="sanitizar" onclick="devFn(64)"><span class="ico">🧹</span><div>Sanitizar dados<small>Limpa inconsistências</small></div></button>
+        <button class="func-btn" data-dev-q="fila pendente" onclick="devFn(51)"><span class="ico">📤</span><div>Limpar fila pendente<small>Envios travados</small></div></button>
+        <button class="func-btn" data-dev-q="zerar dados" onclick="devFn(3)"><span class="ico">⚠️</span><div>Zerar dados locais<small>Irreversível neste aparelho</small></div></button>
       </div></div>
     </div>
 
-    <div class="collapse-box" id="dev-sec-backup">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-backup')">
-        <span>💾 Backup e dados<small>Exportar, fila pendente, zerar</small></span>
+    <div class="collapse-box" id="dev-sec-sistema">
+      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-sistema')">
+        <span>⚙️ Sistema<small>Diagnóstico e cache</small></span>
         <span class="chev">▼</span>
       </button>
       <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(54)"><span class="ico">📦</span><div>Exportar backup JSON<small>Download completo do banco local</small></div></button>
-        <button class="func-btn" onclick="devFn(51)"><span class="ico">📤</span><div>Limpar fila pendente<small>Remove itens aguardando envio</small></div></button>
-        <button class="func-btn" onclick="devFn(56)"><span class="ico">🗂️</span><div>Plantões e folhas<small>Resumo e inconsistências</small></div></button>
-        <button class="func-btn" onclick="devFn(1)"><span class="ico">💾</span><div>Backup rápido<small>Salva snapshot local</small></div></button>
-        <button class="func-btn" onclick="devFn(2)"><span class="ico">📥</span><div>Restaurar backup<small>Importa snapshot</small></div></button>
-        <button class="func-btn" onclick="devFn(3)"><span class="ico">⚠️</span><div>Zerar dados locais<small>Cuidado — apaga base local</small></div></button>
-        <button class="func-btn" onclick="devFn(55)"><span class="ico">🎛️</span><div>Reset preferências do aparelho<small>Tema, vibração, onboarding</small></div></button>
+        <button class="func-btn" data-dev-q="saúde diagnóstico" onclick="devFn(73)"><span class="ico">🩺</span><div>Saúde do app<small>Diagnóstico completo</small></div></button>
+        <button class="func-btn" data-dev-q="recarregar cache" onclick="devFn(52)"><span class="ico">♻️</span><div>Recarregar app<small>Limpa cache</small></div></button>
+        <button class="func-btn" data-dev-q="modo nuvem local" onclick="devFn(4)"><span class="ico">🔀</span><div>Modo nuvem / local<small>Alternar sincronização</small></div></button>
+        <button class="func-btn" data-dev-q="aviso global" onclick="devFn(14)"><span class="ico">📢</span><div>Aviso global<small>Banner para todos</small></div></button>
+        <button class="func-btn" data-dev-q="limpar aviso" onclick="devFn(15)"><span class="ico">🔕</span><div>Limpar aviso<small>Remove banner</small></div></button>
+        <button class="func-btn" data-dev-q="ferramentas labs" onclick="devFn(40)"><span class="ico">🛠</span><div>Ferramentas extras<small>Labs e relatórios</small></div></button>
       </div></div>
     </div>
 
-    <div class="collapse-box" id="dev-sec-feed">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-feed')">
-        <span>📡 Operação e feed<small>Atividades, auditoria, avisos</small></span>
-        <span class="chev">▼</span>
-      </button>
-      <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(5)"><span class="ico">📡</span><div>Feed de atividades<small>Últimos eventos do sistema</small></div></button>
-        <button class="func-btn" onclick="devFn(6)"><span class="ico">⏱️</span><div>Tempo do feed<small>Minutos visíveis no início</small></div></button>
-        <button class="func-btn" onclick="devFn(28)"><span class="ico">🔎</span><div>Auditoria rápida<small>Users, plantões, inconsistências</small></div></button>
-        <button class="func-btn" onclick="devFn(14)"><span class="ico">📢</span><div>Aviso global<small>Banner para todos</small></div></button>
-        <button class="func-btn" onclick="devFn(15)"><span class="ico">🔕</span><div>Limpar aviso global<small>Remove banner</small></div></button>
-      </div></div>
-    </div>
-
-    <div class="collapse-box" id="dev-sec-test">
-      <button type="button" class="collapse-head" onclick="toggleCollapse('dev-sec-test')">
-        <span>🧪 Testes e ferramentas<small>Mock, push, labs</small></span>
-        <span class="chev">▼</span>
-      </button>
-      <div class="collapse-body"><div class="func-list">
-        <button class="func-btn" onclick="devFn(7)"><span class="ico">🧪</span><div>Injetar dados de teste<small>Postos, escalas e ocorrências</small></div></button>
-        <button class="func-btn" onclick="devFn(8)"><span class="ico">🔔</span><div>Testar notificações<small>Toast + feedback visual</small></div></button>
-        <button class="func-btn" onclick="devFn(34)"><span class="ico">⏱️</span><div>Tempo das notificações<small>Duração global</small></div></button>
-        <button class="func-btn" onclick="devFn(27)"><span class="ico">📢</span><div>Testar aviso global<small>Envia aviso de teste</small></div></button>
-        <button class="func-btn" onclick="devFn(40)"><span class="ico">🛠</span><div>Ferramentas avançadas<small>Ronda, 2FA, relatório…</small></div></button>
-      </div></div>
-    </div>
-
-    <button class="btn dark" style="margin-top:16px" onclick="fecharDrawer()">Fechar</button>
+    <p id="dev-menu-vazio" class="empty" style="display:none;margin:12px 0">Nada encontrado.</p>
+    <button class="btn dark" style="margin-top:12px" onclick="fecharDrawer()">Fechar</button>
   </aside>
 
   <aside class="drawer" id="drawer-sup" style="border-color:rgba(250,204,21,0.25)">
@@ -2732,7 +2705,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.1.0</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.1.2</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3577,7 +3550,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.1.0';
+    const APP_VERSION = '0.1.2';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5909,21 +5882,96 @@
     }
 
     // DEV MENU
+
+    function filtrarMenuDev(q) {
+      try {
+        q = String(q || '').toLowerCase().trim();
+        var btns = document.querySelectorAll('#drawer-dev .func-btn');
+        var vis = 0;
+        btns.forEach(function(b) {
+          var t = (b.textContent || '') + ' ' + (b.getAttribute('data-dev-q') || '');
+          t = t.toLowerCase();
+          var show = !q || t.indexOf(q) >= 0;
+          b.classList.toggle('dev-hide', !show);
+          if (show) vis++;
+        });
+        // open sections that have matches when searching
+        if (q) {
+          document.querySelectorAll('#drawer-dev .collapse-box').forEach(function(box) {
+            var any = box.querySelectorAll('.func-btn:not(.dev-hide)').length > 0;
+            if (any) box.classList.add('open');
+          });
+        }
+        var empty = document.getElementById('dev-menu-vazio');
+        if (empty) empty.style.display = vis ? 'none' : 'block';
+      } catch (e) {}
+    }
+    async function atualizarPainelDevUI(toastOk) {
+      try {
+        var body = document.getElementById('dev-dash-body');
+        var chips = document.getElementById('dev-chips');
+        var dv = document.getElementById('dev-drawer-ver');
+        if (dv && typeof APP_VERSION !== 'undefined') dv.textContent = 'v' + APP_VERSION;
+
+        var pend = 0, trocas = 0, vivos = 0;
+        try {
+          pend = (db.solicitacoes || []).filter(function(s) { return s && s.status === 'pendente'; }).length;
+          if (!pend) pend = (db.users || []).filter(function(u) {
+            return u && (u.pendente === true || u.pendente === 'true' || u.pendente === 1);
+          }).length;
+        } catch (e) {}
+        try {
+          trocas = (db.pedidosTrocaPlantao || []).filter(function(p) { return p && p.status === 'pendente'; }).length;
+        } catch (e) {}
+        try {
+          vivos = (db.sessoesPlantao || []).filter(function(s) {
+            return s && (s.status === 'ativo' || s.status === 'almoco');
+          }).length;
+        } catch (e) {}
+        var manut = false;
+        try {
+          var m = await lerManutencao();
+          manut = !!(m && m.ativo);
+        } catch (e) {}
+        var online = navigator.onLine !== false;
+        var fb = typeof firebaseOk !== 'undefined' && firebaseOk;
+
+        if (chips) {
+          chips.innerHTML =
+            '<span class="dev-chip ' + (manut ? 'warn' : 'ok') + '">' + (manut ? 'Manutenção ON' : 'App liberado') + '</span>' +
+            '<span class="dev-chip ' + (fb ? 'ok' : 'warn') + '">' + (fb ? 'Nuvem OK' : 'Modo local') + '</span>' +
+            '<span class="dev-chip ' + (online ? 'ok' : 'bad') + '">' + (online ? 'Online' : 'Offline') + '</span>' +
+            (pend ? '<span class="dev-chip warn">' + pend + ' pendente(s)</span>' : '') +
+            (trocas ? '<span class="dev-chip warn">' + trocas + ' troca(s)</span>' : '') +
+            (vivos ? '<span class="dev-chip ok">' + vivos + ' em serviço</span>' : '');
+        }
+        if (body) {
+          body.innerHTML =
+            'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') +
+            ' · users ' + ((db.users || []).length) +
+            ' · plantões ' + ((db.plantaoes || []).length) +
+            ' · postos ' + ((db.postos || []).length) +
+            ' · oco ' + ((db.oco || []).length) +
+            (manut ? '<br>Manutenção ativa' : '');
+        }
+        if (toastOk) try { toast('Painel DEV atualizado'); } catch (e) {}
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    function filtrarMenuDevReset() {
+      var inp = document.getElementById('dev-menu-busca');
+      if (inp) inp.value = '';
+      filtrarMenuDev('');
+    }
+
+
     function liberarSessaoDevAposSenha() {
       try {
         setTimeout(function() {
-          try {
-            var el = document.getElementById('dev-dash-body');
-            var dv = document.getElementById('dev-drawer-ver');
-            if (dv && typeof APP_VERSION !== 'undefined') dv.textContent = 'v' + APP_VERSION;
-            if (el && typeof db !== 'undefined') {
-              el.innerHTML = 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—') +
-                ' · users ' + ((db.users||[]).length) +
-                ' · plantões ' + ((db.plantaoes||[]).length) +
-                ' · nuvem ' + (typeof firebaseOk !== 'undefined' && firebaseOk ? 'OK' : 'local');
-            }
-          } catch (e) {}
-        }, 150);
+          try { filtrarMenuDevReset(); } catch (e) {}
+          try { atualizarPainelDevUI(false); } catch (e) {}
+        }, 120);
       } catch (e) {}
       try { setManutSessaoDesbloqueada(true); } catch (e) {}
       devLiberado = true;
@@ -6135,7 +6183,7 @@
           zerarDados(); break;
         case 4:
           DataService.setMode(DataService.mode === 'local' ? 'firebase' : 'local');
-          toast('Mode: ' + DataService.mode);
+          toast('Modo: ' + (DataService.mode === 'firebase' ? 'nuvem' : 'local'));
           render();
           break;
         case 11: {
@@ -6469,6 +6517,44 @@
           toast('Log DEV limpo');
           break;
         }
+        case 32: {
+          (async function() {
+            try {
+              await carregarConfigApp();
+              var c = window.__valisConfigApp || { cadastroPublico: true };
+              var on = c.cadastroPublico !== false;
+              var next = !on;
+              if (!confirm((next ? 'ATIVAR' : 'DESATIVAR') + ' cadastro público?\n\n' + (next ? 'Qualquer pessoa poderá solicitar cadastro.' : 'Novos pedidos ficarão bloqueados.'))) return;
+              c.cadastroPublico = next;
+              window.__valisConfigApp = c;
+              if (typeof salvarConfigApp === 'function') await salvarConfigApp(c);
+              else if (firebaseOk && fbDb) {
+                await fbDb.collection('valis').doc('config_app').set({ cadastroPublico: next }, { merge: true });
+              }
+              toast(next ? 'Cadastro público ATIVO' : 'Cadastro público BLOQUEADO');
+            } catch (e) { alert('Erro: ' + (e && e.message ? e.message : e)); }
+          })();
+          break;
+        }
+        case 75: {
+          (async function() {
+            try {
+              await carregarConfigApp();
+              var c = window.__valisConfigApp || { loginNuvem: true };
+              var on = c.loginNuvem !== false;
+              var next = !on;
+              if (!confirm((next ? 'ATIVAR' : 'DESATIVAR') + ' login sincronizado na nuvem?')) return;
+              c.loginNuvem = next;
+              window.__valisConfigApp = c;
+              if (typeof salvarConfigApp === 'function') await salvarConfigApp(c);
+              else if (firebaseOk && fbDb) {
+                await fbDb.collection('valis').doc('config_app').set({ loginNuvem: next }, { merge: true });
+              }
+              toast(next ? 'Login sincronizado ATIVO' : 'Login sincronizado DESLIGADO');
+            } catch (e) { alert('Erro: ' + (e && e.message ? e.message : e)); }
+          })();
+          break;
+        }
         case 5:
           tab('supervisao');
           document.getElementById('sup-resultado').innerHTML =
@@ -6519,6 +6605,7 @@
           break;
         case 50: {
           try {
+            try { atualizarPainelDevUI(false); } catch (e0) {}
             var pend = (db.users || []).filter(function(u) {
               return u && (u.pendente === true || u.pendente === 'true' || u.pendente === 1);
             }).length;
