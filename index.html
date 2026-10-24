@@ -2467,6 +2467,49 @@
   <div class="impersonate-bar" id="impersonate-bar">
     Modo teste como outro usuário · <button type="button" class="linkish" style="color:#fff;text-decoration:underline;background:none;border:0;font-weight:800" onclick="devSairImpersonate()">Sair do modo</button>
   </div>
+  
+  <div class="valis-modal-bg" id="checkout-plantao-bg" onclick="if(event.target===this)/*não fecha no fundo*/null">
+    <div class="valis-modal" role="dialog" aria-modal="true" style="max-width:440px">
+      <h3 id="checkout-pl-title">Finalizar serviço</h3>
+      <div class="meta" id="checkout-pl-sub" style="margin-bottom:10px;font-size:12px;color:var(--muted)">Preencha os dados do plantão antes de encerrar o check-in.</div>
+      <div class="field"><label>Posto</label>
+        <input id="checkout-pl-posto" class="input" readonly>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Início</label><input id="checkout-pl-inicio" class="input" type="time"></div>
+        <div class="field"><label>Fim</label><input id="checkout-pl-fim" class="input" type="time"></div>
+      </div>
+      <div class="field"><label>Tipo de serviço</label>
+        <select id="checkout-pl-tipo" class="select" onchange="checkoutPlTipoUI()">
+          <option value="Plantão Fixo">Plantão Fixo (escala própria)</option>
+          <option value="Cobertura">Cobertura / Folguista</option>
+          <option value="Folga Trabalhada">Folga Trabalhada</option>
+          <option value="Hora Extra">Hora Extra</option>
+        </select>
+      </div>
+      <div class="field" id="checkout-pl-cobriu-wrap">
+        <label>Quem você cobriu (titular)</label>
+        <input id="checkout-pl-cobriu" class="input" placeholder="Nome de quem você substituiu">
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Valor (R$)</label><input id="checkout-pl-valor" class="input" type="number" min="0" step="0.01" value="100"></div>
+        <div class="field"><label>Horas</label><input id="checkout-pl-horas" class="input" readonly></div>
+      </div>
+      <div class="field"><label>Observação</label>
+        <textarea id="checkout-pl-obs" class="area" rows="2" placeholder="Opcional"></textarea>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin:8px 0 4px;cursor:pointer">
+        <input type="checkbox" id="checkout-pl-salvar" checked style="width:16px;height:16px">
+        Salvar plantão no extrato/folha
+      </label>
+      <div class="vm-actions" style="flex-direction:column;margin-top:12px">
+        <button type="button" class="btn green" onclick="confirmarCheckoutComPlantao()">Finalizar e salvar</button>
+        <button type="button" class="btn dark" onclick="confirmarCheckoutSemPlantao()">Só fechar check-in (sem folha)</button>
+        <button type="button" class="btn dark" onclick="cancelarCheckoutPlantaoForm()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="valis-modal-bg" id="valis-modal-bg" onclick="if(event.target===this)fecharValisModal()">
     <div class="valis-modal" role="dialog" aria-modal="true">
       <h3 id="valis-modal-title">—</h3>
@@ -2482,7 +2525,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.2</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2540,7 +2583,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.2</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.3</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2705,7 +2748,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.1.2</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.1.3</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3550,7 +3593,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.1.2';
+    const APP_VERSION = '0.1.3';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -12206,7 +12249,18 @@
         var alvo = alvoCheckoutAposCheckIn(sess.checkIn, hhmm);
         if (!alvo) return;
         if (Date.now() >= alvo.getTime()) {
-          pvFecharCheckinAutomatico('horário ' + hhmm);
+          try {
+            if (document.visibilityState === 'visible' && typeof abrirFormularioCheckoutPlantao === 'function') {
+              abrirFormularioCheckoutPlantao(sess, { auto: true, motivo: 'horário ' + hhmm });
+            } else {
+              // App em segundo plano/fechado: marca pendência e fecha check-in sem folha
+              sess.pendenteFormularioCheckout = true;
+              pvSave(sess);
+              pvFecharCheckinAutomatico('horário ' + hhmm);
+            }
+          } catch (e) {
+            pvFecharCheckinAutomatico('horário ' + hhmm);
+          }
         }
       } catch (e) {}
     }
@@ -12617,13 +12671,232 @@
       try { await salvar(); } catch (e) {}
       toast('Volta do almoço/janta registrada');
     }
+
+    var __checkoutPending = null; // { sessSnapshot, auto, motivo }
+
+    function checkoutPlTipoUI() {
+      try {
+        var tipo = ((document.getElementById('checkout-pl-tipo') || {}).value || '');
+        var wrap = document.getElementById('checkout-pl-cobriu-wrap');
+        if (wrap) wrap.style.display = (tipo === 'Cobertura' || tipo.indexOf('Cobertura') >= 0) ? 'block' : 'block';
+      } catch (e) {}
+    }
+    function calcHorasCheckoutForm() {
+      try {
+        var a = (document.getElementById('checkout-pl-inicio') || {}).value || '00:00';
+        var b = (document.getElementById('checkout-pl-fim') || {}).value || '00:00';
+        var pa = a.split(':').map(Number);
+        var pb = b.split(':').map(Number);
+        var mi = pa[0]*60 + (pa[1]||0);
+        var mf = pb[0]*60 + (pb[1]||0);
+        var diff = mf - mi;
+        if (diff <= 0) diff += 24*60;
+        var h = (diff/60);
+        var el = document.getElementById('checkout-pl-horas');
+        if (el) el.value = h.toFixed(2) + ' hrs';
+        return h;
+      } catch (e) { return 0; }
+    }
+    function abrirFormularioCheckoutPlantao(sess, opts) {
+      opts = opts || {};
+      try {
+        if (!sess) return;
+        // snapshot da sessão ativa
+        __checkoutPending = {
+          auto: !!opts.auto,
+          motivo: opts.motivo || '',
+          sessId: sess.checkIn || Date.now(),
+          postoId: sess.postoId,
+          postoNome: sess.postoNome || '',
+          checkIn: sess.checkIn,
+          almocoInicio: sess.almocoInicio || null,
+          almocoFim: sess.almocoFim || null,
+          autoIn: !!sess.autoIn,
+          checklistEntrada: (sess.checklistEntrada || []).slice(),
+          checklistSaida: (typeof pvLerChecklistSaida === 'function' ? pvLerChecklistSaida() : (sess.checklistSaida || [])),
+          statusAntes: sess.status
+        };
+        var ini = new Date(sess.checkIn || Date.now());
+        var fim = new Date();
+        var hIni = String(ini.getHours()).padStart(2,'0') + ':' + String(ini.getMinutes()).padStart(2,'0');
+        var hFim = String(fim.getHours()).padStart(2,'0') + ':' + String(fim.getMinutes()).padStart(2,'0');
+        var postoEl = document.getElementById('checkout-pl-posto');
+        var iEl = document.getElementById('checkout-pl-inicio');
+        var fEl = document.getElementById('checkout-pl-fim');
+        var tipoEl = document.getElementById('checkout-pl-tipo');
+        var cobEl = document.getElementById('checkout-pl-cobriu');
+        var valEl = document.getElementById('checkout-pl-valor');
+        var obsEl = document.getElementById('checkout-pl-obs');
+        var sub = document.getElementById('checkout-pl-sub');
+        var title = document.getElementById('checkout-pl-title');
+        if (postoEl) postoEl.value = sess.postoNome || '—';
+        if (iEl) iEl.value = hIni;
+        if (fEl) fEl.value = hFim;
+        if (tipoEl) {
+          try {
+            tipoEl.value = (typeof tipoPlantaoPadraoDoUsuario === 'function') ? tipoPlantaoPadraoDoUsuario() : 'Plantão Fixo';
+          } catch (e) { tipoEl.value = 'Plantão Fixo'; }
+        }
+        if (cobEl) cobEl.value = '';
+        if (valEl && !valEl.value) valEl.value = '100';
+        if (obsEl) {
+          var obs = opts.auto ? ('Checkout automático' + (opts.motivo ? ' · ' + opts.motivo : '')) : '';
+          obsEl.value = obs;
+        }
+        if (title) title.textContent = opts.auto ? 'Finalizar serviço (automático)' : 'Finalizar serviço';
+        if (sub) sub.textContent = opts.auto
+          ? 'O check-in vai encerrar. Preencha o plantão abaixo (quem você cobriu, tipo, valor…).'
+          : 'Antes de sair, preencha os dados do plantão. Você pode só fechar o check-in se preferir.';
+        calcHorasCheckoutForm();
+        checkoutPlTipoUI();
+        try {
+          if (iEl) iEl.onchange = calcHorasCheckoutForm;
+          if (fEl) fEl.onchange = calcHorasCheckoutForm;
+        } catch (e) {}
+        var bg = document.getElementById('checkout-plantao-bg');
+        if (bg) bg.classList.add('show');
+      } catch (e) {
+        alert('Erro ao abrir formulário: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function cancelarCheckoutPlantaoForm() {
+      try {
+        var bg = document.getElementById('checkout-plantao-bg');
+        if (bg) bg.classList.remove('show');
+      } catch (e) {}
+      __checkoutPending = null;
+      try { _pvAutoBusy = false; } catch (e) {}
+    }
+    function lerDadosFormCheckout() {
+      calcHorasCheckoutForm();
+      return {
+        posto: ((document.getElementById('checkout-pl-posto') || {}).value || '').trim(),
+        inicio: ((document.getElementById('checkout-pl-inicio') || {}).value || '').trim(),
+        fim: ((document.getElementById('checkout-pl-fim') || {}).value || '').trim(),
+        tipo: ((document.getElementById('checkout-pl-tipo') || {}).value || 'Plantão Fixo').trim(),
+        cobriu: ((document.getElementById('checkout-pl-cobriu') || {}).value || '').trim(),
+        valor: Number(((document.getElementById('checkout-pl-valor') || {}).value || 0)),
+        horas: ((document.getElementById('checkout-pl-horas') || {}).value || ''),
+        obs: ((document.getElementById('checkout-pl-obs') || {}).value || '').trim(),
+        salvarFolha: !!(document.getElementById('checkout-pl-salvar') && document.getElementById('checkout-pl-salvar').checked)
+      };
+    }
+    async function executarCheckoutSessao(dados, salvarFolha) {
+      var pend = __checkoutPending;
+      if (!pend) return toast('Nenhum check-out pendente');
+      var sess = pvLoad();
+      if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) {
+        // sessão já pode ter sido alterada — usa snapshot mínimo
+        cancelarCheckoutPlantaoForm();
+        return toast('Sessão de plantão não está mais ativa');
+      }
+      try {
+        sess.checklistSaida = pend.checklistSaida || (typeof pvLerChecklistSaida === 'function' ? pvLerChecklistSaida() : []);
+      } catch (e) {}
+      var lat = null, lng = null, acc = null;
+      try {
+        var pos = await pvGetPosicao();
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+        acc = pos.coords.accuracy;
+      } catch (e) {
+        if (pend.auto) { /* segue sem GPS */ }
+      }
+      sess.status = 'finalizado';
+      sess.checkOut = new Date().toISOString();
+      sess.checkOutLat = lat;
+      sess.checkOutLng = lng;
+      sess.checkOutAcc = acc;
+      sess.autoOut = !!pend.auto;
+      sess.noAutoUntil = Date.now() + (typeof PV_COOLDOWN_MS === 'number' ? PV_COOLDOWN_MS : 90000);
+      sess.needsLeaveBeforeAuto = true;
+      sess.lastFinishedPostoId = sess.postoId || '';
+      sess.cooldownUntil = Date.now() + 2 * 60 * 60 * 1000;
+      if (pend.motivo) sess.fechadoMotivo = pend.motivo;
+      pvSave(sess);
+      try { registrarSessaoPlantaoVivo('finalizado', sess); } catch (e) {}
+      try { pvRender(); } catch (e) {}
+      try { addAtividade('Check-out plantão: ' + (sess.postoNome || '') + (pend.auto ? ' (auto)' : '')); } catch (e) {}
+      try { await salvar(); } catch (e) {}
+      try { labRegPresenca('check-out', sess.postoNome, sess.checkOutLat, sess.checkOutLng); } catch (e) {}
+      try { notificarApp('VALIS · Check-out', (sess.postoNome ? sess.postoNome + ' · ' : '') + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.checkOut) : '')); } catch (e) {}
+
+      if (salvarFolha && dados) {
+        try {
+          if (!db.plantaoes) db.plantaoes = [];
+          var ini = new Date(sess.checkIn);
+          var data = ini.toISOString().slice(0, 10);
+          var obs = dados.obs || '';
+          if (sess.almocoInicio) obs += (obs ? ' | ' : '') + 'Almoço ' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.almocoInicio) : '') + (sess.almocoFim ? '-' + (typeof pvFmtHora === 'function' ? pvFmtHora(sess.almocoFim) : '') : '');
+          if (pend.auto) obs += (obs ? ' | ' : '') + 'checkout-auto';
+          db.plantaoes.unshift({
+            id: Date.now(),
+            data: data,
+            turno: (ini.getHours() < 12 ? 'Diurno' : 'Noturno'),
+            inicio: dados.inicio || '',
+            fim: dados.fim || '',
+            tipo: dados.tipo || 'Plantão Fixo',
+            valor: Number(dados.valor || 0),
+            horas: dados.horas || '',
+            sono: 0,
+            checklistEntrada: (sess.checklistEntrada || []).slice(),
+            checklistSaida: (sess.checklistSaida || []).slice(),
+            cobriu: dados.cobriu || '',
+            obs: obs,
+            posto: dados.posto || sess.postoNome || '',
+            por: usuarioAtual ? usuarioAtual.nome : '—',
+            userLogin: usuarioAtual ? usuarioAtual.user : '',
+            userId: usuarioAtual ? usuarioAtual.id : null,
+            criadoEm: new Date().toISOString(),
+            plantaoVivo: true
+          });
+          await salvar();
+          try { if (typeof backupPlantaoesAuto === 'function') await backupPlantaoesAuto('checkout_form'); } catch (e) {}
+          toast('Check-out feito e plantão salvo na folha');
+        } catch (e) {
+          toast('Check-out feito, mas falhou ao salvar plantão');
+        }
+      } else {
+        toast(pend.auto ? 'Check-in finalizado (automático)' : 'Check-in finalizado');
+      }
+      cancelarCheckoutPlantaoForm();
+      try { if (typeof atualizarResumoDia === 'function') atualizarResumoDia(); } catch (e) {}
+      try { if (typeof atualizarTimerPlantaoLive === 'function') atualizarTimerPlantaoLive(); } catch (e) {}
+      try { _pvAutoBusy = false; } catch (e) {}
+    }
+    async function confirmarCheckoutComPlantao() {
+      try {
+        var dados = lerDadosFormCheckout();
+        if ((dados.tipo === 'Cobertura' || String(dados.tipo).indexOf('Cobertura') >= 0) && !dados.cobriu) {
+          if (!confirm('Cobertura sem nome do titular. Continuar assim mesmo?')) return;
+        }
+        dados.salvarFolha = true;
+        await executarCheckoutSessao(dados, true);
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    async function confirmarCheckoutSemPlantao() {
+      try {
+        if (!confirm('Fechar só o check-in, sem lançar na folha?')) return;
+        var dados = lerDadosFormCheckout();
+        await executarCheckoutSessao(dados, false);
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+
+
     async function pvCheckOut(auto) {
       var sess = pvLoad();
       if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
       if (guardReadonly()) return;
-      if (!auto) {
-        var postoNome = sess.postoNome || 'posto';
-        if (!confirm('Confirmar check-out (saída) em ' + postoNome + '?')) return;
+      // Abre formulário de plantão (manual ou automático com app aberto)
+      try {
+        abrirFormularioCheckoutPlantao(sess, { auto: !!auto, motivo: auto ? 'saída automática' : '' });
+        return;
+      } catch (e) {
+        console.warn(e);
       }
       try {
         sess.checklistSaida = pvLerChecklistSaida();
