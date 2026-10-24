@@ -3,7 +3,7 @@
   "dir": "ltr",
   "display": "standalone",
   "name": "valis-vigia-ltda.",
-  "orientation": "any",
+  "orientation": "portrait",
   "scope": "/",
   "short_name": "valis-vigia-ltda.vercel",
   "start_url": "/",

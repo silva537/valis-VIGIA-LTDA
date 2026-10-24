@@ -1,0 +1,21 @@
+VALIS — caminho para app nativo Android (item 8)
+================================================
+O PWA já roda instalado no Android (Adicionar à tela inicial).
+
+Para APK nativo de verdade (GPS em background mais forte):
+1) Instalar Node.js no PC
+2) npm create @capacitor/app
+3) Copiar index.html + assets para a pasta www/
+4) npx cap add android
+5) npx cap sync
+6) Abrir no Android Studio e gerar APK/AAB
+
+Plugins úteis:
+- @capacitor/geolocation
+- @capacitor/local-notifications
+- @capacitor/background-geolocation (plugins community)
+
+Enquanto isso, o PWA usa:
+- sessão 1h+
+- check-out agendado ao reabrir o app
+- plantão vivo em localStorage

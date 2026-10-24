@@ -160,3 +160,13 @@ async function checarAvisosBackground() {
     // Se não há janela aberta, não temos auth Firestore aqui — push real exigiria FCM/servidor
   } catch (e) {}
 }
+
+// VALIS: ao ativar, avisa clientes para checar check-out agendado
+self.addEventListener('activate', function(event) {
+  event.waitUntil(self.clients.claim());
+});
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'CHECKOUT_TICK') {
+    // cliente processa localStorage
+  }
+});

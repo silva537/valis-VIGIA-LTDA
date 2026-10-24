@@ -307,6 +307,25 @@
 
 
 
+
+    /* Pack 0.2.0 */
+    .ops-soft-card {
+      border-radius: 14px; padding: 12px 14px; margin: 0 0 12px;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: linear-gradient(165deg, rgba(15,23,42,0.9), rgba(30,41,59,0.75));
+    }
+    .ops-soft-card h4 { margin: 0 0 6px; font-size: 13px; color: #e2e8f0; }
+    #mapa-vivos-box { height: 220px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(148,163,184,0.25); margin-top: 8px; }
+    .aviso-banner-soft {
+      border-left: 4px solid #fbbf24; padding: 10px 12px; border-radius: 10px;
+      background: rgba(120,53,15,0.2); margin-bottom: 10px; font-size: 13px; color: #fde68a;
+    }
+    @media print {
+      body * { visibility: hidden; }
+      #print-folha-area, #print-folha-area * { visibility: visible; }
+      #print-folha-area { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; }
+    }
+
     /* Pack 0.0.4 */
     .valis-modal-bg {
       position: fixed; inset: 0; z-index: 9999;
@@ -2464,6 +2483,7 @@
 
   <!-- LOGIN -->
 
+  <div id="print-folha-area" class="hidden" aria-hidden="true"></div>
   <div class="impersonate-bar" id="impersonate-bar">
     Modo teste como outro usuário · <button type="button" class="linkish" style="color:#fff;text-decoration:underline;background:none;border:0;font-weight:800" onclick="devSairImpersonate()">Sair do modo</button>
   </div>
@@ -2525,7 +2545,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2583,7 +2603,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.3</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.0</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2748,7 +2768,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.1.3</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.0</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -2848,6 +2868,18 @@
         </div>
 
         <div class="sync-meta" id="sync-meta">Sync: —</div>
+
+        
+        <div class="ops-soft-card" id="inicio-ranking-box" style="display:none">
+          <h4>🏆 Ranking do mês</h4>
+          <div id="inicio-ranking-body" class="meta" style="font-size:12px;color:var(--muted)">—</div>
+        </div>
+        <div class="ops-soft-card" id="inicio-mapa-vivos" style="display:none">
+          <h4>📍 Equipe em serviço</h4>
+          <div id="inicio-vivos-lista" class="meta" style="font-size:12px;margin-bottom:6px">—</div>
+          <div id="mapa-vivos-box"></div>
+          <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="atualizarMapaVivos(true)">Atualizar mapa</button>
+        </div>
 
         <div class="collapse-box" id="inicio-extras-ops">
           <button type="button" class="collapse-head" onclick="toggleCollapse('inicio-extras-ops')">
@@ -3001,6 +3033,7 @@
           <div class="ops-kpi money">
             <div class="k-lbl">Total da folha</div>
             <div class="k-val" id="ex-total">R$ 0,00</div>
+          <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="exportarFolhaPDF()">Exportar folha (imprimir/PDF)</button>
             <div class="k-sub">Valor acumulado</div>
           </div>
           <div class="ops-kpi count">
@@ -3593,7 +3626,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.1.3';
+    const APP_VERSION = '0.2.0';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4600,12 +4633,9 @@
       usuarioAtual = byUser;
       try { localStorage.setItem('valis_last_user', byUser.user || ''); } catch (e) {}
       const manter = document.getElementById('login-manter');
-      const payload = JSON.stringify({ user: byUser.user });
-      sessionStorage.setItem('valis_user', payload);
-      if (manter && manter.checked) {
-        localStorage.setItem('valis_user_persist', payload);
-      } else {
-        localStorage.removeItem('valis_user_persist');
+      try { salvarSessaoLogin(byUser.user, !!(manter && manter.checked)); } catch (e) {
+        sessionStorage.setItem('valis_user', JSON.stringify({ user: byUser.user }));
+        localStorage.setItem('valis_user_persist', JSON.stringify({ user: byUser.user, exp: Date.now() + 3600000 }));
       }
       byUser.ultimoLogin = new Date().toISOString();
       try { await salvar(); } catch (e) {}
@@ -5691,6 +5721,11 @@
         try { atualizarEscalaSemanaInicio(); } catch (e0) {}
         try { aplicarReadonlyUI(); } catch (e0) {}
         try { renderPedidosTrocaInicio(); } catch (e0) {}
+        try { atualizarRankingInicio(); } catch (e0) {}
+        try { atualizarMapaVivos(false); } catch (e0) {}
+        try { polirAvisoGlobalUI(); } catch (e0) {}
+        try { bindRascunhosExtras(); } catch (e0) {}
+        try { processarCheckoutAgendadoFundo(); } catch (e0) {}
         try { verificarOcoNovasDoPosto(); } catch (e0) {}
         var pack = document.getElementById('inicio-pack');
         var items = document.getElementById('inicio-pack-items');
@@ -5835,7 +5870,155 @@
       if (sheet.contains(e.target) || (btn && btn.contains(e.target))) return;
       fecharMore();
     });
+
+    /* ===== Sessão de login (mín. 1 hora) ===== */
+    var VALIS_SESSION_MIN_MS = 60 * 60 * 1000;
+    var VALIS_SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000;
+    function salvarSessaoLogin(userLogin, manterLongo) {
+      try {
+        var now = Date.now();
+        var ttl = manterLongo ? VALIS_SESSION_LONG_MS : VALIS_SESSION_MIN_MS;
+        if (ttl < VALIS_SESSION_MIN_MS) ttl = VALIS_SESSION_MIN_MS;
+        var payload = JSON.stringify({
+          user: userLogin,
+          em: now,
+          exp: now + ttl,
+          manter: !!manterLongo
+        });
+        sessionStorage.setItem('valis_user', payload);
+        localStorage.setItem('valis_user_persist', payload);
+      } catch (e) {}
+    }
+    function limparSessaoLogin() {
+      try { sessionStorage.removeItem('valis_user'); } catch (e) {}
+      try { localStorage.removeItem('valis_user_persist'); } catch (e) {}
+    }
+    function lerSessaoLogin() {
+      try {
+        var raw = localStorage.getItem('valis_user_persist') || sessionStorage.getItem('valis_user');
+        if (!raw) return null;
+        var data = JSON.parse(raw);
+        if (!data || !data.user) return null;
+        if (!data.exp) {
+          data.em = data.em || Date.now();
+          data.exp = data.em + VALIS_SESSION_MIN_MS;
+        }
+        if (Date.now() > Number(data.exp)) {
+          limparSessaoLogin();
+          return null;
+        }
+        return data;
+      } catch (e) {
+        return null;
+      }
+    }
+    function renovarSessaoLogin() {
+      try {
+        var data = lerSessaoLogin();
+        if (!data || !data.user) return;
+        var manter = !!data.manter;
+        var now = Date.now();
+        var ttl = manter ? VALIS_SESSION_LONG_MS : VALIS_SESSION_MIN_MS;
+        data.em = now;
+        data.exp = now + ttl;
+        var payload = JSON.stringify(data);
+        sessionStorage.setItem('valis_user', payload);
+        localStorage.setItem('valis_user_persist', payload);
+      } catch (e) {}
+    }
+    var __sessaoWatch = null;
+    function iniciarWatcherSessaoLogin() {
+      try {
+        if (__sessaoWatch) clearInterval(__sessaoWatch);
+        renovarSessaoLogin();
+        __sessaoWatch = setInterval(function() {
+          try {
+            var s = lerSessaoLogin();
+            if (!s) {
+              if (usuarioAtual) {
+                try { toast('Sessão expirou — faça login novamente'); } catch (e) {}
+                try { sair(); } catch (e) {}
+              }
+              return;
+            }
+            if (usuarioAtual && document.visibilityState === 'visible') {
+              renovarSessaoLogin();
+            }
+          } catch (e) {}
+        }, 5 * 60 * 1000);
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'visible') {
+            var s = lerSessaoLogin();
+            if (!s && usuarioAtual) {
+              try { toast('Sessão expirou — faça login novamente'); } catch (e) {}
+              try { sair(); } catch (e) {}
+            } else if (s && usuarioAtual) {
+              renovarSessaoLogin();
+            }
+          }
+        });
+      } catch (e) {}
+    }
+    function draftKey(nome) {
+      var u = usuarioAtual && usuarioAtual.user ? usuarioAtual.user : 'anon';
+      return 'valis_draft_' + nome + '_' + u;
+    }
+    function salvarRascunhoPlantao() {
+      try {
+        var data = {
+          data: ((document.getElementById('pl-data') || {}).value || ''),
+          inicio: ((document.getElementById('pl-inicio') || {}).value || ''),
+          fim: ((document.getElementById('pl-fim') || {}).value || ''),
+          tipo: ((document.getElementById('pl-tipo') || {}).value || ''),
+          valor: ((document.getElementById('pl-valor') || {}).value || ''),
+          cobriu: ((document.getElementById('pl-cobriu') || {}).value || ''),
+          obs: ((document.getElementById('pl-obs') || {}).value || ''),
+          sono: ((document.getElementById('pl-sono') || {}).value || '')
+        };
+        localStorage.setItem(draftKey('plantao'), JSON.stringify(data));
+      } catch (e) {}
+    }
+    function restaurarRascunhoPlantao() {
+      try {
+        var raw = localStorage.getItem(draftKey('plantao'));
+        if (!raw) return;
+        var d = JSON.parse(raw);
+        function set(id, v) {
+          var el = document.getElementById(id);
+          if (el && v != null && v !== '') el.value = v;
+        }
+        set('pl-data', d.data); set('pl-inicio', d.inicio); set('pl-fim', d.fim);
+        set('pl-tipo', d.tipo); set('pl-valor', d.valor); set('pl-cobriu', d.cobriu);
+        set('pl-obs', d.obs); set('pl-sono', d.sono);
+        try { if (typeof plantaoCalcHoras === 'function') plantaoCalcHoras(); } catch (e) {}
+        try { if (typeof atualizarUITipoPlantao === 'function') atualizarUITipoPlantao(); } catch (e) {}
+      } catch (e) {}
+    }
+    function limparRascunhoPlantao() {
+      try { localStorage.removeItem(draftKey('plantao')); } catch (e) {}
+    }
+    function bindRascunhoPlantao() {
+      try {
+        ['pl-data','pl-inicio','pl-fim','pl-tipo','pl-valor','pl-cobriu','pl-obs','pl-sono'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el || el._draftBound) return;
+          el.addEventListener('input', salvarRascunhoPlantao);
+          el.addEventListener('change', salvarRascunhoPlantao);
+          el._draftBound = true;
+        });
+      } catch (e) {}
+    }
+
+
     function entrarApp() {
+      try {
+        if (usuarioAtual) {
+          var ss = lerSessaoLogin();
+          salvarSessaoLogin(usuarioAtual.user, !!(ss && ss.manter));
+        }
+      } catch (e) {}
+      try { iniciarWatcherSessaoLogin(); } catch (e) {}
+      try { bindRascunhoPlantao(); restaurarRascunhoPlantao(); } catch (e) {}
       try {
         var loginEl = document.getElementById('login');
         var appEl = document.getElementById('app');
@@ -5905,8 +6088,10 @@
       try { setManutSessaoDesbloqueada(false); } catch (e) {}
       usuarioAtual = null;
       devLiberado = false;
-      sessionStorage.removeItem('valis_user');
-      localStorage.removeItem('valis_user_persist');
+      try { limparSessaoLogin(); } catch (e) {
+        sessionStorage.removeItem('valis_user');
+        localStorage.removeItem('valis_user_persist');
+      }
       try {
         if (firebaseOk && firebase.auth && firebase.auth().currentUser) {
           firebase.auth().signOut().then(() => ensureFirebaseAuth());
@@ -7823,6 +8008,7 @@
       await salvar();
       await backupPlantaoesAuto('salvar');
       render();
+      try { limparRascunhoPlantao(); } catch (e0) {}
       toast('Plantão salvo + backup');
       tab('extrato');
     }
@@ -9219,7 +9405,8 @@
         document.getElementById('lab-oco-txt').value = '';
         if (fileInput) fileInput.value = '';
         try { salvar(); } catch (e) {}
-        toast('Ocorrência registrada'); try { render(); } catch (e) {}
+        try { rascunhoLimpar('ocorrencia'); } catch (e0) {}
+      toast('Ocorrência registrada'); try { render(); } catch (e) {}
       }
       if (!file) return save(null);
       var reader = new FileReader();
@@ -10511,7 +10698,8 @@
         try { registrarAuditoria('troca_plantao_' + status, (p.de || '') + ' → ' + (p.para || '')); } catch (e) {}
         try { addAtividade('Troca de plantão ' + status + ': @' + (p.de || '') + ' → @' + (p.para || '')); } catch (e) {}
         renderPedidosTrocaInicio();
-        toast(status === 'aceito' ? 'Troca aceita' : 'Troca recusada');
+        if (status === 'aceito') { try { await registrarTrocaPlantaoAceita(p); } catch (e) {} }
+        toast(status === 'aceito' ? 'Troca aceita e registrada' : 'Troca recusada');
       } catch (e) {
         alert('Erro: ' + (e && e.message ? e.message : e));
       }
@@ -10555,6 +10743,277 @@
           ? '<div class="vm-item"><b>Atenção</b><div class="meta">' + d.warn.map(function(x){ return '• ' + x; }).join('<br>') + '</div></div>'
           : '<div class="vm-item"><b>Atenção</b><div class="meta">Nenhum alerta.</div></div>');
       abrirValisModal('Saúde do app', html);
+    }
+
+
+
+    /* ===== Pack 0.2.0 — itens 2–10 (sem FCM) ===== */
+    function rascunhoSalvar(nome, obj) {
+      try { localStorage.setItem(draftKey(nome), JSON.stringify(obj || {})); } catch (e) {}
+    }
+    function rascunhoLer(nome) {
+      try {
+        var raw = localStorage.getItem(draftKey(nome));
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+    function rascunhoLimpar(nome) {
+      try { localStorage.removeItem(draftKey(nome)); } catch (e) {}
+    }
+    function bindRascunhoCampos(ids, nome) {
+      try {
+        ids.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el || el._rascBound) return;
+          var save = function() {
+            var o = rascunhoLer(nome) || {};
+            ids.forEach(function(i2) {
+              var e2 = document.getElementById(i2);
+              if (e2) o[i2] = e2.type === 'checkbox' ? !!e2.checked : (e2.value || '');
+            });
+            rascunhoSalvar(nome, o);
+          };
+          el.addEventListener('input', save);
+          el.addEventListener('change', save);
+          el._rascBound = true;
+        });
+      } catch (e) {}
+    }
+    function restaurarRascunhoCampos(ids, nome) {
+      try {
+        var o = rascunhoLer(nome);
+        if (!o) return;
+        ids.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el || o[id] == null || o[id] === '') return;
+          if (el.type === 'checkbox') el.checked = !!o[id];
+          else el.value = o[id];
+        });
+      } catch (e) {}
+    }
+    function bindRascunhosExtras() {
+      bindRascunhoCampos(['checkout-pl-tipo','checkout-pl-cobriu','checkout-pl-valor','checkout-pl-obs','checkout-pl-inicio','checkout-pl-fim'], 'checkout');
+      bindRascunhoCampos(['ot','otp','ot-posto'], 'ocorrencia');
+      bindRascunhoCampos(['mt','mdest'], 'mensagem');
+      // restore if fields exist
+      restaurarRascunhoCampos(['checkout-pl-tipo','checkout-pl-cobriu','checkout-pl-valor','checkout-pl-obs','checkout-pl-inicio','checkout-pl-fim'], 'checkout');
+      restaurarRascunhoCampos(['ot','otp','ot-posto'], 'ocorrencia');
+      restaurarRascunhoCampos(['mt','mdest'], 'mensagem');
+    }
+    // Check-out alvo gravado na sessão (funciona melhor ao reabrir)
+    function gravarAlvoCheckoutNaSessao(sess) {
+      try {
+        if (!sess || !sess.checkIn) return sess;
+        var hhmm = typeof getHoraCheckoutAuto === 'function' ? getHoraCheckoutAuto() : '06:00';
+        var alvo = typeof alvoCheckoutAposCheckIn === 'function' ? alvoCheckoutAposCheckIn(sess.checkIn, hhmm) : null;
+        if (alvo) {
+          sess.autoCheckoutAt = alvo.getTime();
+          sess.autoCheckoutHora = hhmm;
+        }
+        return sess;
+      } catch (e) { return sess; }
+    }
+    function processarCheckoutAgendadoFundo() {
+      try {
+        // Varre chaves de plantão vivo de qualquer user neste aparelho
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf('valis_plantao_vivo_') === 0) keys.push(k);
+        }
+        keys.forEach(function(k) {
+          try {
+            var sess = JSON.parse(localStorage.getItem(k) || 'null');
+            if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
+            var at = Number(sess.autoCheckoutAt || 0);
+            if (!at) {
+              sess = gravarAlvoCheckoutNaSessao(sess);
+              at = Number(sess.autoCheckoutAt || 0);
+              localStorage.setItem(k, JSON.stringify(sess));
+            }
+            if (at && Date.now() >= at) {
+              sess.status = 'finalizado';
+              sess.checkOut = new Date().toISOString();
+              sess.fechadoAuto = true;
+              sess.fechadoMotivo = 'horario_' + (sess.autoCheckoutHora || '');
+              sess.cooldownUntil = Date.now() + 2 * 60 * 60 * 1000;
+              sess.pendenteFormularioCheckout = true;
+              localStorage.setItem(k, JSON.stringify(sess));
+            }
+          } catch (e) {}
+        });
+      } catch (e) {}
+    }
+    // Troca de plantão: aceite gera registro operacional
+    async function registrarTrocaPlantaoAceita(pedido) {
+      try {
+        if (!db.trocasPlantaoRegistro) db.trocasPlantaoRegistro = [];
+        db.trocasPlantaoRegistro.unshift({
+          id: Date.now(),
+          de: pedido.de,
+          deNome: pedido.deNome || '',
+          para: pedido.para,
+          motivo: pedido.motivo || '',
+          status: 'aceito',
+          em: new Date().toISOString(),
+          respondidoPor: usuarioAtual ? usuarioAtual.user : '—'
+        });
+        if (db.trocasPlantaoRegistro.length > 150) db.trocasPlantaoRegistro.length = 150;
+        try { addAtividade('Troca ACEITA: @' + (pedido.de || '') + ' → @' + (pedido.para || '')); } catch (e) {}
+        try { await salvar(); } catch (e) {}
+      } catch (e) {}
+    }
+    // Mapa de quem está em serviço
+    var __mapaVivos = null;
+    var __mapaVivosMarkers = [];
+    function atualizarMapaVivos(forceOpen) {
+      try {
+        var box = document.getElementById('inicio-mapa-vivos');
+        var lista = document.getElementById('inicio-vivos-lista');
+        var mapEl = document.getElementById('mapa-vivos-box');
+        if (!box || !mapEl) return;
+        var pode = false;
+        if (usuarioAtual) {
+          var f = String(usuarioAtual.funcao || '').toLowerCase();
+          pode = f === 'dev' || f === 'admin' || f === 'supervisor' || f === 'supervisao' || !!devLiberado;
+        }
+        if (!pode) { box.style.display = 'none'; return; }
+        box.style.display = 'block';
+        var sessions = (db.sessoesPlantao || []).filter(function(s) {
+          return s && (s.status === 'ativo' || s.status === 'almoco');
+        });
+        // merge local
+        try {
+          var loc = typeof pvLoad === 'function' ? pvLoad() : null;
+          if (loc && (loc.status === 'ativo' || loc.status === 'almoco') && usuarioAtual) {
+            sessions = sessions.filter(function(s) { return String(s.userLogin) !== String(usuarioAtual.user); });
+            sessions.unshift({
+              userLogin: usuarioAtual.user,
+              nome: usuarioAtual.nome,
+              status: loc.status,
+              postoNome: loc.postoNome,
+              lat: loc.checkInLat || (typeof _pvLastPos !== 'undefined' && _pvLastPos ? _pvLastPos.lat : null),
+              lng: loc.checkInLng || (typeof _pvLastPos !== 'undefined' && _pvLastPos ? _pvLastPos.lng : null)
+            });
+          }
+        } catch (e) {}
+        if (lista) {
+          lista.innerHTML = sessions.length
+            ? sessions.map(function(s) {
+                return '• @' + (s.userLogin || '') + ' · ' + (s.postoNome || '—') + ' · ' + (s.status || '');
+              }).join('<br>')
+            : 'Ninguém em serviço registrado.';
+        }
+        if (typeof L === 'undefined') return;
+        if (!__mapaVivos) {
+          __mapaVivos = L.map(mapEl).setView([-15.8, -47.9], 4);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OSM'
+          }).addTo(__mapaVivos);
+        }
+        __mapaVivosMarkers.forEach(function(m) { try { __mapaVivos.removeLayer(m); } catch (e) {} });
+        __mapaVivosMarkers = [];
+        var bounds = [];
+        sessions.forEach(function(s) {
+          var lat = Number(s.lat), lng = Number(s.lng);
+          if (!lat && !lng) {
+            // tenta posto
+            try {
+              var p = (db.postos || []).find(function(x) {
+                return String(x.nome || '') === String(s.postoNome || '') || String(x.id) === String(s.postoId || '');
+              });
+              if (p && p.lat && p.lng) { lat = Number(p.lat); lng = Number(p.lng); }
+            } catch (e) {}
+          }
+          if (!lat || !lng) return;
+          var mk = L.marker([lat, lng]).addTo(__mapaVivos);
+          mk.bindPopup('<b>@' + (s.userLogin || '') + '</b><br>' + (s.postoNome || '') + '<br>' + (s.status || ''));
+          __mapaVivosMarkers.push(mk);
+          bounds.push([lat, lng]);
+        });
+        if (bounds.length) {
+          try { __mapaVivos.fitBounds(bounds, { padding: [24, 24], maxZoom: 15 }); } catch (e) {}
+        }
+        setTimeout(function() { try { __mapaVivos.invalidateSize(); } catch (e) {} }, 200);
+      } catch (e) { console.warn(e); }
+    }
+    function atualizarRankingInicio() {
+      try {
+        var box = document.getElementById('inicio-ranking-box');
+        var body = document.getElementById('inicio-ranking-body');
+        if (!box || !body || !usuarioAtual) return;
+        var f = String(usuarioAtual.funcao || '').toLowerCase();
+        var pode = f === 'dev' || f === 'admin' || f === 'supervisor' || f === 'supervisao' || !!devLiberado;
+        if (!pode) { box.style.display = 'none'; return; }
+        box.style.display = 'block';
+        var mes = new Date().toISOString().slice(0, 7);
+        var map = {};
+        (db.plantaoes || []).forEach(function(p) {
+          if (!p || String(p.data || '').slice(0, 7) !== mes) return;
+          var k = p.userLogin || p.por || '—';
+          if (!map[k]) map[k] = 0;
+          map[k]++;
+        });
+        var rows = Object.keys(map).map(function(k) { return { k: k, n: map[k] }; })
+          .sort(function(a, b) { return b.n - a.n; }).slice(0, 8);
+        body.innerHTML = rows.length
+          ? rows.map(function(r, i) { return '#' + (i+1) + ' ' + r.k + ' — ' + r.n + ' plantão(ões)'; }).join('<br>')
+          : 'Sem plantões neste mês.';
+      } catch (e) {}
+    }
+    function exportarFolhaPDF() {
+      try {
+        var mes = new Date().toISOString().slice(0, 7);
+        var lista = (db.plantaoes || []).filter(function(p) {
+          if (!p) return false;
+          if (usuarioAtual && usuarioAtual.funcao === 'vigilante') {
+            return (p.userLogin === usuarioAtual.user || p.por === usuarioAtual.nome) && String(p.data||'').slice(0,7) === mes;
+          }
+          return String(p.data || '').slice(0, 7) === mes;
+        });
+        var total = 0;
+        var rows = lista.map(function(p) {
+          total += Number(p.valor || 0);
+          return '<tr><td>' + (p.data||'') + '</td><td>' + (p.posto||'') + '</td><td>' + (p.tipo||'') + '</td><td>' +
+            (p.inicio||'') + '-' + (p.fim||'') + '</td><td>' + (p.cobriu||'') + '</td><td>R$ ' + Number(p.valor||0).toFixed(2) + '</td></tr>';
+        }).join('');
+        var area = document.getElementById('print-folha-area');
+        if (!area) return toast('Área de impressão indisponível');
+        area.classList.remove('hidden');
+        area.innerHTML = '<h2>Folha VALIS — ' + mes + '</h2><p>' +
+          (usuarioAtual ? (usuarioAtual.nome + ' (@' + usuarioAtual.user + ')') : '') +
+          '</p><table border="1" cellpadding="6" cellspacing="0" width="100%"><thead><tr><th>Data</th><th>Posto</th><th>Tipo</th><th>Horário</th><th>Cobriu</th><th>Valor</th></tr></thead><tbody>' +
+          (rows || '<tr><td colspan="6">Sem plantões</td></tr>') +
+          '</tbody></table><p><b>Total: R$ ' + total.toFixed(2) + '</b></p><p style="font-size:11px">Gerado em ' + new Date().toLocaleString('pt-BR') + '</p>';
+        window.print();
+        setTimeout(function() { area.classList.add('hidden'); area.innerHTML = ''; }, 500);
+      } catch (e) {
+        alert('Erro ao exportar: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function polirAvisoGlobalUI() {
+      try {
+        var el = document.getElementById('aviso-global') || document.getElementById('banner-aviso');
+        if (el) el.classList.add('aviso-banner-soft');
+      } catch (e) {}
+    }
+    // PWA install soft prompt
+    var __deferredInstall = null;
+    try {
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        __deferredInstall = e;
+      });
+    } catch (e) {}
+    function instalarAppPWA() {
+      try {
+        if (__deferredInstall) {
+          __deferredInstall.prompt();
+          return;
+        }
+        toast('Use o menu do navegador → Instalar aplicativo');
+      } catch (e) { toast('Instale pelo menu do navegador'); }
     }
 
 
@@ -11412,10 +11871,9 @@
       // listener manutenção em tempo real (com force reload)
       iniciarListenerManutencao();
       try {
-        const sess = sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist');
-        if (sess) {
+        const s = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
+        if (s && s.user) {
           setLoginAutoStatus(true, 'Login automatico', 'Validando usuario salvo e permissoes...', null);
-          const s = JSON.parse(sess);
           const u = (db.users || []).find(x => {
             if (String(x.user || '').toLowerCase() !== String(s.user || '').toLowerCase()) return false;
             const ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1;
@@ -11425,7 +11883,9 @@
           if (u) {
             setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
             usuarioAtual = u;
-            sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
+            try { salvarSessaoLogin(u.user, !!s.manter); } catch (e) {
+              sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
+            }
             pedirPermissaoNotificacoes();
             setTimeout(function() {
               try { setLoginAutoStatus(false); } catch (e) {}
@@ -12644,6 +13104,7 @@
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
       try { feedbackAcaoLeve(); } catch (e) {}
       try { iniciarTimerPlantaoLive(); } catch (e) {}
+      try { sess = gravarAlvoCheckoutNaSessao(sess); pvSave(sess); } catch (e) {}
       try { registrarSessaoPlantaoVivo('ativo', sess); } catch (e) {}
       try { var saida = document.getElementById('pv-checklist-saida'); if (saida) saida.style.display = 'block'; } catch (e) {}
       try { labRegPresenca('check-in', sess.postoNome, sess.checkInLat, sess.checkInLng); } catch (e) {}
@@ -12753,6 +13214,8 @@
           if (iEl) iEl.onchange = calcHorasCheckoutForm;
           if (fEl) fEl.onchange = calcHorasCheckoutForm;
         } catch (e) {}
+        try { restaurarRascunhoCampos(['checkout-pl-tipo','checkout-pl-cobriu','checkout-pl-valor','checkout-pl-obs'], 'checkout'); } catch (e) {}
+        try { bindRascunhoCampos(['checkout-pl-tipo','checkout-pl-cobriu','checkout-pl-valor','checkout-pl-obs','checkout-pl-inicio','checkout-pl-fim'], 'checkout'); } catch (e) {}
         var bg = document.getElementById('checkout-plantao-bg');
         if (bg) bg.classList.add('show');
       } catch (e) {
@@ -12859,6 +13322,7 @@
       } else {
         toast(pend.auto ? 'Check-in finalizado (automático)' : 'Check-in finalizado');
       }
+      try { rascunhoLimpar('checkout'); } catch (e) {}
       cancelarCheckoutPlantaoForm();
       try { if (typeof atualizarResumoDia === 'function') atualizarResumoDia(); } catch (e) {}
       try { if (typeof atualizarTimerPlantaoLive === 'function') atualizarTimerPlantaoLive(); } catch (e) {}
@@ -13147,7 +13611,9 @@
         pvStartGeoWatch();
         try { pvBindMapaDetails(); } catch (e) {}
         try { iniciarTimerPlantaoLive(); } catch (e) {}
+        try { processarCheckoutAgendadoFundo(); } catch (e) {}
         try { iniciarWatcherCheckoutAuto(); } catch (e) {}
+        try { setInterval(processarCheckoutAgendadoFundo, 60000); } catch (e) {}
         try { atualizarBadgeVersao(); } catch (e) {}
         try { atualizarSyncMeta(); } catch (e) {}
         try { aplicarReadonlyUI(); } catch (e) {}
