@@ -1,5 +1,5 @@
 {
-  "v": "0.2.3",
+  "v": "0.2.4",
   "forceReload": true,
-  "msg": "Interface exclusiva do login DEV (console de gestao)"
+  "msg": "Corrige plantoes ao vivo + mapa (sync GPS e UI DEV)"
 }

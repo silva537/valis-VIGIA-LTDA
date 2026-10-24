@@ -2633,7 +2633,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.4</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2691,7 +2691,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.3</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.4</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2856,7 +2856,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.3</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.4</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -2910,6 +2910,12 @@
             <button type="button" class="dev-home-tile" onclick="try{devFn(11)}catch(e){}">
               <span class="ico">🚧</span><div class="lab">Manutenção</div><div class="sub">Bloquear / liberar</div>
             </button>
+          </div>
+          <div class="ops-soft-card" id="dev-home-mapa" style="margin-bottom:12px">
+            <h4 style="margin:0 0 6px;font-size:13px">📍 Equipe em serviço</h4>
+            <div id="dev-vivos-lista" class="meta" style="font-size:12px;margin-bottom:6px">—</div>
+            <div id="dev-mapa-vivos-box" style="height:200px;border-radius:12px;overflow:hidden;border:1px solid rgba(148,163,184,0.25)"></div>
+            <button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="atualizarMapaVivos(true)">Atualizar mapa / lista</button>
           </div>
           <div class="ops-soft-card" style="margin-bottom:12px">
             <h4 style="margin:0 0 6px;font-size:13px">Atalhos rápidos</h4>
@@ -3766,7 +3772,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.3';
+    const APP_VERSION = '0.2.4';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -7226,32 +7232,60 @@
         }
         case 62: {
           try {
-            var list = db.sessoesPlantao || [];
-            // merge local session
-            try {
-              var sess = typeof pvLoad === 'function' ? pvLoad() : null;
-              if (sess && (sess.status === 'ativo' || sess.status === 'almoco') && usuarioAtual) {
-                list = list.filter(function(s) { return String(s.userLogin) !== String(usuarioAtual.user); });
-                list = [{
-                  userLogin: usuarioAtual.user,
-                  nome: usuarioAtual.nome,
-                  status: sess.status,
-                  postoNome: sess.postoNome,
-                  checkIn: sess.checkIn,
-                  updatedAt: new Date().toISOString()
-                }].concat(list);
-              }
-            } catch (e) {}
+            var list = listarSessoesPlantaoAtivas();
             if (!list.length) {
-              abrirValisModal('Plantões ao vivo', '<div class="empty">Ninguém em serviço registrado agora.</div>');
+              abrirValisModal('Plantões ao vivo',
+                '<div class="empty">Ninguém em serviço registrado agora.</div>' +
+                '<p class="meta" style="margin-top:8px;font-size:12px">As sessões só aparecem após check-in com sincronização. Peça ao vigilante para abrir o app online.</p>' +
+                '<button type="button" class="btn dark sm" style="margin-top:8px;width:100%" onclick="try{atualizarMapaVivos(true)}catch(e){}">Atualizar mapa na home</button>'
+              );
               break;
             }
-            abrirValisModal('Plantões ao vivo', list.slice(0, 30).map(function(s) {
+            var htmlL = list.slice(0, 40).map(function(s) {
+              var h = '—';
+              try {
+                if (s.checkIn) {
+                  var d = new Date(s.checkIn);
+                  h = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+                }
+              } catch (e) {}
               return '<div class="vm-item"><b>@' + (s.userLogin || '') + '</b> · ' + (s.nome || '') +
-                '<div class="meta">' + (s.status || '') + ' · ' + (s.postoNome || '—') +
-                (s.checkIn ? (' · desde ' + new Date(s.checkIn).toLocaleTimeString('pt-BR')) : '') + '</div></div>';
-            }).join(''));
-          } catch (e) { alert(e); }
+                '<div class="meta">' + (s.status || '') + ' · ' + (s.postoNome || '—') + ' · entrada ' + h +
+                ((s.lat && s.lng) ? ' · GPS ok' : ' · sem GPS') + '</div></div>';
+            }).join('');
+            htmlL += '<div id="modal-mapa-vivos" style="height:200px;margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid rgba(148,163,184,0.25)"></div>';
+            abrirValisModal('Plantões ao vivo (' + list.length + ')', htmlL);
+            setTimeout(function() {
+              try {
+                if (typeof L === 'undefined') return;
+                var el = document.getElementById('modal-mapa-vivos');
+                if (!el) return;
+                var map = L.map(el).setView([-15.8, -47.9], 4);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+                var bounds = [];
+                list.forEach(function(s) {
+                  var lat = Number(s.lat), lng = Number(s.lng);
+                  if ((!lat || !lng) && s.postoNome) {
+                    var p = (db.postos || []).find(function(x) {
+                      return String(x.nome || '').toLowerCase() === String(s.postoNome || '').toLowerCase();
+                    });
+                    if (p) { lat = Number(p.lat); lng = Number(p.lng); }
+                  }
+                  if (!lat || !lng) return;
+                  L.marker([lat, lng]).addTo(map).bindPopup('@' + (s.userLogin || '') + '<br>' + (s.postoNome || ''));
+                  bounds.push([lat, lng]);
+                });
+                setTimeout(function() {
+                  map.invalidateSize(true);
+                  if (bounds.length === 1) map.setView(bounds[0], 15);
+                  else if (bounds.length > 1) map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
+                }, 200);
+              } catch (e) { console.warn(e); }
+            }, 150);
+            try { atualizarMapaVivos(true); } catch (e) {}
+          } catch (e) {
+            alert('Erro ao listar: ' + (e && e.message ? e.message : e));
+          }
           break;
         }
         case 63: {
@@ -11103,6 +11137,18 @@
         el('dh-kpi-trocas', trocas);
         el('dh-kpi-users', (db.users || []).length);
         try {
+          var sessions = typeof listarSessoesPlantaoAtivas === 'function' ? listarSessoesPlantaoAtivas() : [];
+          var dl = document.getElementById('dev-vivos-lista');
+          if (dl) {
+            dl.innerHTML = sessions.length
+              ? sessions.map(function(s) {
+                  return '• @' + (s.userLogin || '') + ' · ' + (s.postoNome || '—') + ' · ' + (s.status || '');
+                }).join('<br>')
+              : 'Ninguém em serviço registrado.';
+          }
+        } catch (e) {}
+        try { setTimeout(function(){ atualizarMapaVivos(false); }, 200); } catch (e) {}
+        try {
           var pvc = document.getElementById('plantao-vivo-card');
           if (pvc) pvc.style.display = 'none';
           var pack = document.getElementById('inicio-pack');
@@ -11115,74 +11161,132 @@
       try {
         var box = document.getElementById('inicio-mapa-vivos');
         var lista = document.getElementById('inicio-vivos-lista');
+        var listaDev = document.getElementById('dev-vivos-lista');
+        if (listaDev && usuarioAtual && String(usuarioAtual.funcao||'')==='dev') lista = listaDev;
         var mapEl = document.getElementById('mapa-vivos-box');
-        if (!box || !mapEl) return;
+        var mapElDev = document.getElementById('dev-mapa-vivos-box');
+        if (mapElDev && usuarioAtual && String(usuarioAtual.funcao||'')==='dev') {
+          mapEl = mapElDev; // mapa na interface DEV
+        }
+        var isDev = usuarioAtual && String(usuarioAtual.funcao || '').toLowerCase() === 'dev';
         var pode = false;
         if (usuarioAtual) {
           var f = String(usuarioAtual.funcao || '').toLowerCase();
           pode = f === 'dev' || f === 'admin' || f === 'supervisor' || f === 'supervisao' || !!devLiberado;
         }
+        if (!box || !mapEl) return;
         if (!pode) { box.style.display = 'none'; return; }
         box.style.display = 'block';
-        var sessions = (db.sessoesPlantao || []).filter(function(s) {
-          return s && (s.status === 'ativo' || s.status === 'almoco');
-        });
-        // merge local
-        try {
-          var loc = typeof pvLoad === 'function' ? pvLoad() : null;
-          if (loc && (loc.status === 'ativo' || loc.status === 'almoco') && usuarioAtual) {
-            sessions = sessions.filter(function(s) { return String(s.userLogin) !== String(usuarioAtual.user); });
-            sessions.unshift({
-              userLogin: usuarioAtual.user,
-              nome: usuarioAtual.nome,
-              status: loc.status,
-              postoNome: loc.postoNome,
-              lat: loc.checkInLat || (typeof _pvLastPos !== 'undefined' && _pvLastPos ? _pvLastPos.lat : null),
-              lng: loc.checkInLng || (typeof _pvLastPos !== 'undefined' && _pvLastPos ? _pvLastPos.lng : null)
-            });
-          }
-        } catch (e) {}
+        if (isDev) {
+          // Garante visível na home DEV
+          box.style.visibility = 'visible';
+          box.style.opacity = '1';
+        }
+
+        var sessions = listarSessoesPlantaoAtivas();
+
         if (lista) {
           lista.innerHTML = sessions.length
             ? sessions.map(function(s) {
-                return '• @' + (s.userLogin || '') + ' · ' + (s.postoNome || '—') + ' · ' + (s.status || '');
+                var h = '';
+                try {
+                  if (s.checkIn) {
+                    var d = new Date(s.checkIn);
+                    h = ' · ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+                  }
+                } catch (e) {}
+                return '• <b>@' + (s.userLogin || '') + '</b> · ' + (s.postoNome || '—') + ' · ' + (s.status || '') + h;
               }).join('<br>')
-            : 'Ninguém em serviço registrado.';
+            : 'Ninguém em serviço no momento. (Sessões sincronizam após check-in com internet.)';
         }
-        if (typeof L === 'undefined') return;
+
+        if (typeof L === 'undefined') {
+          if (lista) lista.innerHTML += '<br><span style="color:#fbbf24">Mapa indisponível (Leaflet não carregou).</span>';
+          return;
+        }
+
+        // Destroi mapa antigo se o container foi recriado
+        try {
+          if (__mapaVivos && mapEl._leaflet_id && __mapaVivos._container !== mapEl) {
+            __mapaVivos.remove();
+            __mapaVivos = null;
+          }
+        } catch (e) {}
+
         if (!__mapaVivos) {
-          __mapaVivos = L.map(mapEl).setView([-15.8, -47.9], 4);
+          mapEl.style.height = '220px';
+          mapEl.style.width = '100%';
+          __mapaVivos = L.map(mapEl, { zoomControl: true }).setView([-15.8, -47.9], 4);
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OSM'
           }).addTo(__mapaVivos);
         }
-        __mapaVivosMarkers.forEach(function(m) { try { __mapaVivos.removeLayer(m); } catch (e) {} });
+        (__mapaVivosMarkers || []).forEach(function(m) {
+          try { __mapaVivos.removeLayer(m); } catch (e) {}
+        });
         __mapaVivosMarkers = [];
         var bounds = [];
         sessions.forEach(function(s) {
-          var lat = Number(s.lat), lng = Number(s.lng);
-          if (!lat && !lng) {
-            // tenta posto
+          var lat = Number(s.lat);
+          var lng = Number(s.lng);
+          if ((!lat || !lng) && s.postoId) {
             try {
-              var p = (db.postos || []).find(function(x) {
-                return String(x.nome || '') === String(s.postoNome || '') || String(x.id) === String(s.postoId || '');
-              });
-              if (p && p.lat && p.lng) { lat = Number(p.lat); lng = Number(p.lng); }
+              var p = (db.postos || []).find(function(x) { return String(x.id) === String(s.postoId); });
+              if (p) { lat = Number(p.lat); lng = Number(p.lng); }
             } catch (e) {}
           }
-          if (!lat || !lng) return;
+          if ((!lat || !lng) && s.postoNome) {
+            try {
+              var p2 = (db.postos || []).find(function(x) {
+                return String(x.nome || '').toLowerCase() === String(s.postoNome || '').toLowerCase();
+              });
+              if (p2) { lat = Number(p2.lat); lng = Number(p2.lng); }
+            } catch (e) {}
+          }
+          if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
           var mk = L.marker([lat, lng]).addTo(__mapaVivos);
-          mk.bindPopup('<b>@' + (s.userLogin || '') + '</b><br>' + (s.postoNome || '') + '<br>' + (s.status || ''));
+          mk.bindPopup('<b>@' + (s.userLogin || '') + '</b><br>' + (s.nome || '') + '<br>' + (s.postoNome || '') + '<br>' + (s.status || ''));
           __mapaVivosMarkers.push(mk);
           bounds.push([lat, lng]);
         });
-        if (bounds.length) {
-          try { __mapaVivos.fitBounds(bounds, { padding: [24, 24], maxZoom: 15 }); } catch (e) {}
-        }
-        setTimeout(function() { try { __mapaVivos.invalidateSize(); } catch (e) {} }, 200);
-      } catch (e) { console.warn(e); }
+        setTimeout(function() {
+          try {
+            __mapaVivos.invalidateSize(true);
+            if (bounds.length === 1) __mapaVivos.setView(bounds[0], 15);
+            else if (bounds.length > 1) __mapaVivos.fitBounds(bounds, { padding: [28, 28], maxZoom: 15 });
+          } catch (e) {}
+        }, forceOpen ? 100 : 250);
+      } catch (e) { console.warn('atualizarMapaVivos', e); }
     }
+    function listarSessoesPlantaoAtivas() {
+      var sessions = [];
+      try {
+        sessions = (db.sessoesPlantao || []).filter(function(s) {
+          return s && (s.status === 'ativo' || s.status === 'almoco');
+        }).map(function(s) { return Object.assign({}, s); });
+      } catch (e) {}
+      try {
+        var loc = typeof pvLoad === 'function' ? pvLoad() : null;
+        if (loc && (loc.status === 'ativo' || loc.status === 'almoco') && usuarioAtual) {
+          sessions = sessions.filter(function(s) {
+            return String(s.userLogin || '') !== String(usuarioAtual.user || '');
+          });
+          sessions.unshift({
+            userLogin: usuarioAtual.user,
+            nome: usuarioAtual.nome,
+            status: loc.status,
+            postoNome: loc.postoNome,
+            postoId: loc.postoId,
+            checkIn: loc.checkIn,
+            lat: loc.checkInLat != null ? loc.checkInLat : (typeof _pvLastPos !== 'undefined' && _pvLastPos ? _pvLastPos.lat : null),
+            lng: loc.checkInLng != null ? loc.checkInLng : (typeof _pvLastPos !== 'undefined' && _pvLastPos ? _pvLastPos.lng : null)
+          });
+        }
+      } catch (e) {}
+      return sessions;
+    }
+
     function atualizarRankingInicio() {
       try {
         var box = document.getElementById('inicio-ranking-box');
@@ -11333,18 +11437,40 @@
           return String(s.userLogin || '') !== login;
         });
         if (status === 'ativo' || status === 'almoco') {
+          var lat = null, lng = null;
+          try {
+            lat = sess && (sess.checkInLat != null ? sess.checkInLat : sess.lat);
+            lng = sess && (sess.checkInLng != null ? sess.checkInLng : sess.lng);
+            if ((lat == null || lng == null) && typeof _pvLastPos !== 'undefined' && _pvLastPos) {
+              lat = _pvLastPos.lat; lng = _pvLastPos.lng;
+            }
+          } catch (e) {}
           db.sessoesPlantao.unshift({
             userLogin: login,
             nome: usuarioAtual ? usuarioAtual.nome : '',
             status: status,
-            postoNome: sess && sess.postoNome || '',
-            postoId: sess && sess.postoId || '',
-            checkIn: sess && sess.checkIn || null,
+            postoNome: (sess && sess.postoNome) || '',
+            postoId: (sess && sess.postoId) || '',
+            checkIn: (sess && sess.checkIn) || null,
+            lat: lat != null ? Number(lat) : null,
+            lng: lng != null ? Number(lng) : null,
             updatedAt: new Date().toISOString()
           });
         }
         if (db.sessoesPlantao.length > 80) db.sessoesPlantao.length = 80;
-      } catch (e) {}
+        // Persiste na nuvem (não bloquear UI)
+        try {
+          if (typeof salvar === 'function') {
+            Promise.resolve(salvar()).catch(function(){});
+          }
+        } catch (e) {}
+        try {
+          if (typeof atualizarMapaVivos === 'function') setTimeout(function(){ atualizarMapaVivos(false); }, 300);
+        } catch (e) {}
+        try {
+          if (typeof atualizarInterfaceDevHome === 'function') setTimeout(function(){ atualizarInterfaceDevHome(); }, 300);
+        } catch (e) {}
+      } catch (e) { console.warn('registrarSessaoPlantaoVivo', e); }
     }
     function devSairImpersonate() {
       try {
@@ -13351,6 +13477,7 @@
       try { iniciarTimerPlantaoLive(); } catch (e) {}
       try { sess = gravarAlvoCheckoutNaSessao(sess); pvSave(sess); } catch (e) {}
       try { registrarSessaoPlantaoVivo('ativo', sess); } catch (e) {}
+      try { await salvar(); } catch (e) {}
       try { var saida = document.getElementById('pv-checklist-saida'); if (saida) saida.style.display = 'block'; } catch (e) {}
       try { labRegPresenca('check-in', sess.postoNome, sess.checkInLat, sess.checkInLng); } catch (e) {}
       try { notificarApp('VALIS · Check-in', (p ? p.n + ' · ' : '') + pvFmtHora(sess.checkIn)); } catch (e) {}
