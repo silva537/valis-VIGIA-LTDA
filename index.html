@@ -1016,6 +1016,20 @@
       padding: 12px 10px; font-weight: 700; font-size: 13px; cursor: pointer;
     }
     .btn-pl-volta:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pv-posto-btn {
+      width: 100%; text-align: left; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; min-height: 44px;
+    }
+    .pv-posto-btn::after { content: '▼'; font-size: 11px; opacity: 0.7; }
+    .posto-pick-item {
+      border-radius: 12px; padding: 12px 14px; text-align: left; cursor: pointer;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(15,23,42,0.8); color: #e2e8f0; font: inherit;
+    }
+    .posto-pick-item .pp-name { font-weight: 800; font-size: 14px; }
+    .posto-pick-item .pp-meta { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+    .posto-pick-item.active { border-color: rgba(34,197,94,0.55); background: rgba(20,83,45,0.35); }
     .plantao-vivo-select {
       width: 100%; margin-bottom: 8px; background: #0f172a; color: var(--text);
       border: 1px solid rgba(148,163,184,0.25); border-radius: 10px; padding: 10px 12px; font-size: 13px;
@@ -2576,7 +2590,17 @@
     Modo teste como outro usuário · <button type="button" class="linkish" style="color:#fff;text-decoration:underline;background:none;border:0;font-weight:800" onclick="devSairImpersonate()">Sair do modo</button>
   </div>
   
-  <div class="valis-modal-bg" id="checkout-plantao-bg" onclick="if(event.target===this)/*não fecha no fundo*/null">
+    <div class="valis-modal-bg" id="posto-picker-bg" onclick="if(event.target===this)fecharSeletorPosto()">
+    <div class="valis-modal" role="dialog" aria-modal="true" style="max-width:440px">
+      <h3 id="posto-picker-title">Escolher posto</h3>
+      <div class="meta" id="posto-picker-sub" style="margin-bottom:10px;font-size:12px;color:var(--muted)">Postos vinculados ao seu login</div>
+      <div id="posto-picker-list" style="max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:8px"></div>
+      <div class="vm-actions" style="margin-top:12px">
+        <button type="button" class="btn dark" onclick="fecharSeletorPosto()">Fechar</button>
+      </div>
+    </div>
+  </div>
+<div class="valis-modal-bg" id="checkout-plantao-bg" onclick="if(event.target===this)/*não fecha no fundo*/null">
     <div class="valis-modal" role="dialog" aria-modal="true" style="max-width:440px">
       <h3 id="checkout-pl-title">Finalizar serviço</h3>
       <div class="meta" id="checkout-pl-sub" style="margin-bottom:10px;font-size:12px;color:var(--muted)">Preencha os dados do plantão antes de encerrar o check-in.</div>
@@ -2633,7 +2657,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.4</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.5</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2691,7 +2715,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.4</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.5</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2856,7 +2880,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.4</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.5</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -2953,9 +2977,12 @@
           <div class="plantao-vivo-meta" id="pv-meta">
             Selecione o posto e faça o check-in (manual ou automático por GPS).
           </div>
-          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()">
+          <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()" style="position:absolute;opacity:0;pointer-events:none;height:0;width:0;overflow:hidden">
             <option value="">— Selecione o posto —</option>
           </select>
+          <button type="button" class="plantao-vivo-select pv-posto-btn" id="pv-posto-btn" onclick="abrirSeletorPosto({troca:false})">
+            <span id="pv-posto-btn-label">— Toque para escolher o posto —</span>
+          </button>
           <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
           <div class="pv-checklist" id="pv-checklist">
             <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de entrada (opcional)</div>
@@ -2979,7 +3006,7 @@
             <label><input type="checkbox" class="pv-chk-out" data-item="Área conferida"> Área conferida</label>
           </div>
           <div class="pv-extra-actions">
-            <button type="button" class="btn dark sm" id="pv-btn-troca" onclick="pvTrocarPostoAgora()" disabled>Trocar posto</button>
+            <button type="button" class="btn dark sm" id="pv-btn-troca" onclick="abrirSeletorPosto({troca:true})" disabled>Trocar posto</button>
             <button type="button" class="btn dark sm" onclick="copiarRelatorioTurnoAgora()">Relatório do turno</button>
             <button type="button" class="btn dark sm" onclick="abrirPedidoTrocaPlantao()">Pedir troca de plantão</button>
           </div>
@@ -3772,7 +3799,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.4';
+    const APP_VERSION = '0.2.5';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4209,7 +4236,7 @@
       }
     };
 
-    let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [], rondas: [], presenca: [], trocasPostoPlantao: [], valoresPlantao: {}, labsConfig: {}, logsSensivel: [] };
+    let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [], rondas: [], presenca: [], trocasPostoPlantao: [], sessoesPlantao: [], pedidosTrocaPlantao: [], valoresPlantao: {}, labsConfig: {}, logsSensivel: [] };
     let usuarioAtual = null;
     let devLiberado = false;
 
@@ -5399,6 +5426,16 @@
           if (Array.isArray(remote.esc)) db.esc = remote.esc;
           if (Array.isArray(remote.oco)) db.oco = remote.oco;
           // plantões: mantém merge para não perder local
+          if (Array.isArray(remote.sessoesPlantao)) {
+            db.sessoesPlantao = mergeSessoesPlantao(db.sessoesPlantao || [], remote.sessoesPlantao);
+            try {
+              if (typeof atualizarMapaVivos === 'function') atualizarMapaVivos(false);
+              if (typeof atualizarInterfaceDevHome === 'function') atualizarInterfaceDevHome();
+            } catch (eSess) {}
+          }
+          if (Array.isArray(remote.pedidosTrocaPlantao)) {
+            db.pedidosTrocaPlantao = remote.pedidosTrocaPlantao;
+          }
           if (Array.isArray(remote.plantaoes)) {
             var arqIds = {};
             function _markArq(list) {
@@ -11429,6 +11466,43 @@
         if (db.aprovacoesLog.length > 200) db.aprovacoesLog.length = 200;
       } catch (e) {}
     }
+
+    function mergeSessoesPlantao(local, remote) {
+      var map = {};
+      function put(s) {
+        if (!s || !s.userLogin) return;
+        var k = String(s.userLogin).toLowerCase();
+        var prev = map[k];
+        var t = Date.parse(s.updatedAt || s.checkIn || 0) || 0;
+        var tp = prev ? (Date.parse(prev.updatedAt || prev.checkIn || 0) || 0) : -1;
+        if (!prev || t >= tp) map[k] = s;
+      }
+      (remote || []).forEach(put);
+      (local || []).forEach(put);
+      return Object.keys(map).map(function(k) { return map[k]; }).filter(function(s) {
+        return s && (s.status === 'ativo' || s.status === 'almoco');
+      });
+    }
+    var __sessaoVivoHb = null;
+    function iniciarHeartbeatSessaoVivo() {
+      try {
+        if (__sessaoVivoHb) clearInterval(__sessaoVivoHb);
+        __sessaoVivoHb = setInterval(function() {
+          try {
+            var sess = typeof pvLoad === 'function' ? pvLoad() : null;
+            if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) return;
+            if (!usuarioAtual) return;
+            try {
+              if (typeof _pvLastPos !== 'undefined' && _pvLastPos) {
+                if (_pvLastPos.lat != null) { sess.checkInLat = _pvLastPos.lat; sess.lat = _pvLastPos.lat; }
+                if (_pvLastPos.lng != null) { sess.checkInLng = _pvLastPos.lng; sess.lng = _pvLastPos.lng; }
+              }
+            } catch (e) {}
+            registrarSessaoPlantaoVivo(sess.status, sess);
+          } catch (e) {}
+        }, 90000);
+      } catch (e) {}
+    }
     function registrarSessaoPlantaoVivo(status, sess) {
       try {
         if (!db.sessoesPlantao) db.sessoesPlantao = [];
@@ -13200,44 +13274,164 @@
       try { cur = localStorage.getItem('valis_pv_ultimo_posto') || ''; } catch (e) {}
       if (sess && sess.postoId) cur = String(sess.postoId);
       if (!cur && sel.value) cur = sel.value;
-      var opts = ['<option value="">— Selecione o posto —</option>'];
-      var comGps = [];
-      (db.postos || []).forEach(function(p) {
-        var geo = (p.lat != null && p.lng != null) ? ' 📍' : '';
-        if (p.lat != null && p.lng != null) comGps.push(p);
-        opts.push('<option value="' + p.id + '">' + (p.n || 'Posto') + geo + (p.d ? ' — ' + p.d : '') + '</option>');
-      });
-      sel.innerHTML = opts.join('');
-      // Auto: último posto, ou único posto com GPS
-      if (cur) {
-        sel.value = cur;
-      } else if (comGps.length === 1) {
-        sel.value = String(comGps[0].id);
-        cur = sel.value;
-      }
-      if (sel.value) {
-        try { localStorage.setItem('valis_pv_ultimo_posto', String(sel.value)); } catch (e) {}
-        // Garante sessão idle com posto já escolhido (para auto GPS sem trocar select)
-        if (!sess || sess.status === 'idle' || sess.status === 'finalizado' || !sess.status) {
-          var p = pvPostoById(sel.value);
-          var keepCooldown = sess || {};
-          pvSave({
-            status: (sess && sess.status === 'finalizado') ? 'finalizado' : 'idle',
-            postoId: sel.value,
-            postoNome: p ? p.n : '',
-            checkIn: (sess && sess.status === 'finalizado') ? sess.checkIn : null,
-            almocoInicio: (sess && sess.status === 'finalizado') ? sess.almocoInicio : null,
-            almocoFim: (sess && sess.status === 'finalizado') ? sess.almocoFim : null,
-            checkOut: (sess && sess.status === 'finalizado') ? sess.checkOut : null,
-            noAutoUntil: keepCooldown.noAutoUntil || 0,
-            needsLeaveBeforeAuto: !!keepCooldown.needsLeaveBeforeAuto
-          });
+
+      var lista = [];
+      try { lista = postosDoUsuarioAtual() || []; } catch (e) {}
+      if (!lista.length && usuarioAtual) {
+        var f = String(usuarioAtual.funcao || '').toLowerCase();
+        if (f === 'dev' || f === 'admin' || f === 'supervisor' || f === 'supervisao') {
+          lista = (db.postos || []).slice();
         }
       }
+
+      var opts = ['<option value="">— Selecione o posto —</option>'];
+      lista.forEach(function(p) {
+        var geo = (p.lat != null && p.lng != null) ? ' 📍' : '';
+        var end = p.d || p.end || p.endereco || '';
+        opts.push('<option value="' + p.id + '">' + (p.n || p.nome || 'Posto') + geo + (end ? ' — ' + end : '') + '</option>');
+      });
+      sel.innerHTML = opts.join('');
+
+      if (cur) {
+        // se o cur não está na lista, ainda adiciona para não quebrar sessão ativa
+        var ok = false;
+        for (var i = 0; i < sel.options.length; i++) {
+          if (String(sel.options[i].value) === String(cur)) { ok = true; break; }
+        }
+        if (!ok) {
+          var p0 = (db.postos || []).find(function(x) { return String(x.id) === String(cur); });
+          var o = document.createElement('option');
+          o.value = String(cur);
+          o.textContent = p0 ? (p0.n || p0.nome || cur) : String(cur);
+          sel.appendChild(o);
+        }
+        sel.value = String(cur);
+      } else if (lista.length === 1) {
+        sel.value = String(lista[0].id);
+        try { localStorage.setItem('valis_pv_ultimo_posto', sel.value); } catch (e) {}
+      }
+      try { atualizarLabelPostoBtn(); } catch (e) {}
+    }
+
+
+    var __postoPickerTroca = false;
+    function abrirSeletorPosto(opts) {
+      opts = opts || {};
+      __postoPickerTroca = !!opts.troca;
+      try {
+        var list = document.getElementById('posto-picker-list');
+        var title = document.getElementById('posto-picker-title');
+        var sub = document.getElementById('posto-picker-sub');
+        var bg = document.getElementById('posto-picker-bg');
+        if (!list || !bg) return toast('Seletor de postos indisponível');
+        if (title) title.textContent = __postoPickerTroca ? 'Trocar posto' : 'Escolher posto';
+        if (sub) sub.textContent = __postoPickerTroca
+          ? 'Novo posto do plantão em andamento'
+          : 'Postos vinculados ao seu login (Admin/DEV/Supervisão definem)';
+        var postos = [];
+        try { postos = postosDoUsuarioAtual() || []; } catch (e) {}
+        if (!postos.length && usuarioAtual) {
+          var f = String(usuarioAtual.funcao || '').toLowerCase();
+          if (f === 'dev' || f === 'admin' || f === 'supervisor' || f === 'supervisao') {
+            postos = (db.postos || []).slice();
+            if (sub) sub.textContent = 'Todos os postos (gestão)';
+          }
+        }
+        if (!postos.length) {
+          list.innerHTML = '<div class="empty">Nenhum posto vinculado.<br>Peça ao supervisor/admin para vincular no cadastro.</div>';
+        } else {
+          var cur = '';
+          try {
+            var sel = document.getElementById('pv-posto');
+            if (sel) cur = sel.value;
+            var sess = pvLoad();
+            if (sess && sess.postoId) cur = String(sess.postoId);
+          } catch (e) {}
+          list.innerHTML = postos.map(function(p) {
+            var id = String(p.id);
+            var nome = p.n || p.nome || ('Posto ' + id);
+            var end = p.d || p.end || p.endereco || '';
+            var geo = (p.lat != null && p.lng != null) ? '📍 GPS' : 'sem GPS';
+            var act = String(cur) === id ? ' active' : '';
+            return '<button type="button" class="posto-pick-item' + act + '" onclick="escolherPostoDoSeletor(\'' + id.replace(/'/g,'') + '\')">' +
+              '<div class="pp-name">' + nome + '</div>' +
+              '<div class="pp-meta">' + (end ? end + ' · ' : '') + geo + '</div></button>';
+          }).join('');
+        }
+        bg.classList.add('show');
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function fecharSeletorPosto() {
+      try {
+        var bg = document.getElementById('posto-picker-bg');
+        if (bg) bg.classList.remove('show');
+      } catch (e) {}
+    }
+    function atualizarLabelPostoBtn() {
+      try {
+        var sel = document.getElementById('pv-posto');
+        var lab = document.getElementById('pv-posto-btn-label');
+        if (!lab) return;
+        if (!sel || !sel.value) { lab.textContent = '— Toque para escolher o posto —'; return; }
+        var opt = sel.options[sel.selectedIndex];
+        lab.textContent = opt ? opt.textContent : sel.value;
+      } catch (e) {}
+    }
+    async function escolherPostoDoSeletor(pid) {
+      try {
+        pid = String(pid);
+        var sel = document.getElementById('pv-posto');
+        if (!sel) return;
+        var found = false;
+        for (var i = 0; i < sel.options.length; i++) {
+          if (String(sel.options[i].value) === pid) { found = true; break; }
+        }
+        if (!found) {
+          var p = (db.postos || []).find(function(x) { return String(x.id) === pid; });
+          var o = document.createElement('option');
+          o.value = pid;
+          o.textContent = p ? (p.n || p.nome || pid) : pid;
+          sel.appendChild(o);
+        }
+        sel.value = pid;
+        if (__postoPickerTroca) await pvAplicarTrocaPosto(pid);
+        else pvSelecionarPosto();
+        atualizarLabelPostoBtn();
+        fecharSeletorPosto();
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    async function pvAplicarTrocaPosto(pid) {
+      var sess = pvLoad();
+      if (!sess || (sess.status !== 'ativo' && sess.status !== 'almoco')) {
+        return toast('Inicie o plantão antes de trocar o posto');
+      }
+      var p = (db.postos || []).find(function(x) { return String(x.id) === String(pid); });
+      if (!p) return alert('Posto não encontrado');
+      var antigo = sess.postoNome || '';
+      sess.postoId = String(pid);
+      sess.postoNome = p.n || p.nome || '';
+      try {
+        if (!db.trocasPostoPlantao) db.trocasPostoPlantao = [];
+        db.trocasPostoPlantao.unshift({
+          id: Date.now(), de: antigo, para: sess.postoNome,
+          user: usuarioAtual ? usuarioAtual.user : '', em: new Date().toISOString()
+        });
+      } catch (e) {}
+      pvSave(sess);
+      try { registrarSessaoPlantaoVivo(sess.status, sess); } catch (e) {}
+      try { await salvar(); } catch (e) {}
+      try { pvRender(); } catch (e) {}
+      try { atualizarLabelPostoBtn(); } catch (e) {}
+      toast('Posto: ' + sess.postoNome);
     }
     function pvSelecionarPosto() {
       var sel = document.getElementById('pv-posto');
       if (!sel) return;
+      try { atualizarLabelPostoBtn(); } catch (e) {}
       var sess = pvLoad() || { status: 'idle' };
       var st = sess.status || 'idle';
       if (!sel.value) {
@@ -13277,6 +13471,8 @@
         };
       } else {
         sess.postoId = sel.value;
+      try { localStorage.setItem('valis_pv_ultimo_posto', String(sel.value)); } catch (e) {}
+      try { atualizarLabelPostoBtn(); } catch (e) {}
         sess.postoNome = p ? p.n : '';
       }
       pvSave(sess);

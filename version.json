@@ -1,5 +1,5 @@
 {
-  "v": "0.2.4",
+  "v": "0.2.5",
   "forceReload": true,
-  "msg": "Corrige plantoes ao vivo + mapa (sync GPS e UI DEV)"
+  "msg": "Sessoes ao vivo na nuvem + novo seletor de postos"
 }
