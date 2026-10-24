@@ -308,6 +308,94 @@
 
 
 
+
+    /* Login DEV: esconde UI de vigilante, mantém gestão */
+    body.role-dev #tab-plantao,
+    body.role-dev .vigilante-only,
+    body.role-dev #pv-card-operacional,
+    body.role-dev .plantao-vivo-card .pv-actions-vigilante {
+      /* abas já fora do nav; reforço visual */
+    }
+    body.role-dev .vigilante-only { display: none !important; }
+
+    
+    /* ===== Interface exclusiva login DEV ===== */
+    body.role-dev #tab-inicio > .title {
+      display: none !important;
+    }
+    body.role-dev #plantao-vivo-card,
+    body.role-dev #inicio-pack,
+    body.role-dev #tab-plantao {
+      display: none !important;
+    }
+    body.role-dev #dev-home {
+      display: block !important;
+    }
+    #dev-home { display: none; }
+    .dev-home-hero {
+      border-radius: 18px;
+      padding: 16px 16px 14px;
+      margin: 0 0 14px;
+      border: 1px solid rgba(239,68,68,0.35);
+      background:
+        radial-gradient(120% 80% at 100% 0%, rgba(239,68,68,0.18), transparent 55%),
+        linear-gradient(165deg, #0b1220 0%, #1a1020 55%, #0f172a 100%);
+    }
+    .dev-home-hero .dh-kicker {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #fca5a5; margin-bottom: 4px;
+    }
+    .dev-home-hero h2 {
+      margin: 0 0 4px; font-size: 20px; color: #f8fafc; letter-spacing: -0.02em;
+    }
+    .dev-home-hero p {
+      margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.45;
+    }
+    .dev-home-kpis {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 0;
+    }
+    .dev-home-kpi {
+      border-radius: 12px; padding: 10px 12px;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: rgba(15,23,42,0.65);
+    }
+    .dev-home-kpi .k { font-size: 10px; color: #94a3b8; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .dev-home-kpi .v { font-size: 18px; font-weight: 800; color: #e2e8f0; margin-top: 2px; }
+    .dev-home-kpi .v.warn { color: #fbbf24; }
+    .dev-home-kpi .v.ok { color: #4ade80; }
+    .dev-home-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+    }
+    .dev-home-tile {
+      border-radius: 14px; padding: 14px 12px; text-align: left; cursor: pointer;
+      border: 1px solid rgba(148,163,184,0.22);
+      background: rgba(15,23,42,0.75);
+      color: #e2e8f0; font: inherit;
+      transition: border-color .15s, transform .12s;
+    }
+    .dev-home-tile:active { transform: scale(0.98); }
+    .dev-home-tile .ico { font-size: 22px; display: block; margin-bottom: 6px; }
+    .dev-home-tile .lab { font-size: 13px; font-weight: 800; }
+    .dev-home-tile .sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .dev-home-tile.red { border-color: rgba(239,68,68,0.4); background: rgba(69,10,10,0.35); }
+    .dev-home-tile.green { border-color: rgba(34,197,94,0.35); }
+    .dev-home-tile.amber { border-color: rgba(251,191,36,0.35); }
+    .dev-home-tile.blue { border-color: rgba(59,130,246,0.35); }
+    .dev-home-tile.purple { border-color: rgba(168,85,247,0.35); }
+    body.role-dev #main-nav button[data-tab="plantao"] { display: none !important; }
+
+    body.role-dev #plantao-vivo-card,
+    body.role-dev #tab-plantao,
+    body.role-dev .plantao-vivo-card,
+    body.role-dev button[data-tab="plantao"] {
+      display: none !important;
+    }
+    body.role-dev #inicio-ranking-box,
+    body.role-dev #inicio-mapa-vivos {
+      display: block !important;
+    }
+
+
     /* Pack 0.2.0 */
     .ops-soft-card {
       border-radius: 14px; padding: 12px 14px; margin: 0 0 12px;
@@ -2545,7 +2633,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.2.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos de uso</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2603,7 +2691,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.0</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.3</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2768,7 +2856,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.0</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.2.3</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -2783,6 +2871,58 @@
       <section id="tab-inicio" class="tab active">
         <div class="title">Painel operacional</div>
         <div class="br-flag-strip"></div>
+
+        <!-- Interface exclusiva DEV -->
+        <div id="dev-home" class="dev-home">
+          <div class="dev-home-hero">
+            <div class="dh-kicker">Console DEV</div>
+            <h2>Painel de gestão</h2>
+            <p>Visão de desenvolvedor · admin · supervisão. Sem fluxo operacional de vigilante.</p>
+            <div class="dev-home-kpis">
+              <div class="dev-home-kpi"><div class="k">Pendentes</div><div class="v warn" id="dh-kpi-pend">0</div></div>
+              <div class="dev-home-kpi"><div class="k">Em serviço</div><div class="v ok" id="dh-kpi-vivos">0</div></div>
+              <div class="dev-home-kpi"><div class="k">Trocas</div><div class="v" id="dh-kpi-trocas">0</div></div>
+              <div class="dev-home-kpi"><div class="k">Users</div><div class="v" id="dh-kpi-users">0</div></div>
+            </div>
+          </div>
+          <div class="dev-home-grid">
+            <button type="button" class="dev-home-tile red" onclick="try{abrirMenuDev()}catch(e){}">
+              <span class="ico">🛠</span><div class="lab">Menu DEV</div><div class="sub">Ferramentas técnicas</div>
+            </button>
+            <button type="button" class="dev-home-tile green" onclick="tab('supervisao')">
+              <span class="ico">📡</span><div class="lab">Supervisão</div><div class="sub">Painel e indicadores</div>
+            </button>
+            <button type="button" class="dev-home-tile blue" onclick="tab('usuarios')">
+              <span class="ico">👥</span><div class="lab">Equipe</div><div class="sub">Usuários e cargos</div>
+            </button>
+            <button type="button" class="dev-home-tile amber" onclick="try{devFn(17)}catch(e){tab('usuarios')}">
+              <span class="ico">⏳</span><div class="lab">Pendentes</div><div class="sub">Aprovar cadastros</div>
+            </button>
+            <button type="button" class="dev-home-tile purple" onclick="tab('extrato')">
+              <span class="ico">💰</span><div class="lab">Extrato</div><div class="sub">Folhas e valores</div>
+            </button>
+            <button type="button" class="dev-home-tile blue" onclick="tab('postos')">
+              <span class="ico">📍</span><div class="lab">Postos</div><div class="sub">Cadastro e geofence</div>
+            </button>
+            <button type="button" class="dev-home-tile amber" onclick="tab('ocorrencias')">
+              <span class="ico">⚠</span><div class="lab">Ocorrências</div><div class="sub">Visão geral</div>
+            </button>
+            <button type="button" class="dev-home-tile" onclick="try{devFn(11)}catch(e){}">
+              <span class="ico">🚧</span><div class="lab">Manutenção</div><div class="sub">Bloquear / liberar</div>
+            </button>
+          </div>
+          <div class="ops-soft-card" style="margin-bottom:12px">
+            <h4 style="margin:0 0 6px;font-size:13px">Atalhos rápidos</h4>
+            <div class="btn-row" style="flex-wrap:wrap;gap:6px">
+              <button type="button" class="btn dark sm" onclick="try{devFn(62)}catch(e){}">Ao vivo</button>
+              <button type="button" class="btn dark sm" onclick="try{devFn(72)}catch(e){}">Trocas</button>
+              <button type="button" class="btn dark sm" onclick="try{devFn(21)}catch(e){}">Sync</button>
+              <button type="button" class="btn dark sm" onclick="try{devFn(73)}catch(e){}">Saúde</button>
+              <button type="button" class="btn dark sm" onclick="try{devFn(14)}catch(e){}">Aviso</button>
+            </div>
+          </div>
+        </div>
+
 
         <div id="update-banner" role="status" aria-live="polite">
           <div class="ub-title">🚀 Nova atualização disponível</div>
@@ -3626,7 +3766,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.0';
+    const APP_VERSION = '0.2.3';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5491,24 +5631,56 @@
         const NAV_ITEMS = [
       /* Barra principal (máx. 4 + Mais) */
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      { tab: 'plantao', roles: ['all'], icon: '📋', label: 'Plantão', primary: true },
+      /* Plantão operacional = vigilante/equipe/admin/supervisor — NÃO entra no login DEV */
+      { tab: 'plantao', roles: ['vigilante','equipe','supervisor','admin'], icon: '📋', label: 'Plantão', primary: true },
       { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
       { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      /* Menu Mais — abas */
+      /* Menu Mais */
       { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escalas', primary: false },
-      { tab: 'postos', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
+      { tab: 'postos', roles: ['supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
       { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorrências', primary: false },
-      { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: false },
+      { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: true },
+      { tab: 'supervisao', roles: ['admin','dev','supervisor'], icon: '📡', label: 'Supervisão', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
     ];
 
     function hubMaisItens(role) {
       var itens = [];
-      // Só o que NÃO está na barra inferior (Início / Plantão / Extrato / Msgs)
+      // Login DEV: só gestão (admin / supervisão / dev) — sem fluxo de vigilante
+      if (role === 'dev') {
+        itens.push({ sec: 'Gestão', icon: '📡', label: 'Supervisão', sub: 'Painel e indicadores', color: 'green',
+          go: function() { fecharMore(); tab('supervisao'); } });
+        itens.push({ sec: 'Gestão', icon: '👥', label: 'Equipe', sub: 'Usuários e postos', color: 'blue',
+          go: function() { fecharMore(); tab('usuarios'); } });
+        itens.push({ sec: 'Gestão', icon: '📍', label: 'Postos', sub: 'Cadastro e geofence', color: 'blue',
+          go: function() { fecharMore(); tab('postos'); } });
+        itens.push({ sec: 'Gestão', icon: '💰', label: 'Extrato / Folha', sub: 'Visão administrativa', color: 'amber',
+          go: function() { fecharMore(); tab('extrato'); } });
+        itens.push({ sec: 'Gestão', icon: '⚠', label: 'Ocorrências', sub: 'Visão geral', color: 'amber',
+          go: function() { fecharMore(); tab('ocorrencias'); } });
+        itens.push({ sec: 'Gestão', icon: '📅', label: 'Escalas', sub: 'Grade geral', color: 'blue',
+          go: function() { fecharMore(); tab('escalas'); } });
+        itens.push({ sec: 'Conta', icon: '👤', label: 'Meu perfil', sub: 'Conta DEV', color: '',
+          go: function() { fecharMore(); tab('config'); } });
+        itens.push({ sec: 'DEV', icon: '🛠', label: 'Menu DEV', sub: 'Ferramentas técnicas', color: 'red',
+          go: function() {
+            fecharMore();
+            try { if (typeof abrirMenuDev === 'function') abrirMenuDev();
+            else { var b = document.querySelector('.btn-dev, #btn-dev'); if (b) b.click(); } } catch (e) {}
+          } });
+        return itens;
+      }
+
+      // Vigilante / equipe / demais: operação normal
       itens.push({ sec: 'Operação', icon: '⚠', label: 'Ocorrências', sub: 'Registrar evento', color: 'amber',
         go: function() { fecharMore(); tab('ocorrencias'); } });
-      itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
-        go: function() { fecharMore(); tab('postos'); } });
+      if (role === 'supervisor' || role === 'admin') {
+        itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
+          go: function() { fecharMore(); tab('postos'); } });
+      } else {
+        itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
+          go: function() { fecharMore(); tab('postos'); } });
+      }
       itens.push({ sec: 'Operação', icon: '📅', label: 'Escalas', sub: 'Grade de serviço', color: 'blue',
         go: function() { fecharMore(); tab('escalas'); } });
       itens.push({ sec: 'Conta', icon: '👤', label: 'Meu perfil', sub: 'Dados da conta', color: '',
@@ -5598,9 +5770,13 @@
 
 
     function rolePode(roles, role) {
-      // DEV vê e acessa tudo
-      if (role === 'dev') return true;
-      return roles.includes('all') || roles.includes(role);
+      if (!roles || !roles.length) return false;
+      // DEV NÃO herda abas de vigilante — só o que incluir 'dev', 'all' ou gestão explícita
+      if (role === 'dev') {
+        return roles.indexOf('all') >= 0 || roles.indexOf('dev') >= 0;
+      }
+      if (role === 'supervisao') role = 'supervisor';
+      return roles.indexOf('all') >= 0 || roles.indexOf(role) >= 0;
     }
 
     /** Mensagem visível para o cargo atual */
@@ -5721,11 +5897,19 @@
         try { atualizarEscalaSemanaInicio(); } catch (e0) {}
         try { aplicarReadonlyUI(); } catch (e0) {}
         try { renderPedidosTrocaInicio(); } catch (e0) {}
+        try { atualizarInterfaceDevHome(); } catch (e0) {}
         try { atualizarRankingInicio(); } catch (e0) {}
         try { atualizarMapaVivos(false); } catch (e0) {}
         try { polirAvisoGlobalUI(); } catch (e0) {}
         try { bindRascunhosExtras(); } catch (e0) {}
         try { processarCheckoutAgendadoFundo(); } catch (e0) {}
+        try {
+          if (usuarioAtual && String(usuarioAtual.funcao||'') === 'dev') {
+            var pvc = document.getElementById('plantao-vivo-card');
+            if (pvc) pvc.style.display = 'none';
+            document.querySelectorAll('button[data-tab="plantao"]').forEach(function(b){ b.style.display = 'none'; });
+          }
+        } catch (e0) {}
         try { verificarOcoNovasDoPosto(); } catch (e0) {}
         var pack = document.getElementById('inicio-pack');
         var items = document.getElementById('inicio-pack-items');
@@ -5799,6 +5983,12 @@
 
     function aplicarPermissoes() {
       const role = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
+      try {
+        document.body.classList.remove('role-dev', 'role-admin', 'role-supervisor', 'role-vigilante', 'role-equipe');
+        var rc = role === 'supervisao' ? 'supervisor' : role;
+        if (['dev','admin','supervisor','vigilante','equipe'].indexOf(rc) >= 0) document.body.classList.add('role-' + rc);
+        else document.body.classList.add('role-vigilante');
+      } catch (e) {}
       const allowed = NAV_ITEMS.filter(i => rolePode(i.roles, role));
       // Primários: até 4 + "Mais" se sobrar
       let primary = allowed.filter(i => i.primary);
@@ -6056,6 +6246,22 @@
         }
         try { render(); } catch (e) { console.warn('render', e); }
         try { atualizarBtnSup(); } catch (e) {}
+      // DEV: sem plantão operacional na UI
+      try {
+        if (role === 'dev') {
+          document.body.classList.add('role-dev');
+          try { atualizarInterfaceDevHome(); } catch (e3) {}
+          var pvc = document.getElementById('plantao-vivo-card');
+          if (pvc) pvc.style.display = 'none';
+          document.querySelectorAll('button[data-tab="plantao"]').forEach(function(b){ b.style.display = 'none'; });
+          var plantaoTab = document.getElementById('tab-plantao');
+          if (plantaoTab) {
+            plantaoTab.classList.remove('show');
+            plantaoTab.style.display = 'none';
+          }
+          try { tab('inicio'); } catch (e2) {}
+        }
+      } catch (e) {}
         try { iniciarListenerDados(); } catch (e) {}
         try { iniciarSchedulerLembretePonto(); preencherUILembretePonto(); } catch (e) {}
         try { if (typeof syncInicioHello === 'function') syncInicioHello(); } catch (e) {}
@@ -10866,6 +11072,45 @@
     // Mapa de quem está em serviço
     var __mapaVivos = null;
     var __mapaVivosMarkers = [];
+
+    function atualizarInterfaceDevHome() {
+      try {
+        var isDev = usuarioAtual && String(usuarioAtual.funcao || '').toLowerCase() === 'dev';
+        var home = document.getElementById('dev-home');
+        if (home) home.style.display = isDev ? 'block' : 'none';
+        if (!isDev) return;
+        document.body.classList.add('role-dev');
+        var pend = 0, vivos = 0, trocas = 0;
+        try {
+          pend = (db.users || []).filter(function(u) {
+            return u && (u.pendente === true || u.pendente === 'true' || u.pendente === 1);
+          }).length;
+          if (!pend && db.solicitacoes) {
+            pend = (db.solicitacoes || []).filter(function(s) { return s && s.status === 'pendente'; }).length;
+          }
+        } catch (e) {}
+        try {
+          vivos = (db.sessoesPlantao || []).filter(function(s) {
+            return s && (s.status === 'ativo' || s.status === 'almoco');
+          }).length;
+        } catch (e) {}
+        try {
+          trocas = (db.pedidosTrocaPlantao || []).filter(function(p) { return p && p.status === 'pendente'; }).length;
+        } catch (e) {}
+        var el = function(id, v) { var n = document.getElementById(id); if (n) n.textContent = v; };
+        el('dh-kpi-pend', pend);
+        el('dh-kpi-vivos', vivos);
+        el('dh-kpi-trocas', trocas);
+        el('dh-kpi-users', (db.users || []).length);
+        try {
+          var pvc = document.getElementById('plantao-vivo-card');
+          if (pvc) pvc.style.display = 'none';
+          var pack = document.getElementById('inicio-pack');
+          if (pack) pack.style.display = 'none';
+        } catch (e) {}
+      } catch (e) { console.warn(e); }
+    }
+
     function atualizarMapaVivos(forceOpen) {
       try {
         var box = document.getElementById('inicio-mapa-vivos');

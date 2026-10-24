@@ -1,5 +1,5 @@
 {
-  "v": "0.2.0",
+  "v": "0.2.3",
   "forceReload": true,
-  "msg": "Pack 2-10: checkout fundo, rascunhos, troca, mapa, PDF, ranking"
+  "msg": "Interface exclusiva do login DEV (console de gestao)"
 }
