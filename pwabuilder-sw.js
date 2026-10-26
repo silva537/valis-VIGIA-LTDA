@@ -1,10 +1,60 @@
-// VALIS VIGIA — Service Worker (offline + notificações em 2º plano)
-const CACHE = "pwabuilder-offline-v2";
+// VALIS VIGIA — Service Worker v3 (offline + notificações)
+const CACHE = "pwabuilder-offline-v3";
 const offlineFallbackPage = "index.html";
-const AVISO_KEY = "valis_sw_last_aviso";
-const MSG_KEY = "valis_sw_last_msg";
 
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js");
+
+// Firebase Messaging em background (app fechado)
+try {
+  importScripts("https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js");
+  importScripts("https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js");
+  firebase.initializeApp({
+    apiKey: "AIzaSyBpIuf5yokj51txTYgnER7T27IamB_pdLo",
+    authDomain: "valis-vigia-ltda-d0263.firebaseapp.com",
+    projectId: "valis-vigia-ltda-d0263",
+    storageBucket: "valis-vigia-ltda-d0263.firebasestorage.app",
+    messagingSenderId: "963853721440",
+    appId: "1:963853721440:web:d1d1453d053f064063c805"
+  });
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage(function(payload) {
+    const n = (payload && payload.notification) || {};
+    const d = (payload && payload.data) || {};
+    const title = n.title || d.title || "VALIS VIGIA";
+    const body = n.body || d.body || d.texto || d.message || "";
+    return self.registration.showNotification(title, {
+      body: String(body),
+      icon: "/launchericon-192x192.png",
+      badge: "/launchericon-96x96.png",
+      tag: d.tag || "valis-fcm",
+      renotify: true,
+      requireInteraction: true,
+      silent: false,
+      vibrate: [220, 80, 220, 80, 220],
+      data: { url: d.url || "/", fullBody: String(body) }
+    });
+  });
+} catch (e) {
+  console.warn("[VALIS SW] FCM background init:", e);
+}
+
+function showValisNotification(d) {
+  d = d || {};
+  const title = d.title || "VALIS VIGIA";
+  const body = d.body != null ? String(d.body) : "";
+  return self.registration.showNotification(title, {
+    body: body,
+    icon: d.icon || "/launchericon-192x192.png",
+    badge: d.badge || "/launchericon-96x96.png",
+    tag: d.tag || ("valis-" + Date.now()),
+    renotify: true,
+    requireInteraction: d.requireInteraction !== false,
+    silent: false,
+    vibrate: d.vibrate || [220, 80, 220, 80, 220],
+    timestamp: Date.now(),
+    data: Object.assign({ url: "/", fullBody: body }, d.data || {})
+  });
+}
 
 self.addEventListener("message", (event) => {
   if (!event.data) return;
@@ -12,49 +62,14 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
     return;
   }
-  // Página pede para exibir notificação (app em background, SW ativo)
   if (event.data.type === "SHOW_NOTIFICATION") {
-    const d = event.data.payload || {};
-    event.waitUntil(
-      self.registration.showNotification(d.title || "VALIS VIGIA", {
-        body: d.body || "",
-        icon: d.icon || "/launchericon-192x192.png",
-        badge: d.badge || "/launchericon-96x96.png",
-        tag: d.tag || "valis-msg",
-        renotify: true,
-        requireInteraction: !!d.requireInteraction,
-        silent: false,
-        vibrate: [200, 100, 200, 100, 200],
-        data: d.data || { url: "/" }
-      })
-    );
-  }
-  if (event.data.type === "STORE_META") {
-    event.waitUntil(
-      (async () => {
-        try {
-          const cache = await caches.open(CACHE);
-          if (event.data.avisoEm != null) {
-            await cache.put(
-              new Request("https://valis.local/meta-aviso"),
-              new Response(String(event.data.avisoEm))
-            );
-          }
-          if (event.data.msgStamp != null) {
-            await cache.put(
-              new Request("https://valis.local/meta-msg"),
-              new Response(String(event.data.msgStamp))
-            );
-          }
-        } catch (e) {}
-      })()
-    );
+    event.waitUntil(showValisNotification(event.data.payload || {}));
   }
 });
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.add(offlineFallbackPage).catch(() => {}))
+    caches.open(CACHE).then((cache) => cache.add(offlineFallbackPage).catch(function() {}))
   );
   self.skipWaiting();
 });
@@ -69,19 +84,17 @@ if (workbox && workbox.navigationPreload && workbox.navigationPreload.isSupporte
 
 self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
-    event.respondWith(
-      (async () => {
-        try {
-          const preloadResp = await event.preloadResponse;
-          if (preloadResp) return preloadResp;
-          return await fetch(event.request);
-        } catch (error) {
-          const cache = await caches.open(CACHE);
-          const cachedResp = await cache.match(offlineFallbackPage);
-          return cachedResp || Response.error();
-        }
-      })()
-    );
+    event.respondWith((async () => {
+      try {
+        const preloadResp = await event.preloadResponse;
+        if (preloadResp) return preloadResp;
+        return await fetch(event.request);
+      } catch (error) {
+        const cache = await caches.open(CACHE);
+        const cachedResp = await cache.match(offlineFallbackPage);
+        return cachedResp || Response.error();
+      }
+    })());
   }
 });
 
@@ -93,9 +106,7 @@ self.addEventListener("notificationclick", (event) => {
       for (const client of clientList) {
         if ("focus" in client) {
           client.focus();
-          try {
-            if (client.navigate) client.navigate(targetUrl);
-          } catch (e) {}
+          try { if (client.navigate) client.navigate(targetUrl); } catch (e) {}
           return;
         }
       }
@@ -104,69 +115,30 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
+// Push genérico (FCM / Web Push)
 self.addEventListener("push", (event) => {
-  let data = {
-    title: "VALIS VIGIA",
-    body: "Nova mensagem",
-    icon: "/launchericon-192x192.png"
-  };
+  let title = "VALIS VIGIA";
+  let body = "Nova notificação";
+  let tag = "valis-push";
+  let url = "/";
   try {
     if (event.data) {
       const raw = event.data.json();
-      const notification = raw && raw.notification ? raw.notification : {};
-      const customData = raw && raw.data ? raw.data : {};
-      data = Object.assign(data, raw || {}, notification || {});
-      if (!data.data || typeof data.data !== 'object') data.data = {};
-      data.data = Object.assign({}, data.data, customData);
-      if (customData.url) data.data.url = customData.url;
-      if (raw && raw.fcmOptions && raw.fcmOptions.link) data.data.url = raw.fcmOptions.link;
+      const n = (raw && raw.notification) || {};
+      const d = (raw && raw.data) || {};
+      title = n.title || d.title || raw.title || title;
+      body = n.body || d.body || d.texto || d.message || raw.body || body;
+      tag = d.tag || raw.tag || tag;
+      url = d.url || (raw.fcmOptions && raw.fcmOptions.link) || url;
     }
   } catch (e) {
-    try {
-      data.body = event.data ? event.data.text() : data.body;
-    } catch (e2) {}
+    try { body = event.data.text(); } catch (e2) {}
   }
-  event.waitUntil(
-    self.registration.showNotification(data.title || "VALIS VIGIA", {
-      body: data.body || "",
-      icon: data.icon || "/launchericon-192x192.png",
-      badge: data.badge || "/launchericon-96x96.png",
-      tag: data.tag || "valis-push",
-      renotify: true,
-      requireInteraction: true,
-      silent: false,
-      vibrate: [200, 100, 200],
-      data: data.data || { url: "/" }
-    })
-  );
-});
-
-// Verificação periódica (Chrome/Android PWA instalado)
-self.addEventListener("periodicsync", (event) => {
-  if (event.tag === "valis-check-avisos") {
-    event.waitUntil(checarAvisosBackground());
-  }
-});
-
-async function checarAvisosBackground() {
-  try {
-    // Avisa todas as janelas abertas para sincronizar; se houver, elas notificam
-    const all = await clients.matchAll({ type: "window", includeUncontrolled: true });
-    all.forEach((c) => {
-      try {
-        c.postMessage({ type: "VALIS_BG_SYNC" });
-      } catch (e) {}
-    });
-    // Se não há janela aberta, não temos auth Firestore aqui — push real exigiria FCM/servidor
-  } catch (e) {}
-}
-
-// VALIS: ao ativar, avisa clientes para checar check-out agendado
-self.addEventListener('activate', function(event) {
-  event.waitUntil(self.clients.claim());
-});
-self.addEventListener('message', function(event) {
-  if (event.data && event.data.type === 'CHECKOUT_TICK') {
-    // cliente processa localStorage
-  }
+  event.waitUntil(showValisNotification({
+    title: title,
+    body: body,
+    tag: tag,
+    requireInteraction: true,
+    data: { url: url, fullBody: body }
+  }));
 });

@@ -1,5 +1,5 @@
 {
-  "v": "0.2.5",
+  "v": "0.3.0",
   "forceReload": true,
-  "msg": "Sessoes ao vivo na nuvem + novo seletor de postos"
+  "msg": "Novo sistema de notificacoes (som, texto completo, SW/FCM)"
 }
