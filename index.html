@@ -2657,7 +2657,7 @@
       <div class="login-logo" aria-label="VALIS VIGIA"><img src="launchericon-192x192.png" alt="VALIS VIGIA" width="72" height="72"></div>
       <h1>VALIS VIGIA LTDA</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.3.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.3.3</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2715,7 +2715,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.3.0</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.3.3</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2880,13 +2880,13 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.3.0</span>
+        VALIS VIGIA <span class="ver-badge" id="app-ver-badge">v0.3.3</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
         <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
         <span id="conn-dot" class="conn-dot green" title="Conexão com a nuvem — toque para reconectar" onclick="recuperarApp(false)"></span>
-        <button class="btn dark sm" onclick="sair()">Sair</button>
+        <button type="button" class="btn dark sm" id="btn-sair" onclick="event.preventDefault();event.stopPropagation();try{sair();}catch(e){console.error(e);}">Sair</button>
       </div>
     </header>
 
@@ -2945,6 +2945,7 @@
             <h4 style="margin:0 0 6px;font-size:13px">Atalhos rápidos</h4>
             <div class="btn-row" style="flex-wrap:wrap;gap:6px">
               <button type="button" class="btn dark sm" onclick="try{devFn(62)}catch(e){}">Ao vivo</button>
+              <button type="button" class="btn dark sm" onclick="try{encerrarSessoesAtrasadasGlobais({toast:true}).then(function(n){toast((n||0)+' encerrado(s)');})}catch(e){}">Encerrar atrasados</button>
               <button type="button" class="btn dark sm" onclick="try{devFn(72)}catch(e){}">Trocas</button>
               <button type="button" class="btn dark sm" onclick="try{devFn(21)}catch(e){}">Sync</button>
               <button type="button" class="btn dark sm" onclick="try{devFn(73)}catch(e){}">Saúde</button>
@@ -3024,6 +3025,20 @@
               <div class="pv-mapa-info" id="pv-mapa-info">Aguardando GPS e posto…</div>
             </div>
           </details>
+        </div>
+
+        
+        <!-- Lembretes de cobertura — só folguista -->
+        <div class="ops-soft-card" id="lemb-folga-card" style="display:none">
+          <h4 style="margin:0 0 6px;font-size:14px">📅 Meus lembretes de plantão</h4>
+          <p class="meta" style="font-size:12px;margin:0 0 10px;color:var(--muted)">Para quem cobre plantão (folguista). Anote o dia e quem você vai cobrir.</p>
+          <div class="grid2">
+            <div class="field"><label>Data do plantão</label><input type="date" id="lemb-data" class="input"></div>
+            <div class="field"><label>Quem você cobre</label><input type="text" id="lemb-cobriu" class="input" placeholder="Nome do titular"></div>
+          </div>
+          <div class="field"><label>Observação (opcional)</label><input type="text" id="lemb-obs" class="input" placeholder="Ex.: posto, horário combinado"></div>
+          <button type="button" class="btn green" style="width:100%;margin-bottom:10px" onclick="adicionarLembreteFolguista()">＋ Salvar lembrete</button>
+          <div id="lemb-folga-lista" class="meta" style="font-size:12px;line-height:1.5">—</div>
         </div>
 
         <div class="resumo-dia-card" id="resumo-dia-card">
@@ -3875,7 +3890,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.3.0';
+    const APP_VERSION = '0.3.3';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4312,7 +4327,7 @@
       }
     };
 
-    let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [], rondas: [], presenca: [], trocasPostoPlantao: [], sessoesPlantao: [], pedidosTrocaPlantao: [], valoresPlantao: {}, labsConfig: {}, logsSensivel: [] };
+    let db = { users: [], postos: [], esc: [], oco: [], msg: [], telSup: '', atividades: [], plantaoes: [], folhasArquivadas: [], rondas: [], presenca: [], trocasPostoPlantao: [], sessoesPlantao: [], pedidosTrocaPlantao: [], lembretesFolguista: [], valoresPlantao: {}, labsConfig: {}, logsSensivel: [] };
     let usuarioAtual = null;
     let devLiberado = false;
 
@@ -5593,11 +5608,24 @@
           if (Array.isArray(remote.esc)) db.esc = remote.esc;
           if (Array.isArray(remote.oco)) db.oco = remote.oco;
           // plantões: mantém merge para não perder local
+          if (Array.isArray(remote.lembretesFolguista)) {
+            // mescla por id
+            var mapL = {};
+            (db.lembretesFolguista || []).forEach(function(l) { if (l && l.id) mapL[l.id] = l; });
+            (remote.lembretesFolguista || []).forEach(function(l) {
+              if (!l || !l.id) return;
+              var prev = mapL[l.id];
+              if (!prev || String(l.em || '') >= String(prev.em || '')) mapL[l.id] = l;
+            });
+            db.lembretesFolguista = Object.keys(mapL).map(function(k) { return mapL[k]; });
+            try { renderLembretesFolguista(); } catch (e) {}
+          }
           if (Array.isArray(remote.sessoesPlantao)) {
             db.sessoesPlantao = mergeSessoesPlantao(db.sessoesPlantao || [], remote.sessoesPlantao);
             try {
               if (typeof atualizarMapaVivos === 'function') atualizarMapaVivos(false);
               if (typeof atualizarInterfaceDevHome === 'function') atualizarInterfaceDevHome();
+              if (typeof encerrarSessoesAtrasadasGlobais === 'function') encerrarSessoesAtrasadasGlobais({ toast: false });
             } catch (eSess) {}
           }
           if (Array.isArray(remote.pedidosTrocaPlantao)) {
@@ -6100,6 +6128,9 @@
     function atualizarPainelInicio() {
       try {
         try { atualizarResumoDia(); } catch (e0) {}
+        try { renderLembretesFolguista(); } catch (e0) {}
+        try { encerrarSessoesAtrasadasGlobais({ toast: false }); } catch (e0) {}
+        try { checarLembretesFolguistaHoje(); } catch (e0) {}
         try { atualizarUIOfflinePack(); } catch (e0) {}
         try { atualizarSyncMeta(); } catch (e0) {}
         try { atualizarTimerPlantaoLive(); } catch (e0) {}
@@ -6412,6 +6443,12 @@
 
     function entrarApp() {
       try {
+        var appEl = document.getElementById('app');
+        var loginEl = document.getElementById('login');
+        if (appEl) { appEl.style.display = ''; appEl.classList.add('show'); }
+        if (loginEl) loginEl.style.display = 'none';
+      } catch (e) {}
+      try {
         if (usuarioAtual) {
           var ss = lerSessaoLogin();
           salvarSessaoLogin(usuarioAtual.user, !!(ss && ss.manter));
@@ -6502,27 +6539,80 @@
       }
     }
 
+    var __logoutManual = false;
+    var __sessaoWatch = window.__sessaoWatch || null;
     function sair() {
-      try { setManutSessaoDesbloqueada(false); } catch (e) {}
-      usuarioAtual = null;
-      devLiberado = false;
-      try { limparSessaoLogin(); } catch (e) {
-        sessionStorage.removeItem('valis_user');
-        localStorage.removeItem('valis_user_persist');
-      }
       try {
-        if (firebaseOk && firebase.auth && firebase.auth().currentUser) {
-          firebase.auth().signOut().then(() => ensureFirebaseAuth());
+        __logoutManual = true;
+        try { sessionStorage.setItem('valis_logout_manual', '1'); } catch (e) {}
+        try { setManutSessaoDesbloqueada(false); } catch (e) {}
+        usuarioAtual = null;
+        devLiberado = false;
+        try {
+          if (typeof __sessaoWatch !== 'undefined' && __sessaoWatch) {
+            clearInterval(__sessaoWatch);
+            __sessaoWatch = null;
+          }
+        } catch (e) {}
+        // limpa todas as chaves de sessão conhecidas
+        try { limparSessaoLogin(); } catch (e) {}
+        try {
+          sessionStorage.removeItem('valis_user');
+          sessionStorage.removeItem('valis_impersonate_real');
+          sessionStorage.removeItem('valis_manut_unlocked');
+          localStorage.removeItem('valis_user_persist');
+        } catch (e) {}
+        try {
+          if (firebaseOk && firebase.auth && firebase.auth().currentUser) {
+            firebase.auth().signOut().then(function() {
+              try { ensureFirebaseAuth(); } catch (e2) {}
+            }).catch(function() {});
+          }
+        } catch (e) {}
+        try { fecharDrawer(); } catch (e) {}
+        try { fecharMore(); } catch (e) {}
+        // força UI de login
+        var app = document.getElementById('app');
+        var login = document.getElementById('login');
+        if (app) {
+          app.classList.remove('show');
+          app.style.display = 'none';
         }
-      } catch (e) {}
-      document.getElementById('app').classList.remove('show');
-      document.getElementById('login').style.display = 'flex';
-      document.getElementById('login-user').value = '';
-      document.getElementById('login-pass').value = '';
-      fecharDrawer();
-      atualizarBtnSup();
-      mostrarLogin('entrar');
+        if (login) {
+          login.style.display = 'flex';
+          login.classList.remove('hidden');
+        }
+        try {
+          var u = document.getElementById('login-user');
+          var p = document.getElementById('login-pass');
+          if (u) u.value = '';
+          if (p) p.value = '';
+        } catch (e) {}
+        try { atualizarBtnSup(); } catch (e) {}
+        try { mostrarLogin('entrar'); } catch (e) {}
+        try { setLoginAutoStatus(false); } catch (e) {}
+        try { toast('Você saiu da conta'); } catch (e) {}
+        // libera auto-login de novo após alguns segundos (login manual)
+        setTimeout(function() {
+          __logoutManual = false;
+          try { sessionStorage.removeItem('valis_logout_manual'); } catch (e) {}
+        }, 2000);
+      } catch (err) {
+        console.error('sair', err);
+        try {
+          usuarioAtual = null;
+          localStorage.removeItem('valis_user_persist');
+          sessionStorage.removeItem('valis_user');
+          var app2 = document.getElementById('app');
+          var login2 = document.getElementById('login');
+          if (app2) { app2.classList.remove('show'); app2.style.display = 'none'; }
+          if (login2) login2.style.display = 'flex';
+        } catch (e2) {}
+        alert('Saída forçada. Se a tela não mudar, feche e abra o app.');
+      }
     }
+    try { window.sair = sair; } catch (e) {}
+
     function labelFuncao(f) {
       return ({ admin: 'Admin', supervisor: 'Supervisor', vigilante: 'Vigilante', equipe: 'Equipe', dev: 'DEV' })[f] || f;
     }
@@ -8121,6 +8211,133 @@
         document.getElementById('pl-fim').value = '18:00';
       }
       plantaoCalcHoras();
+    }
+
+
+    /* ===== Lembretes de cobertura (folguista) ===== */
+    function isFolguistaAtual() {
+      try {
+        return (typeof regimeDoUsuario === 'function' ? regimeDoUsuario() : '') === 'folguista';
+      } catch (e) { return false; }
+    }
+    function lembretesDoUsuarioAtual() {
+      var login = usuarioAtual ? String(usuarioAtual.user || '').toLowerCase() : '';
+      if (!login) return [];
+      if (!db.lembretesFolguista) db.lembretesFolguista = [];
+      return (db.lembretesFolguista || []).filter(function(l) {
+        return l && String(l.userLogin || '').toLowerCase() === login && !l.apagado;
+      }).sort(function(a, b) {
+        return String(a.data || '').localeCompare(String(b.data || ''));
+      });
+    }
+    function renderLembretesFolguista() {
+      try {
+        var card = document.getElementById('lemb-folga-card');
+        var lista = document.getElementById('lemb-folga-lista');
+        if (!card || !lista) return;
+        var show = isFolguistaAtual() || (usuarioAtual && String(usuarioAtual.funcao||'') === 'dev');
+        card.style.display = show ? 'block' : 'none';
+        if (!show) return;
+        var items = lembretesDoUsuarioAtual();
+        var hoje = new Date().toISOString().slice(0, 10);
+        if (!items.length) {
+          lista.innerHTML = '<span style="color:var(--muted)">Nenhum lembrete. Adicione a data do plantão que você vai cobrir.</span>';
+          return;
+        }
+        lista.innerHTML = items.map(function(l) {
+          var quando = l.data || '—';
+          var marca = '';
+          if (quando === hoje) marca = ' <b style="color:#fbbf24">· HOJE</b>';
+          else if (quando < hoje) marca = ' <span style="color:#94a3b8">· passou</span>';
+          else marca = ' <span style="color:#86efac">· próximo</span>';
+          var feito = l.feito ? ' text-decoration:line-through;opacity:0.65' : '';
+          return '<div style="padding:8px 0;border-bottom:1px solid rgba(148,163,184,0.15)' + feito + '">' +
+            '<b>' + quando + '</b>' + marca + '<br>Cobrir: <b>' + (l.cobriu || '—') + '</b>' +
+            (l.obs ? '<br><span style="color:var(--muted)">' + l.obs + '</span>' : '') +
+            '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">' +
+            (!l.feito ? '<button type="button" class="btn dark sm" onclick="marcarLembreteFolguistaFeito(\'' + l.id + '\')">Feito</button>' : '') +
+            '<button type="button" class="btn dark sm" onclick="apagarLembreteFolguista(\'' + l.id + '\')">Excluir</button>' +
+            '</div></div>';
+        }).join('');
+      } catch (e) { console.warn(e); }
+    }
+    async function adicionarLembreteFolguista() {
+      try {
+        if (!usuarioAtual) return toast('Faça login');
+        if (!isFolguistaAtual() && String(usuarioAtual.funcao||'') !== 'dev') {
+          return toast('Lembretes disponíveis para regime Folguista');
+        }
+        var dataEl = document.getElementById('lemb-data');
+        var cobEl = document.getElementById('lemb-cobriu');
+        var obsEl = document.getElementById('lemb-obs');
+        var data = dataEl ? String(dataEl.value || '').trim() : '';
+        var cobriu = cobEl ? String(cobEl.value || '').trim() : '';
+        var obs = obsEl ? String(obsEl.value || '').trim() : '';
+        if (!data) return toast('Informe a data do plantão');
+        if (!cobriu) return toast('Informe quem você vai cobrir');
+        if (!db.lembretesFolguista) db.lembretesFolguista = [];
+        db.lembretesFolguista.unshift({
+          id: 'lf_' + Date.now(),
+          userLogin: String(usuarioAtual.user || '').toLowerCase(),
+          nome: usuarioAtual.nome || '',
+          data: data,
+          cobriu: cobriu,
+          obs: obs,
+          feito: false,
+          em: new Date().toISOString()
+        });
+        if (db.lembretesFolguista.length > 200) db.lembretesFolguista.length = 200;
+        try { await salvar(); } catch (e) {}
+        if (dataEl) dataEl.value = '';
+        if (cobEl) cobEl.value = '';
+        if (obsEl) obsEl.value = '';
+        renderLembretesFolguista();
+        toast('Lembrete salvo: ' + data + ' · ' + cobriu);
+        try {
+          notificarApp('VALIS · Lembrete salvo', data + ' — cobrir ' + cobriu + (obs ? ' · ' + obs : ''), { tag: 'lemb-save' });
+        } catch (e) {}
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    async function marcarLembreteFolguistaFeito(id) {
+      try {
+        var l = (db.lembretesFolguista || []).find(function(x) { return String(x.id) === String(id); });
+        if (!l) return;
+        l.feito = true;
+        try { await salvar(); } catch (e) {}
+        renderLembretesFolguista();
+        toast('Lembrete marcado como feito');
+      } catch (e) {}
+    }
+    async function apagarLembreteFolguista(id) {
+      try {
+        if (!confirm('Excluir este lembrete?')) return;
+        db.lembretesFolguista = (db.lembretesFolguista || []).filter(function(x) {
+          return String(x.id) !== String(id);
+        });
+        try { await salvar(); } catch (e) {}
+        renderLembretesFolguista();
+        toast('Lembrete excluído');
+      } catch (e) {}
+    }
+    function checarLembretesFolguistaHoje() {
+      try {
+        if (!isFolguistaAtual() && !(usuarioAtual && String(usuarioAtual.funcao||'') === 'dev')) return;
+        var hoje = new Date().toISOString().slice(0, 10);
+        var key = 'valis_lemb_folga_' + hoje + '_' + (usuarioAtual ? usuarioAtual.user : '');
+        if (localStorage.getItem(key) === '1') return;
+        var hojeList = lembretesDoUsuarioAtual().filter(function(l) {
+          return l && l.data === hoje && !l.feito;
+        });
+        if (!hojeList.length) return;
+        localStorage.setItem(key, '1');
+        var texto = hojeList.map(function(l) {
+          return 'Cobrir ' + (l.cobriu || '—') + (l.obs ? ' (' + l.obs + ')' : '');
+        }).join(' · ');
+        notificarApp('VALIS · Plantão hoje', texto, { tag: 'lemb-hoje', requireInteraction: true });
+        try { toast('Você tem cobertura hoje: ' + texto); } catch (e) {}
+      } catch (e) {}
     }
 
     function regimeDoUsuario(u) {
@@ -11672,6 +11889,105 @@
         }, 90000);
       } catch (e) {}
     }
+
+    /* ===== Encerrar plantões atrasados na nuvem (qualquer aparelho online ajuda) ===== */
+    var __encerrarSessoesBusy = false;
+    function horasMaxPlantaoVivo() {
+      try {
+        var n = Number((window.__valisConfigApp && window.__valisConfigApp.maxHorasPlantao) || 14);
+        if (isNaN(n) || n < 8) n = 14;
+        if (n > 24) n = 24;
+        return n;
+      } catch (e) { return 14; }
+    }
+    function sessaoDeveEncerrar(s) {
+      if (!s || (s.status !== 'ativo' && s.status !== 'almoco')) return null;
+      var agora = Date.now();
+      // 1) Horário alvo de check-out automático
+      var at = Number(s.autoCheckoutAt || 0);
+      if (at && agora >= at) return 'horario_auto';
+      // 2) Calcula alvo se tiver checkIn + hora configurada
+      try {
+        if (s.checkIn && typeof getHoraCheckoutAuto === 'function' && typeof alvoCheckoutAposCheckIn === 'function') {
+          var hhmm = getHoraCheckoutAuto();
+          var alvo = alvoCheckoutAposCheckIn(s.checkIn, hhmm);
+          if (alvo && agora >= alvo.getTime()) return 'horario_' + hhmm;
+        }
+      } catch (e) {}
+      // 3) Tempo máximo de plantão vivo (padrão 14h)
+      try {
+        var ini = Date.parse(s.checkIn || s.updatedAt || 0);
+        if (ini && (agora - ini) >= horasMaxPlantaoVivo() * 3600000) return 'tempo_max_' + horasMaxPlantaoVivo() + 'h';
+      } catch (e) {}
+      // 4) updatedAt muito antigo sem heartbeat (6h sem atualização + já passou 10h de check-in)
+      try {
+        var upd = Date.parse(s.updatedAt || 0);
+        var ini2 = Date.parse(s.checkIn || 0);
+        if (upd && ini2 && (agora - upd) >= 6 * 3600000 && (agora - ini2) >= 10 * 3600000) {
+          return 'sem_sinal';
+        }
+      } catch (e) {}
+      return null;
+    }
+    async function encerrarSessoesAtrasadasGlobais(opts) {
+      opts = opts || {};
+      if (__encerrarSessoesBusy) return 0;
+      __encerrarSessoesBusy = true;
+      var n = 0;
+      try {
+        if (!db.sessoesPlantao) db.sessoesPlantao = [];
+        var agoraIso = new Date().toISOString();
+        var mudou = false;
+        db.sessoesPlantao = (db.sessoesPlantao || []).map(function(s) {
+          if (!s) return s;
+          var motivo = sessaoDeveEncerrar(s);
+          if (!motivo) return s;
+          mudou = true;
+          n++;
+          return Object.assign({}, s, {
+            status: 'finalizado',
+            checkOut: agoraIso,
+            fechadoAuto: true,
+            fechadoMotivo: motivo,
+            fechadoPor: 'sistema_nuvem',
+            updatedAt: agoraIso
+          });
+        });
+        // também encerra sessão LOCAL deste aparelho se aplicável
+        try {
+          var loc = typeof pvLoad === 'function' ? pvLoad() : null;
+          if (loc && (loc.status === 'ativo' || loc.status === 'almoco')) {
+            var m2 = sessaoDeveEncerrar({
+              status: loc.status,
+              checkIn: loc.checkIn,
+              autoCheckoutAt: loc.autoCheckoutAt,
+              updatedAt: loc.updatedAt || loc.checkIn
+            });
+            if (m2 && typeof pvFecharCheckinAutomatico === 'function') {
+              pvFecharCheckinAutomatico(m2);
+              n++;
+              mudou = true;
+            }
+          }
+        } catch (e) {}
+        if (mudou) {
+          try { await salvar(); } catch (e) {}
+          try {
+            if (typeof atualizarMapaVivos === 'function') atualizarMapaVivos(false);
+            if (typeof atualizarInterfaceDevHome === 'function') atualizarInterfaceDevHome();
+            if (typeof listarSessoesPlantaoAtivas === 'function') { /* refresh */ }
+          } catch (e) {}
+          if (opts.toast && n) {
+            try { toast(n + ' plantão(ões) encerrado(s) automaticamente'); } catch (e) {}
+          }
+        }
+      } catch (e) {
+        console.warn('encerrarSessoesAtrasadasGlobais', e);
+      }
+      __encerrarSessoesBusy = false;
+      return n;
+    }
+
     function registrarSessaoPlantaoVivo(status, sess) {
       try {
         if (!db.sessoesPlantao) db.sessoesPlantao = [];
@@ -11688,6 +12004,14 @@
               lat = _pvLastPos.lat; lng = _pvLastPos.lng;
             }
           } catch (e) {}
+          var autoAt = null;
+          try {
+            if (sess && sess.autoCheckoutAt) autoAt = Number(sess.autoCheckoutAt);
+            else if (sess && sess.checkIn && typeof gravarAlvoCheckoutNaSessao === 'function') {
+              var tmp = gravarAlvoCheckoutNaSessao(Object.assign({}, sess));
+              autoAt = tmp && tmp.autoCheckoutAt ? Number(tmp.autoCheckoutAt) : null;
+            }
+          } catch (e) {}
           db.sessoesPlantao.unshift({
             userLogin: login,
             nome: usuarioAtual ? usuarioAtual.nome : '',
@@ -11697,6 +12021,8 @@
             checkIn: (sess && sess.checkIn) || null,
             lat: lat != null ? Number(lat) : null,
             lng: lng != null ? Number(lng) : null,
+            autoCheckoutAt: autoAt,
+            autoCheckoutHora: (sess && sess.autoCheckoutHora) || (typeof getHoraCheckoutAuto === 'function' ? getHoraCheckoutAuto() : '06:00'),
             updatedAt: new Date().toISOString()
           });
         }
@@ -12485,6 +12811,10 @@
       // listener manutenção em tempo real (com force reload)
       iniciarListenerManutencao();
       try {
+        try {
+          if (typeof __logoutManual !== 'undefined' && __logoutManual) return;
+          if (sessionStorage.getItem('valis_logout_manual') === '1') return;
+        } catch (e) {}
         const s = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
         if (s && s.user) {
           setLoginAutoStatus(true, 'Login automatico', 'Validando usuario salvo e permissoes...', null);
@@ -14349,8 +14679,10 @@
         try { pvBindMapaDetails(); } catch (e) {}
         try { iniciarTimerPlantaoLive(); } catch (e) {}
         try { processarCheckoutAgendadoFundo(); } catch (e) {}
+        try { encerrarSessoesAtrasadasGlobais({ toast: false }); } catch (e) {}
         try { iniciarWatcherCheckoutAuto(); } catch (e) {}
         try { setInterval(processarCheckoutAgendadoFundo, 60000); } catch (e) {}
+        try { setInterval(function(){ encerrarSessoesAtrasadasGlobais({ toast: false }); }, 120000); } catch (e) {}
         try { atualizarBadgeVersao(); } catch (e) {}
         try { atualizarSyncMeta(); } catch (e) {}
         try { aplicarReadonlyUI(); } catch (e) {}

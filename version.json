@@ -1,5 +1,5 @@
 {
-  "v": "0.3.0",
+  "v": "0.3.3",
   "forceReload": true,
-  "msg": "Novo sistema de notificacoes (som, texto completo, SW/FCM)"
+  "msg": "Encerra plantões atrasados na nuvem automaticamente"
 }
