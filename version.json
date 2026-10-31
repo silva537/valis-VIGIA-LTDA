@@ -1,5 +1,5 @@
 {
-  "v": "0.3.3",
+  "v": "0.3.5",
   "forceReload": true,
-  "msg": "Encerra plantões atrasados na nuvem automaticamente"
+  "msg": "Fechamento de folha: dias 5 e fim do mes"
 }
