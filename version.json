@@ -1,5 +1,5 @@
 {
-  "v": "0.1.1",
+  "v": "0.1.2",
   "forceReload": true,
-  "msg": "Base estavel ESCALA-NAV restaurada + excluir folha"
+  "msg": "Escala lanca plantoes so da quinzena atual"
 }

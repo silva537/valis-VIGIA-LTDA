@@ -2803,7 +2803,7 @@
       <div class="login-logo" aria-label="VALIS TM"><img src="launchericon-192x192.png" alt="VALIS TM" width="72" height="72"></div>
       <h1>VALIS TM</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.1</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.2</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
         ⚠ FAÇA LOGIN COM SENHA
@@ -2865,7 +2865,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.1</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.2</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -3030,7 +3030,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.1.1</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.1.2</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3222,7 +3222,7 @@
           </div>
           <label class="meta" style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px">
             <input type="checkbox" id="esc-fixa-gerar-pl" checked>
-            Ao salvar, lançar plantões no extrato (mês atual e próximo)
+            Ao salvar, lançar plantões só da quinzena atual (como na escala)
           </label>
           <button type="button" class="btn green" style="width:100%;margin-bottom:8px" onclick="salvarMinhaEscalaFixa()">Salvar minha escala</button>
           <div class="meta" id="esc-fixa-resumo" style="font-size:12px;margin-bottom:6px">—</div>
@@ -4091,7 +4091,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.1.1';
+    const APP_VERSION = '0.1.2';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -8780,23 +8780,44 @@
         if (typeof normalizarTipoPlantao === 'function') tipo = normalizarTipoPlantao(tipo);
       } catch (e) {}
 
-      // mês atual + próximo mês
+      // Somente a QUINZENA ATUAL (igual ao demonstrativo da escala)
       var agora = new Date();
       var y = agora.getFullYear(), m = agora.getMonth();
-      var iniMes = new Date(y, m, 1);
-      var fimProx = new Date(y, m + 2, 0); // último dia do próximo mês
-      var startCfg = new Date(cfg.inicio + 'T12:00:00');
-      if (startCfg > iniMes) iniMes = startCfg;
+      var diaHoje = agora.getDate();
+      var ultMes = new Date(y, m + 1, 0).getDate();
+      // 1ª quinzena: dias 1–15 · 2ª quinzena: 16–fim do mês
+      var diaIniQ, diaFimQ, nomeQ;
+      if (diaHoje <= 15) {
+        diaIniQ = 1;
+        diaFimQ = 15;
+        nomeQ = '1ª quinzena (dias 1 a 15)';
+      } else {
+        diaIniQ = 16;
+        diaFimQ = ultMes;
+        nomeQ = '2ª quinzena (dias 16 a ' + ultMes + ')';
+      }
       function fmt(dt) {
         return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
       }
-      var datas = listarDatasTrabalhoEntre(cfg, fmt(iniMes), fmt(fimProx));
-      if (!datas.length) return 0;
+      var iniRange = new Date(y, m, diaIniQ, 12, 0, 0);
+      var fimRange = new Date(y, m, diaFimQ, 12, 0, 0);
+      var startCfg = new Date(cfg.inicio + 'T12:00:00');
+      if (startCfg > iniRange) iniRange = startCfg;
+      if (iniRange > fimRange) {
+        if (!opts.silencioso) toast('Nenhum dia de trabalho nesta quinzena a partir do início da escala');
+        return 0;
+      }
+      var datas = listarDatasTrabalhoEntre(cfg, fmt(iniRange), fmt(fimRange));
+      if (!datas.length) {
+        if (!opts.silencioso) toast('Nenhum plantão para lançar nesta quinzena');
+        return 0;
+      }
       if (!opts.silencioso) {
         if (!confirm(
-          'Lançar ' + datas.length + ' plantão(ões) no extrato?\n' +
-          turno + ' · ' + inicioH + ' às ' + fimH + ' · ' + valor.toFixed(0) + ' R$ cada\n' +
-          '(mês atual e próximo; não duplica datas já lançadas)'
+          'Lançar ' + datas.length + ' plantão(ões) da ' + nomeQ + '?\n' +
+          turno + ' · ' + inicioH + ' às ' + fimH + ' · R$ ' + valor.toFixed(0) + ' cada\n' +
+          'Datas: ' + datas.join(', ') + '\n' +
+          '(não duplica datas já lançadas; só esta quinzena)'
         )) return 0;
       }
       if (!db.plantaoes) db.plantaoes = [];
