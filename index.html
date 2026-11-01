@@ -2803,7 +2803,7 @@
       <div class="login-logo" aria-label="VALIS TM"><img src="launchericon-192x192.png" alt="VALIS TM" width="72" height="72"></div>
       <h1>VALIS TM</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.4</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.5</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
         ⚠ FAÇA LOGIN COM SENHA
@@ -2865,7 +2865,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.4</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.5</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -3030,7 +3030,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.1.4</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.1.5</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -4091,7 +4091,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.1.4';
+    const APP_VERSION = '0.1.5';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5854,6 +5854,12 @@
           }
           if (Array.isArray(remote.pedidosTrocaPlantao)) {
             db.pedidosTrocaPlantao = remote.pedidosTrocaPlantao;
+          }
+          if (remote.plantaoesApagados && typeof remote.plantaoesApagados === 'object') {
+            db.plantaoesApagados = Object.assign({}, db.plantaoesApagados || {}, remote.plantaoesApagados);
+          }
+          if (remote.folhasApagadas && typeof remote.folhasApagadas === 'object') {
+            db.folhasApagadas = Object.assign({}, db.folhasApagadas || {}, remote.folhasApagadas);
           }
           if (Array.isArray(remote.plantaoes)) {
             var arqIds = {};
@@ -11707,11 +11713,40 @@
 
 
     // ---------- BACKUP PLANTÕES (local + Firebase) ----------
+    function idsPlantaoApagados() {
+      var o = (db && db.plantaoesApagados) ? db.plantaoesApagados : {};
+      if (!o || typeof o !== 'object') return {};
+      return o;
+    }
+    function marcarPlantaoApagado(id) {
+      try {
+        if (!db) return;
+        if (!db.plantaoesApagados || typeof db.plantaoesApagados !== 'object') db.plantaoesApagados = {};
+        db.plantaoesApagados[String(id)] = new Date().toISOString();
+      } catch (e) { console.warn(e); }
+    }
+    function marcarFolhaApagada(id) {
+      try {
+        if (!db) return;
+        if (!db.folhasApagadas || typeof db.folhasApagadas !== 'object') db.folhasApagadas = {};
+        db.folhasApagadas[String(id)] = new Date().toISOString();
+      } catch (e) { console.warn(e); }
+    }
     function mergePlantaoes(a, b) {
-      const map = new Map();
-      (a || []).forEach(x => { if (x && x.id != null) map.set(String(x.id), x); });
-      (b || []).forEach(x => { if (x && x.id != null) map.set(String(x.id), x); });
-      return Array.from(map.values()).sort((x, y) => (Number(y.id) || 0) - (Number(x.id) || 0));
+      var apagados = idsPlantaoApagados();
+      var map = new Map();
+      function put(x) {
+        if (!x || x.id == null) return;
+        var k = String(x.id);
+        if (apagados[k]) return;
+        map.set(k, x);
+      }
+      (a || []).forEach(put);
+      (b || []).forEach(put);
+      Object.keys(apagados || {}).forEach(function(k) { map.delete(k); });
+      return Array.from(map.values()).sort(function(x, y) {
+        return (Number(y.id) || 0) - (Number(x.id) || 0);
+      });
     }
 
     function marcarFolhaComoRestaurada(id) {
@@ -11764,6 +11799,7 @@
         if (!x || x.id == null) return;
         if (folhaFoiRestauradaLocal(x.id)) return;
         var key = String(x.id);
+        if (db.folhasApagadas && db.folhasApagadas[key]) return;
         var prev = map.get(key);
         if (!prev) {
           map.set(key, Object.assign({}, x));
