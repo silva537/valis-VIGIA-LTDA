@@ -550,9 +550,73 @@
     @keyframes lasSpin { to { transform: rotate(360deg); } }
     .login-auto-status.ok { border-color: rgba(34, 197, 94, 0.4); }
     .login-auto-status.ok .las-title { color: #86efac; }
-    .login-auto-status.err { border-color: rgba(248, 113, 113, 0.4); }
-    .login-auto-status.err .las-title { color: #fca5a5; }
-    .login-auto-status.err .las-spin { display: none; }
+    .login-auto-status.err {
+      border: 2px solid #ef4444 !important;
+      background: linear-gradient(135deg, rgba(239,68,68,0.28), rgba(69,10,10,0.9)) !important;
+      animation: valisLoginErrPulse 1s ease-in-out infinite;
+      box-shadow: 0 0 28px rgba(239,68,68,0.5);
+    }
+    .login-auto-status.err .las-title {
+      color: #fecaca !important;
+      font-size: 18px !important;
+      font-weight: 900 !important;
+    }
+    .login-auto-status.err .las-msg {
+      color: #fff !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+    .login-auto-status.err .las-spin { display: none !important; }
+    @keyframes valisLoginErrPulse {
+      0%, 100% { opacity: 1; border-color: #ef4444; }
+      50% { opacity: 0.85; border-color: #fca5a5; }
+    }
+    #login-erro-senha-banner {
+      display: none;
+      position: fixed;
+      left: 12px; right: 12px;
+      top: max(12px, env(safe-area-inset-top));
+      z-index: 500;
+      padding: 16px 14px;
+      border-radius: 14px;
+      border: 2px solid #f87171;
+      background: rgba(127, 29, 29, 0.96);
+      color: #fff;
+      text-align: center;
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.35;
+      animation: valisLoginErrPulse 1s ease-in-out infinite;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    #login-erro-senha-banner.show { display: block; }
+    #login-erro-senha-banner small {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fecaca;
+    }
+    .nav-wrap .nav, #main-nav {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      gap: 4px;
+      scrollbar-width: none;
+    }
+    .nav-wrap .nav::-webkit-scrollbar, #main-nav::-webkit-scrollbar { display: none; }
+    #main-nav button {
+      flex: 0 0 auto !important;
+      min-width: 64px;
+      max-width: 90px;
+      padding: 8px 6px !important;
+      font-size: 10px !important;
+    }
+    #main-nav button span { display: block; font-size: 18px; margin-bottom: 2px; }
+
 
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
@@ -659,6 +723,61 @@
     .collapse-box.open .collapse-head .chev { transform: rotate(180deg); }
     .collapse-body { display: none; }
     .collapse-box.open .collapse-body { display: block; }
+
+    
+    .esc-mes-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: rgba(15,23,42,0.65);
+    }
+    .esc-mes-bar button.esc-mes-arrow {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(30,41,59,0.9);
+      color: #e2e8f0;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .esc-mes-bar button.esc-mes-arrow:active { transform: scale(0.96); }
+    .esc-mes-centro {
+      flex: 1;
+      text-align: center;
+      min-width: 0;
+    }
+    .esc-mes-centro .esc-mes-nome {
+      font-size: 16px;
+      font-weight: 800;
+      color: #f1f5f9;
+      letter-spacing: -0.02em;
+    }
+    .esc-mes-centro .esc-mes-ano {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+    .esc-mes-hoje {
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(56,189,248,0.35);
+      background: rgba(14,165,233,0.12);
+      color: #7dd3fc;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px;
+      cursor: pointer;
+    }
 
     #escala-fixa-card .esc-cal {
       display: grid;
@@ -2684,8 +2803,12 @@
       <div class="login-logo" aria-label="VALIS TM"><img src="launchericon-192x192.png" alt="VALIS TM" width="72" height="72"></div>
       <h1>VALIS TM</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.1</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
       <div class="login-version" id="login-version">v—</div>
+      <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
+        ⚠ FAÇA LOGIN COM SENHA
+        <small>O login automático falhou. Digite usuário e senha para entrar de novo.</small>
+      </div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
         <div class="las-msg" id="login-auto-msg">Coletando dados de acesso neste aparelho...</div>
@@ -2701,7 +2824,7 @@
         <div class="field">
           <label>Senha</label>
           <div class="login-pass-wrap">
-            <input id="login-pass" class="input" type="password" placeholder="Sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()">
+            <input id="login-pass" onfocus="try{esconderBannerLoginErro()}catch(e){}" oninput="try{esconderBannerLoginErro()}catch(e){}" class="input" type="password" placeholder="Sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()">
             <button type="button" class="login-pass-toggle" id="login-pass-toggle" onclick="toggleLoginSenha()" title="Mostrar/ocultar senha" aria-label="Mostrar senha">👁</button>
           </div>
         </div>
@@ -2742,7 +2865,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.0.0</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.1</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2907,7 +3030,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.0.0</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.1.1</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3097,19 +3220,25 @@
             <label>Valor por plantão (R$)</label>
             <input type="number" id="esc-fixa-valor" class="input" min="0" step="1" value="100" placeholder="100">
           </div>
+          <label class="meta" style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px">
+            <input type="checkbox" id="esc-fixa-gerar-pl" checked>
+            Ao salvar, lançar plantões no extrato (mês atual e próximo)
+          </label>
           <button type="button" class="btn green" style="width:100%;margin-bottom:8px" onclick="salvarMinhaEscalaFixa()">Salvar minha escala</button>
           <div class="meta" id="esc-fixa-resumo" style="font-size:12px;margin-bottom:6px">—</div>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:4px">
             <span style="color:#86efac">■</span> Trabalho &nbsp; <span style="color:#64748b">■</span> Folga
           </div>
           <div id="esc-fixa-cal" class="esc-cal"></div>
-          <div class="btn-row" style="margin-top:10px;gap:8px;flex-wrap:wrap;align-items:center">
-            <button type="button" class="btn dark sm" onclick="navegarMesEscala(-1)" title="Mês anterior">‹</button>
-            <select id="esc-fixa-mes-sel" class="input" style="width:auto;min-width:110px;padding:8px 10px" onchange="pularMesEscalaUI()"></select>
-            <select id="esc-fixa-ano-sel" class="input" style="width:auto;min-width:88px;padding:8px 10px" onchange="pularMesEscalaUI()"></select>
-            <button type="button" class="btn dark sm" onclick="navegarMesEscala(1)" title="Próximo mês">›</button>
-            <button type="button" class="btn green sm" onclick="navegarMesEscala(0)">Hoje</button>
+          <div class="esc-mes-bar">
+            <button type="button" class="esc-mes-arrow" onclick="navegarMesEscala(-1)" aria-label="Mês anterior">‹</button>
+            <div class="esc-mes-centro">
+              <div class="esc-mes-nome" id="esc-fixa-mes-nome">—</div>
+              <div class="esc-mes-ano" id="esc-fixa-mes-ano">—</div>
+            </div>
+            <button type="button" class="esc-mes-arrow" onclick="navegarMesEscala(1)" aria-label="Próximo mês">›</button>
           </div>
+          <button type="button" class="esc-mes-hoje" onclick="navegarMesEscala(0)">Ir para o mês atual</button>
         </div>
 
         <div class="resumo-dia-card" id="resumo-dia-card">
@@ -3962,7 +4091,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.0';
+    const APP_VERSION = '0.1.1';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -4489,29 +4618,52 @@
       } catch (e) {}
     }
 
+    function esconderBannerLoginErro() {
+      try {
+        var banner = document.getElementById('login-erro-senha-banner');
+        if (banner) banner.classList.remove('show');
+      } catch (e) {}
+    }
     function setLoginAutoStatus(visivel, titulo, msg, estado) {
       try {
         var box = document.getElementById('login-auto-status');
         var t = document.getElementById('login-auto-title');
         var m = document.getElementById('login-auto-msg');
+        var banner = document.getElementById('login-erro-senha-banner');
         if (!box) return;
         if (titulo && t) t.textContent = titulo;
         if (msg && m) m.textContent = msg;
         box.classList.remove('ok', 'err', 'show');
+        if (banner) banner.classList.remove('show');
         if (visivel) {
           box.classList.add('show');
           box.style.display = 'block';
           box.style.visibility = 'visible';
           box.style.opacity = '1';
           if (estado === 'ok') box.classList.add('ok');
-          if (estado === 'err') box.classList.add('err');
+          if (estado === 'err') {
+            box.classList.add('err');
+            if (t) t.textContent = titulo || '⚠ LOGIN AUTOMÁTICO FALHOU';
+            if (m) m.textContent = msg || 'Digite usuário e senha para entrar novamente.';
+            if (banner) {
+              banner.classList.add('show');
+              banner.innerHTML = '⚠ FAÇA LOGIN COM SENHA<small>' +
+                (msg || 'O login automático não funcionou. Informe usuário e senha para entrar de novo.') +
+                '</small>';
+            }
+            try {
+              var pass = document.getElementById('login-pass');
+              if (pass) pass.focus();
+            } catch (e) {}
+          }
         } else {
           box.style.display = '';
           box.style.visibility = '';
           box.style.opacity = '';
         }
-      } catch (e) {}
+      } catch (e) { console.warn(e); }
     }
+
     function temSessaoSalvaLogin() {
       try {
         return !!(sessionStorage.getItem('valis_user') || localStorage.getItem('valis_user_persist'));
@@ -5939,18 +6091,16 @@
       return isCargoDev();
     }
         const NAV_ITEMS = [
-      /* Barra principal (máx. 4 + Mais) */
+      /* Rodapé interativo (scroll horizontal) + Mais */
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      /* Plantão operacional = vigilante/equipe/admin/supervisor — NÃO entra no login DEV */
       { tab: 'plantao', roles: ['vigilante','equipe','supervisor','admin'], icon: '📋', label: 'Plantão', primary: true },
       { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
+      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorr.', primary: true },
       { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      /* Menu Mais */
-      { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escalas', primary: false },
-      { tab: 'postos', roles: ['supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: false },
-      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorrências', primary: false },
+      { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escala', primary: true },
+      { tab: 'postos', roles: ['supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: true },
       { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: true },
-      { tab: 'supervisao', roles: ['admin','dev','supervisor'], icon: '📡', label: 'Supervisão', primary: true },
+      { tab: 'supervisao', roles: ['admin','dev','supervisor'], icon: '📡', label: 'Superv.', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
     ];
 
@@ -8576,28 +8726,110 @@
     }
     function preencherSeletoresMesEscala(y, m) {
       try {
-        var ms = document.getElementById('esc-fixa-mes-sel');
-        var ys = document.getElementById('esc-fixa-ano-sel');
-        if (!ms || !ys) return;
         var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-        if (!ms.options.length) {
-          ms.innerHTML = meses.map(function(nome, idx) {
-            return '<option value="' + idx + '">' + nome + '</option>';
-          }).join('');
-        }
-        if (!ys.options.length) {
-          var agora = new Date();
-          var y0 = agora.getFullYear() - 1;
-          var opts = [];
-          for (var yy = y0; yy <= agora.getFullYear() + 2; yy++) {
-            opts.push('<option value="' + yy + '">' + yy + '</option>');
-          }
-          ys.innerHTML = opts.join('');
-        }
-        if (document.activeElement !== ms) ms.value = String(m);
-        if (document.activeElement !== ys) ys.value = String(y);
+        var nomeEl = document.getElementById('esc-fixa-mes-nome');
+        var anoEl = document.getElementById('esc-fixa-mes-ano');
+        if (nomeEl) nomeEl.textContent = meses[m] || '—';
+        if (anoEl) anoEl.textContent = String(y);
       } catch (e) {}
     }
+
+    function plantaoJaExisteNaFolha(login, data) {
+      login = String(login || '').toLowerCase();
+      data = String(data || '').slice(0, 10);
+      return (db.plantaoes || []).some(function(p) {
+        if (!p) return false;
+        var pl = String(p.userLogin || '').toLowerCase();
+        var pd = String(p.data || '').slice(0, 10);
+        return pl === login && pd === data;
+      });
+    }
+    function listarDatasTrabalhoEntre(cfg, dataIni, dataFim) {
+      var out = [];
+      if (!cfg || !cfg.inicio) return out;
+      var cur = new Date(dataIni + 'T12:00:00');
+      var end = new Date(dataFim + 'T12:00:00');
+      if (isNaN(cur.getTime()) || isNaN(end.getTime())) return out;
+      while (cur <= end) {
+        if (ehDiaTrabalhoEscala(cur, cfg)) {
+          var y = cur.getFullYear();
+          var m = String(cur.getMonth() + 1).padStart(2, '0');
+          var d = String(cur.getDate()).padStart(2, '0');
+          out.push(y + '-' + m + '-' + d);
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+      return out;
+    }
+    async function gerarPlantaoesDaEscalaFixa(cfg, opts) {
+      opts = opts || {};
+      if (!usuarioAtual || !cfg || !cfg.inicio) return 0;
+      var login = String(usuarioAtual.user || '').toLowerCase();
+      var nome = usuarioAtual.nome || login;
+      var valor = 100;
+      try {
+        if (cfg.valorPlantao != null) valor = Number(cfg.valorPlantao) || 100;
+        else if (usuarioAtual.valorPlantao != null) valor = Number(usuarioAtual.valorPlantao) || 100;
+      } catch (e) {}
+      var noturno = (cfg.turno || 'noturno') === 'noturno';
+      var turno = noturno ? 'Noturno' : 'Diurno';
+      var inicioH = noturno ? '18:00' : '06:00';
+      var fimH = noturno ? '06:00' : '18:00';
+      var tipo = noturno ? 'Plantão Noturno' : 'Plantão Diurno';
+      try {
+        if (typeof normalizarTipoPlantao === 'function') tipo = normalizarTipoPlantao(tipo);
+      } catch (e) {}
+
+      // mês atual + próximo mês
+      var agora = new Date();
+      var y = agora.getFullYear(), m = agora.getMonth();
+      var iniMes = new Date(y, m, 1);
+      var fimProx = new Date(y, m + 2, 0); // último dia do próximo mês
+      var startCfg = new Date(cfg.inicio + 'T12:00:00');
+      if (startCfg > iniMes) iniMes = startCfg;
+      function fmt(dt) {
+        return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+      }
+      var datas = listarDatasTrabalhoEntre(cfg, fmt(iniMes), fmt(fimProx));
+      if (!datas.length) return 0;
+      if (!opts.silencioso) {
+        if (!confirm(
+          'Lançar ' + datas.length + ' plantão(ões) no extrato?\n' +
+          turno + ' · ' + inicioH + ' às ' + fimH + ' · ' + valor.toFixed(0) + ' R$ cada\n' +
+          '(mês atual e próximo; não duplica datas já lançadas)'
+        )) return 0;
+      }
+      if (!db.plantaoes) db.plantaoes = [];
+      var criados = 0;
+      datas.forEach(function(data) {
+        if (plantaoJaExisteNaFolha(login, data)) return;
+        db.plantaoes.unshift({
+          id: Date.now() + criados + Math.floor(Math.random() * 1000),
+          data: data,
+          turno: turno,
+          inicio: inicioH,
+          fim: fimH,
+          tipo: tipo,
+          valor: valor,
+          horas: '12',
+          sono: 0,
+          cobriu: nome,
+          obs: 'Gerado pela escala fixa',
+          por: nome,
+          userLogin: login,
+          userId: usuarioAtual.id || null,
+          origemEscala: true,
+          criadoEm: new Date().toISOString()
+        });
+        criados++;
+      });
+      if (criados) {
+        try { await salvar(); } catch (e) {}
+        try { await backupPlantaoesAuto('escala_auto'); } catch (e) {}
+      }
+      return criados;
+    }
+
     async function salvarMinhaEscalaFixa() {
       try {
         if (!usuarioAtual) return toast('Faça login');
@@ -8638,10 +8870,19 @@
         }
         try { salvarSessaoLogin(usuarioAtual); } catch (e) {}
         renderEscalaFixaCard();
-        toast('Escala salva · plantão fixo a partir de ' + ini);
+        var nGerados = 0;
         try {
-          notificarApp('VALIS TM · Escala', 'Escala fixa salva a partir de ' + ini + ' (' + (turno === 'diurno' ? 'diurno' : 'noturno') + ')', { tag: 'escala' });
+          var chk = document.getElementById('esc-fixa-gerar-pl');
+          if (!chk || chk.checked) {
+            nGerados = await gerarPlantaoesDaEscalaFixa(usuarioAtual.escalaFixa, { silencioso: false });
+          }
+        } catch (eG) { console.warn(eG); }
+        toast('Escala salva' + (nGerados ? (' · ' + nGerados + ' plantão(ões) no extrato') : ''));
+        try {
+          notificarApp('VALIS TM · Escala', 'Escala salva a partir de ' + ini +
+            (nGerados ? (' · ' + nGerados + ' plantões lançados') : ''), { tag: 'escala' });
         } catch (e) {}
+        try { if (nGerados && typeof render === 'function') render(); } catch (e) {}
       } catch (e) {
         alert('Erro: ' + (e && e.message ? e.message : e));
       }
@@ -9009,6 +9250,32 @@
       try { registrarAuditoria('excluir_plantao', String(id) + ' · ' + quem); } catch (e) {}
       render();
       toast('Plantão excluído (folha atual)');
+    }
+
+    
+    async function excluirFolhaArquivada(folhaId) {
+      if (!podeVerTodosPlantaoes()) {
+        return alert('Apenas DEV, administrador ou supervisão podem excluir folhas.');
+      }
+      var f = (db.folhasArquivadas || []).find(function(x) { return String(x.id) === String(folhaId); });
+      if (!f) return alert('Folha não encontrada.');
+      var quem = f.por || f.userLogin || '—';
+      var qtd = (f.itens && f.itens.length) ? f.itens.length : (f.qtd || 0);
+      var totalTxt = f.total;
+      try { if (typeof moneyBR === 'function') totalTxt = moneyBR(f.total); } catch (e) {}
+      if (!confirm(
+        'Excluir a FOLHA INTEIRA de ' + quem + '?\n' +
+        (f.fechadoEm || f.id) + '\n' +
+        qtd + ' plantão(ões) · ' + totalTxt + '\n\n' +
+        'Remove a folha para todos no app. Não dá para desfazer.'
+      )) return;
+      db.folhasArquivadas = (db.folhasArquivadas || []).filter(function(x) {
+        return String(x.id) !== String(folhaId);
+      });
+      try { await salvar(); } catch (e) {}
+      try { registrarAuditoria('excluir_folha_arq', String(folhaId) + ' · ' + quem); } catch (e) {}
+      render();
+      toast('Folha excluída');
     }
 
     async function excluirPlantaoArquivado(folhaId, plantaoId) {
@@ -10806,13 +11073,18 @@
                 ? '<span class="badge green">Pago</span>'
                 : '<span class="badge yellow">Pendente</span>';
               const podeRest = podeRestaurarFolha(f);
-              const btns = podeRest
-                ? ('<div class="actions" style="margin-top:8px;flex-wrap:wrap;gap:6px">' +
-                   '<button type="button" class="btn yellow sm" onclick="restaurarFolhaArquivada(\'' + f.id + '\')">↺ Restaurar plantões</button>' +
-                   (st === 'pago'
-                     ? '<button type="button" class="btn dark sm" onclick="marcarFolhaPaga(\'' + f.id + '\', false)">Marcar pendente</button>'
-                     : '<button type="button" class="btn green sm" onclick="marcarFolhaPaga(\'' + f.id + '\', true)">Marcar pago</button>') +
-                   '</div>')
+              var acoesFolha = [];
+              if (podeRest) {
+                acoesFolha.push('<button type="button" class="btn yellow sm" onclick="restaurarFolhaArquivada(\'' + f.id + '\')">↺ Restaurar plantões</button>');
+                acoesFolha.push(st === 'pago'
+                  ? '<button type="button" class="btn dark sm" onclick="marcarFolhaPaga(\'' + f.id + '\', false)">Marcar pendente</button>'
+                  : '<button type="button" class="btn green sm" onclick="marcarFolhaPaga(\'' + f.id + '\', true)">Marcar pago</button>');
+              }
+              if (podeVerTodosPlantaoes()) {
+                acoesFolha.push('<button type="button" class="btn red sm" onclick="excluirFolhaArquivada(\'' + f.id + '\')">🗑 Excluir folha</button>');
+              }
+              const btns = acoesFolha.length
+                ? ('<div class="actions" style="margin-top:8px;flex-wrap:wrap;gap:6px">' + acoesFolha.join('') + '</div>')
                 : '';
               var itensHtml = '';
               if (podeVerTodosPlantaoes() && f.itens && f.itens.length) {

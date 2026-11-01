@@ -1,4 +1,4 @@
-// VALIS VIGIA — Service Worker v3 (offline + notificações)
+// VALIS TM — Service Worker v3 (offline + notificações)
 const CACHE = "pwabuilder-offline-v3";
 const offlineFallbackPage = "index.html";
 
@@ -20,7 +20,7 @@ try {
   messaging.onBackgroundMessage(function(payload) {
     const n = (payload && payload.notification) || {};
     const d = (payload && payload.data) || {};
-    const title = n.title || d.title || "VALIS VIGIA";
+    const title = n.title || d.title || "VALIS TM";
     const body = n.body || d.body || d.texto || d.message || "";
     return self.registration.showNotification(title, {
       body: String(body),
@@ -40,7 +40,7 @@ try {
 
 function showValisNotification(d) {
   d = d || {};
-  const title = d.title || "VALIS VIGIA";
+  const title = d.title || "VALIS TM";
   const body = d.body != null ? String(d.body) : "";
   return self.registration.showNotification(title, {
     body: body,
@@ -117,7 +117,7 @@ self.addEventListener("notificationclick", (event) => {
 
 // Push genérico (FCM / Web Push)
 self.addEventListener("push", (event) => {
-  let title = "VALIS VIGIA";
+  let title = "VALIS TM";
   let body = "Nova notificação";
   let tag = "valis-push";
   let url = "/";
