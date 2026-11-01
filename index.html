@@ -659,6 +659,33 @@
     .collapse-box.open .collapse-head .chev { transform: rotate(180deg); }
     .collapse-body { display: none; }
     .collapse-box.open .collapse-body { display: block; }
+
+    #escala-fixa-card .esc-cal {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+    }
+    #escala-fixa-card .esc-dow {
+      text-align: center; font-size: 10px; font-weight: 700;
+      color: #94a3b8; padding: 2px 0;
+    }
+    #escala-fixa-card .esc-day {
+      aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 12px; font-weight: 700;
+      border: 1px solid rgba(148,163,184,0.15);
+      background: rgba(15,23,42,0.5); color: #64748b;
+    }
+    #escala-fixa-card .esc-day.trabalho {
+      background: rgba(34,197,94,0.2);
+      border-color: rgba(34,197,94,0.45);
+      color: #86efac;
+    }
+    #escala-fixa-card .esc-day.hoje {
+      outline: 2px solid #38bdf8;
+    }
+    #escala-fixa-card .esc-day.vazio { border: none; background: transparent; }
+
     #collapse-ex-folha:not(.open) #ex-lista-body {
       display: none !important;
     }
@@ -2657,7 +2684,7 @@
       <div class="login-logo" aria-label="VALIS TM"><img src="launchericon-192x192.png" alt="VALIS TM" width="72" height="72"></div>
       <h1>VALIS TM</h1>
       <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.3.5</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
+      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.0.0</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
       <div class="login-version" id="login-version">v—</div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -2715,7 +2742,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.3.5</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.0.0</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -2880,7 +2907,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.3.5</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.0.0</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3039,6 +3066,50 @@
           <div class="field"><label>Observação (opcional)</label><input type="text" id="lemb-obs" class="input" placeholder="Ex.: posto, horário combinado"></div>
           <button type="button" class="btn green" style="width:100%;margin-bottom:10px" onclick="adicionarLembreteFolguista()">＋ Salvar lembrete</button>
           <div id="lemb-folga-lista" class="meta" style="font-size:12px;line-height:1.5">—</div>
+        </div>
+
+        
+        <!-- Escala plantão fixo -->
+        <div class="ops-soft-card" id="escala-fixa-card" style="display:none">
+          <h4 style="margin:0 0 4px;font-size:14px">📅 Minha escala (plantão fixo)</h4>
+          <p class="meta" style="font-size:12px;margin:0 0 10px;color:var(--muted)">12h · dia sim / dia não · configure o 1º dia de trabalho</p>
+          <div class="grid2">
+            <div class="field">
+              <label>1º dia de trabalho</label>
+              <input type="date" id="esc-fixa-inicio" class="input">
+            </div>
+            <div class="field">
+              <label>Turno</label>
+              <select id="esc-fixa-turno" class="input">
+                <option value="noturno">Noturno (12h)</option>
+                <option value="diurno">Diurno (12h)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Padrão</label>
+            <select id="esc-fixa-padrao" class="input">
+              <option value="12x36">12×36 (1 dia trabalho / 1 folga)</option>
+              <option value="24x48">24×48 (1 dia trabalho / 2 folgas)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor por plantão (R$)</label>
+            <input type="number" id="esc-fixa-valor" class="input" min="0" step="1" value="100" placeholder="100">
+          </div>
+          <button type="button" class="btn green" style="width:100%;margin-bottom:8px" onclick="salvarMinhaEscalaFixa()">Salvar minha escala</button>
+          <div class="meta" id="esc-fixa-resumo" style="font-size:12px;margin-bottom:6px">—</div>
+          <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:4px">
+            <span style="color:#86efac">■</span> Trabalho &nbsp; <span style="color:#64748b">■</span> Folga
+          </div>
+          <div id="esc-fixa-cal" class="esc-cal"></div>
+          <div class="btn-row" style="margin-top:10px;gap:8px;flex-wrap:wrap;align-items:center">
+            <button type="button" class="btn dark sm" onclick="navegarMesEscala(-1)" title="Mês anterior">‹</button>
+            <select id="esc-fixa-mes-sel" class="input" style="width:auto;min-width:110px;padding:8px 10px" onchange="pularMesEscalaUI()"></select>
+            <select id="esc-fixa-ano-sel" class="input" style="width:auto;min-width:88px;padding:8px 10px" onchange="pularMesEscalaUI()"></select>
+            <button type="button" class="btn dark sm" onclick="navegarMesEscala(1)" title="Próximo mês">›</button>
+            <button type="button" class="btn green sm" onclick="navegarMesEscala(0)">Hoje</button>
+          </div>
         </div>
 
         <div class="resumo-dia-card" id="resumo-dia-card">
@@ -3236,6 +3307,7 @@
             <button class="btn dark sm" onclick="exportarExtratoCSV()">📊 CSV</button>
           </div>
           <button class="btn green" onclick="fecharFolha()">✓ Recebi / Fechar Folha Atual</button>
+          <button type="button" class="btn dark" id="btn-limpar-dup-plantao" style="margin-top:8px;width:100%;display:none" onclick="limparPlantaoesDuplicados()">🧹 Limpar plantões duplicados (gestão)</button>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4">
             Confirma pagamento e arquiva os plantões. Se fechar por engano, use <b>Restaurar plantões</b> em Folhas anteriores.
           </div>
@@ -3890,7 +3962,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.3.5';
+    const APP_VERSION = '0.0.0';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -6129,6 +6201,7 @@
       try {
         try { atualizarResumoDia(); } catch (e0) {}
         try { renderLembretesFolguista(); } catch (e0) {}
+        try { renderEscalaFixaCard(); } catch (e0) {}
         try { encerrarSessoesAtrasadasGlobais({ toast: false }); } catch (e0) {}
         try { checarLembretesFolguistaHoje(); } catch (e0) {}
         try { atualizarUIOfflinePack(); } catch (e0) {}
@@ -8340,6 +8413,247 @@
       } catch (e) {}
     }
 
+
+    /* ===== Escala plantão fixo (12x36 / dia sim dia não) ===== */
+    var __escMesView = null; // {y, m} m=0-11
+    function getEscalaFixaUser(u) {
+      u = u || usuarioAtual;
+      if (!u) return null;
+      var e = u.escalaFixa || null;
+      if (!e || !e.inicio) return null;
+      return {
+        inicio: String(e.inicio).slice(0, 10),
+        turno: e.turno || 'noturno',
+        padrao: e.padrao || '12x36',
+        valorPlantao: e.valorPlantao != null ? e.valorPlantao : (u.valorPlantao != null ? u.valorPlantao : 100)
+      };
+    }
+    function ehDiaTrabalhoEscala(dataRef, cfg) {
+      if (!cfg || !cfg.inicio) return false;
+      var start = new Date(cfg.inicio + 'T12:00:00');
+      var cur = new Date(dataRef.getFullYear(), dataRef.getMonth(), dataRef.getDate(), 12, 0, 0);
+      var diff = Math.round((cur - start) / 86400000);
+      if (diff < 0) return false;
+      var pad = cfg.padrao || '12x36';
+      if (pad === '24x48') {
+        // 1 trabalho, 2 folgas → ciclo 3
+        return (diff % 3) === 0;
+      }
+      // 12x36: 1 trabalho, 1 folga
+      return (diff % 2) === 0;
+    }
+    function listarDiasTrabalhoMes(y, m, cfg) {
+      var ult = new Date(y, m + 1, 0).getDate();
+      var dias = [];
+      for (var d = 1; d <= ult; d++) {
+        if (ehDiaTrabalhoEscala(new Date(y, m, d), cfg)) dias.push(d);
+      }
+      return dias;
+    }
+    function renderEscalaFixaCard() {
+      try {
+        var card = document.getElementById('escala-fixa-card');
+        if (!card || !usuarioAtual) return;
+        var reg = (typeof regimeDoUsuario === 'function') ? regimeDoUsuario() : 'fixo';
+        // Folguista usa lembretes; escala fixa para plantão fixo (e DEV pode ver)
+        var show = reg === 'fixo' || String(usuarioAtual.funcao || '') === 'dev';
+        card.style.display = show ? 'block' : 'none';
+        if (!show) return;
+
+        var cfg = getEscalaFixaUser() || { inicio: '', turno: 'noturno', padrao: '12x36' };
+        var iniEl = document.getElementById('esc-fixa-inicio');
+        var turEl = document.getElementById('esc-fixa-turno');
+        var padEl = document.getElementById('esc-fixa-padrao');
+        if (iniEl && document.activeElement !== iniEl) iniEl.value = cfg.inicio || '';
+        if (turEl && document.activeElement !== turEl) turEl.value = cfg.turno || 'noturno';
+        if (padEl && document.activeElement !== padEl) padEl.value = cfg.padrao || '12x36';
+        try {
+          var valEl = document.getElementById('esc-fixa-valor');
+          if (valEl && document.activeElement !== valEl) {
+            var vv = 100;
+            if (cfg.valorPlantao != null) vv = Number(cfg.valorPlantao) || 100;
+            else if (usuarioAtual && usuarioAtual.valorPlantao != null) vv = Number(usuarioAtual.valorPlantao) || 100;
+            valEl.value = vv;
+          }
+        } catch (e) {}
+
+        var agora = new Date();
+        if (!__escMesView) __escMesView = { y: agora.getFullYear(), m: agora.getMonth() };
+        var y = __escMesView.y, m = __escMesView.m;
+        var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        try { preencherSeletoresMesEscala(y, m); } catch (e) {}
+
+        var cal = document.getElementById('esc-fixa-cal');
+        var resumo = document.getElementById('esc-fixa-resumo');
+        if (!cal) return;
+
+        if (!cfg.inicio) {
+          cal.innerHTML = '';
+          if (resumo) resumo.textContent = 'Defina o 1º dia de trabalho (ex.: próxima segunda) e salve.';
+          return;
+        }
+
+        var diasTrab = listarDiasTrabalhoMes(y, m, cfg);
+        if (resumo) {
+          var valorUnit = 100;
+          try {
+            if (db.valoresPlantao && db.valoresPlantao.padrao != null) valorUnit = Number(db.valoresPlantao.padrao) || 100;
+            else if (usuarioAtual && usuarioAtual.valorPlantao != null) valorUnit = Number(usuarioAtual.valorPlantao) || 100;
+          } catch (e) { valorUnit = 100; }
+          var totalRs = diasTrab.length * valorUnit;
+          // quinzenas: 1–15 e 16–fim
+          var q1 = diasTrab.filter(function(d) { return d <= 15; });
+          var q2 = diasTrab.filter(function(d) { return d > 15; });
+          // fechamento de folha no mês (15 e último dia — quinzena)
+          var ultMes = new Date(y, m + 1, 0).getDate();
+          var fecha1 = 15;
+          var fecha2 = ultMes; // 28/29/30/31
+          // se config global tiver dias, usa (mas 31 vira fim do mês)
+          try {
+            if (typeof getFolhaAutoConfig === 'function' && typeof diasFechamentoEfetivos === 'function') {
+              var cfgF = getFolhaAutoConfig();
+              var efet = diasFechamentoEfetivos(cfgF.dias || [15, 31], new Date(y, m, 15));
+              if (efet.length >= 1) fecha1 = efet[0];
+              if (efet.length >= 2) fecha2 = efet[efet.length - 1];
+              else if (efet.length === 1 && efet[0] >= 28) { fecha1 = 15; fecha2 = efet[0]; }
+            }
+          } catch (e) {}
+          function brl(n) {
+            try { return (typeof moneyBR === 'function') ? moneyBR(n) : ('R$ ' + Number(n).toFixed(2)); }
+            catch (e) { return 'R$ ' + n; }
+          }
+          resumo.innerHTML =
+            'Turno <b>' + (cfg.turno === 'diurno' ? 'diurno' : 'noturno') + '</b> · padrão <b>' +
+            (cfg.padrao === '24x48' ? '24×48' : '12×36') + '</b><br>' +
+            '<b style="color:#86efac;font-size:14px">' + diasTrab.length + ' plantões</b> em ' + meses[m] +
+            ' · <b style="color:#fbbf24">' + brl(totalRs) + '</b>' +
+            ' <span style="color:var(--muted)">(' + brl(valorUnit) + ' cada)</span><br>' +
+            '<span style="color:var(--muted)">Dias: ' + (diasTrab.length ? diasTrab.join(', ') : '—') + '</span><br>' +
+            '<span style="margin-top:4px;display:inline-block">1ª quinzena (até dia 15): <b>' + q1.length +
+            '</b> plantões · <b>' + brl(q1.length * valorUnit) + '</b> · fecha <b>dia ' + fecha1 + '</b></span><br>' +
+            '<span>2ª quinzena (16–' + ultMes + '): <b>' + q2.length +
+            '</b> plantões · <b>' + brl(q2.length * valorUnit) + '</b> · fecha <b>dia ' + fecha2 + '</b></span>';
+        }
+
+        var first = new Date(y, m, 1);
+        var startDow = first.getDay(); // 0=dom
+        var ult = new Date(y, m + 1, 0).getDate();
+        var hoje = agora;
+        var htmlC = ['D','S','T','Q','Q','S','S'].map(function(t) {
+          return '<div class="esc-dow">' + t + '</div>';
+        }).join('');
+        for (var i = 0; i < startDow; i++) htmlC += '<div class="esc-day vazio"></div>';
+        for (var d = 1; d <= ult; d++) {
+          var trab = diasTrab.indexOf(d) >= 0;
+          var isHoje = (hoje.getFullYear() === y && hoje.getMonth() === m && hoje.getDate() === d);
+          htmlC += '<div class="esc-day' + (trab ? ' trabalho' : '') + (isHoje ? ' hoje' : '') + '">' + d + '</div>';
+        }
+        cal.innerHTML = htmlC;
+      } catch (e) { console.warn(e); }
+    }
+    function navegarMesEscala(delta) {
+      var agora = new Date();
+      if (!__escMesView) __escMesView = { y: agora.getFullYear(), m: agora.getMonth() };
+      if (delta === 0) {
+        __escMesView = { y: agora.getFullYear(), m: agora.getMonth() };
+      } else {
+        var d0 = new Date(__escMesView.y, __escMesView.m + delta, 1);
+        __escMesView = { y: d0.getFullYear(), m: d0.getMonth() };
+      }
+      renderEscalaFixaCard();
+    }
+    function pularMesEscalaUI() {
+      try {
+        var ms = document.getElementById('esc-fixa-mes-sel');
+        var ys = document.getElementById('esc-fixa-ano-sel');
+        if (!ms || !ys) return;
+        var m = parseInt(ms.value, 10);
+        var y = parseInt(ys.value, 10);
+        if (isNaN(m) || isNaN(y)) return;
+        __escMesView = { y: y, m: m };
+        renderEscalaFixaCard();
+      } catch (e) {}
+    }
+    function preencherSeletoresMesEscala(y, m) {
+      try {
+        var ms = document.getElementById('esc-fixa-mes-sel');
+        var ys = document.getElementById('esc-fixa-ano-sel');
+        if (!ms || !ys) return;
+        var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        if (!ms.options.length) {
+          ms.innerHTML = meses.map(function(nome, idx) {
+            return '<option value="' + idx + '">' + nome + '</option>';
+          }).join('');
+        }
+        if (!ys.options.length) {
+          var agora = new Date();
+          var y0 = agora.getFullYear() - 1;
+          var opts = [];
+          for (var yy = y0; yy <= agora.getFullYear() + 2; yy++) {
+            opts.push('<option value="' + yy + '">' + yy + '</option>');
+          }
+          ys.innerHTML = opts.join('');
+        }
+        if (document.activeElement !== ms) ms.value = String(m);
+        if (document.activeElement !== ys) ys.value = String(y);
+      } catch (e) {}
+    }
+    async function salvarMinhaEscalaFixa() {
+      try {
+        if (!usuarioAtual) return toast('Faça login');
+        var ini = (document.getElementById('esc-fixa-inicio') || {}).value || '';
+        var turno = (document.getElementById('esc-fixa-turno') || {}).value || 'noturno';
+        var padrao = (document.getElementById('esc-fixa-padrao') || {}).value || '12x36';
+        if (!ini) return toast('Informe o 1º dia de trabalho');
+        var valorPl = 100;
+        try {
+          var vEl = document.getElementById('esc-fixa-valor');
+          if (vEl && vEl.value !== '') valorPl = Number(vEl.value) || 100;
+        } catch (e) {}
+        usuarioAtual.valorPlantao = valorPl;
+        usuarioAtual.escalaFixa = {
+          inicio: String(ini).slice(0, 10),
+          turno: turno,
+          padrao: padrao,
+          valorPlantao: valorPl,
+          atualizadoEm: new Date().toISOString()
+        };
+        // regime fixo
+        usuarioAtual.regimeServico = 'fixo';
+        // grava no array users
+        var login = String(usuarioAtual.user || '').toLowerCase();
+        db.users = (db.users || []).map(function(u) {
+          if (!u || String(u.user || '').toLowerCase() !== login) return u;
+          return Object.assign({}, u, {
+            escalaFixa: usuarioAtual.escalaFixa,
+            regimeServico: 'fixo',
+            valorPlantao: usuarioAtual.valorPlantao
+          });
+        });
+        try {
+          if (typeof salvarUsersSeguro === 'function') await salvarUsersSeguro({ forcarLocal: true });
+          else await salvar();
+        } catch (e) {
+          try { await salvar(); } catch (e2) {}
+        }
+        try { salvarSessaoLogin(usuarioAtual); } catch (e) {}
+        renderEscalaFixaCard();
+        toast('Escala salva · plantão fixo a partir de ' + ini);
+        try {
+          notificarApp('VALIS TM · Escala', 'Escala fixa salva a partir de ' + ini + ' (' + (turno === 'diurno' ? 'diurno' : 'noturno') + ')', { tag: 'escala' });
+        } catch (e) {}
+      } catch (e) {
+        alert('Erro: ' + (e && e.message ? e.message : e));
+      }
+    }
+    function hojeTemPlantaoEscala() {
+      try {
+        var cfg = getEscalaFixaUser();
+        if (!cfg) return null;
+        return ehDiaTrabalhoEscala(new Date(), cfg);
+      } catch (e) { return null; }
+    }
+
     function regimeDoUsuario(u) {
       u = u || usuarioAtual;
       if (!u) return 'fixo';
@@ -8505,10 +8819,12 @@
             '</div>' +
             '<div style="text-align:right">' +
               '<div style="font-weight:900;color:var(--green)">' + moneyBR(x.valor) + '</div>' +
-              '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;margin-top:6px">' +
-                '<button class="btn dark sm" onclick="editarPlantao(' + x.id + ')">✏️ Editar</button>' +
-                '<button class="btn red sm" onclick="excluirPlantao(' + x.id + ')">Excluir</button>' +
-              '</div>' +
+              (podeVerTodosPlantaoes()
+                ? ('<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;margin-top:6px">' +
+                   '<button type="button" class="btn dark sm" onclick="editarPlantao(' + x.id + ')">✏️ Editar</button>' +
+                   '<button type="button" class="btn red sm" onclick="excluirPlantao(' + x.id + ')">Excluir</button>' +
+                   '</div>')
+                : '') +
             '</div>' +
           '</div>' +
         '</div>'
@@ -8676,22 +8992,106 @@
       tab('extrato');
     }
     async function excluirPlantao(id) {
-      const item = (db.plantaoes || []).find(x => x.id === id);
-      if (!item) return;
-      if (!podeVerTodosPlantaoes() && !plantaoDoUsuario(item)) {
-        return alert('Você só pode excluir os seus plantões.');
+      if (!podeVerTodosPlantaoes()) {
+        return alert('Apenas DEV, administrador ou supervisão podem excluir plantões.');
       }
-      if (!confirm('Excluir este plantão da folha atual?')) return;
+      const item = (db.plantaoes || []).find(x => String(x.id) === String(id));
+      if (!item) return alert('Plantão não encontrado na folha atual.');
+      var quem = (item.por || item.userLogin || '—');
+      if (!confirm('Excluir plantão de ' + quem + ' (' + (item.data || '') + ')?\nEssa ação vale para todos no app.')) return;
       if (_plantaoEditId != null && String(_plantaoEditId) === String(id)) {
         _plantaoEditId = null;
         setModoEdicaoPlantao(false);
       }
-      db.plantaoes = (db.plantaoes || []).filter(x => x.id !== id);
-      await salvar();
-      await backupPlantaoesAuto('excluir');
+      db.plantaoes = (db.plantaoes || []).filter(x => String(x.id) !== String(id));
+      try { await salvar(); } catch (e) {}
+      try { await backupPlantaoesAuto('excluir'); } catch (e) {}
+      try { registrarAuditoria('excluir_plantao', String(id) + ' · ' + quem); } catch (e) {}
       render();
-      toast('Excluído');
+      toast('Plantão excluído (folha atual)');
     }
+
+    async function excluirPlantaoArquivado(folhaId, plantaoId) {
+      if (!podeVerTodosPlantaoes()) {
+        return alert('Apenas DEV, administrador ou supervisão podem excluir plantões.');
+      }
+      var f = (db.folhasArquivadas || []).find(function(x) { return String(x.id) === String(folhaId); });
+      if (!f || !Array.isArray(f.itens)) return alert('Folha arquivada não encontrada.');
+      var item = f.itens.find(function(x) { return String(x.id) === String(plantaoId); });
+      if (!item) return alert('Plantão não encontrado nesta folha.');
+      var quem = item.por || item.userLogin || f.por || '—';
+      if (!confirm('Excluir da folha arquivada o plantão de ' + quem + ' (' + (item.data || '') + ')?\nSome para todos no app.')) return;
+      f.itens = f.itens.filter(function(x) { return String(x.id) !== String(plantaoId); });
+      f.qtd = f.itens.length;
+      try {
+        f.total = f.itens.reduce(function(s, it) { return s + (Number(it.valor) || 0); }, 0);
+      } catch (e) { f.total = 0; }
+      f.atualizadoEm = new Date().toISOString();
+      // se esvaziar, remove a folha
+      if (!f.itens.length) {
+        db.folhasArquivadas = (db.folhasArquivadas || []).filter(function(x) {
+          return String(x.id) !== String(folhaId);
+        });
+      }
+      try { await salvar(); } catch (e) {}
+      try { registrarAuditoria('excluir_plantao_arq', String(folhaId) + '/' + String(plantaoId) + ' · ' + quem); } catch (e) {}
+      render();
+      toast('Plantão removido da folha arquivada');
+    }
+
+    async function limparPlantaoesDuplicados() {
+      if (!podeVerTodosPlantaoes()) {
+        return alert('Apenas DEV, admin ou supervisão.');
+      }
+      if (!confirm('Remover plantões duplicados da folha atual (mesma data, login, posto/horário)?')) return;
+      var seen = {};
+      var kept = [];
+      var removidos = 0;
+      (db.plantaoes || []).forEach(function(p) {
+        if (!p) return;
+        var key = [
+          String(p.userLogin || p.por || ''),
+          String(p.data || ''),
+          String(p.inicio || ''),
+          String(p.fim || ''),
+          String(p.posto || p.postoNome || ''),
+          String(p.tipo || ''),
+          String(Number(p.valor) || 0)
+        ].join('|');
+        if (seen[key]) { removidos++; return; }
+        seen[key] = true;
+        kept.push(p);
+      });
+      db.plantaoes = kept;
+      // também dentro de folhas arquivadas
+      var remArq = 0;
+      (db.folhasArquivadas || []).forEach(function(f) {
+        if (!f || !Array.isArray(f.itens)) return;
+        var s2 = {}, k2 = [];
+        f.itens.forEach(function(p) {
+          if (!p) return;
+          var key = [
+            String(p.userLogin || p.por || ''),
+            String(p.data || ''),
+            String(p.inicio || ''),
+            String(p.fim || ''),
+            String(p.posto || p.postoNome || ''),
+            String(p.tipo || ''),
+            String(Number(p.valor) || 0)
+          ].join('|');
+          if (s2[key]) { remArq++; return; }
+          s2[key] = true;
+          k2.push(p);
+        });
+        f.itens = k2;
+        f.qtd = k2.length;
+        try { f.total = k2.reduce(function(s, it) { return s + (Number(it.valor) || 0); }, 0); } catch (e) {}
+      });
+      try { await salvar(); } catch (e) {}
+      render();
+      toast('Duplicados: ' + removidos + ' na atual · ' + remArq + ' em arquivadas');
+    }
+
 
 
     function ultimoDiaDoMes(y, m) {
@@ -10344,6 +10744,8 @@
             var st = document.getElementById('folha-auto-status');
             if (chk) chk.checked = !!cfg.ativo;
             if (diasEl && document.activeElement !== diasEl) diasEl.value = cfg.dias.join(',');
+            var btnDup = document.getElementById('btn-limpar-dup-plantao');
+          if (btnDup) btnDup.style.display = podeVerTodosPlantaoes() ? 'block' : 'none';
             if (st) {
               var agora = new Date();
               var efet = (typeof diasFechamentoEfetivos === 'function')
@@ -10412,11 +10814,24 @@
                      : '<button type="button" class="btn green sm" onclick="marcarFolhaPaga(\'' + f.id + '\', true)">Marcar pago</button>') +
                    '</div>')
                 : '';
+              var itensHtml = '';
+              if (podeVerTodosPlantaoes() && f.itens && f.itens.length) {
+                itensHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(148,163,184,0.15)">' +
+                  f.itens.map(function(it) {
+                    return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(148,163,184,0.08)">' +
+                      '<div style="font-size:12px"><b>' + (it.data || '—') + '</b> · @' + (it.userLogin || it.por || '—') +
+                      '<div class="meta">' + (it.inicio || '') + '–' + (it.fim || '') + ' · ' + (it.tipo || '') + ' · ' + moneyBR(it.valor) + '</div></div>' +
+                      '<button type="button" class="btn red sm" onclick="excluirPlantaoArquivado(\'' + f.id + '\',\'' + it.id + '\')">Excluir</button>' +
+                      '</div>';
+                  }).join('') + '</div>';
+              }
               return '<div class="item">' +
                 '<b>Folha · ' + (f.fechadoEm || f.id) + '</b> ' + badge +
-                '<div class="meta">' + (f.qtd || 0) + ' plantão(ões) · <span style="color:var(--green)">' + moneyBR(f.total) + '</span> · por ' + (f.por || '—') + '</div>' +
+                '<div class="meta">' + (f.qtd || 0) + ' plantão(ões) · <span style="color:var(--green)">' + moneyBR(f.total) + '</span> · por ' + (f.por || '—') +
+                (f.userLogin ? (' · @' + f.userLogin) : '') + '</div>' +
                 (f.pagoEm ? ('<div class="meta">Confirmado em ' + f.pagoEm + (f.pagoPor ? (' · ' + f.pagoPor) : '') + '</div>') : '') +
                 btns +
+                itensHtml +
                 '</div>';
             }).join('')
           : '<div class="empty">Nenhuma folha arquivada</div>';
