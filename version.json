@@ -1,5 +1,5 @@
 {
-  "v": "0.1.2",
+  "v": "0.1.3",
   "forceReload": true,
-  "msg": "Escala lanca plantoes so da quinzena atual"
+  "msg": "Excluir folha/plantao sincroniza para todos os logins"
 }
