@@ -2655,6 +2655,573 @@
       font-size: 13px;
     }
 
+  
+    
+
+  
+    /* ===== Login panel v3 — modelo operacional split ===== */
+    #login.login {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0 !important;
+      margin: 0;
+      background: #020617 !important;
+      overflow: auto;
+    }
+    #login .login-box {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      margin: auto;
+      padding: 0 !important;
+      text-align: left !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      overflow: visible;
+    }
+    #login .login-box::before { display: none !important; }
+
+    /* topo marca */
+    #login .login-hero {
+      padding: 36px 28px 28px;
+      background:
+        linear-gradient(145deg, #0f2918 0%, #0a1628 55%, #0c1220 100%);
+      border-bottom: 3px solid #ffdf00;
+      position: relative;
+    }
+    #login .login-hero::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -3px;
+      height: 3px;
+      background: linear-gradient(90deg, #009c3b, #ffdf00 40%, #002776);
+    }
+    #login .login-logo {
+      width: 64px !important;
+      height: 64px !important;
+      margin: 0 0 16px !important;
+      border-radius: 16px !important;
+      border: 2px solid rgba(255, 223, 0, 0.35);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      background: #020617;
+      overflow: hidden;
+    }
+    #login .login-logo img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+      display: block;
+    }
+    #login .login-box > h1,
+    #login .login-hero h1 {
+      margin: 0 0 8px !important;
+      font-size: 28px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #f8fafc !important;
+      text-align: left !important;
+    }
+    #login .login-box > .sub,
+    #login .login-hero .sub {
+      margin: 0 !important;
+      font-size: 13px !important;
+      color: #86efac !important;
+      font-weight: 600;
+      text-align: left !important;
+      letter-spacing: 0.02em;
+    }
+    #login .login-meta {
+      margin: 12px 0 0 !important;
+      font-size: 11px !important;
+      color: #64748b !important;
+      text-align: left !important;
+    }
+    #login .login-version {
+      display: inline-block;
+      margin: 14px 0 0 !important;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #020617 !important;
+      background: #ffdf00 !important;
+      border: none !important;
+    }
+
+    /* corpo do formulário */
+    #login .login-body {
+      padding: 24px 28px 32px;
+      background: #0b1220;
+    }
+    #login .br-flag-strip {
+      display: none !important;
+    }
+    #login .login-tabs {
+      display: flex !important;
+      gap: 0;
+      padding: 0 !important;
+      margin: 0 0 22px !important;
+      border-radius: 0;
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.15);
+    }
+    #login .login-tabs button {
+      flex: 1;
+      border: none !important;
+      border-radius: 0 !important;
+      padding: 12px 8px !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #64748b !important;
+      background: transparent !important;
+      border-bottom: 3px solid transparent !important;
+      margin-bottom: -2px;
+      cursor: pointer;
+    }
+    #login .login-tabs button.active {
+      color: #ffdf00 !important;
+      background: transparent !important;
+      border-bottom-color: #ffdf00 !important;
+      box-shadow: none !important;
+    }
+    #login .field {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+    #login .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 10px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #94a3b8 !important;
+    }
+    #login .input,
+    #login input.input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px 16px !important;
+      border-radius: 8px !important;
+      border: 1px solid rgba(148, 163, 184, 0.22) !important;
+      background: #020617 !important;
+      color: #f1f5f9 !important;
+      font-size: 15px !important;
+    }
+    #login .input:focus {
+      outline: none !important;
+      border-color: #ffdf00 !important;
+      box-shadow: 0 0 0 2px rgba(255, 223, 0, 0.2);
+    }
+    #login .login-pass-wrap { position: relative; }
+    #login .login-pass-wrap .input { padding-right: 48px !important; }
+    #login .login-pass-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 6px;
+    }
+    #login #form-entrar .btn.green,
+    #login #form-cadastrar .btn.green,
+    #login button.btn.green {
+      width: 100%;
+      margin-top: 10px;
+      padding: 15px 16px !important;
+      border-radius: 8px !important;
+      font-size: 14px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none !important;
+      background: #009c3b !important;
+      color: #fff !important;
+      box-shadow: 0 4px 0 #006b2a, 0 8px 20px rgba(0, 156, 59, 0.35);
+    }
+    #login #form-entrar .btn.green:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #006b2a, 0 4px 12px rgba(0, 156, 59, 0.3);
+    }
+    #login .login-auto-status {
+      margin: 0 28px 0 !important;
+      border-radius: 8px !important;
+      border-left: 4px solid #38bdf8 !important;
+      text-align: left !important;
+    }
+    #login .login-alert {
+      margin: 12px 28px 0;
+    }
+    @media (min-width: 720px) {
+      #login.login {
+        background:
+          linear-gradient(90deg, #0a1f12 0%, #0a1f12 42%, #020617 42%, #020617 100%) !important;
+      }
+      #login .login-box {
+        max-width: 920px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 40px auto;
+        border-radius: 16px !important;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.15) !important;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.5) !important;
+      }
+      #login .login-hero {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 48px 40px;
+        border-bottom: none;
+      }
+      #login .login-body {
+        padding: 48px 40px;
+      }
+      #login .login-auto-status {
+        margin: 0 0 16px !important;
+      }
+    }
+
+  
+    
+      
+    /* ============================================================
+       VALIS TM — UI Interna NOVA (cores · formas · inovação)
+       Regras seguras: não força width em .btn genérico
+       ============================================================ */
+    #app.app {
+      --ui-bg: #0a0e17;
+      --ui-surface: #121a2b;
+      --ui-surface2: #182236;
+      --ui-line: rgba(125, 211, 252, 0.14);
+      --ui-text: #eef5ff;
+      --ui-muted: #8fa3bf;
+      --ui-accent: #2dd4bf;
+      --ui-accent2: #38bdf8;
+      --ui-warn: #fbbf24;
+      --ui-danger: #fb7185;
+      --ui-ok: #34d399;
+      --ui-radius: 20px;
+      --ui-radius-sm: 14px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+      box-sizing: border-box;
+      background:
+        radial-gradient(ellipse 100% 60% at 0% 0%, rgba(45, 212, 191, 0.09), transparent 55%),
+        radial-gradient(ellipse 80% 50% at 100% 10%, rgba(56, 189, 248, 0.08), transparent 50%),
+        var(--ui-bg) !important;
+      color: var(--ui-text);
+    }
+
+    /* Header */
+    #app .top {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px !important;
+      background: rgba(10, 14, 23, 0.88) !important;
+      border-bottom: 1px solid var(--ui-line) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    #app .top .brand {
+      flex: 1;
+      min-width: 0;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ui-text) !important;
+    }
+    #app .top .ver-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #042f2e !important;
+      background: linear-gradient(135deg, #2dd4bf, #38bdf8) !important;
+      vertical-align: middle;
+    }
+    #app #header-user {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--ui-muted) !important;
+    }
+    #app .hamburger {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--ui-line);
+      background: var(--ui-surface);
+      flex-shrink: 0;
+    }
+    #app .hamburger span { background: var(--ui-accent2); }
+
+    /* Títulos */
+    #app .title {
+      margin: 18px 2px 6px !important;
+      font-size: 22px !important;
+      font-weight: 900 !important;
+      letter-spacing: -0.03em;
+      color: var(--ui-text) !important;
+    }
+    #app .br-flag-strip {
+      height: 4px !important;
+      border-radius: 99px;
+      margin: 0 0 16px !important;
+      background: linear-gradient(90deg, var(--ui-accent), var(--ui-accent2), #a78bfa, var(--ui-accent)) !important;
+      background-size: 200% 100%;
+      opacity: 0.85;
+    }
+    #app .tab {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      box-sizing: border-box;
+    }
+
+    /* Superfícies / cards — formas novas */
+    #app .card,
+    #app .ops-soft-card,
+    #app .plantao-vivo-card,
+    #app .resumo-dia-card,
+    #app .item,
+    #app .dev-home-hero {
+      background: linear-gradient(160deg, var(--ui-surface) 0%, var(--ui-surface2) 100%) !important;
+      border: 1px solid var(--ui-line) !important;
+      border-radius: var(--ui-radius) !important;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28) !important;
+    }
+    #app .card { padding: 16px !important; margin-bottom: 12px; }
+    #app .item {
+      padding: 14px !important;
+      margin-bottom: 10px;
+      border-radius: var(--ui-radius-sm) !important;
+    }
+    #app .dev-home-tile {
+      border-radius: 18px !important;
+      border: 1px solid var(--ui-line) !important;
+      background: var(--ui-surface) !important;
+    }
+    #app .card-label,
+    #app .field label,
+    #app label {
+      color: var(--ui-accent2) !important;
+      font-size: 10px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    #app .meta { color: var(--ui-muted) !important; }
+
+    /* Inputs */
+    #app .input,
+    #app .select,
+    #app select,
+    #app textarea,
+    #app .plantao-vivo-select,
+    #app .pv-posto-btn {
+      background: rgba(6, 10, 18, 0.9) !important;
+      border: 1px solid rgba(125, 211, 252, 0.18) !important;
+      border-radius: 14px !important;
+      color: var(--ui-text) !important;
+    }
+    #app .input:focus,
+    #app .select:focus {
+      border-color: var(--ui-accent) !important;
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.15);
+      outline: none !important;
+    }
+
+    /* Cores de ação — só cor/raio, sem width forçado */
+    #app .btn {
+      border-radius: 14px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.03em;
+    }
+    #app .btn.green {
+      background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
+      border: 1px solid rgba(45, 212, 191, 0.4) !important;
+      color: #042f2e !important;
+    }
+    #app .btn.red {
+      background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+      border: 1px solid rgba(251, 113, 133, 0.35) !important;
+      color: #fff !important;
+    }
+    #app .btn.dark {
+      background: var(--ui-surface2) !important;
+      border: 1px solid var(--ui-line) !important;
+      color: var(--ui-text) !important;
+    }
+    #app .btn.yellow {
+      background: rgba(251, 191, 36, 0.12) !important;
+      border: 1px solid rgba(251, 191, 36, 0.35) !important;
+      color: #fde68a !important;
+    }
+    #app .btn.sm { border-radius: 10px !important; }
+
+    /* Plantão */
+    #app .plantao-vivo-card {
+      padding: 16px !important;
+      border-color: rgba(45, 212, 191, 0.25) !important;
+      position: relative;
+      overflow: hidden;
+    }
+    #app .plantao-vivo-card::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+    #app .plantao-vivo-head .titulo {
+      color: var(--ui-accent) !important;
+      letter-spacing: 0.12em;
+      font-weight: 900 !important;
+    }
+    #app .plantao-vivo-badge {
+      border-radius: 999px !important;
+      border: 1px solid rgba(45, 212, 191, 0.35) !important;
+      background: rgba(45, 212, 191, 0.12) !important;
+      color: var(--ui-accent) !important;
+    }
+
+    /* Badges */
+    #app .badge.green {
+      background: rgba(52, 211, 153, 0.15) !important;
+      color: #6ee7b7 !important;
+      border-radius: 999px;
+    }
+    #app .badge.yellow {
+      background: rgba(251, 191, 36, 0.15) !important;
+      color: #fde68a !important;
+      border-radius: 999px;
+    }
+
+    /* Rodapé — formas novas, layout seguro */
+    #app .nav-wrap {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      transform: none !important;
+      z-index: 100 !important;
+      margin: 0 !important;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+      pointer-events: none !important;
+      box-sizing: border-box !important;
+      background: linear-gradient(to top, rgba(10, 14, 23, 0.98), rgba(10, 14, 23, 0.75) 70%, transparent) !important;
+      border: none !important;
+    }
+    #app .nav-wrap .nav,
+    #app #main-nav {
+      pointer-events: auto !important;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: stretch !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      max-width: 420px !important;
+      margin: 0 auto !important;
+      transform: none !important;
+      gap: 4px !important;
+      padding: 6px !important;
+      box-sizing: border-box !important;
+      border-radius: 22px !important;
+      background: rgba(18, 26, 43, 0.96) !important;
+      border: 1px solid var(--ui-line) !important;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(45, 212, 191, 0.06) inset;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      scrollbar-width: none;
+    }
+    #app #main-nav::-webkit-scrollbar { display: none; }
+    #app #main-nav button {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 10px 4px !important;
+      border: none !important;
+      border-radius: 16px !important;
+      background: transparent !important;
+      color: var(--ui-muted) !important;
+      font-size: 10px !important;
+      font-weight: 700 !important;
+      line-height: 1.15 !important;
+      box-sizing: border-box !important;
+    }
+    #app #main-nav button span {
+      display: block !important;
+      font-size: 18px !important;
+      margin-bottom: 3px !important;
+    }
+    #app #main-nav button.active {
+      background: linear-gradient(160deg, rgba(45, 212, 191, 0.2), rgba(56, 189, 248, 0.12)) !important;
+      color: var(--ui-accent) !important;
+      box-shadow: 0 0 20px rgba(45, 212, 191, 0.12);
+    }
+
+    /* Escala */
+    #app .esc-day {
+      border-radius: 12px !important;
+    }
+    #app .esc-day.trabalho {
+      background: rgba(45, 212, 191, 0.2) !important;
+      border-color: rgba(45, 212, 191, 0.45) !important;
+      color: #5eead4 !important;
+    }
+    #app .esc-mes-bar {
+      border-radius: 16px !important;
+      background: var(--ui-surface) !important;
+      border-color: var(--ui-line) !important;
+    }
+    #app .esc-mes-arrow {
+      border-radius: 12px !important;
+      background: var(--ui-surface2) !important;
+      border-color: var(--ui-line) !important;
+      color: var(--ui-accent2) !important;
+    }
+
+    /* More hub */
+    #more-sheet {
+      background: rgba(10, 14, 23, 0.98) !important;
+      border-radius: 24px 24px 0 0 !important;
+      border-top: 1px solid var(--ui-line) !important;
+    }
+
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -2800,11 +3367,15 @@
 
   <section id="login" class="login">
     <div class="login-box">
-      <div class="login-logo" aria-label="VALIS TM"><img src="launchericon-192x192.png" alt="VALIS TM" width="72" height="72"></div>
-      <h1>VALIS TM</h1>
-      <p class="sub">Sistema Operacional • UFV São Miguel</p>
-      <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <span id="footer-ver">v0.1.5</span> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-      <div class="login-version" id="login-version">v—</div>
+      <div class="login-hero">
+        <div class="login-logo" aria-label="VALIS TM"><img src="launchericon-192x192.png" alt="VALIS TM" width="64" height="64"></div>
+        <h1>VALIS TM</h1>
+        <p class="sub">Controle de ponto · vigilância</p>
+        <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
+        <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
+        <div class="login-version" id="login-version">v—</div>
+      </div>
+      <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
         ⚠ FAÇA LOGIN COM SENHA
         <small>O login automático falhou. Digite usuário e senha para entrar de novo.</small>
@@ -2814,7 +3385,6 @@
         <div class="las-msg" id="login-auto-msg">Coletando dados de acesso neste aparelho...</div>
       </div>
       <div class="login-alert" id="login-alert" role="status"></div>
-      <div class="br-flag-strip"></div>
       <div class="login-tabs">
         <button class="active" id="tab-btn-entrar" onclick="mostrarLogin('entrar')">Entrar</button>
         <button id="tab-btn-cadastrar" onclick="mostrarLogin('cadastrar')">Cadastrar</button>
@@ -2858,6 +3428,7 @@
         <button class="btn green" onclick="cadastrarUsuario()">SOLICITAR CADASTRO</button>
       </div>
       <p id="login-msg" class="erro"></p>
+      </div><!-- /login-body -->
     </div>
   </section>
 
@@ -2865,7 +3436,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.1.5</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.2</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -3030,7 +3601,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.1.5</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.2</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -4091,7 +4662,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.1.5';
+    const APP_VERSION = '0.2.2';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {

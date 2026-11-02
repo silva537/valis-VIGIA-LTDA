@@ -1,5 +1,5 @@
 {
-  "v": "0.1.5",
+  "v": "0.2.2",
   "forceReload": true,
-  "msg": "Corrige botao excluir folha/plantao (funcoes faltando)"
+  "msg": "Interface interna nova: cores teal/cyan e formas"
 }
