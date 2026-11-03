@@ -3222,6 +3222,281 @@
       border-top: 1px solid var(--ui-line) !important;
     }
 
+  
+    /* ---------- Refino INÍCIO + EXTRATO (passo 1 e 2) ---------- */
+    #tab-inicio .title,
+    #tab-extrato .title {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    #tab-inicio .title::after,
+    #tab-extrato .title::after {
+      content: "";
+      flex: 1;
+      min-width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(45, 212, 191, 0.35), transparent);
+      align-self: center;
+    }
+
+    /* Início — plantão como painel destaque */
+    #tab-inicio .plantao-vivo-card {
+      border-radius: 24px !important;
+      padding: 18px 16px !important;
+      border: 1px solid rgba(45, 212, 191, 0.28) !important;
+      background:
+        radial-gradient(ellipse 80% 60% at 100% 0%, rgba(45, 212, 191, 0.1), transparent 55%),
+        linear-gradient(165deg, #121a2b 0%, #0f1828 100%) !important;
+    }
+    #tab-inicio .plantao-vivo-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    #tab-inicio .plantao-vivo-actions,
+    #tab-inicio .pv-actions,
+    #tab-inicio .plantao-vivo-card .actions {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #tab-inicio .plantao-vivo-card .btn {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 48px;
+      border-radius: 16px !important;
+      font-size: 12px !important;
+    }
+    #tab-inicio .plantao-vivo-card .btn.green {
+      grid-column: auto;
+    }
+    /* botões full width quando só um na linha */
+    #tab-inicio #pv-card-operacional .btn[style*="width:100%"],
+    #tab-inicio .plantao-vivo-card > .btn {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* DEV home no início */
+    #tab-inicio .dev-home-hero {
+      border-radius: 24px !important;
+      padding: 18px !important;
+      border-color: rgba(56, 189, 248, 0.25) !important;
+      background:
+        radial-gradient(ellipse 70% 50% at 0% 0%, rgba(56, 189, 248, 0.12), transparent 50%),
+        linear-gradient(160deg, #121a2b, #152036) !important;
+    }
+    #tab-inicio .dev-home-hero .dh-kicker {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #38bdf8;
+    }
+    #tab-inicio .dev-home-hero h2 {
+      margin: 6px 0 4px;
+      font-size: 20px;
+      font-weight: 900;
+      color: #eef5ff;
+    }
+    #tab-inicio .dev-home-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+    #tab-inicio .dev-home-kpi {
+      background: rgba(6, 10, 18, 0.55);
+      border: 1px solid rgba(125, 211, 252, 0.12);
+      border-radius: 14px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    #tab-inicio .dev-home-kpi .k {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8fa3bf;
+    }
+    #tab-inicio .dev-home-kpi .v {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #2dd4bf;
+    }
+    #tab-inicio .dev-home-kpi .v.warn { color: #fbbf24; }
+    #tab-inicio .dev-home-kpi .v.ok { color: #34d399; }
+    #tab-inicio .dev-home-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    #tab-inicio .dev-home-tile {
+      min-height: 92px;
+      padding: 14px 12px !important;
+      border-radius: 18px !important;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+    #tab-inicio .dev-home-tile:active { transform: scale(0.98); }
+    #tab-inicio .dev-home-tile .ico { font-size: 22px; display: block; margin-bottom: 6px; }
+    #tab-inicio .dev-home-tile .lab { font-weight: 800; font-size: 13px; color: #eef5ff; }
+    #tab-inicio .dev-home-tile .sub { font-size: 11px; color: #8fa3bf; margin-top: 2px; }
+
+    /* Extrato — KPIs e folha */
+    #tab-extrato .ops-kpi-row {
+      display: grid !important;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    #tab-extrato .ops-kpi {
+      border-radius: 20px !important;
+      padding: 16px 14px !important;
+      border: 1px solid rgba(125, 211, 252, 0.14) !important;
+      background:
+        linear-gradient(155deg, #121a2b 0%, #152238 100%) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+    }
+    #tab-extrato .ops-kpi.money {
+      border-color: rgba(45, 212, 191, 0.28) !important;
+      background:
+        radial-gradient(ellipse 80% 60% at 100% 0%, rgba(45, 212, 191, 0.12), transparent 55%),
+        linear-gradient(155deg, #121a2b, #0f1f24) !important;
+    }
+    #tab-extrato .ops-kpi .k-lbl {
+      font-size: 10px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8fa3bf !important;
+    }
+    #tab-extrato .ops-kpi .k-val {
+      margin-top: 6px;
+      font-size: 26px !important;
+      font-weight: 900 !important;
+      letter-spacing: -0.03em;
+      color: #2dd4bf !important;
+      line-height: 1.15;
+    }
+    #tab-extrato .ops-kpi.count .k-val {
+      color: #38bdf8 !important;
+    }
+    #tab-extrato .ops-kpi .k-sub {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #8fa3bf;
+    }
+    #tab-extrato .ops-kpi .btn {
+      margin-top: 10px !important;
+      border-radius: 12px !important;
+    }
+    #tab-extrato .card {
+      border-radius: 20px !important;
+      padding: 16px !important;
+    }
+    #tab-extrato .card > .btn.green {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 48px;
+      border-radius: 14px !important;
+      margin: 10px 0 8px;
+    }
+    #tab-extrato .card > .btn.dark {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+      border-radius: 14px !important;
+    }
+    #tab-extrato .item {
+      border-radius: 16px !important;
+      border-left: 3px solid rgba(45, 212, 191, 0.45) !important;
+      background: linear-gradient(90deg, rgba(45, 212, 191, 0.06), transparent 40%),
+                  linear-gradient(160deg, #121a2b, #152036) !important;
+    }
+    #tab-extrato .item .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    #tab-extrato .item .actions .btn {
+      border-radius: 10px !important;
+    }
+    @media (max-width: 360px) {
+      #tab-inicio .dev-home-kpis { grid-template-columns: repeat(2, 1fr); }
+      #tab-extrato .ops-kpi-row { grid-template-columns: 1fr; }
+      #tab-extrato .ops-kpi .k-val { font-size: 22px !important; }
+    }
+
+  
+    /* Expandir / minimizar seções */
+    .sec-min-btn {
+      flex-shrink: 0;
+      border: 1px solid rgba(125, 211, 252, 0.22);
+      background: rgba(18, 26, 43, 0.95);
+      color: #7dd3fc;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .sec-min-btn:active { transform: scale(0.97); }
+    .sec-fold-body {
+      overflow: hidden;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.2s ease;
+      max-height: 3000px;
+      opacity: 1;
+    }
+    .sec-fold-body.is-collapsed {
+      max-height: 0 !important;
+      opacity: 0;
+      margin: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      pointer-events: none;
+    }
+    .plantao-vivo-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .plantao-vivo-head .titulo { flex: 1; min-width: 120px; }
+    .sec-fold-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .sec-fold-head h4,
+    .sec-fold-head .card-label,
+    .sec-fold-head .sec-fold-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+    .card.sec-collapsed,
+    .ops-soft-card.sec-collapsed,
+    #plantao-vivo-card.sec-collapsed {
+      padding-bottom: 12px !important;
+    }
+
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3436,7 +3711,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.2</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.4</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -3601,7 +3876,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.2</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.4</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3614,7 +3889,7 @@
     <main>
       <!-- INÍCIO -->
       <section id="tab-inicio" class="tab active">
-        <div class="title">Painel operacional</div>
+        <div class="title">Início</div>
         <div class="br-flag-strip"></div>
 
         <!-- Interface exclusiva DEV -->
@@ -3695,10 +3970,12 @@
           <div class="plantao-vivo-head">
             <div class="titulo">MODO PLANTÃO ATIVO</div>
             <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
+            <button type="button" class="sec-min-btn" id="pv-fold-btn" onclick="toggleSecFold('pv-fold-body', this)" aria-expanded="true">Minimizar</button>
           </div>
-          <div class="plantao-vivo-meta" id="pv-meta">
+          <div class="plantao-vivo-meta" id="pv-meta" style="margin-bottom:8px">
             Selecione o posto e faça o check-in (manual ou automático por GPS).
           </div>
+          <div id="pv-fold-body" class="sec-fold-body">
           <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()" style="position:absolute;opacity:0;pointer-events:none;height:0;width:0;overflow:hidden">
             <option value="">— Selecione o posto —</option>
           </select>
@@ -3746,6 +4023,7 @@
               <div class="pv-mapa-info" id="pv-mapa-info">Aguardando GPS e posto…</div>
             </div>
           </details>
+          </div><!-- /pv-fold-body -->
         </div>
 
         
@@ -3764,8 +4042,12 @@
 
         
         <!-- Escala plantão fixo -->
-        <div class="ops-soft-card" id="escala-fixa-card" style="display:none">
-          <h4 style="margin:0 0 4px;font-size:14px">📅 Minha escala (plantão fixo)</h4>
+        <div class="ops-soft-card" id="escala-fixa-card" class="ops-soft-card" style="display:none">
+          <div class="sec-fold-head">
+            <h4 class="sec-fold-title" style="margin:0;font-size:14px">📅 Minha escala (plantão fixo)</h4>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('esc-fold-body', this)">Minimizar</button>
+          </div>
+          <div id="esc-fold-body" class="sec-fold-body">
           <p class="meta" style="font-size:12px;margin:0 0 10px;color:var(--muted)">12h · dia sim / dia não · configure o 1º dia de trabalho</p>
           <div class="grid2">
             <div class="field">
@@ -3810,6 +4092,7 @@
             <button type="button" class="esc-mes-arrow" onclick="navegarMesEscala(1)" aria-label="Próximo mês">›</button>
           </div>
           <button type="button" class="esc-mes-hoje" onclick="navegarMesEscala(0)">Ir para o mês atual</button>
+          </div><!-- /esc-fold-body -->
         </div>
 
         <div class="resumo-dia-card" id="resumo-dia-card">
@@ -3986,7 +4269,7 @@
 
       <!-- EXTRATO & FOLHA -->
       <section id="tab-extrato" class="tab">
-        <div class="title">Extrato &amp; Folha</div>
+        <div class="title">Extrato</div>
         <div class="br-flag-strip"></div>
         <div class="ops-kpi-row">
           <div class="ops-kpi money">
@@ -4662,7 +4945,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.2';
+    const APP_VERSION = '0.2.4';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -9426,6 +9709,42 @@
         try { await backupPlantaoesAuto('escala_auto'); } catch (e) {}
       }
       return criados;
+    }
+
+    function toggleSecFold(bodyId, btn) {
+      try {
+        var body = document.getElementById(bodyId);
+        if (!body) return;
+        var collapsed = body.classList.toggle('is-collapsed');
+        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
+        if (card) {
+          if (collapsed) card.classList.add('sec-collapsed');
+          else card.classList.remove('sec-collapsed');
+        }
+        if (btn) {
+          btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          btn.textContent = collapsed ? 'Expandir' : 'Minimizar';
+        }
+        try { localStorage.setItem('valis_fold_' + bodyId, collapsed ? '1' : '0'); } catch (e) {}
+      } catch (e) { console.warn(e); }
+    }
+    function restaurarSecFolds() {
+      try {
+        ['pv-fold-body', 'esc-fold-body', 'ex-folha-fold', 'ex-arq-fold'].forEach(function(id) {
+          var v = localStorage.getItem('valis_fold_' + id);
+          if (v !== '1') return;
+          var body = document.getElementById(id);
+          if (!body) return;
+          body.classList.add('is-collapsed');
+          var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
+          if (card) card.classList.add('sec-collapsed');
+          var btn = document.querySelector('[onclick*="' + id + '"]');
+          if (btn) {
+            btn.setAttribute('aria-expanded', 'false');
+            btn.textContent = 'Expandir';
+          }
+        });
+      } catch (e) {}
     }
 
     async function salvarMinhaEscalaFixa() {

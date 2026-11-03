@@ -1,5 +1,5 @@
 {
-  "v": "0.2.2",
+  "v": "0.2.4",
   "forceReload": true,
-  "msg": "Interface interna nova: cores teal/cyan e formas"
+  "msg": "Minimizar/expandir secoes (plantao, extrato, escala)"
 }
