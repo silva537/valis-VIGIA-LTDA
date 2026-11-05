@@ -1,5 +1,5 @@
 {
-  "v": "0.2.4",
+  "v": "0.2.5",
   "forceReload": true,
-  "msg": "Minimizar/expandir secoes (plantao, extrato, escala)"
+  "msg": "Vigilante pode editar e excluir os proprios plantoes"
 }

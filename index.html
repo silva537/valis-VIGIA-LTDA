@@ -3711,7 +3711,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.4</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.5</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -3876,7 +3876,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.4</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.5</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -4945,7 +4945,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.4';
+    const APP_VERSION = '0.2.5';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -9977,7 +9977,7 @@
             '</div>' +
             '<div style="text-align:right">' +
               '<div style="font-weight:900;color:var(--green)">' + moneyBR(x.valor) + '</div>' +
-              (podeVerTodosPlantaoes()
+              ((podeVerTodosPlantaoes() || plantaoDoUsuario(x))
                 ? ('<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;margin-top:6px">' +
                    '<button type="button" class="btn dark sm" onclick="editarPlantao(' + x.id + ')">✏️ Editar</button>' +
                    '<button type="button" class="btn red sm" onclick="excluirPlantao(' + x.id + ')">Excluir</button>' +
@@ -10150,11 +10150,13 @@
       tab('extrato');
     }
     async function excluirPlantao(id) {
-      if (!podeVerTodosPlantaoes()) {
-        return alert('Apenas DEV, administrador ou supervisão podem excluir plantões.');
-      }
       const item = (db.plantaoes || []).find(x => String(x.id) === String(id));
       if (!item) return alert('Plantão não encontrado na folha atual.');
+      var podeGestao = podeVerTodosPlantaoes();
+      var podeProprio = plantaoDoUsuario(item);
+      if (!podeGestao && !podeProprio) {
+        return alert('Você só pode excluir os seus próprios plantões.');
+      }
       var quem = (item.por || item.userLogin || '—');
       if (!confirm('Excluir plantão de ' + quem + ' (' + (item.data || '') + ')?\nEssa ação vale para todos no app.')) return;
       if (_plantaoEditId != null && String(_plantaoEditId) === String(id)) {
