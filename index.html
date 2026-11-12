@@ -382,13 +382,10 @@
     .dev-home-tile.amber { border-color: rgba(251,191,36,0.35); }
     .dev-home-tile.blue { border-color: rgba(59,130,246,0.35); }
     .dev-home-tile.purple { border-color: rgba(168,85,247,0.35); }
-    body.role-dev #main-nav button[data-tab="plantao"] { display: none !important; }
+    body.role-dev #main-nav button[data-tab="plantao"] { display: flex !important; }
 
-    body.role-dev #plantao-vivo-card,
-    body.role-dev #tab-plantao,
-    body.role-dev .plantao-vivo-card,
-    body.role-dev button[data-tab="plantao"] {
-      display: none !important;
+    body.role-dev #main-nav button[data-tab="plantao"] {
+      display: flex !important;
     }
     body.role-dev #inicio-ranking-box,
     body.role-dev #inicio-mapa-vivos {
@@ -3497,6 +3494,231 @@
       padding-bottom: 12px !important;
     }
 
+  
+    /* Plantão de HOJE — destaque animado (extrato + escala) */
+    @keyframes valisHojeRgb {
+      0%   { box-shadow: 0 0 0 2px #22d3ee, 0 0 16px rgba(34, 211, 238, 0.55); border-color: #22d3ee; }
+      33%  { box-shadow: 0 0 0 2px #a78bfa, 0 0 18px rgba(167, 139, 250, 0.55); border-color: #a78bfa; }
+      66%  { box-shadow: 0 0 0 2px #34d399, 0 0 18px rgba(52, 211, 153, 0.55); border-color: #34d399; }
+      100% { box-shadow: 0 0 0 2px #22d3ee, 0 0 16px rgba(34, 211, 238, 0.55); border-color: #22d3ee; }
+    }
+    @keyframes valisHojePulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.06); filter: brightness(1.15); }
+    }
+    @keyframes valisHojeBadge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    #app .item.plantao-hoje,
+    .item.plantao-hoje {
+      position: relative;
+      border-left: 4px solid #22d3ee !important;
+      background:
+        linear-gradient(90deg, rgba(34, 211, 238, 0.12), transparent 45%),
+        linear-gradient(160deg, #121a2b, #152036) !important;
+      animation: valisHojeRgb 2.8s linear infinite;
+    }
+    .item.plantao-hoje .badge-hoje-plantao {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: #042f2e;
+      background: linear-gradient(90deg, #22d3ee, #a78bfa, #34d399, #22d3ee);
+      background-size: 200% 100%;
+      animation: valisHojeRgb 2.2s linear infinite, valisHojeBadge 1.2s ease-in-out infinite;
+      vertical-align: middle;
+    }
+    /* Escala: dia de trabalho = hoje */
+    #escala-fixa-card .esc-day.trabalho.hoje,
+    #app .esc-day.trabalho.hoje {
+      color: #042f2e !important;
+      font-weight: 900 !important;
+      background: linear-gradient(135deg, #22d3ee, #a78bfa, #34d399) !important;
+      background-size: 200% 200% !important;
+      border: 2px solid #fff !important;
+      outline: none !important;
+      animation: valisHojeRgb 2.4s linear infinite, valisHojePulse 1.4s ease-in-out infinite;
+      z-index: 2;
+      position: relative;
+    }
+    #escala-fixa-card .esc-day.hoje:not(.trabalho) {
+      outline: 2px solid #38bdf8;
+      animation: valisHojeBadge 1.6s ease-in-out infinite;
+    }
+
+  
+    /* === VALIS módulos — novos módulos === */
+    #btn-panico-float {
+      position: fixed;
+      left: 12px;
+      right: auto;
+      bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      z-index: 90;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 3px solid #fecaca;
+      background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      box-shadow: 0 10px 28px rgba(185, 28, 28, 0.55);
+      animation: valisPanicPulse 1.4s ease-in-out infinite;
+      display: none;
+    }
+    #app.app #btn-panico-float { display: flex; align-items: center; justify-content: center; text-align: center; }
+    @keyframes valisPanicPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 10px 28px rgba(185,28,28,0.45); }
+      50% { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(248,113,113,0.18), 0 12px 32px rgba(185,28,28,0.55); }
+    }
+    .ronda-card .ronda-pt {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 10px 12px; margin-bottom: 8px;
+      border-radius: 12px; border: 1px solid rgba(125,211,252,0.16);
+      background: rgba(15,22,36,0.9);
+    }
+    .ronda-card .ronda-pt.ok { border-color: rgba(52,211,153,0.4); background: rgba(16,185,129,0.1); }
+    .ronda-card .ronda-pt .nm { font-weight: 800; font-size: 13px; }
+    .ronda-card .ronda-pt .st { font-size: 11px; color: #94a3b8; }
+    .badge-emergencia {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      background: #dc2626; color: #fff; font-size: 10px; font-weight: 900;
+      animation: valisLoginErrBlink 1s infinite;
+    }
+    .comprovante-box {
+      margin-top: 10px; padding: 12px; border-radius: 14px;
+      border: 1px dashed rgba(45,212,191,0.35);
+      background: rgba(15,22,36,0.85); font-size: 12px; line-height: 1.45;
+    }
+    .livro-dia-item {
+      padding: 10px 12px; margin-bottom: 8px; border-radius: 12px;
+      border-left: 3px solid #38bdf8; background: rgba(15,22,36,0.9);
+      font-size: 12px;
+    }
+    .alerta-posto-vazio {
+      padding: 12px 14px; border-radius: 14px; margin-bottom: 12px;
+      border: 1px solid rgba(251,191,36,0.4);
+      background: rgba(120,53,15,0.35); color: #fde68a;
+      font-size: 13px; font-weight: 700;
+    }
+
+  
+    /* Corrige botões sumidos — plantão sempre visível */
+    #plantao-vivo-card .plantao-vivo-btns {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+      width: 100% !important;
+      margin: 10px 0 12px !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      max-height: none !important;
+    }
+    #plantao-vivo-card .plantao-vivo-btns .full {
+      grid-column: 1 / -1 !important;
+    }
+    #plantao-vivo-card .btn-pl-in,
+    #plantao-vivo-card .btn-pl-out,
+    #plantao-vivo-card .btn-pl-almoco,
+    #plantao-vivo-card .btn-pl-volta {
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      min-height: 48px !important;
+    }
+    #plantao-vivo-card .btn-pl-out:disabled,
+    #plantao-vivo-card .btn-pl-almoco:disabled,
+    #plantao-vivo-card .btn-pl-volta:disabled {
+      opacity: 0.45 !important;
+    }
+    #app #main-nav {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    #app #main-nav button {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    #app .nav-wrap {
+      pointer-events: none !important;
+    }
+    #app .nav-wrap .nav,
+    #app #main-nav {
+      pointer-events: auto !important;
+    }
+
+  
+    #app .nav-wrap, .nav-wrap {
+      display: block !important; visibility: visible !important; opacity: 1 !important;
+      z-index: 200 !important; pointer-events: none !important;
+    }
+    #app #main-nav, #main-nav, .nav-wrap .nav {
+      display: flex !important; visibility: visible !important; opacity: 1 !important;
+      pointer-events: auto !important; min-height: 54px !important;
+    }
+    #app #main-nav button, #main-nav button {
+      display: flex !important; visibility: visible !important; opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  
+    /* Rodapé forçado — nunca esconder botões padrão */
+    #app #main-nav button[data-tab="inicio"],
+    #app #main-nav button[data-tab="plantao"],
+    #app #main-nav button[data-tab="extrato"],
+    #app #main-nav button[data-tab="ocorrencias"],
+    #app #main-nav button.nav-more,
+    #main-nav button[data-tab="inicio"],
+    #main-nav button[data-tab="plantao"],
+    #main-nav button[data-tab="extrato"],
+    #main-nav button[data-tab="ocorrencias"],
+    #main-nav button.nav-more {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      color: #94a3b8 !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    body.role-dev #main-nav button[data-tab="plantao"] {
+      display: flex !important;
+    }
+    body.role-dev button[data-tab="plantao"] {
+      display: flex !important;
+    }
+
+  
+    .sec-fold-body:not(.is-collapsed) {
+      max-height: none !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      overflow: visible !important;
+    }
+    #ronda-fold-body .btn,
+    #livro-fold-body .btn,
+    #lemb-cfg-fold input,
+    #lemb-cfg-fold .btn {
+      pointer-events: auto !important;
+    }
+
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3653,7 +3875,7 @@
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
         ⚠ FAÇA LOGIN COM SENHA
-        <small>O login automático falhou. Digite usuário e senha para entrar de novo.</small>
+        <small>O login automático falhou. É necessário entrar com usuário e senha.</small>
       </div>
       <div class="login-auto-status" id="login-auto-status" role="status" aria-live="polite">
         <div class="las-title"><span class="las-spin" id="login-auto-spin"></span><span id="login-auto-title">Aguardando login automatico</span></div>
@@ -3711,7 +3933,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.5</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.0.0</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -3876,7 +4098,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.5</span>
+        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.0.2</span>
         <span id="header-user">—</span>
       </div>
       <div class="top-actions">
@@ -3890,6 +4112,7 @@
       <!-- INÍCIO -->
       <section id="tab-inicio" class="tab active">
         <div class="title">Início</div>
+        <div id="alerta-postos-vazios" style="display:none"></div>
         <div class="br-flag-strip"></div>
 
         <!-- Interface exclusiva DEV -->
@@ -3966,16 +4189,22 @@
           <div id="inicio-pack-items"></div>
         </div>
 
-        <div class="plantao-vivo-card" id="plantao-vivo-card">
+        <div class="plantao-vivo-card sec-collapsed" id="plantao-vivo-card">
           <div class="plantao-vivo-head">
             <div class="titulo">MODO PLANTÃO ATIVO</div>
             <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
-            <button type="button" class="sec-min-btn" id="pv-fold-btn" onclick="toggleSecFold('pv-fold-body', this)" aria-expanded="true">Minimizar</button>
+            <button type="button" class="sec-min-btn" id="pv-fold-btn" onclick="toggleSecFold('pv-fold-body', this)" aria-expanded="false">Expandir</button>
           </div>
           <div class="plantao-vivo-meta" id="pv-meta" style="margin-bottom:8px">
             Selecione o posto e faça o check-in (manual ou automático por GPS).
           </div>
-          <div id="pv-fold-body" class="sec-fold-body">
+          <div class="plantao-vivo-btns">
+            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
+            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
+            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
+            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
+          </div>
+          <div id="pv-fold-body" class="sec-fold-body is-collapsed">
           <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()" style="position:absolute;opacity:0;pointer-events:none;height:0;width:0;overflow:hidden">
             <option value="">— Selecione o posto —</option>
           </select>
@@ -3983,6 +4212,7 @@
             <span id="pv-posto-btn-label">— Toque para escolher o posto —</span>
           </button>
           <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
+          <div class="comprovante-box" id="comprovante-ponto" style="display:none"></div>
           <div class="pv-checklist" id="pv-checklist">
             <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de entrada (opcional)</div>
             <label><input type="checkbox" class="pv-chk" data-item="Portão / acesso"> Portão / acesso</label>
@@ -3991,12 +4221,7 @@
             <label><input type="checkbox" class="pv-chk" data-item="Ronda inicial"> Ronda inicial</label>
             <label><input type="checkbox" class="pv-chk" data-item="Rádio / comunicação"> Rádio / comunicação</label>
           </div>
-          <div class="plantao-vivo-btns">
-            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
-            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
-            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
-            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
-          </div>
+          
           <div class="pv-checklist" id="pv-checklist-saida" style="display:none">
             <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de saída</div>
             <label><input type="checkbox" class="pv-chk-out" data-item="Portão fechado"> Portão fechado</label>
@@ -4045,9 +4270,9 @@
         <div class="ops-soft-card" id="escala-fixa-card" class="ops-soft-card" style="display:none">
           <div class="sec-fold-head">
             <h4 class="sec-fold-title" style="margin:0;font-size:14px">📅 Minha escala (plantão fixo)</h4>
-            <button type="button" class="sec-min-btn" onclick="toggleSecFold('esc-fold-body', this)">Minimizar</button>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('esc-fold-body', this)" aria-expanded="false">Expandir</button>
           </div>
-          <div id="esc-fold-body" class="sec-fold-body">
+          <div id="esc-fold-body" class="sec-fold-body is-collapsed">
           <p class="meta" style="font-size:12px;margin:0 0 10px;color:var(--muted)">12h · dia sim / dia não · configure o 1º dia de trabalho</p>
           <div class="grid2">
             <div class="field">
@@ -4095,8 +4320,68 @@
           </div><!-- /esc-fold-body -->
         </div>
 
-        <div class="resumo-dia-card" id="resumo-dia-card">
-          <div class="rd-title">Resumo do dia</div>
+        
+        <!-- Módulo TESTE: Ronda / checkpoints -->
+        <div class="card ronda-card" id="ronda-card">
+          <div class="sec-fold-head">
+            <div class="card-label" style="margin:0">Ronda do posto (checkpoints)</div>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('ronda-fold-body', this)" aria-expanded="false">Expandir</button>
+          </div>
+          <div id="ronda-fold-body" class="sec-fold-body is-collapsed">
+            <p class="meta" style="font-size:12px;margin:0 0 10px">Marque os pontos da ronda no posto atual. Cada marcação grava horário e GPS.</p>
+            <div class="field"><label>Posto da ronda</label>
+              <select id="ronda-posto" class="select" onchange="renderRondaCard()"></select>
+            </div>
+            <div id="ronda-lista" class="empty">Selecione o posto</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              <button type="button" class="btn dark sm" onclick="adicionarPontoRonda()">+ Ponto</button>
+              <button type="button" class="btn green sm" onclick="reiniciarRondaHoje()">Nova ronda hoje</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo TESTE: Livro do posto -->
+        <div class="card" id="livro-posto-card">
+          <div class="sec-fold-head">
+            <div class="card-label" style="margin:0">Livro do posto (hoje)</div>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('livro-fold-body', this)" aria-expanded="false">Expandir</button>
+          </div>
+          <div id="livro-fold-body" class="sec-fold-body is-collapsed">
+            <div class="field"><label>Posto</label>
+              <select id="livro-posto" class="select" onchange="renderLivroPosto()"></select>
+            </div>
+            <div id="livro-lista" class="empty">Sem registros hoje</div>
+          </div>
+        </div>
+
+        <!-- Módulo TESTE: Lembretes de plantão -->
+        <div class="card sec-collapsed" id="lemb-plantao-cfg-card">
+          <div class="sec-fold-head">
+            <div class="card-label" style="margin:0">Lembretes antes do plantão</div>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('lemb-cfg-fold', this)" aria-expanded="false">Expandir</button>
+          </div>
+          <div id="lemb-cfg-fold" class="sec-fold-body is-collapsed">
+          <p class="meta" style="font-size:12px;margin:0 0 8px">Avisos locais: 2h, 1h e 30 min antes (com base na escala / próximo plantão).</p>
+          <label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px">
+            <input type="checkbox" id="lemb-2h" checked onchange="salvarCfgLembretesPlantao()"> 2 horas antes
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px">
+            <input type="checkbox" id="lemb-1h" checked onchange="salvarCfgLembretesPlantao()"> 1 hora antes
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px">
+            <input type="checkbox" id="lemb-30m" checked onchange="salvarCfgLembretesPlantao()"> 30 minutos antes
+          </label>
+          <button type="button" class="btn dark sm" style="margin-top:8px" onclick="testarLembretePlantao()">Testar lembrete agora</button>
+          </div>
+        </div>
+
+        <div class="resumo-dia-card sec-collapsed" id="resumo-dia-card">
+          <div class="sec-fold-head">
+            <div class="rd-title" style="margin:0">Resumo do dia</div>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('rd-fold-body', this)" aria-expanded="false">Expandir</button>
+          </div>
+          <div id="rd-fold-body" class="sec-fold-body is-collapsed">
+          <div class="rd-title" style="display:none">Resumo do dia</div>
           <div id="pv-timer-live" class="hidden"></div>
           <div class="resumo-dia-grid">
             <div class="rd-cell"><div class="rd-lbl">Status</div><div class="rd-val" id="rd-status">—</div></div>
@@ -4107,6 +4392,7 @@
           <div class="pv-extra-actions" style="margin-top:10px">
             <button type="button" class="btn dark sm" onclick="copiarRelatorioTurnoAgora()">Copiar relatório do turno</button>
           </div>
+          </div><!-- /rd-fold-body -->
         </div>
 
         <div class="sync-meta" id="sync-meta">Sync: —</div>
@@ -4284,11 +4570,19 @@
             <div class="k-sub">Na folha atual</div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card" id="ex-adicional-box" style="margin-bottom:12px">
+          <div class="card-label">Resumo de horas (folha atual)</div>
+          <div class="meta" id="ex-horas-resumo">—</div>
+        </div>
+        <div class="card sec-collapsed">
+          <div class="card-label" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
             <span>Folha atual</span>
-            <button class="btn dark sm" onclick="exportarExtratoCSV()">📊 CSV</button>
+            <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <button type="button" class="sec-min-btn" onclick="toggleSecFold('ex-folha-fold', this)" aria-expanded="false">Expandir</button>
+              <button class="btn dark sm" onclick="exportarExtratoCSV()">📊 CSV</button>
+            </span>
           </div>
+          <div id="ex-folha-fold" class="sec-fold-body is-collapsed">
           <button class="btn green" onclick="fecharFolha()">✓ Recebi / Fechar Folha Atual</button>
           <button type="button" class="btn dark" id="btn-limpar-dup-plantao" style="margin-top:8px;width:100%;display:none" onclick="limparPlantaoesDuplicados()">🧹 Limpar plantões duplicados (gestão)</button>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4">
@@ -4325,7 +4619,7 @@
               <option value="Plantão Próprio">Plantão Próprio (legado)</option>
             </select>
           </div>
-          <div id="collapse-ex-folha" class="collapse-box" style="margin-top:8px">
+          <div id="collapse-ex-folha" class="collapse-box is-collapsed" style="margin-top:8px">
             <div class="collapse-body" id="ex-lista-body">
               <div id="ex-lista"></div>
             </div>
@@ -4885,7 +5179,11 @@
     </div>
     <div class="nav-wrap">
       <nav class="nav" id="main-nav">
-        <!-- preenchido por JS conforme cargo -->
+        <button type="button" data-tab="inicio" onclick="try{fecharMore()}catch(e){}tab('inicio',this)"><span>⌂</span>Início</button>
+        <button type="button" data-tab="plantao" onclick="try{fecharMore()}catch(e){}tab('plantao',this)"><span>📋</span>Plantão</button>
+        <button type="button" data-tab="extrato" onclick="try{fecharMore()}catch(e){}tab('extrato',this)"><span>💰</span>Extrato</button>
+        <button type="button" data-tab="ocorrencias" onclick="try{fecharMore()}catch(e){}tab('ocorrencias',this)"><span>⚠</span>Ocorr.</button>
+        <button type="button" class="nav-more" id="btn-more" onclick="event.stopPropagation();toggleMore()"><span>⋯</span>Mais</button>
       </nav>
     </div>
   </section>
@@ -4945,7 +5243,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.5';
+    const APP_VERSION = '0.0.2';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5488,7 +5786,10 @@
         if (titulo && t) t.textContent = titulo;
         if (msg && m) m.textContent = msg;
         box.classList.remove('ok', 'err', 'show');
-        if (banner) banner.classList.remove('show');
+        if (banner) {
+          banner.classList.remove('show');
+          if (estado !== 'err') banner.style.display = 'none';
+        }
         if (visivel) {
           box.classList.add('show');
           box.style.display = 'block';
@@ -5501,8 +5802,14 @@
             if (m) m.textContent = msg || 'Digite usuário e senha para entrar novamente.';
             if (banner) {
               banner.classList.add('show');
-              banner.innerHTML = '⚠ FAÇA LOGIN COM SENHA<small>' +
-                (msg || 'O login automático não funcionou. Informe usuário e senha para entrar de novo.') +
+              banner.style.display = 'block';
+              banner.style.visibility = 'visible';
+              banner.style.opacity = '1';
+              banner.style.zIndex = '99999';
+              banner.innerHTML =
+                '⚠ FAÇA LOGIN COM SENHA' +
+                '<small>' +
+                (msg || 'O login automático falhou. Digite usuário e senha para entrar de novo.') +
                 '</small>';
             }
             try {
@@ -5514,6 +5821,10 @@
           box.style.display = '';
           box.style.visibility = '';
           box.style.opacity = '';
+          if (banner) {
+            banner.classList.remove('show');
+            banner.style.display = 'none';
+          }
         }
       } catch (e) { console.warn(e); }
     }
@@ -6592,6 +6903,453 @@
         });
       } catch (e) { console.warn(e); }
     }
+    async 
+    /* ========== VALIS módulos — novos módulos ========== */
+    function _valisHojeISO() {
+      var n = new Date();
+      return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
+    }
+    function _valisAgoraStr() {
+      return new Date().toLocaleString('pt-BR');
+    }
+    async function dispararPanicoValis() {
+      if (!usuarioAtual) return alert('Faça login.');
+      if (!confirm('🚨 Disparar EMERGÊNCIA para supervisão agora?')) return;
+      var lat = null, lng = null, posto = '';
+      try {
+        if (typeof _pvLastPos !== 'undefined' && _pvLastPos) { lat = _pvLastPos.lat; lng = _pvLastPos.lng; }
+      } catch (e) {}
+      try {
+        var sel = document.getElementById('pv-posto');
+        if (sel && sel.value) posto = sel.value;
+        var btnL = document.getElementById('pv-posto-btn-label');
+        if ((!posto || posto === '') && btnL) posto = (btnL.textContent || '').replace(/^—\s*/,'').trim();
+      } catch (e) {}
+      var txt = '🚨 EMERGÊNCIA — ' + (usuarioAtual.nome || usuarioAtual.user || '—');
+      if (posto) txt += ' · Posto: ' + posto;
+      if (lat != null && lng != null) txt += ' · GPS ' + Number(lat).toFixed(5) + ',' + Number(lng).toFixed(5);
+      else txt += ' · GPS indisponível';
+      txt += ' · ' + _valisAgoraStr();
+      try {
+        if (!db.msg) db.msg = [];
+        db.msg.unshift({
+          id: Date.now(),
+          d: 'Supervisão',
+          t: txt,
+          h: _valisAgoraStr(),
+          de: usuarioAtual.nome || usuarioAtual.user,
+          emergencia: true,
+          lat: lat, lng: lng,
+          posto: posto,
+          lidos: []
+        });
+      } catch (e) {}
+      try {
+        if (!db.oco) db.oco = [];
+        db.oco.unshift({
+          id: Date.now() + 1,
+          p: posto || '—',
+          tipo: 'Emergência',
+          t: txt,
+          d: _valisAgoraStr(),
+          por: usuarioAtual.nome || usuarioAtual.user,
+          userLogin: usuarioAtual.user,
+          emergencia: true,
+          lat: lat, lng: lng
+        });
+      } catch (e) {}
+      try { if (typeof addAtividade === 'function') addAtividade(txt); } catch (e) {}
+      try { await salvar(); } catch (e) {}
+      try { notificarApp('VALIS TM · EMERGÊNCIA', txt, { tag: 'panico', requireInteraction: true }); } catch (e) {}
+      try { if (typeof render === 'function') render(); } catch (e) {}
+      alert('Emergência registrada e enviada à supervisão.');
+    }
+
+    function listaNomesPostosApp() {
+      var nomes = [];
+      var seen = {};
+      function add(n) {
+        n = String(n || '').trim();
+        if (!n) return;
+        var k = n.toLowerCase();
+        if (seen[k]) return;
+        seen[k] = true;
+        nomes.push(n);
+      }
+      try {
+        (db.postos || []).forEach(function(p) { add(p.n || p.nome); });
+      } catch (e) {}
+      try {
+        var pv = document.getElementById('pv-posto');
+        if (pv) {
+          for (var i = 0; i < pv.options.length; i++) {
+            var o = pv.options[i];
+            if (o && o.value) add(o.textContent || o.value);
+          }
+        }
+      } catch (e) {}
+      try {
+        var sess = typeof pvLoad === 'function' ? pvLoad() : null;
+        if (sess && sess.postoNome) add(sess.postoNome);
+      } catch (e) {}
+      return nomes;
+    }
+    function preencherSelectPostosRonda() {
+      try {
+        var ids = ['ronda-posto', 'livro-posto'];
+        var nomes = listaNomesPostosApp();
+        ids.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var cur = el.value;
+          var htmlOpts = '<option value="">— Selecione —</option>';
+          nomes.forEach(function(n) {
+            htmlOpts += '<option value="' + String(n).replace(/"/g, '&quot;') + '">' + n + '</option>';
+          });
+          el.innerHTML = htmlOpts;
+          if (cur) el.value = cur;
+        });
+      } catch (e) { console.warn(e); }
+    }
+    function rondaPostoAtual() {
+      var sel = document.getElementById('ronda-posto');
+      var man = document.getElementById('ronda-posto-manual');
+      var v = (sel && sel.value) ? String(sel.value).trim() : '';
+      if (!v && man) v = String(man.value || '').trim();
+      return v;
+    }
+    function onRondaPostoChange() {
+      try {
+        var sel = document.getElementById('ronda-posto');
+        var man = document.getElementById('ronda-posto-manual');
+        if (sel && man && sel.value) man.value = sel.value;
+        renderRondaCard();
+      } catch (e) {}
+    }
+    function onRondaPostoManual() {
+      try {
+        var man = document.getElementById('ronda-posto-manual');
+        var sel = document.getElementById('ronda-posto');
+        if (man && man.value && sel) {
+          var v = String(man.value).trim();
+          var found = false;
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === v) { found = true; break; }
+          }
+          if (!found) {
+            var opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            sel.appendChild(opt);
+          }
+          sel.value = v;
+        }
+        renderRondaCard();
+      } catch (e) {}
+    }
+    function livroPostoAtual() {
+      var sel = document.getElementById('livro-posto');
+      var man = document.getElementById('livro-posto-manual');
+      var v = (sel && sel.value) ? String(sel.value).trim() : '';
+      if (!v && man) v = String(man.value || '').trim();
+      return v;
+    }
+
+    function _rondaKey(posto) {
+      return 'ronda_' + _valisHojeISO() + '_' + String(posto || '').toLowerCase().replace(/\s+/g,'_');
+    }
+    function _getRondaState(posto) {
+      if (!db.rondas) db.rondas = {};
+      var k = _rondaKey(posto);
+      if (!db.rondas[k]) {
+        db.rondas[k] = { posto: posto, data: _valisHojeISO(), pontos: [] };
+      }
+      return db.rondas[k];
+    }
+    function renderRondaCard() {
+      try {
+        var box = document.getElementById('ronda-lista');
+        if (!box) return;
+        var posto = (typeof rondaPostoAtual === 'function') ? rondaPostoAtual() : '';
+        if (!posto) { box.innerHTML = '<div class="empty">Selecione ou digite o posto</div>'; return; }
+        var st = _getRondaState(posto);
+        if (!st.pontos.length) {
+          st.pontos = [
+            { id: 1, nome: 'Portaria / entrada' },
+            { id: 2, nome: 'Perímetro externo' },
+            { id: 3, nome: 'Área interna' },
+            { id: 4, nome: 'Estacionamento' }
+          ];
+        }
+        box.innerHTML = st.pontos.map(function(pt) {
+          var ok = !!pt.ok;
+          return '<div class="ronda-pt' + (ok ? ' ok' : '') + '">' +
+            '<div><div class="nm">' + (pt.nome || 'Ponto') + '</div>' +
+            '<div class="st">' + (ok ? ('✓ ' + (pt.quando || '') + (pt.gps ? ' · GPS ok' : '')) : 'Pendente') + '</div></div>' +
+            (ok ? '' : '<button type="button" class="btn green sm" onclick="marcarPontoRonda(' + pt.id + ')">Marcar</button>') +
+            '</div>';
+        }).join('');
+      } catch (e) { console.warn(e); }
+    }
+    async function marcarPontoRonda(pid) {
+      try {
+        var posto = rondaPostoAtual();
+        if (!posto) return alert('Selecione ou digite o posto');
+        var st = _getRondaState(posto);
+        var pt = (st.pontos || []).find(function(x) { return Number(x.id) === Number(pid); });
+        if (!pt) return;
+        var lat = null, lng = null;
+        try { if (_pvLastPos) { lat = _pvLastPos.lat; lng = _pvLastPos.lng; } } catch (e) {}
+        pt.ok = true;
+        pt.quando = _valisAgoraStr();
+        pt.gps = (lat != null);
+        pt.lat = lat; pt.lng = lng;
+        pt.por = usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—';
+        try { await salvar(); } catch (e) {}
+        renderRondaCard();
+        try { notificarApp('VALIS TM · Ronda', 'Ponto marcado: ' + pt.nome, { tag: 'ronda' }); } catch (e) {}
+        toast('Ponto de ronda marcado');
+      } catch (e) { alert(e.message || e); }
+    }
+    function adicionarPontoRonda() {
+      var posto = rondaPostoAtual();
+      if (!posto) return alert('Selecione ou digite o posto da ronda.');
+      var nome = prompt('Nome do ponto de ronda:');
+      if (!nome) return;
+      var st = _getRondaState(posto);
+      var maxId = 0;
+      (st.pontos || []).forEach(function(p) { if (p.id > maxId) maxId = p.id; });
+      st.pontos.push({ id: maxId + 1, nome: String(nome).trim() });
+      renderRondaCard();
+      try { salvar(); } catch (e) {}
+    }
+    function reiniciarRondaHoje() {
+      var posto = rondaPostoAtual();
+      if (!posto) return alert('Selecione ou digite o posto');
+      if (!confirm('Reiniciar ronda de hoje neste posto?')) return;
+      if (!db.rondas) db.rondas = {};
+      delete db.rondas[_rondaKey(posto)];
+      renderRondaCard();
+      try { salvar(); } catch (e) {}
+    }
+
+    function renderLivroPosto() {
+      try {
+        var box = document.getElementById('livro-lista');
+        if (!box) return;
+        var posto = (typeof livroPostoAtual === 'function') ? livroPostoAtual() : '';
+        if (!posto) { box.innerHTML = '<div class="empty">Selecione ou digite o posto</div>'; return; }
+        var hojeBr = new Date().toLocaleDateString('pt-BR');
+        var iso = _valisHojeISO();
+        var itens = [];
+        (db.oco || []).forEach(function(o) {
+          if (!o) return;
+          var p = String(o.p || o.posto || '');
+          if (p !== posto && p.toLowerCase() !== posto.toLowerCase()) return;
+          var d = String(o.d || '');
+          if (d.indexOf(hojeBr) < 0 && d.indexOf(iso) < 0 && d.indexOf(hojeBr.replace(/\//g,'-')) < 0) {
+            // ainda aceita se for hoje pelo id recente? skip
+            if (!plantaoDataEhHoje || !plantaoDataEhHoje(d.split(' ')[0])) {
+              // try first part
+            }
+          }
+          var diaOk = d.indexOf(hojeBr) >= 0 || d.indexOf(iso) >= 0;
+          if (!diaOk) return;
+          itens.push({ h: d, tipo: o.tipo || 'Ocorrência', txt: o.t || '', por: o.por || '', emer: !!o.emergencia });
+        });
+        (db.msg || []).forEach(function(m) {
+          if (!m || !m.emergencia) return;
+          var d = String(m.h || '');
+          if (d.indexOf(hojeBr) < 0 && d.indexOf(iso) < 0) return;
+          if (m.posto && String(m.posto) !== posto) return;
+          itens.push({ h: d, tipo: 'Emergência', txt: m.t || '', por: m.de || '', emer: true });
+        });
+        // ronda marks
+        try {
+          var st = db.rondas && db.rondas[_rondaKey(posto)];
+          if (st && st.pontos) {
+            st.pontos.filter(function(pt) { return pt.ok; }).forEach(function(pt) {
+              itens.push({ h: pt.quando || '', tipo: 'Ronda', txt: 'Checkpoint: ' + pt.nome, por: pt.por || '', emer: false });
+            });
+          }
+        } catch (e) {}
+        itens.sort(function(a,b) { return String(b.h).localeCompare(String(a.h)); });
+        if (!itens.length) {
+          box.innerHTML = '<div class="empty">Sem registros hoje neste posto</div>';
+          return;
+        }
+        box.innerHTML = itens.map(function(it) {
+          return '<div class="livro-dia-item">' +
+            (it.emer ? '<span class="badge-emergencia">SOS</span> ' : '') +
+            '<b>' + (it.tipo || '') + '</b> · ' + (it.h || '') +
+            '<div class="meta">' + (it.txt || '') + '</div>' +
+            '<div class="meta">Por: ' + (it.por || '—') + '</div></div>';
+        }).join('');
+      } catch (e) { console.warn(e); }
+    }
+
+    function salvarCfgLembretesPlantao() {
+      try {
+        var cfg = {
+          h2: !!(document.getElementById('lemb-2h') || {}).checked,
+          h1: !!(document.getElementById('lemb-1h') || {}).checked,
+          m30: !!(document.getElementById('lemb-30m') || {}).checked
+        };
+        localStorage.setItem('valis_lemb_plantao_cfg', JSON.stringify(cfg));
+      } catch (e) {}
+    }
+    function carregarCfgLembretesPlantao() {
+      try {
+        var raw = localStorage.getItem('valis_lemb_plantao_cfg');
+        var cfg = raw ? JSON.parse(raw) : { h2: true, h1: true, m30: true };
+        var a = document.getElementById('lemb-2h'); if (a) a.checked = cfg.h2 !== false;
+        var b = document.getElementById('lemb-1h'); if (b) b.checked = cfg.h1 !== false;
+        var c = document.getElementById('lemb-30m'); if (c) c.checked = cfg.m30 !== false;
+      } catch (e) {}
+    }
+    function testarLembretePlantao() {
+      try {
+        notificarApp('VALIS TM · Lembrete de plantão', 'Teste: seu plantão se aproxima. Prepare-se para o posto.', { tag: 'lemb-test', requireInteraction: true });
+        toast('Lembrete de teste enviado');
+      } catch (e) { alert('Notificação: ' + (e.message || e)); }
+    }
+    function verificarLembretesPlantaoEscala() {
+      try {
+        if (!usuarioAtual || !usuarioAtual.escalaFixa) return;
+        var raw = localStorage.getItem('valis_lemb_plantao_cfg');
+        var cfg = raw ? JSON.parse(raw) : { h2: true, h1: true, m30: true };
+        var ef = usuarioAtual.escalaFixa;
+        var turno = ef.turno || 'noturno';
+        var inicioH = (turno === 'diurno') ? 6 : 18;
+        var agora = new Date();
+        var alvo = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), inicioH, 0, 0, 0);
+        if (alvo < agora) alvo.setDate(alvo.getDate() + 1);
+        // only if escala says work day - approximate using inicio
+        var diffMin = Math.round((alvo - agora) / 60000);
+        var marks = [];
+        if (cfg.h2 !== false && diffMin <= 120 && diffMin > 110) marks.push('2h');
+        if (cfg.h1 !== false && diffMin <= 60 && diffMin > 50) marks.push('1h');
+        if (cfg.m30 !== false && diffMin <= 30 && diffMin > 20) marks.push('30min');
+        if (!marks.length) return;
+        var key = 'valis_lemb_p_' + _valisHojeISO() + '_' + marks.join('_');
+        if (localStorage.getItem(key)) return;
+        localStorage.setItem(key, '1');
+        notificarApp('VALIS TM · Plantão em breve', 'Faltam cerca de ' + marks[0] + ' para o início do plantão (' + inicioH + 'h).', { tag: 'lemb-escala', requireInteraction: true });
+      } catch (e) {}
+    }
+
+    function mostrarComprovantePonto(tipo, posto, extra) {
+      try {
+        var box = document.getElementById('comprovante-ponto');
+        if (!box) return;
+        var txt = 'COMPROVANTE DE PONTO — VALIS TM\\n' +
+          'Tipo: ' + (tipo || '—') + '\\n' +
+          'Quem: ' + (usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—') + '\\n' +
+          'Posto: ' + (posto || '—') + '\\n' +
+          'Quando: ' + _valisAgoraStr() + '\\n' +
+          (extra || '');
+        box.style.display = 'block';
+        box.innerHTML = '<b>Comprovante</b><pre style="white-space:pre-wrap;margin:8px 0 0;font-size:11px;color:#e2e8f0">' +
+          txt.replace(/</g,'&lt;') + '</pre>' +
+          '<button type="button" class="btn dark sm" style="margin-top:8px" onclick="copiarComprovantePonto()">Copiar comprovante</button>';
+        window._ultimoComprovantePonto = txt;
+      } catch (e) {}
+    }
+    function copiarComprovantePonto() {
+      try {
+        var t = window._ultimoComprovantePonto || '';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(function() { toast('Comprovante copiado'); });
+        } else {
+          prompt('Copie o comprovante:', t);
+        }
+      } catch (e) {}
+    }
+
+    function atualizarResumoHorasFolha() {
+      try {
+        var el = document.getElementById('ex-horas-resumo');
+        if (!el) return;
+        var lista = (db.plantaoes || []).filter(function(p) {
+          if (!p) return false;
+          if (typeof podeVerTodosPlantaoes === 'function' && podeVerTodosPlantaoes()) return true;
+          return typeof plantaoDoUsuario === 'function' ? plantaoDoUsuario(p) : true;
+        });
+        var totalH = 0, noturnos = 0;
+        lista.forEach(function(p) {
+          var h = parseFloat(String(p.horas || '').replace(',','.'));
+          if (!isNaN(h)) totalH += h;
+          else totalH += 12;
+          var turno = String(p.turno || '').toLowerCase();
+          if (turno.indexOf('not') >= 0 || String(p.inicio || '').indexOf('18') === 0) noturnos++;
+        });
+        var adicional = noturnos * 12 * 0.2; // 20% ilustrativo sobre horas noturnas (12h)
+        el.innerHTML = 'Horas lançadas: <b>' + totalH.toFixed(1) + 'h</b><br>' +
+          'Plantões noturnos: <b>' + noturnos + '</b><br>' +
+          'Ref. adicional noturno (estimativa 20%): <b>' + (typeof moneyBR === 'function' ? moneyBR(adicional * ((usuarioAtual && usuarioAtual.valorPlantao) || 100) / 12) : ('R$ ' + adicional.toFixed(2))) + '</b>' +
+          '<div class="meta" style="margin-top:6px">Estimativa educativa — ajuste conforme acordo da equipe.</div>';
+      } catch (e) {}
+    }
+
+    function verificarPostosVazios() {
+      try {
+        var box = document.getElementById('alerta-postos-vazios');
+        if (!box) return;
+        var cargo = (usuarioAtual && (usuarioAtual.cargo || usuarioAtual.role || '')).toLowerCase();
+        var gestao = cargo.indexOf('dev') >= 0 || cargo.indexOf('admin') >= 0 || cargo.indexOf('super') >= 0;
+        if (!gestao) { box.style.display = 'none'; return; }
+        var vivos = [];
+        try {
+          if (typeof sessoesPlantaoAtivas === 'function') vivos = sessoesPlantaoAtivas() || [];
+          else if (db.sessoesPlantao) vivos = (db.sessoesPlantao || []).filter(function(s) { return s && s.ativo; });
+        } catch (e) {}
+        var cobertos = {};
+        vivos.forEach(function(s) {
+          var p = String(s.posto || s.postoNome || '').toLowerCase();
+          if (p) cobertos[p] = true;
+        });
+        var agora = new Date();
+        var hora = agora.getHours();
+        // janela típica de plantão noturno 18-6 ou diurno 6-18 — alerta genérico se posto sem ninguém em horário comercial noturno
+        var vazios = [];
+        (db.postos || []).forEach(function(p) {
+          var n = p.n || p.nome || '';
+          if (!n) return;
+          if (!cobertos[String(n).toLowerCase()]) vazios.push(n);
+        });
+        if (!vazios.length || (hora > 8 && hora < 17)) {
+          // de dia pode ser normal — só mostra se houver escala noturna ativa global
+          if (!(hora >= 18 || hora < 6) && vazios.length) {
+            box.style.display = 'none';
+            return;
+          }
+        }
+        if (!vazios.length) { box.style.display = 'none'; return; }
+        if (!(hora >= 18 || hora < 7)) { box.style.display = 'none'; return; }
+        box.style.display = 'block';
+        box.innerHTML = '<div class="alerta-posto-vazio">⚠ Postos sem check-in ativo agora: <b>' +
+          vazios.slice(0, 6).join(', ') + (vazios.length > 6 ? '…' : '') + '</b></div>';
+      } catch (e) {}
+    }
+
+    function initModulosExtras() {
+      try { preencherSelectPostosRonda(); } catch (e) { console.warn(e); }
+      try { carregarCfgLembretesPlantao(); } catch (e) { console.warn(e); }
+      try { renderRondaCard(); } catch (e) { console.warn(e); }
+      try { renderLivroPosto(); } catch (e) { console.warn(e); }
+      try { atualizarResumoHorasFolha(); } catch (e) { console.warn(e); }
+      try { verificarPostosVazios(); } catch (e) { console.warn(e); }
+      try { verificarLembretesPlantaoEscala(); } catch (e) { console.warn(e); }
+      try {
+        if (!window._valisLembTimer) {
+          window._valisLembTimer = setInterval(function() {
+            try { verificarLembretesPlantaoEscala(); } catch (e) {}
+            try { verificarPostosVazios(); } catch (e) {}
+          }, 60000);
+        }
+      } catch (e) {}
+    }
+
     async function notificarApp(titulo, corpo, opts) {
       try {
         return await ValisNotify.show(titulo, corpo, opts || {});
@@ -6805,8 +7563,10 @@
     /** Cadastrar / GPS / excluir postos — só Admin, Supervisão e DEV */
     function podeGerenciarPostos() {
       if (!usuarioAtual) return false;
-      const f = String(usuarioAtual.funcao || '');
-      return f === 'admin' || f === 'supervisor' || f === 'dev';
+      var f = String(usuarioAtual.funcao || usuarioAtual.role || usuarioAtual.cargo || '').toLowerCase();
+      if (f === 'supervisao') f = 'supervisor';
+      return f === 'admin' || f === 'supervisor' || f === 'dev' ||
+        f.indexOf('admin') >= 0 || f.indexOf('dev') >= 0 || f.indexOf('super') >= 0;
     }
     /** Excluir mensagens — só Admin, Supervisão e DEV */
     function podeExcluirMensagens() {
@@ -6951,14 +7711,14 @@
       return isCargoDev();
     }
         const NAV_ITEMS = [
-      /* Rodapé interativo (scroll horizontal) + Mais */
+      /* Rodapé oficial: Início · Plantão · Extrato · Ocorr. · Mais */
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      { tab: 'plantao', roles: ['vigilante','equipe','supervisor','admin'], icon: '📋', label: 'Plantão', primary: true },
-      { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
-      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorr.', primary: true },
-      { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
-      { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escala', primary: true },
-      { tab: 'postos', roles: ['supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: true },
+      { tab: 'plantao', roles: ['all'], icon: '📋', label: 'Plantão', primary: true },
+      { tab: 'extrato', roles: ['all'], icon: '💰', label: 'Extrato', primary: true },
+      { tab: 'ocorrencias', roles: ['all'], icon: '⚠', label: 'Ocorr.', primary: true },
+      { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: false },
+      { tab: 'escalas', roles: ['all'], icon: '📅', label: 'Escala', primary: false },
+      { tab: 'postos', roles: ['all'], icon: '📍', label: 'Postos', primary: false },
       { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: true },
       { tab: 'supervisao', roles: ['admin','dev','supervisor'], icon: '📡', label: 'Superv.', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
@@ -7091,11 +7851,12 @@
 
     function rolePode(roles, role) {
       if (!roles || !roles.length) return false;
-      // DEV NÃO herda abas de vigilante — só o que incluir 'dev', 'all' ou gestão explícita
-      if (role === 'dev') {
-        return roles.indexOf('all') >= 0 || roles.indexOf('dev') >= 0;
-      }
       if (role === 'supervisao') role = 'supervisor';
+      if (role === 'dev') {
+        return roles.indexOf('all') >= 0 || roles.indexOf('dev') >= 0 ||
+          roles.indexOf('admin') >= 0 || roles.indexOf('supervisor') >= 0 ||
+          roles.indexOf('vigilante') >= 0 || roles.indexOf('equipe') >= 0;
+      }
       return roles.indexOf('all') >= 0 || roles.indexOf(role) >= 0;
     }
 
@@ -7306,61 +8067,93 @@
     }
 
     function aplicarPermissoes() {
-      const role = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
+      var role = String((usuarioAtual && (usuarioAtual.funcao || usuarioAtual.role || usuarioAtual.cargo)) || 'vigilante').toLowerCase();
+      if (role === 'supervisao') role = 'supervisor';
       try {
         document.body.classList.remove('role-dev', 'role-admin', 'role-supervisor', 'role-vigilante', 'role-equipe');
-        var rc = role === 'supervisao' ? 'supervisor' : role;
-        if (['dev','admin','supervisor','vigilante','equipe'].indexOf(rc) >= 0) document.body.classList.add('role-' + rc);
+        if (['dev','admin','supervisor','vigilante','equipe'].indexOf(role) >= 0) document.body.classList.add('role-' + role);
         else document.body.classList.add('role-vigilante');
       } catch (e) {}
-      const allowed = NAV_ITEMS.filter(i => rolePode(i.roles, role));
-      // Primários: até 4 + "Mais" se sobrar
-      let primary = allowed.filter(i => i.primary);
-      let secondary = allowed.filter(i => !i.primary);
-      // Se primários > 4, empurra o excesso para secondary
-      if (primary.length > 4) {
-        secondary = primary.slice(4).concat(secondary);
-        primary = primary.slice(0, 4);
+
+      var primary = [
+        { tab: 'inicio', icon: '⌂', label: 'Início' },
+        { tab: 'plantao', icon: '📋', label: 'Plantão' },
+        { tab: 'extrato', icon: '💰', label: 'Extrato' },
+        { tab: 'ocorrencias', icon: '⚠', label: 'Ocorr.' }
+      ];
+      var nav = document.getElementById('main-nav');
+      var moreGrid = document.getElementById('more-grid');
+      if (nav) {
+        try {
+          nav.innerHTML = '';
+          primary.forEach(function(item) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('data-tab', item.tab);
+            b.innerHTML = '<span>' + item.icon + '</span>' + item.label;
+            b.onclick = function() {
+              try { fecharMore(); } catch (e) {}
+              tab(item.tab, b);
+            };
+            nav.appendChild(b);
+          });
+          var more = document.createElement('button');
+          more.type = 'button';
+          more.className = 'nav-more';
+          more.id = 'btn-more';
+          more.innerHTML = '<span>⋯</span>Mais';
+          more.onclick = function(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            toggleMore();
+          };
+          nav.appendChild(more);
+        } catch (e) { console.warn('nav build', e); }
       }
-      // Garante Perfil no rodapé se couber
-      const nav = document.getElementById('main-nav');
-      const moreGrid = document.getElementById('more-grid');
-      if (!nav) return;
-      nav.innerHTML = '';
-      primary.forEach(i => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.setAttribute('data-tab', i.tab);
-        b.innerHTML = '<span>' + i.icon + '</span>' + i.label;
-        b.onclick = function() { try { fecharMore(); } catch (e) {} tab(i.tab, this); };
-        nav.appendChild(b);
-      });
-      if (secondary.length) {
-        const more = document.createElement('button');
-        more.type = 'button';
-        more.className = 'nav-more';
-        more.id = 'btn-more';
-        more.innerHTML = '<span>⋯</span>Mais';
-        more.onclick = function(e) { e.stopPropagation(); toggleMore(); };
-        nav.appendChild(more);
-        if (moreGrid) moreGrid.innerHTML = '';
-        try { renderHubMais(role); } catch (e) { console.warn(e); }
-      } else {
-        if (moreGrid) moreGrid.innerHTML = '';
-        try { renderHubMais(role); } catch (e) {}
+
+      if (moreGrid) {
+        try {
+          moreGrid.innerHTML = '';
+          var mais = [
+            { tab: 'ocorrencias', icon: '⚠', label: 'Ocorrências' },
+            { tab: 'escalas', icon: '📅', label: 'Escalas' },
+            { tab: 'postos', icon: '📍', label: 'Postos' },
+            { tab: 'config', icon: '👤', label: 'Meu perfil' },
+            { tab: 'mensagens', icon: '✉', label: 'Mensagens' }
+          ];
+          if (role === 'admin' || role === 'dev' || role === 'supervisor') {
+            mais.push({ tab: 'usuarios', icon: '👥', label: 'Equipe' });
+            mais.push({ tab: 'supervisao', icon: '📡', label: 'Supervisão' });
+          }
+          mais.forEach(function(item) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('data-tab', item.tab);
+            b.innerHTML = '<span>' + item.icon + '</span>' + item.label;
+            b.onclick = function() {
+              try { fecharMore(); } catch (e) {}
+              tab(item.tab);
+            };
+            moreGrid.appendChild(b);
+          });
+        } catch (e) { console.warn('more grid', e); }
       }
-      const telCard = document.getElementById('card-tel-sup');
-      if (telCard) telCard.style.display = (role === 'supervisor' || role === 'admin') ? '' : 'none';
-      // marca ativo atual
-      const activeTab = document.querySelector('.tab.active');
-      if (activeTab) {
-        const name = activeTab.id.replace('tab-', '');
-        document.querySelectorAll('#main-nav button[data-tab], #more-grid button[data-tab]').forEach(x => {
-          x.classList.toggle('active', x.getAttribute('data-tab') === name);
-        });
-      }
+      try { renderHubMais(role); } catch (e) { console.warn(e); }
+
+      var telCard = document.getElementById('card-tel-sup');
+      if (telCard) telCard.style.display = (role === 'supervisor' || role === 'admin' || role === 'dev') ? '' : 'none';
+      try {
+        var activeTab = document.querySelector('.tab.active');
+        if (activeTab) {
+          var name = activeTab.id.replace('tab-', '');
+          document.querySelectorAll('#main-nav button[data-tab], #more-grid button[data-tab]').forEach(function(x) {
+            x.classList.toggle('active', x.getAttribute('data-tab') === name);
+          });
+        }
+      } catch (e) {}
       try { atualizarBadgeMensagens(); } catch (e) {}
+      try { atualizarUIPostos(); } catch (e) {}
     }
+
     function toggleMore() {
       var sheet = document.getElementById('more-sheet');
       if (!sheet) return;
@@ -9730,21 +10523,43 @@
     }
     function restaurarSecFolds() {
       try {
-        ['pv-fold-body', 'esc-fold-body', 'ex-folha-fold', 'ex-arq-fold'].forEach(function(id) {
-          var v = localStorage.getItem('valis_fold_' + id);
-          if (v !== '1') return;
+        if (!localStorage.getItem('valis_fold_defaults_v030')) {
+          ['pv-fold-body','esc-fold-body','ex-folha-fold','ex-arq-fold','ronda-fold-body','livro-fold-body','lemb-cfg-fold','rd-fold-body'].forEach(function(id) {
+            try { localStorage.removeItem('valis_fold_' + id); } catch (e) {}
+          });
+          localStorage.setItem('valis_fold_defaults_v030', '1');
+        }
+      } catch (e) {}
+
+      try {
+        var ids = ['pv-fold-body', 'esc-fold-body', 'ex-folha-fold', 'ex-arq-fold', 'ronda-fold-body', 'livro-fold-body', 'lemb-cfg-fold', 'rd-fold-body'];
+        ids.forEach(function(id) {
           var body = document.getElementById(id);
           if (!body) return;
-          body.classList.add('is-collapsed');
+          var v = null;
+          try { v = localStorage.getItem('valis_fold_' + id); } catch (e) {}
+          // padrão: minimizado. Só expande se usuário salvou explicitamente expandido ('0')
+          var collapsed = (v !== '0');
+          if (collapsed) {
+            body.classList.add('is-collapsed');
+          } else {
+            body.classList.remove('is-collapsed');
+          }
           var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
-          if (card) card.classList.add('sec-collapsed');
+          if (card) {
+            if (collapsed) card.classList.add('sec-collapsed');
+            else card.classList.remove('sec-collapsed');
+          }
           var btn = document.querySelector('[onclick*="' + id + '"]');
           if (btn) {
-            btn.setAttribute('aria-expanded', 'false');
-            btn.textContent = 'Expandir';
+            btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            btn.textContent = collapsed ? 'Expandir' : 'Minimizar';
           }
         });
       } catch (e) {}
+    }
+    function aplicarFoldsPadraoMinimizados() {
+      try { restaurarSecFolds(); } catch (e) {}
     }
 
     async function salvarMinhaEscalaFixa() {
@@ -9963,12 +10778,35 @@
       });
       return order.map(function(k) { return map[k]; });
     }
+    function plantaoDataEhHoje(dataStr) {
+      if (!dataStr) return false;
+      var s = String(dataStr).trim();
+      var now = new Date();
+      var iso = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+      var br = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+      var br2 = now.getDate() + '/' + (now.getMonth() + 1) + '/' + now.getFullYear();
+      if (s === iso || s.indexOf(iso) === 0) return true;
+      if (s === br || s.indexOf(br) >= 0) return true;
+      if (s === br2 || s.indexOf(br2) >= 0) return true;
+      // dd/mm/yyyy flex
+      var m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) {
+        var d = Number(m[1]), mo = Number(m[2]), y = Number(m[3]);
+        if (d === now.getDate() && mo === (now.getMonth() + 1) && y === now.getFullYear()) return true;
+      }
+      var m2 = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (m2) {
+        if (Number(m2[3]) === now.getDate() && Number(m2[2]) === (now.getMonth() + 1) && Number(m2[1]) === now.getFullYear()) return true;
+      }
+      return false;
+    }
     function htmlItemPlantaoExtrato(x) {
+      var ehHoje = plantaoDataEhHoje(x && x.data);
       return (
-        '<div class="item">' +
+        '<div class="item' + (ehHoje ? ' plantao-hoje' : '') + '">' +
           '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">' +
             '<div>' +
-              '<b>' + (x.data || '') + '</b>' +
+              '<b>' + (x.data || '') + '</b>' + (ehHoje ? '<span class="badge-hoje-plantao">HOJE</span>' : '') +
               '<div class="meta" style="color:var(--yellow)">Por: ' + (x.por || '—') + (x.userLogin ? (' · @' + x.userLogin) : '') + ' · Cobriu: ' + (x.cobriu || '—') + '</div>' +
               (x.sono ? ('<div class="meta">💤 ' + x.sono + 'h sono</div>') : '') +
               (x.obs ? ('<div class="meta">Obs: ' + x.obs + '</div>') : '') +
@@ -10820,6 +11658,9 @@
       if (raioEl) raioEl.value = '150';
       addAtividade('Posto: ' + n);
       await salvar();
+      try { preencherSelectPostosRonda(); renderRondaCard(); renderLivroPosto(); } catch (e) {}
+      try { if (typeof render === 'function') render(); } catch (e) {}
+      try { toast('Posto cadastrado: ' + n); } catch (e) {}
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
         try {
           await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
@@ -11593,6 +12434,7 @@
       toast('Mensagem ao posto'); labRender();
     }
     async function labPanico() {
+      return dispararPanicoValis();
       if (!confirm('Disparar EMERGÊNCIA?')) return;
       labEnsureDb();
       var lat = null, lng = null;
@@ -15872,6 +16714,7 @@
       addAtividade('Check-in plantão: ' + (p ? p.n : 'posto') + (auto ? ' (GPS auto)' : ''));
       try { await salvar(); } catch (e) {}
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
+      try { mostrarComprovantePonto(auto ? 'Check-in automático' : 'Check-in', sess.postoNome || '', 'GPS: ' + (sess.checkInLat != null ? (Number(sess.checkInLat).toFixed(5)+','+Number(sess.checkInLng).toFixed(5)) : 'n/d')); } catch (e) {}
       try { feedbackAcaoLeve(); } catch (e) {}
       try { iniciarTimerPlantaoLive(); } catch (e) {}
       try { sess = gravarAlvoCheckoutNaSessao(sess); pvSave(sess); } catch (e) {}

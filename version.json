@@ -1,5 +1,5 @@
 {
-  "v": "0.2.5",
+  "v": "0.0.2",
   "forceReload": true,
-  "msg": "Vigilante pode editar e excluir os proprios plantoes"
+  "msg": "Corrige ronda, livro do posto e lembretes"
 }
