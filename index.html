@@ -3719,6 +3719,72 @@
       pointer-events: auto !important;
     }
 
+  
+    #login-version, .login-version {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #94a3b8 !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      margin-top: 8px !important;
+    }
+    #app-ver-badge, .ver-badge {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+  
+    /* Perfil no topo */
+    .top {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 6px !important;
+      padding-bottom: 10px !important;
+    }
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+    }
+    .top-perfil-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      padding: 0 2px;
+      position: relative;
+      z-index: 45;
+    }
+    .perfil-chip-wrap.top-perfil {
+      margin: 0 !important;
+      display: flex !important;
+      justify-content: flex-end;
+      width: 100%;
+    }
+    .perfil-chip-wrap.top-perfil .perfil-chip {
+      margin-left: auto;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .header-user-fallback {
+      display: none !important;
+    }
+    .perfil-chip-detail {
+      z-index: 60;
+      right: 0;
+      left: auto;
+    }
+
+  
+    /* Remove botões duplicados no menu Mais — só o Hub */
+    #more-sheet .more-grid,
+    #more-grid {
+      display: none !important;
+    }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3870,7 +3936,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v—</div>
+        <div class="login-version" id="login-version">v0.0.6</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -4094,17 +4160,36 @@
   <!-- APP -->
   <section id="app" class="app">
     <header class="top">
-      <button class="hamburger" onclick="abrirDevMenu()" title="Menu DEV">
-        <span></span><span></span><span></span>
-      </button>
-      <div class="brand">
-        VALIS TM <span class="ver-badge" id="app-ver-badge">v0.0.2</span>
-        <span id="header-user">—</span>
+      <div class="top-row">
+        <button class="hamburger" onclick="abrirDevMenu()" title="Menu DEV">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="brand">
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.0.6</span>
+        </div>
+        <div class="top-actions">
+          <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
+          <span id="conn-dot" class="conn-dot green" title="Conexão com a nuvem — toque para reconectar" onclick="recuperarApp(false)"></span>
+          <button type="button" class="btn dark sm" id="btn-sair" onclick="event.preventDefault();event.stopPropagation();try{sair();}catch(e){console.error(e);}">Sair</button>
+        </div>
       </div>
-      <div class="top-actions">
-        <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
-        <span id="conn-dot" class="conn-dot green" title="Conexão com a nuvem — toque para reconectar" onclick="recuperarApp(false)"></span>
-        <button type="button" class="btn dark sm" id="btn-sair" onclick="event.preventDefault();event.stopPropagation();try{sair();}catch(e){console.error(e);}">Sair</button>
+      <div class="top-perfil-row">
+        <div class="perfil-chip-wrap top-perfil">
+          <div>
+            <div class="perfil-chip" id="perfil-chip" onclick="togglePerfilChip()" title="Meu perfil">
+              <div class="avatar" id="perfil-chip-avatar">?</div>
+              <div class="chip-text">
+                <div class="nome" id="perfil-chip-nome">—</div>
+                <div class="cargo" id="perfil-chip-cargo">Meu perfil</div>
+              </div>
+              <span class="chev-mini">▼</span>
+            </div>
+            <div class="perfil-chip-detail" id="perfil-chip-detail">
+              <div id="meu-perfil">—</div>
+            </div>
+          </div>
+        </div>
+        <span id="header-user" class="header-user-fallback">—</span>
       </div>
     </header>
 
@@ -4328,11 +4413,15 @@
             <button type="button" class="sec-min-btn" onclick="toggleSecFold('ronda-fold-body', this)" aria-expanded="false">Expandir</button>
           </div>
           <div id="ronda-fold-body" class="sec-fold-body is-collapsed">
-            <p class="meta" style="font-size:12px;margin:0 0 10px">Marque os pontos da ronda no posto atual. Cada marcação grava horário e GPS.</p>
+            <p class="meta" style="font-size:12px;margin:0 0 10px">Escolha o posto na lista ou digite o nome. Depois marque os checkpoints.</p>
             <div class="field"><label>Posto da ronda</label>
-              <select id="ronda-posto" class="select" onchange="renderRondaCard()"></select>
+              <select id="ronda-posto" class="select" onchange="onRondaPostoChange()"></select>
             </div>
-            <div id="ronda-lista" class="empty">Selecione o posto</div>
+            <div class="field"><label>Digite o posto (se não aparecer na lista)</label>
+              <input id="ronda-posto-manual" class="input" list="ronda-postos-datalist" placeholder="Ex: UFV São Miguel" autocomplete="off" oninput="onRondaPostoManual()" onchange="onRondaPostoManual()">
+              <datalist id="ronda-postos-datalist"></datalist>
+            </div>
+            <div id="ronda-lista" class="empty">Selecione ou digite o posto</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
               <button type="button" class="btn dark sm" onclick="adicionarPontoRonda()">+ Ponto</button>
               <button type="button" class="btn green sm" onclick="reiniciarRondaHoje()">Nova ronda hoje</button>
@@ -4348,9 +4437,13 @@
           </div>
           <div id="livro-fold-body" class="sec-fold-body is-collapsed">
             <div class="field"><label>Posto</label>
-              <select id="livro-posto" class="select" onchange="renderLivroPosto()"></select>
+              <select id="livro-posto" class="select" onchange="onLivroPostoChange()"></select>
             </div>
-            <div id="livro-lista" class="empty">Sem registros hoje</div>
+            <div class="field"><label>Digite o posto (se não aparecer na lista)</label>
+              <input id="livro-posto-manual" class="input" list="livro-postos-datalist" placeholder="Ex: UFV São Miguel" autocomplete="off" oninput="onLivroPostoManual()" onchange="onLivroPostoManual()">
+              <datalist id="livro-postos-datalist"></datalist>
+            </div>
+            <div id="livro-lista" class="empty">Sem registros hoje neste posto</div>
           </div>
         </div>
 
@@ -4434,21 +4527,7 @@
           <button type="button" class="btn dark sm" onclick="flushFilaOffline().then(function(){toast('Sync tentado');atualizarUIOfflinePack();})">Tentar sincronizar</button>
         </div>
 
-        <div class="perfil-chip-wrap">
-          <div>
-            <div class="perfil-chip" id="perfil-chip" onclick="togglePerfilChip()" title="Meu perfil">
-              <div class="avatar" id="perfil-chip-avatar">?</div>
-              <div class="chip-text">
-                <div class="nome" id="perfil-chip-nome">—</div>
-                <div class="cargo" id="perfil-chip-cargo">Meu perfil</div>
-              </div>
-              <span class="chev-mini">▼</span>
-            </div>
-            <div class="perfil-chip-detail" id="perfil-chip-detail">
-              <div id="meu-perfil">—</div>
-            </div>
-          </div>
-        </div>
+
         <div class="status-bar">
           <div class="dot" id="status-dot"></div>
           <span id="status-text">Sistema operacional</span>
@@ -5175,7 +5254,7 @@
         <div class="more-role" id="more-role-label">—</div>
       </div>
       <div id="more-hub" class="more-hub"></div>
-      <div class="more-grid" id="more-grid"></div>
+      <div class="more-grid" id="more-grid" style="display:none" aria-hidden="true"></div>
     </div>
     <div class="nav-wrap">
       <nav class="nav" id="main-nav">
@@ -5243,7 +5322,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.2';
+    const APP_VERSION = '0.0.6';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5738,9 +5817,20 @@
     }
     function atualizarPainelLogin() {
       try {
+        var verTxt = 'v' + (typeof APP_VERSION !== 'undefined' && APP_VERSION ? APP_VERSION : '0.0.4');
         var verEl = document.getElementById('login-version');
         if (verEl) {
-          verEl.textContent = 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—');
+          verEl.textContent = verTxt;
+          verEl.style.display = 'block';
+          verEl.style.visibility = 'visible';
+          verEl.style.opacity = '1';
+        }
+        var badge = document.getElementById('app-ver-badge');
+        if (badge) {
+          badge.textContent = verTxt;
+          badge.style.display = 'inline-flex';
+          badge.style.visibility = 'visible';
+          badge.style.opacity = '1';
         }
         var userInp = document.getElementById('login-user');
         if (userInp && !String(userInp.value || '').trim()) {
@@ -6970,53 +7060,146 @@
       var seen = {};
       function add(n) {
         n = String(n || '').trim();
-        if (!n) return;
+        if (!n || n === '—' || n === '-') return;
         var k = n.toLowerCase();
         if (seen[k]) return;
         seen[k] = true;
         nomes.push(n);
       }
       try {
-        (db.postos || []).forEach(function(p) { add(p.n || p.nome); });
+        (typeof db !== 'undefined' && db && db.postos ? db.postos : []).forEach(function(p) {
+          if (!p) return;
+          add(p.n || p.nome || p.name || p.titulo);
+        });
       } catch (e) {}
       try {
         var pv = document.getElementById('pv-posto');
-        if (pv) {
+        if (pv && pv.options) {
           for (var i = 0; i < pv.options.length; i++) {
             var o = pv.options[i];
-            if (o && o.value) add(o.textContent || o.value);
+            if (!o) continue;
+            var t = String(o.textContent || '').trim();
+            var v = String(o.value || '').trim();
+            // value pode ser id; text é o nome
+            if (t && t.indexOf('Selecione') < 0 && t !== '—') add(t);
+            else if (v && !/^\d+$/.test(v)) add(v);
           }
         }
       } catch (e) {}
       try {
-        var sess = typeof pvLoad === 'function' ? pvLoad() : null;
-        if (sess && sess.postoNome) add(sess.postoNome);
+        var sess = (typeof pvLoad === 'function') ? pvLoad() : null;
+        if (sess) {
+          add(sess.postoNome);
+          // também tenta achar nome pelo id
+          if (sess.postoId && typeof db !== 'undefined' && db && db.postos) {
+            var found = (db.postos || []).find(function(x) { return String(x.id) === String(sess.postoId); });
+            if (found) add(found.n || found.nome);
+          }
+        }
       } catch (e) {}
+      try {
+        var meta = document.getElementById('pv-meta');
+        if (meta) {
+          var m = String(meta.textContent || '').match(/Posto:\s*([^\n]+)/i);
+          if (m) add(m[1]);
+        }
+      } catch (e) {}
+      nomes.sort(function(a, b) { return a.localeCompare(b, 'pt-BR'); });
       return nomes;
     }
     function preencherSelectPostosRonda() {
       try {
-        var ids = ['ronda-posto', 'livro-posto'];
         var nomes = listaNomesPostosApp();
+        var ids = ['ronda-posto', 'livro-posto'];
         ids.forEach(function(id) {
           var el = document.getElementById(id);
           if (!el) return;
           var cur = el.value;
-          var htmlOpts = '<option value="">— Selecione —</option>';
+          var htmlOpts = '<option value="">— Selecione o posto —</option>';
           nomes.forEach(function(n) {
-            htmlOpts += '<option value="' + String(n).replace(/"/g, '&quot;') + '">' + n + '</option>';
+            htmlOpts += '<option value="' + String(n).replace(/&/g,'&amp;').replace(/"/g, '&quot;') + '">' +
+              String(n).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>';
           });
           el.innerHTML = htmlOpts;
-          if (cur) el.value = cur;
+          if (cur) {
+            el.value = cur;
+          }
         });
-      } catch (e) { console.warn(e); }
+        // datalists
+        ['ronda-postos-datalist', 'livro-postos-datalist'].forEach(function(did) {
+          var dl = document.getElementById(did);
+          if (!dl) return;
+          dl.innerHTML = nomes.map(function(n) {
+            return '<option value="' + String(n).replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '">';
+          }).join('');
+        });
+        // auto-seleciona posto do plantão se ainda vazio
+        var auto = '';
+        try {
+          var sess = (typeof pvLoad === 'function') ? pvLoad() : null;
+          if (sess && sess.postoNome) auto = String(sess.postoNome).trim();
+        } catch (e) {}
+        if (!auto) {
+          try {
+            var meta = document.getElementById('pv-meta');
+            var m = meta && String(meta.textContent || '').match(/Posto:\s*([^\n]+)/i);
+            if (m) auto = m[1].trim();
+          } catch (e) {}
+        }
+        if (auto) {
+          var rs = document.getElementById('ronda-posto');
+          var rm = document.getElementById('ronda-posto-manual');
+          if (rs && !rs.value) {
+            // garante option
+            var has = false;
+            for (var i = 0; i < rs.options.length; i++) {
+              if (rs.options[i].value === auto) { has = true; break; }
+            }
+            if (!has) {
+              var opt = document.createElement('option');
+              opt.value = auto;
+              opt.textContent = auto;
+              rs.appendChild(opt);
+            }
+            rs.value = auto;
+          }
+          if (rm && !rm.value) rm.value = auto;
+          var ls = document.getElementById('livro-posto');
+          var lm = document.getElementById('livro-posto-manual');
+          if (ls && !ls.value) {
+            var has2 = false;
+            for (var j = 0; j < ls.options.length; j++) {
+              if (ls.options[j].value === auto) { has2 = true; break; }
+            }
+            if (!has2) {
+              var opt2 = document.createElement('option');
+              opt2.value = auto;
+              opt2.textContent = auto;
+              ls.appendChild(opt2);
+            }
+            ls.value = auto;
+          }
+          if (lm && !lm.value) lm.value = auto;
+        }
+      } catch (e) { console.warn('preencherSelectPostosRonda', e); }
     }
     function rondaPostoAtual() {
-      var sel = document.getElementById('ronda-posto');
-      var man = document.getElementById('ronda-posto-manual');
-      var v = (sel && sel.value) ? String(sel.value).trim() : '';
-      if (!v && man) v = String(man.value || '').trim();
-      return v;
+      try {
+        var sel = document.getElementById('ronda-posto');
+        var man = document.getElementById('ronda-posto-manual');
+        var v = (sel && sel.value) ? String(sel.value).trim() : '';
+        if (!v && man) v = String(man.value || '').trim();
+        return v;
+      } catch (e) { return ''; }
+    }
+    function livroPostoAtual() {
+      try {
+        var sel = document.getElementById('livro-posto');
+        var man = document.getElementById('livro-posto-manual');
+        var v = (sel && sel.value) ? String(sel.value).trim() : '';
+        if (!v && man) v = String(man.value || '').trim();
+        return v;
+      } catch (e) { return ''; }
     }
     function onRondaPostoChange() {
       try {
@@ -7030,8 +7213,9 @@
       try {
         var man = document.getElementById('ronda-posto-manual');
         var sel = document.getElementById('ronda-posto');
-        if (man && man.value && sel) {
-          var v = String(man.value).trim();
+        if (!man) return;
+        var v = String(man.value || '').trim();
+        if (v && sel) {
           var found = false;
           for (var i = 0; i < sel.options.length; i++) {
             if (sel.options[i].value === v) { found = true; break; }
@@ -7047,14 +7231,36 @@
         renderRondaCard();
       } catch (e) {}
     }
-    function livroPostoAtual() {
-      var sel = document.getElementById('livro-posto');
-      var man = document.getElementById('livro-posto-manual');
-      var v = (sel && sel.value) ? String(sel.value).trim() : '';
-      if (!v && man) v = String(man.value || '').trim();
-      return v;
+    function onLivroPostoChange() {
+      try {
+        var sel = document.getElementById('livro-posto');
+        var man = document.getElementById('livro-posto-manual');
+        if (sel && man && sel.value) man.value = sel.value;
+        renderLivroPosto();
+      } catch (e) {}
     }
-
+    function onLivroPostoManual() {
+      try {
+        var man = document.getElementById('livro-posto-manual');
+        var sel = document.getElementById('livro-posto');
+        if (!man) return;
+        var v = String(man.value || '').trim();
+        if (v && sel) {
+          var found = false;
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === v) { found = true; break; }
+          }
+          if (!found) {
+            var opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            sel.appendChild(opt);
+          }
+          sel.value = v;
+        }
+        renderLivroPosto();
+      } catch (e) {}
+    }
     function _rondaKey(posto) {
       return 'ronda_' + _valisHojeISO() + '_' + String(posto || '').toLowerCase().replace(/\s+/g,'_');
     }
@@ -7740,6 +7946,8 @@
           go: function() { fecharMore(); tab('ocorrencias'); } });
         itens.push({ sec: 'Gestão', icon: '📅', label: 'Escalas', sub: 'Grade geral', color: 'blue',
           go: function() { fecharMore(); tab('escalas'); } });
+        itens.push({ sec: 'Conta', icon: '✉', label: 'Mensagens', sub: 'Avisos da equipe', color: 'blue',
+          go: function() { fecharMore(); tab('mensagens'); } });
         itens.push({ sec: 'Conta', icon: '👤', label: 'Meu perfil', sub: 'Conta DEV', color: '',
           go: function() { fecharMore(); tab('config'); } });
         itens.push({ sec: 'DEV', icon: '🛠', label: 'Menu DEV', sub: 'Ferramentas técnicas', color: 'red',
@@ -7763,6 +7971,8 @@
       }
       itens.push({ sec: 'Operação', icon: '📅', label: 'Escalas', sub: 'Grade de serviço', color: 'blue',
         go: function() { fecharMore(); tab('escalas'); } });
+      itens.push({ sec: 'Operação', icon: '✉', label: 'Mensagens', sub: 'Avisos da equipe', color: 'blue',
+        go: function() { fecharMore(); tab('mensagens'); } });
       itens.push({ sec: 'Conta', icon: '👤', label: 'Meu perfil', sub: 'Dados da conta', color: '',
         go: function() { fecharMore(); tab('config'); } });
 
@@ -8110,32 +8320,9 @@
         } catch (e) { console.warn('nav build', e); }
       }
 
+      // more-grid desativado (duplicava o Hub de funções)
       if (moreGrid) {
-        try {
-          moreGrid.innerHTML = '';
-          var mais = [
-            { tab: 'ocorrencias', icon: '⚠', label: 'Ocorrências' },
-            { tab: 'escalas', icon: '📅', label: 'Escalas' },
-            { tab: 'postos', icon: '📍', label: 'Postos' },
-            { tab: 'config', icon: '👤', label: 'Meu perfil' },
-            { tab: 'mensagens', icon: '✉', label: 'Mensagens' }
-          ];
-          if (role === 'admin' || role === 'dev' || role === 'supervisor') {
-            mais.push({ tab: 'usuarios', icon: '👥', label: 'Equipe' });
-            mais.push({ tab: 'supervisao', icon: '📡', label: 'Supervisão' });
-          }
-          mais.forEach(function(item) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.setAttribute('data-tab', item.tab);
-            b.innerHTML = '<span>' + item.icon + '</span>' + item.label;
-            b.onclick = function() {
-              try { fecharMore(); } catch (e) {}
-              tab(item.tab);
-            };
-            moreGrid.appendChild(b);
-          });
-        } catch (e) { console.warn('more grid', e); }
+        try { moreGrid.innerHTML = ''; moreGrid.style.display = 'none'; } catch (e) {}
       }
       try { renderHubMais(role); } catch (e) { console.warn(e); }
 
@@ -8359,6 +8546,14 @@
           devLiberado = true;
         }
         try { aplicarPermissoes(); } catch (e) { console.warn('aplicarPermissoes', e); }
+        try {
+          setTimeout(function() {
+            try { if (typeof preencherSelectPostosRonda === 'function') preencherSelectPostosRonda(); } catch (e1) {}
+            try { if (typeof renderRondaCard === 'function') renderRondaCard(); } catch (e2) {}
+            try { if (typeof renderLivroPosto === 'function') renderLivroPosto(); } catch (e3) {}
+            try { atualizarPainelLogin(); } catch (e4) {}
+          }, 300);
+        } catch (e) {}
         // Sempre Início — evita tela preta em abas especiais
         try {
           tab('inicio');
@@ -10509,7 +10704,18 @@
         var body = document.getElementById(bodyId);
         if (!body) return;
         var collapsed = body.classList.toggle('is-collapsed');
-        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
+        if (!collapsed) {
+          body.style.maxHeight = 'none';
+          body.style.opacity = '1';
+          body.style.pointerEvents = 'auto';
+          body.style.overflow = 'visible';
+        } else {
+          body.style.maxHeight = '';
+          body.style.opacity = '';
+          body.style.pointerEvents = '';
+          body.style.overflow = '';
+        }
+        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card, .resumo-dia-card');
         if (card) {
           if (collapsed) card.classList.add('sec-collapsed');
           else card.classList.remove('sec-collapsed');
@@ -10519,8 +10725,15 @@
           btn.textContent = collapsed ? 'Expandir' : 'Minimizar';
         }
         try { localStorage.setItem('valis_fold_' + bodyId, collapsed ? '1' : '0'); } catch (e) {}
+        if (!collapsed) {
+          try { preencherSelectPostosRonda(); } catch (e) {}
+          if (bodyId === 'ronda-fold-body') { try { renderRondaCard(); } catch (e) {} }
+          if (bodyId === 'livro-fold-body') { try { renderLivroPosto(); } catch (e) {} }
+          if (bodyId === 'lemb-cfg-fold') { try { carregarCfgLembretesPlantao(); } catch (e) {} }
+        }
       } catch (e) { console.warn(e); }
     }
+
     function restaurarSecFolds() {
       try {
         if (!localStorage.getItem('valis_fold_defaults_v030')) {
@@ -15364,31 +15577,92 @@
         const s = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
         if (s && s.user) {
           setLoginAutoStatus(true, 'Login automatico', 'Validando usuario salvo e permissoes...', null);
-          const u = (db.users || []).find(x => {
-            if (String(x.user || '').toLowerCase() !== String(s.user || '').toLowerCase()) return false;
-            const ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1;
-            const pend = x.pendente === true || x.pendente === 'true' || x.pendente === 1;
-            return ativo && !pend;
-          });
-          if (u) {
-            setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
-            usuarioAtual = u;
-            try { salvarSessaoLogin(u.user, !!s.manter); } catch (e) {
-              sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
-            }
-            pedirPermissaoNotificacoes();
-            setTimeout(function() {
-              try { setLoginAutoStatus(false); } catch (e) {}
-              entrarApp();
-            }, 2200);
-            return;
-          }
-          setLoginAutoStatus(true, 'Login automatico indisponivel', 'Sessao salva nao e valida. Faca login manualmente.', 'err');
+          window.__valisAutoLoginTentativas = 0;
+          window.__valisAutoLoginUser = String(s.user || '');
+          window.__valisAutoLoginManter = !!s.manter;
+          tryAutoLoginComRetry();
+          return;
         } else {
           setLoginAutoStatus(true, 'Pronto para entrar', 'Digite usuario e senha, ou aguarde se houver sessao neste aparelho.', null);
         }
       } catch (e) {
         try { setLoginAutoStatus(true, 'Login automatico', 'Nao foi possivel restaurar a sessao. Entre com usuario e senha.', 'err'); } catch (e2) {}
+      }
+    }
+
+    function acharUsuarioSessaoAuto(login) {
+      try {
+        var alvo = String(login || '').toLowerCase();
+        return (db.users || []).find(function(x) {
+          if (!x) return false;
+          if (String(x.user || '').toLowerCase() !== alvo) return false;
+          var ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1 || x.ativo === undefined;
+          var pend = x.pendente === true || x.pendente === 'true' || x.pendente === 1;
+          return ativo && !pend;
+        }) || null;
+      } catch (e) { return null; }
+    }
+
+    
+    // Re-tenta login automatico quando a base de usuarios chegar da nuvem
+    function notificarUsersCarregadosParaAutoLogin() {
+      try {
+        if (usuarioAtual) return;
+        if (!window.__valisAutoLoginUser) {
+          var s = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
+          if (s && s.user) {
+            window.__valisAutoLoginUser = String(s.user);
+            window.__valisAutoLoginManter = !!s.manter;
+          }
+        }
+        if (window.__valisAutoLoginUser && typeof tryAutoLoginComRetry === 'function') {
+          tryAutoLoginComRetry();
+        }
+      } catch (e) {}
+    }
+
+    function tryAutoLoginComRetry() {
+      try {
+        if (usuarioAtual) return;
+        if (sessionStorage.getItem('valis_logout_manual') === '1') return;
+        if (typeof __logoutManual !== 'undefined' && __logoutManual) return;
+        var login = window.__valisAutoLoginUser;
+        if (!login) {
+          var s0 = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
+          if (!s0 || !s0.user) return;
+          login = String(s0.user);
+          window.__valisAutoLoginUser = login;
+          window.__valisAutoLoginManter = !!s0.manter;
+        }
+        var u = acharUsuarioSessaoAuto(login);
+        if (u) {
+          setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
+          usuarioAtual = u;
+          try { salvarSessaoLogin(u.user, !!window.__valisAutoLoginManter); } catch (e) {
+            try { sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user })); } catch (e2) {}
+          }
+          try { pedirPermissaoNotificacoes(); } catch (e) {}
+          setTimeout(function() {
+            try { setLoginAutoStatus(false); } catch (e) {}
+            try { entrarApp(); } catch (e) { console.warn(e); }
+          }, 1200);
+          return;
+        }
+        window.__valisAutoLoginTentativas = (window.__valisAutoLoginTentativas || 0) + 1;
+        if (window.__valisAutoLoginTentativas <= 20) {
+          setLoginAutoStatus(true, 'Login automatico', 'Aguardando dados da nuvem... (' + window.__valisAutoLoginTentativas + '/20)', null);
+          setTimeout(tryAutoLoginComRetry, 1000);
+        } else {
+          setLoginAutoStatus(true, 'Login automatico indisponivel', 'Sessao salva nao validada. Faca login com senha.', 'err');
+          try { esconderBannerLoginErro(); } catch (e) {}
+          try {
+            var banner = document.getElementById('login-erro-senha-banner');
+            if (banner) banner.classList.add('show');
+          } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('tryAutoLoginComRetry', e);
+        try { setLoginAutoStatus(true, 'Login automatico', 'Erro ao restaurar sessao. Entre com senha.', 'err'); } catch (e2) {}
       }
     }
 
@@ -17672,6 +17946,15 @@
       } catch (e) {}
       try { verificarAtualizacaoConcluida(); } catch (e) {}
       try { atualizarPainelLogin(); } catch (e) {}
+      try {
+        if (!window.__valisAutoLoginWatch) {
+          window.__valisAutoLoginWatch = setInterval(function() {
+            try { atualizarPainelLogin(); } catch (e) {}
+            try { notificarUsersCarregadosParaAutoLogin(); } catch (e) {}
+          }, 2000);
+          setTimeout(function() { try { clearInterval(window.__valisAutoLoginWatch); } catch (e) {} }, 45000);
+        }
+      } catch (e) {}
       try { setTimeout(function() { if (usuarioAtual) atualizarPainelInicio(); }, 400); } catch (e) {}
       try {
         if (window.ValisUpdate) {
