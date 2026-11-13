@@ -382,10 +382,13 @@
     .dev-home-tile.amber { border-color: rgba(251,191,36,0.35); }
     .dev-home-tile.blue { border-color: rgba(59,130,246,0.35); }
     .dev-home-tile.purple { border-color: rgba(168,85,247,0.35); }
-    body.role-dev #main-nav button[data-tab="plantao"] { display: flex !important; }
+    body.role-dev #main-nav button[data-tab="plantao"] { display: none !important; }
 
-    body.role-dev #main-nav button[data-tab="plantao"] {
-      display: flex !important;
+    body.role-dev #plantao-vivo-card,
+    body.role-dev #tab-plantao,
+    body.role-dev .plantao-vivo-card,
+    body.role-dev button[data-tab="plantao"] {
+      display: none !important;
     }
     body.role-dev #inicio-ranking-box,
     body.role-dev #inicio-mapa-vivos {
@@ -3552,191 +3555,7 @@
     }
 
   
-    /* === VALIS módulos — novos módulos === */
-    #btn-panico-float {
-      position: fixed;
-      left: 12px;
-      right: auto;
-      bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-      z-index: 90;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: 3px solid #fecaca;
-      background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 0.04em;
-      line-height: 1.15;
-      box-shadow: 0 10px 28px rgba(185, 28, 28, 0.55);
-      animation: valisPanicPulse 1.4s ease-in-out infinite;
-      display: none;
-    }
-    #app.app #btn-panico-float { display: flex; align-items: center; justify-content: center; text-align: center; }
-    @keyframes valisPanicPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 10px 28px rgba(185,28,28,0.45); }
-      50% { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(248,113,113,0.18), 0 12px 32px rgba(185,28,28,0.55); }
-    }
-    .ronda-card .ronda-pt {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; padding: 10px 12px; margin-bottom: 8px;
-      border-radius: 12px; border: 1px solid rgba(125,211,252,0.16);
-      background: rgba(15,22,36,0.9);
-    }
-    .ronda-card .ronda-pt.ok { border-color: rgba(52,211,153,0.4); background: rgba(16,185,129,0.1); }
-    .ronda-card .ronda-pt .nm { font-weight: 800; font-size: 13px; }
-    .ronda-card .ronda-pt .st { font-size: 11px; color: #94a3b8; }
-    .badge-emergencia {
-      display: inline-block; padding: 2px 8px; border-radius: 999px;
-      background: #dc2626; color: #fff; font-size: 10px; font-weight: 900;
-      animation: valisLoginErrBlink 1s infinite;
-    }
-    .comprovante-box {
-      margin-top: 10px; padding: 12px; border-radius: 14px;
-      border: 1px dashed rgba(45,212,191,0.35);
-      background: rgba(15,22,36,0.85); font-size: 12px; line-height: 1.45;
-    }
-    .livro-dia-item {
-      padding: 10px 12px; margin-bottom: 8px; border-radius: 12px;
-      border-left: 3px solid #38bdf8; background: rgba(15,22,36,0.9);
-      font-size: 12px;
-    }
-    .alerta-posto-vazio {
-      padding: 12px 14px; border-radius: 14px; margin-bottom: 12px;
-      border: 1px solid rgba(251,191,36,0.4);
-      background: rgba(120,53,15,0.35); color: #fde68a;
-      font-size: 13px; font-weight: 700;
-    }
-
-  
-    /* Corrige botões sumidos — plantão sempre visível */
-    #plantao-vivo-card .plantao-vivo-btns {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 8px !important;
-      width: 100% !important;
-      margin: 10px 0 12px !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      max-height: none !important;
-    }
-    #plantao-vivo-card .plantao-vivo-btns .full {
-      grid-column: 1 / -1 !important;
-    }
-    #plantao-vivo-card .btn-pl-in,
-    #plantao-vivo-card .btn-pl-out,
-    #plantao-vivo-card .btn-pl-almoco,
-    #plantao-vivo-card .btn-pl-volta {
-      display: block !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-      min-height: 48px !important;
-    }
-    #plantao-vivo-card .btn-pl-out:disabled,
-    #plantao-vivo-card .btn-pl-almoco:disabled,
-    #plantao-vivo-card .btn-pl-volta:disabled {
-      opacity: 0.45 !important;
-    }
-    #app #main-nav {
-      display: flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-    }
-    #app #main-nav button {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    #app .nav-wrap {
-      pointer-events: none !important;
-    }
-    #app .nav-wrap .nav,
-    #app #main-nav {
-      pointer-events: auto !important;
-    }
-
-  
-    #app .nav-wrap, .nav-wrap {
-      display: block !important; visibility: visible !important; opacity: 1 !important;
-      z-index: 200 !important; pointer-events: none !important;
-    }
-    #app #main-nav, #main-nav, .nav-wrap .nav {
-      display: flex !important; visibility: visible !important; opacity: 1 !important;
-      pointer-events: auto !important; min-height: 54px !important;
-    }
-    #app #main-nav button, #main-nav button {
-      display: flex !important; visibility: visible !important; opacity: 1 !important;
-      pointer-events: auto !important;
-    }
-  
-    /* Rodapé forçado — nunca esconder botões padrão */
-    #app #main-nav button[data-tab="inicio"],
-    #app #main-nav button[data-tab="plantao"],
-    #app #main-nav button[data-tab="extrato"],
-    #app #main-nav button[data-tab="ocorrencias"],
-    #app #main-nav button.nav-more,
-    #main-nav button[data-tab="inicio"],
-    #main-nav button[data-tab="plantao"],
-    #main-nav button[data-tab="extrato"],
-    #main-nav button[data-tab="ocorrencias"],
-    #main-nav button.nav-more {
-      display: flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      color: #94a3b8 !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    body.role-dev #main-nav button[data-tab="plantao"] {
-      display: flex !important;
-    }
-    body.role-dev button[data-tab="plantao"] {
-      display: flex !important;
-    }
-
-  
-    .sec-fold-body:not(.is-collapsed) {
-      max-height: none !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      overflow: visible !important;
-    }
-    #ronda-fold-body .btn,
-    #livro-fold-body .btn,
-    #lemb-cfg-fold input,
-    #lemb-cfg-fold .btn {
-      pointer-events: auto !important;
-    }
-
-  
-    #login-version, .login-version {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      color: #94a3b8 !important;
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      margin-top: 8px !important;
-    }
-    #app-ver-badge, .ver-badge {
-      display: inline-flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-
-  
-    /* Perfil no topo */
+    /* v0.2.8 — perfil no topo */
     .top {
       display: flex !important;
       flex-direction: column !important;
@@ -3756,7 +3575,6 @@
       align-items: center;
       justify-content: flex-end;
       width: 100%;
-      padding: 0 2px;
       position: relative;
       z-index: 45;
     }
@@ -3768,10 +3586,6 @@
     }
     .perfil-chip-wrap.top-perfil .perfil-chip {
       margin-left: auto;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-    }
-    .header-user-fallback {
-      display: none !important;
     }
     .perfil-chip-detail {
       z-index: 60;
@@ -3780,10 +3594,38 @@
     }
 
   
-    /* Remove botões duplicados no menu Mais — só o Hub */
+    /* v0.2.9 — mais sem duplicar */
     #more-sheet .more-grid,
     #more-grid {
       display: none !important;
+    }
+  
+    /* v0.2.10 — ronda postos */
+    #ronda-card .sec-fold-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-bottom: 6px;
+    }
+    #ronda-card .sec-fold-body.is-collapsed {
+      display: none !important;
+    }
+    #ronda-card .sec-fold-body:not(.is-collapsed) {
+      display: block !important;
+    }
+    #ronda-lista .ronda-item {
+      padding: 8px 10px; margin: 6px 0; border-radius: 10px;
+      background: rgba(15,23,42,0.55); border: 1px solid rgba(148,163,184,0.15);
+      font-size: 13px;
+    }
+    #ronda-lista .ronda-item b { color: #e2e8f0; }
+  
+    /* v0.2.11 — folds padrao */
+    .sec-fold-body.is-collapsed {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
+      overflow: hidden !important;
     }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -3936,7 +3778,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v0.0.6</div>
+        <div class="login-version" id="login-version">v0.2.13</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -3999,7 +3841,7 @@
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
   <aside class="drawer" id="drawer-dev">
     <h2>🛠 Menu DEV</h2>
-    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.0.0</span></div>
+    <div class="sub">Só o essencial · <span id="dev-drawer-ver">v0.2.7</span></div>
     <div class="br-flag-strip"></div>
 
     <div class="dev-dash" id="dev-dash">
@@ -4165,7 +4007,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="brand">
-          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.0.6</span>
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.13</span>
         </div>
         <div class="top-actions">
           <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
@@ -4189,7 +4031,7 @@
             </div>
           </div>
         </div>
-        <span id="header-user" class="header-user-fallback">—</span>
+        <span id="header-user" class="header-user-fallback" style="display:none">—</span>
       </div>
     </header>
 
@@ -4197,7 +4039,6 @@
       <!-- INÍCIO -->
       <section id="tab-inicio" class="tab active">
         <div class="title">Início</div>
-        <div id="alerta-postos-vazios" style="display:none"></div>
         <div class="br-flag-strip"></div>
 
         <!-- Interface exclusiva DEV -->
@@ -4274,22 +4115,16 @@
           <div id="inicio-pack-items"></div>
         </div>
 
-        <div class="plantao-vivo-card sec-collapsed" id="plantao-vivo-card">
+        <div class="plantao-vivo-card" id="plantao-vivo-card">
           <div class="plantao-vivo-head">
             <div class="titulo">MODO PLANTÃO ATIVO</div>
             <span class="plantao-vivo-badge idle" id="pv-badge">INATIVO</span>
-            <button type="button" class="sec-min-btn" id="pv-fold-btn" onclick="toggleSecFold('pv-fold-body', this)" aria-expanded="false">Expandir</button>
+            <button type="button" class="sec-min-btn" id="pv-fold-btn" onclick="toggleSecFold('pv-fold-body', this)" aria-expanded="true">Minimizar</button>
           </div>
           <div class="plantao-vivo-meta" id="pv-meta" style="margin-bottom:8px">
             Selecione o posto e faça o check-in (manual ou automático por GPS).
           </div>
-          <div class="plantao-vivo-btns">
-            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
-            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
-            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
-            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
-          </div>
-          <div id="pv-fold-body" class="sec-fold-body is-collapsed">
+          <div id="pv-fold-body" class="sec-fold-body">
           <select class="plantao-vivo-select" id="pv-posto" onchange="pvSelecionarPosto()" style="position:absolute;opacity:0;pointer-events:none;height:0;width:0;overflow:hidden">
             <option value="">— Selecione o posto —</option>
           </select>
@@ -4297,7 +4132,6 @@
             <span id="pv-posto-btn-label">— Toque para escolher o posto —</span>
           </button>
           <div class="plantao-vivo-geo" id="pv-geo">GPS: aguardando…</div>
-          <div class="comprovante-box" id="comprovante-ponto" style="display:none"></div>
           <div class="pv-checklist" id="pv-checklist">
             <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de entrada (opcional)</div>
             <label><input type="checkbox" class="pv-chk" data-item="Portão / acesso"> Portão / acesso</label>
@@ -4306,7 +4140,12 @@
             <label><input type="checkbox" class="pv-chk" data-item="Ronda inicial"> Ronda inicial</label>
             <label><input type="checkbox" class="pv-chk" data-item="Rádio / comunicação"> Rádio / comunicação</label>
           </div>
-          
+          <div class="plantao-vivo-btns">
+            <button type="button" class="btn-pl-in" id="pv-btn-in" onclick="pvCheckIn(false)">● Check-in (Entrada)</button>
+            <button type="button" class="btn-pl-out" id="pv-btn-out" onclick="pvCheckOut(false)" disabled>○ Check-out (Saída)</button>
+            <button type="button" class="btn-pl-almoco full" id="pv-btn-almoco" onclick="pvAlmocoInicio()" disabled>○ Saída almoço / janta</button>
+            <button type="button" class="btn-pl-volta full" id="pv-btn-volta" onclick="pvAlmocoVolta()" disabled>○ Volta almoço / janta</button>
+          </div>
           <div class="pv-checklist" id="pv-checklist-saida" style="display:none">
             <div class="meta" style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Checklist de saída</div>
             <label><input type="checkbox" class="pv-chk-out" data-item="Portão fechado"> Portão fechado</label>
@@ -4334,6 +4173,29 @@
             </div>
           </details>
           </div><!-- /pv-fold-body -->
+        </div>
+
+        <!-- Ronda do posto (parte 3) -->
+        <div class="card vigilante-only" id="ronda-card">
+          <div class="sec-fold-head">
+            <div class="card-label" style="margin:0">Ronda do posto (checkpoints)</div>
+            <button type="button" class="sec-min-btn" onclick="toggleSecFold('ronda-fold-body', this)" aria-expanded="false">Expandir</button>
+          </div>
+          <div id="ronda-fold-body" class="sec-fold-body is-collapsed">
+            <p class="meta" style="font-size:12px;margin:0 0 10px">Escolha o posto na lista ou digite o nome. Cada ponto grava horário.</p>
+            <div class="field"><label>Posto da ronda</label>
+              <select id="ronda-posto" class="select" onchange="onRondaPostoChange()"></select>
+            </div>
+            <div class="field"><label>Digite o posto (se não aparecer na lista)</label>
+              <input id="ronda-posto-manual" class="input" list="ronda-postos-datalist" placeholder="Ex: nome do posto" autocomplete="off" oninput="onRondaPostoManual()" onchange="onRondaPostoManual()">
+              <datalist id="ronda-postos-datalist"></datalist>
+            </div>
+            <div id="ronda-lista" class="empty">Selecione ou digite o posto</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              <button type="button" class="btn dark sm" onclick="adicionarPontoRonda()">+ Ponto</button>
+              <button type="button" class="btn green sm" onclick="reiniciarRondaHoje()">Nova ronda hoje</button>
+            </div>
+          </div>
         </div>
 
         
@@ -4405,76 +4267,8 @@
           </div><!-- /esc-fold-body -->
         </div>
 
-        
-        <!-- Módulo TESTE: Ronda / checkpoints -->
-        <div class="card ronda-card" id="ronda-card">
-          <div class="sec-fold-head">
-            <div class="card-label" style="margin:0">Ronda do posto (checkpoints)</div>
-            <button type="button" class="sec-min-btn" onclick="toggleSecFold('ronda-fold-body', this)" aria-expanded="false">Expandir</button>
-          </div>
-          <div id="ronda-fold-body" class="sec-fold-body is-collapsed">
-            <p class="meta" style="font-size:12px;margin:0 0 10px">Escolha o posto na lista ou digite o nome. Depois marque os checkpoints.</p>
-            <div class="field"><label>Posto da ronda</label>
-              <select id="ronda-posto" class="select" onchange="onRondaPostoChange()"></select>
-            </div>
-            <div class="field"><label>Digite o posto (se não aparecer na lista)</label>
-              <input id="ronda-posto-manual" class="input" list="ronda-postos-datalist" placeholder="Ex: UFV São Miguel" autocomplete="off" oninput="onRondaPostoManual()" onchange="onRondaPostoManual()">
-              <datalist id="ronda-postos-datalist"></datalist>
-            </div>
-            <div id="ronda-lista" class="empty">Selecione ou digite o posto</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-              <button type="button" class="btn dark sm" onclick="adicionarPontoRonda()">+ Ponto</button>
-              <button type="button" class="btn green sm" onclick="reiniciarRondaHoje()">Nova ronda hoje</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Módulo TESTE: Livro do posto -->
-        <div class="card" id="livro-posto-card">
-          <div class="sec-fold-head">
-            <div class="card-label" style="margin:0">Livro do posto (hoje)</div>
-            <button type="button" class="sec-min-btn" onclick="toggleSecFold('livro-fold-body', this)" aria-expanded="false">Expandir</button>
-          </div>
-          <div id="livro-fold-body" class="sec-fold-body is-collapsed">
-            <div class="field"><label>Posto</label>
-              <select id="livro-posto" class="select" onchange="onLivroPostoChange()"></select>
-            </div>
-            <div class="field"><label>Digite o posto (se não aparecer na lista)</label>
-              <input id="livro-posto-manual" class="input" list="livro-postos-datalist" placeholder="Ex: UFV São Miguel" autocomplete="off" oninput="onLivroPostoManual()" onchange="onLivroPostoManual()">
-              <datalist id="livro-postos-datalist"></datalist>
-            </div>
-            <div id="livro-lista" class="empty">Sem registros hoje neste posto</div>
-          </div>
-        </div>
-
-        <!-- Módulo TESTE: Lembretes de plantão -->
-        <div class="card sec-collapsed" id="lemb-plantao-cfg-card">
-          <div class="sec-fold-head">
-            <div class="card-label" style="margin:0">Lembretes antes do plantão</div>
-            <button type="button" class="sec-min-btn" onclick="toggleSecFold('lemb-cfg-fold', this)" aria-expanded="false">Expandir</button>
-          </div>
-          <div id="lemb-cfg-fold" class="sec-fold-body is-collapsed">
-          <p class="meta" style="font-size:12px;margin:0 0 8px">Avisos locais: 2h, 1h e 30 min antes (com base na escala / próximo plantão).</p>
-          <label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px">
-            <input type="checkbox" id="lemb-2h" checked onchange="salvarCfgLembretesPlantao()"> 2 horas antes
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px">
-            <input type="checkbox" id="lemb-1h" checked onchange="salvarCfgLembretesPlantao()"> 1 hora antes
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px">
-            <input type="checkbox" id="lemb-30m" checked onchange="salvarCfgLembretesPlantao()"> 30 minutos antes
-          </label>
-          <button type="button" class="btn dark sm" style="margin-top:8px" onclick="testarLembretePlantao()">Testar lembrete agora</button>
-          </div>
-        </div>
-
-        <div class="resumo-dia-card sec-collapsed" id="resumo-dia-card">
-          <div class="sec-fold-head">
-            <div class="rd-title" style="margin:0">Resumo do dia</div>
-            <button type="button" class="sec-min-btn" onclick="toggleSecFold('rd-fold-body', this)" aria-expanded="false">Expandir</button>
-          </div>
-          <div id="rd-fold-body" class="sec-fold-body is-collapsed">
-          <div class="rd-title" style="display:none">Resumo do dia</div>
+        <div class="resumo-dia-card" id="resumo-dia-card">
+          <div class="rd-title">Resumo do dia</div>
           <div id="pv-timer-live" class="hidden"></div>
           <div class="resumo-dia-grid">
             <div class="rd-cell"><div class="rd-lbl">Status</div><div class="rd-val" id="rd-status">—</div></div>
@@ -4485,7 +4279,6 @@
           <div class="pv-extra-actions" style="margin-top:10px">
             <button type="button" class="btn dark sm" onclick="copiarRelatorioTurnoAgora()">Copiar relatório do turno</button>
           </div>
-          </div><!-- /rd-fold-body -->
         </div>
 
         <div class="sync-meta" id="sync-meta">Sync: —</div>
@@ -4526,7 +4319,6 @@
           <div id="inicio-offline-txt" style="margin:4px 0 8px">—</div>
           <button type="button" class="btn dark sm" onclick="flushFilaOffline().then(function(){toast('Sync tentado');atualizarUIOfflinePack();})">Tentar sincronizar</button>
         </div>
-
 
         <div class="status-bar">
           <div class="dot" id="status-dot"></div>
@@ -4625,6 +4417,13 @@
             <button class="btn dark" onclick="backupPlantaoesManual()">☁ Backup agora</button>
             <button class="btn purple" onclick="recuperarPlantaoes()">↺ Recuperar</button>
           </div>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="btn dark" onclick="exportarPlantaoesJSON()">⬇ Exportar JSON</button>
+            <button class="btn dark" onclick="backupPlantaoesMulti('manual_multi')">💾 Backup multi</button>
+          </div>
+          <p class="meta" style="font-size:11px;margin:8px 0 0;line-height:1.4">
+            Camadas: local · snapshots (3) · IndexedDB · Firebase · cópia segura. Atualização do app não apaga esses backups.
+          </p>
           <button class="btn red" style="margin-top:8px" onclick="apagarBackupPlantaoes()">🗑 Apagar backup de plantões</button>
           <button class="btn dark" style="margin-top:8px" onclick="exportarPlantaoesJSON()">📤 Exportar JSON</button>
           <input type="file" id="pl-import" accept=".json" class="hidden" onchange="importarPlantaoesJSON(event)">
@@ -4649,19 +4448,11 @@
             <div class="k-sub">Na folha atual</div>
           </div>
         </div>
-        <div class="card" id="ex-adicional-box" style="margin-bottom:12px">
-          <div class="card-label">Resumo de horas (folha atual)</div>
-          <div class="meta" id="ex-horas-resumo">—</div>
-        </div>
-        <div class="card sec-collapsed">
-          <div class="card-label" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="card">
+          <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
             <span>Folha atual</span>
-            <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-              <button type="button" class="sec-min-btn" onclick="toggleSecFold('ex-folha-fold', this)" aria-expanded="false">Expandir</button>
-              <button class="btn dark sm" onclick="exportarExtratoCSV()">📊 CSV</button>
-            </span>
+            <button class="btn dark sm" onclick="exportarExtratoCSV()">📊 CSV</button>
           </div>
-          <div id="ex-folha-fold" class="sec-fold-body is-collapsed">
           <button class="btn green" onclick="fecharFolha()">✓ Recebi / Fechar Folha Atual</button>
           <button type="button" class="btn dark" id="btn-limpar-dup-plantao" style="margin-top:8px;width:100%;display:none" onclick="limparPlantaoesDuplicados()">🧹 Limpar plantões duplicados (gestão)</button>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4">
@@ -4698,7 +4489,7 @@
               <option value="Plantão Próprio">Plantão Próprio (legado)</option>
             </select>
           </div>
-          <div id="collapse-ex-folha" class="collapse-box is-collapsed" style="margin-top:8px">
+          <div id="collapse-ex-folha" class="collapse-box" style="margin-top:8px">
             <div class="collapse-body" id="ex-lista-body">
               <div id="ex-lista"></div>
             </div>
@@ -5258,11 +5049,7 @@
     </div>
     <div class="nav-wrap">
       <nav class="nav" id="main-nav">
-        <button type="button" data-tab="inicio" onclick="try{fecharMore()}catch(e){}tab('inicio',this)"><span>⌂</span>Início</button>
-        <button type="button" data-tab="plantao" onclick="try{fecharMore()}catch(e){}tab('plantao',this)"><span>📋</span>Plantão</button>
-        <button type="button" data-tab="extrato" onclick="try{fecharMore()}catch(e){}tab('extrato',this)"><span>💰</span>Extrato</button>
-        <button type="button" data-tab="ocorrencias" onclick="try{fecharMore()}catch(e){}tab('ocorrencias',this)"><span>⚠</span>Ocorr.</button>
-        <button type="button" class="nav-more" id="btn-more" onclick="event.stopPropagation();toggleMore()"><span>⋯</span>Mais</button>
+        <!-- preenchido por JS conforme cargo -->
       </nav>
     </div>
   </section>
@@ -5322,7 +5109,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.0.6';
+    const APP_VERSION = '0.2.13';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5817,20 +5604,9 @@
     }
     function atualizarPainelLogin() {
       try {
-        var verTxt = 'v' + (typeof APP_VERSION !== 'undefined' && APP_VERSION ? APP_VERSION : '0.0.4');
         var verEl = document.getElementById('login-version');
         if (verEl) {
-          verEl.textContent = verTxt;
-          verEl.style.display = 'block';
-          verEl.style.visibility = 'visible';
-          verEl.style.opacity = '1';
-        }
-        var badge = document.getElementById('app-ver-badge');
-        if (badge) {
-          badge.textContent = verTxt;
-          badge.style.display = 'inline-flex';
-          badge.style.visibility = 'visible';
-          badge.style.opacity = '1';
+          verEl.textContent = 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—');
         }
         var userInp = document.getElementById('login-user');
         if (userInp && !String(userInp.value || '').trim()) {
@@ -6993,569 +6769,6 @@
         });
       } catch (e) { console.warn(e); }
     }
-    async 
-    /* ========== VALIS módulos — novos módulos ========== */
-    function _valisHojeISO() {
-      var n = new Date();
-      return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
-    }
-    function _valisAgoraStr() {
-      return new Date().toLocaleString('pt-BR');
-    }
-    async function dispararPanicoValis() {
-      if (!usuarioAtual) return alert('Faça login.');
-      if (!confirm('🚨 Disparar EMERGÊNCIA para supervisão agora?')) return;
-      var lat = null, lng = null, posto = '';
-      try {
-        if (typeof _pvLastPos !== 'undefined' && _pvLastPos) { lat = _pvLastPos.lat; lng = _pvLastPos.lng; }
-      } catch (e) {}
-      try {
-        var sel = document.getElementById('pv-posto');
-        if (sel && sel.value) posto = sel.value;
-        var btnL = document.getElementById('pv-posto-btn-label');
-        if ((!posto || posto === '') && btnL) posto = (btnL.textContent || '').replace(/^—\s*/,'').trim();
-      } catch (e) {}
-      var txt = '🚨 EMERGÊNCIA — ' + (usuarioAtual.nome || usuarioAtual.user || '—');
-      if (posto) txt += ' · Posto: ' + posto;
-      if (lat != null && lng != null) txt += ' · GPS ' + Number(lat).toFixed(5) + ',' + Number(lng).toFixed(5);
-      else txt += ' · GPS indisponível';
-      txt += ' · ' + _valisAgoraStr();
-      try {
-        if (!db.msg) db.msg = [];
-        db.msg.unshift({
-          id: Date.now(),
-          d: 'Supervisão',
-          t: txt,
-          h: _valisAgoraStr(),
-          de: usuarioAtual.nome || usuarioAtual.user,
-          emergencia: true,
-          lat: lat, lng: lng,
-          posto: posto,
-          lidos: []
-        });
-      } catch (e) {}
-      try {
-        if (!db.oco) db.oco = [];
-        db.oco.unshift({
-          id: Date.now() + 1,
-          p: posto || '—',
-          tipo: 'Emergência',
-          t: txt,
-          d: _valisAgoraStr(),
-          por: usuarioAtual.nome || usuarioAtual.user,
-          userLogin: usuarioAtual.user,
-          emergencia: true,
-          lat: lat, lng: lng
-        });
-      } catch (e) {}
-      try { if (typeof addAtividade === 'function') addAtividade(txt); } catch (e) {}
-      try { await salvar(); } catch (e) {}
-      try { notificarApp('VALIS TM · EMERGÊNCIA', txt, { tag: 'panico', requireInteraction: true }); } catch (e) {}
-      try { if (typeof render === 'function') render(); } catch (e) {}
-      alert('Emergência registrada e enviada à supervisão.');
-    }
-
-    function listaNomesPostosApp() {
-      var nomes = [];
-      var seen = {};
-      function add(n) {
-        n = String(n || '').trim();
-        if (!n || n === '—' || n === '-') return;
-        var k = n.toLowerCase();
-        if (seen[k]) return;
-        seen[k] = true;
-        nomes.push(n);
-      }
-      try {
-        (typeof db !== 'undefined' && db && db.postos ? db.postos : []).forEach(function(p) {
-          if (!p) return;
-          add(p.n || p.nome || p.name || p.titulo);
-        });
-      } catch (e) {}
-      try {
-        var pv = document.getElementById('pv-posto');
-        if (pv && pv.options) {
-          for (var i = 0; i < pv.options.length; i++) {
-            var o = pv.options[i];
-            if (!o) continue;
-            var t = String(o.textContent || '').trim();
-            var v = String(o.value || '').trim();
-            // value pode ser id; text é o nome
-            if (t && t.indexOf('Selecione') < 0 && t !== '—') add(t);
-            else if (v && !/^\d+$/.test(v)) add(v);
-          }
-        }
-      } catch (e) {}
-      try {
-        var sess = (typeof pvLoad === 'function') ? pvLoad() : null;
-        if (sess) {
-          add(sess.postoNome);
-          // também tenta achar nome pelo id
-          if (sess.postoId && typeof db !== 'undefined' && db && db.postos) {
-            var found = (db.postos || []).find(function(x) { return String(x.id) === String(sess.postoId); });
-            if (found) add(found.n || found.nome);
-          }
-        }
-      } catch (e) {}
-      try {
-        var meta = document.getElementById('pv-meta');
-        if (meta) {
-          var m = String(meta.textContent || '').match(/Posto:\s*([^\n]+)/i);
-          if (m) add(m[1]);
-        }
-      } catch (e) {}
-      nomes.sort(function(a, b) { return a.localeCompare(b, 'pt-BR'); });
-      return nomes;
-    }
-    function preencherSelectPostosRonda() {
-      try {
-        var nomes = listaNomesPostosApp();
-        var ids = ['ronda-posto', 'livro-posto'];
-        ids.forEach(function(id) {
-          var el = document.getElementById(id);
-          if (!el) return;
-          var cur = el.value;
-          var htmlOpts = '<option value="">— Selecione o posto —</option>';
-          nomes.forEach(function(n) {
-            htmlOpts += '<option value="' + String(n).replace(/&/g,'&amp;').replace(/"/g, '&quot;') + '">' +
-              String(n).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>';
-          });
-          el.innerHTML = htmlOpts;
-          if (cur) {
-            el.value = cur;
-          }
-        });
-        // datalists
-        ['ronda-postos-datalist', 'livro-postos-datalist'].forEach(function(did) {
-          var dl = document.getElementById(did);
-          if (!dl) return;
-          dl.innerHTML = nomes.map(function(n) {
-            return '<option value="' + String(n).replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '">';
-          }).join('');
-        });
-        // auto-seleciona posto do plantão se ainda vazio
-        var auto = '';
-        try {
-          var sess = (typeof pvLoad === 'function') ? pvLoad() : null;
-          if (sess && sess.postoNome) auto = String(sess.postoNome).trim();
-        } catch (e) {}
-        if (!auto) {
-          try {
-            var meta = document.getElementById('pv-meta');
-            var m = meta && String(meta.textContent || '').match(/Posto:\s*([^\n]+)/i);
-            if (m) auto = m[1].trim();
-          } catch (e) {}
-        }
-        if (auto) {
-          var rs = document.getElementById('ronda-posto');
-          var rm = document.getElementById('ronda-posto-manual');
-          if (rs && !rs.value) {
-            // garante option
-            var has = false;
-            for (var i = 0; i < rs.options.length; i++) {
-              if (rs.options[i].value === auto) { has = true; break; }
-            }
-            if (!has) {
-              var opt = document.createElement('option');
-              opt.value = auto;
-              opt.textContent = auto;
-              rs.appendChild(opt);
-            }
-            rs.value = auto;
-          }
-          if (rm && !rm.value) rm.value = auto;
-          var ls = document.getElementById('livro-posto');
-          var lm = document.getElementById('livro-posto-manual');
-          if (ls && !ls.value) {
-            var has2 = false;
-            for (var j = 0; j < ls.options.length; j++) {
-              if (ls.options[j].value === auto) { has2 = true; break; }
-            }
-            if (!has2) {
-              var opt2 = document.createElement('option');
-              opt2.value = auto;
-              opt2.textContent = auto;
-              ls.appendChild(opt2);
-            }
-            ls.value = auto;
-          }
-          if (lm && !lm.value) lm.value = auto;
-        }
-      } catch (e) { console.warn('preencherSelectPostosRonda', e); }
-    }
-    function rondaPostoAtual() {
-      try {
-        var sel = document.getElementById('ronda-posto');
-        var man = document.getElementById('ronda-posto-manual');
-        var v = (sel && sel.value) ? String(sel.value).trim() : '';
-        if (!v && man) v = String(man.value || '').trim();
-        return v;
-      } catch (e) { return ''; }
-    }
-    function livroPostoAtual() {
-      try {
-        var sel = document.getElementById('livro-posto');
-        var man = document.getElementById('livro-posto-manual');
-        var v = (sel && sel.value) ? String(sel.value).trim() : '';
-        if (!v && man) v = String(man.value || '').trim();
-        return v;
-      } catch (e) { return ''; }
-    }
-    function onRondaPostoChange() {
-      try {
-        var sel = document.getElementById('ronda-posto');
-        var man = document.getElementById('ronda-posto-manual');
-        if (sel && man && sel.value) man.value = sel.value;
-        renderRondaCard();
-      } catch (e) {}
-    }
-    function onRondaPostoManual() {
-      try {
-        var man = document.getElementById('ronda-posto-manual');
-        var sel = document.getElementById('ronda-posto');
-        if (!man) return;
-        var v = String(man.value || '').trim();
-        if (v && sel) {
-          var found = false;
-          for (var i = 0; i < sel.options.length; i++) {
-            if (sel.options[i].value === v) { found = true; break; }
-          }
-          if (!found) {
-            var opt = document.createElement('option');
-            opt.value = v;
-            opt.textContent = v;
-            sel.appendChild(opt);
-          }
-          sel.value = v;
-        }
-        renderRondaCard();
-      } catch (e) {}
-    }
-    function onLivroPostoChange() {
-      try {
-        var sel = document.getElementById('livro-posto');
-        var man = document.getElementById('livro-posto-manual');
-        if (sel && man && sel.value) man.value = sel.value;
-        renderLivroPosto();
-      } catch (e) {}
-    }
-    function onLivroPostoManual() {
-      try {
-        var man = document.getElementById('livro-posto-manual');
-        var sel = document.getElementById('livro-posto');
-        if (!man) return;
-        var v = String(man.value || '').trim();
-        if (v && sel) {
-          var found = false;
-          for (var i = 0; i < sel.options.length; i++) {
-            if (sel.options[i].value === v) { found = true; break; }
-          }
-          if (!found) {
-            var opt = document.createElement('option');
-            opt.value = v;
-            opt.textContent = v;
-            sel.appendChild(opt);
-          }
-          sel.value = v;
-        }
-        renderLivroPosto();
-      } catch (e) {}
-    }
-    function _rondaKey(posto) {
-      return 'ronda_' + _valisHojeISO() + '_' + String(posto || '').toLowerCase().replace(/\s+/g,'_');
-    }
-    function _getRondaState(posto) {
-      if (!db.rondas) db.rondas = {};
-      var k = _rondaKey(posto);
-      if (!db.rondas[k]) {
-        db.rondas[k] = { posto: posto, data: _valisHojeISO(), pontos: [] };
-      }
-      return db.rondas[k];
-    }
-    function renderRondaCard() {
-      try {
-        var box = document.getElementById('ronda-lista');
-        if (!box) return;
-        var posto = (typeof rondaPostoAtual === 'function') ? rondaPostoAtual() : '';
-        if (!posto) { box.innerHTML = '<div class="empty">Selecione ou digite o posto</div>'; return; }
-        var st = _getRondaState(posto);
-        if (!st.pontos.length) {
-          st.pontos = [
-            { id: 1, nome: 'Portaria / entrada' },
-            { id: 2, nome: 'Perímetro externo' },
-            { id: 3, nome: 'Área interna' },
-            { id: 4, nome: 'Estacionamento' }
-          ];
-        }
-        box.innerHTML = st.pontos.map(function(pt) {
-          var ok = !!pt.ok;
-          return '<div class="ronda-pt' + (ok ? ' ok' : '') + '">' +
-            '<div><div class="nm">' + (pt.nome || 'Ponto') + '</div>' +
-            '<div class="st">' + (ok ? ('✓ ' + (pt.quando || '') + (pt.gps ? ' · GPS ok' : '')) : 'Pendente') + '</div></div>' +
-            (ok ? '' : '<button type="button" class="btn green sm" onclick="marcarPontoRonda(' + pt.id + ')">Marcar</button>') +
-            '</div>';
-        }).join('');
-      } catch (e) { console.warn(e); }
-    }
-    async function marcarPontoRonda(pid) {
-      try {
-        var posto = rondaPostoAtual();
-        if (!posto) return alert('Selecione ou digite o posto');
-        var st = _getRondaState(posto);
-        var pt = (st.pontos || []).find(function(x) { return Number(x.id) === Number(pid); });
-        if (!pt) return;
-        var lat = null, lng = null;
-        try { if (_pvLastPos) { lat = _pvLastPos.lat; lng = _pvLastPos.lng; } } catch (e) {}
-        pt.ok = true;
-        pt.quando = _valisAgoraStr();
-        pt.gps = (lat != null);
-        pt.lat = lat; pt.lng = lng;
-        pt.por = usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—';
-        try { await salvar(); } catch (e) {}
-        renderRondaCard();
-        try { notificarApp('VALIS TM · Ronda', 'Ponto marcado: ' + pt.nome, { tag: 'ronda' }); } catch (e) {}
-        toast('Ponto de ronda marcado');
-      } catch (e) { alert(e.message || e); }
-    }
-    function adicionarPontoRonda() {
-      var posto = rondaPostoAtual();
-      if (!posto) return alert('Selecione ou digite o posto da ronda.');
-      var nome = prompt('Nome do ponto de ronda:');
-      if (!nome) return;
-      var st = _getRondaState(posto);
-      var maxId = 0;
-      (st.pontos || []).forEach(function(p) { if (p.id > maxId) maxId = p.id; });
-      st.pontos.push({ id: maxId + 1, nome: String(nome).trim() });
-      renderRondaCard();
-      try { salvar(); } catch (e) {}
-    }
-    function reiniciarRondaHoje() {
-      var posto = rondaPostoAtual();
-      if (!posto) return alert('Selecione ou digite o posto');
-      if (!confirm('Reiniciar ronda de hoje neste posto?')) return;
-      if (!db.rondas) db.rondas = {};
-      delete db.rondas[_rondaKey(posto)];
-      renderRondaCard();
-      try { salvar(); } catch (e) {}
-    }
-
-    function renderLivroPosto() {
-      try {
-        var box = document.getElementById('livro-lista');
-        if (!box) return;
-        var posto = (typeof livroPostoAtual === 'function') ? livroPostoAtual() : '';
-        if (!posto) { box.innerHTML = '<div class="empty">Selecione ou digite o posto</div>'; return; }
-        var hojeBr = new Date().toLocaleDateString('pt-BR');
-        var iso = _valisHojeISO();
-        var itens = [];
-        (db.oco || []).forEach(function(o) {
-          if (!o) return;
-          var p = String(o.p || o.posto || '');
-          if (p !== posto && p.toLowerCase() !== posto.toLowerCase()) return;
-          var d = String(o.d || '');
-          if (d.indexOf(hojeBr) < 0 && d.indexOf(iso) < 0 && d.indexOf(hojeBr.replace(/\//g,'-')) < 0) {
-            // ainda aceita se for hoje pelo id recente? skip
-            if (!plantaoDataEhHoje || !plantaoDataEhHoje(d.split(' ')[0])) {
-              // try first part
-            }
-          }
-          var diaOk = d.indexOf(hojeBr) >= 0 || d.indexOf(iso) >= 0;
-          if (!diaOk) return;
-          itens.push({ h: d, tipo: o.tipo || 'Ocorrência', txt: o.t || '', por: o.por || '', emer: !!o.emergencia });
-        });
-        (db.msg || []).forEach(function(m) {
-          if (!m || !m.emergencia) return;
-          var d = String(m.h || '');
-          if (d.indexOf(hojeBr) < 0 && d.indexOf(iso) < 0) return;
-          if (m.posto && String(m.posto) !== posto) return;
-          itens.push({ h: d, tipo: 'Emergência', txt: m.t || '', por: m.de || '', emer: true });
-        });
-        // ronda marks
-        try {
-          var st = db.rondas && db.rondas[_rondaKey(posto)];
-          if (st && st.pontos) {
-            st.pontos.filter(function(pt) { return pt.ok; }).forEach(function(pt) {
-              itens.push({ h: pt.quando || '', tipo: 'Ronda', txt: 'Checkpoint: ' + pt.nome, por: pt.por || '', emer: false });
-            });
-          }
-        } catch (e) {}
-        itens.sort(function(a,b) { return String(b.h).localeCompare(String(a.h)); });
-        if (!itens.length) {
-          box.innerHTML = '<div class="empty">Sem registros hoje neste posto</div>';
-          return;
-        }
-        box.innerHTML = itens.map(function(it) {
-          return '<div class="livro-dia-item">' +
-            (it.emer ? '<span class="badge-emergencia">SOS</span> ' : '') +
-            '<b>' + (it.tipo || '') + '</b> · ' + (it.h || '') +
-            '<div class="meta">' + (it.txt || '') + '</div>' +
-            '<div class="meta">Por: ' + (it.por || '—') + '</div></div>';
-        }).join('');
-      } catch (e) { console.warn(e); }
-    }
-
-    function salvarCfgLembretesPlantao() {
-      try {
-        var cfg = {
-          h2: !!(document.getElementById('lemb-2h') || {}).checked,
-          h1: !!(document.getElementById('lemb-1h') || {}).checked,
-          m30: !!(document.getElementById('lemb-30m') || {}).checked
-        };
-        localStorage.setItem('valis_lemb_plantao_cfg', JSON.stringify(cfg));
-      } catch (e) {}
-    }
-    function carregarCfgLembretesPlantao() {
-      try {
-        var raw = localStorage.getItem('valis_lemb_plantao_cfg');
-        var cfg = raw ? JSON.parse(raw) : { h2: true, h1: true, m30: true };
-        var a = document.getElementById('lemb-2h'); if (a) a.checked = cfg.h2 !== false;
-        var b = document.getElementById('lemb-1h'); if (b) b.checked = cfg.h1 !== false;
-        var c = document.getElementById('lemb-30m'); if (c) c.checked = cfg.m30 !== false;
-      } catch (e) {}
-    }
-    function testarLembretePlantao() {
-      try {
-        notificarApp('VALIS TM · Lembrete de plantão', 'Teste: seu plantão se aproxima. Prepare-se para o posto.', { tag: 'lemb-test', requireInteraction: true });
-        toast('Lembrete de teste enviado');
-      } catch (e) { alert('Notificação: ' + (e.message || e)); }
-    }
-    function verificarLembretesPlantaoEscala() {
-      try {
-        if (!usuarioAtual || !usuarioAtual.escalaFixa) return;
-        var raw = localStorage.getItem('valis_lemb_plantao_cfg');
-        var cfg = raw ? JSON.parse(raw) : { h2: true, h1: true, m30: true };
-        var ef = usuarioAtual.escalaFixa;
-        var turno = ef.turno || 'noturno';
-        var inicioH = (turno === 'diurno') ? 6 : 18;
-        var agora = new Date();
-        var alvo = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), inicioH, 0, 0, 0);
-        if (alvo < agora) alvo.setDate(alvo.getDate() + 1);
-        // only if escala says work day - approximate using inicio
-        var diffMin = Math.round((alvo - agora) / 60000);
-        var marks = [];
-        if (cfg.h2 !== false && diffMin <= 120 && diffMin > 110) marks.push('2h');
-        if (cfg.h1 !== false && diffMin <= 60 && diffMin > 50) marks.push('1h');
-        if (cfg.m30 !== false && diffMin <= 30 && diffMin > 20) marks.push('30min');
-        if (!marks.length) return;
-        var key = 'valis_lemb_p_' + _valisHojeISO() + '_' + marks.join('_');
-        if (localStorage.getItem(key)) return;
-        localStorage.setItem(key, '1');
-        notificarApp('VALIS TM · Plantão em breve', 'Faltam cerca de ' + marks[0] + ' para o início do plantão (' + inicioH + 'h).', { tag: 'lemb-escala', requireInteraction: true });
-      } catch (e) {}
-    }
-
-    function mostrarComprovantePonto(tipo, posto, extra) {
-      try {
-        var box = document.getElementById('comprovante-ponto');
-        if (!box) return;
-        var txt = 'COMPROVANTE DE PONTO — VALIS TM\\n' +
-          'Tipo: ' + (tipo || '—') + '\\n' +
-          'Quem: ' + (usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : '—') + '\\n' +
-          'Posto: ' + (posto || '—') + '\\n' +
-          'Quando: ' + _valisAgoraStr() + '\\n' +
-          (extra || '');
-        box.style.display = 'block';
-        box.innerHTML = '<b>Comprovante</b><pre style="white-space:pre-wrap;margin:8px 0 0;font-size:11px;color:#e2e8f0">' +
-          txt.replace(/</g,'&lt;') + '</pre>' +
-          '<button type="button" class="btn dark sm" style="margin-top:8px" onclick="copiarComprovantePonto()">Copiar comprovante</button>';
-        window._ultimoComprovantePonto = txt;
-      } catch (e) {}
-    }
-    function copiarComprovantePonto() {
-      try {
-        var t = window._ultimoComprovantePonto || '';
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(t).then(function() { toast('Comprovante copiado'); });
-        } else {
-          prompt('Copie o comprovante:', t);
-        }
-      } catch (e) {}
-    }
-
-    function atualizarResumoHorasFolha() {
-      try {
-        var el = document.getElementById('ex-horas-resumo');
-        if (!el) return;
-        var lista = (db.plantaoes || []).filter(function(p) {
-          if (!p) return false;
-          if (typeof podeVerTodosPlantaoes === 'function' && podeVerTodosPlantaoes()) return true;
-          return typeof plantaoDoUsuario === 'function' ? plantaoDoUsuario(p) : true;
-        });
-        var totalH = 0, noturnos = 0;
-        lista.forEach(function(p) {
-          var h = parseFloat(String(p.horas || '').replace(',','.'));
-          if (!isNaN(h)) totalH += h;
-          else totalH += 12;
-          var turno = String(p.turno || '').toLowerCase();
-          if (turno.indexOf('not') >= 0 || String(p.inicio || '').indexOf('18') === 0) noturnos++;
-        });
-        var adicional = noturnos * 12 * 0.2; // 20% ilustrativo sobre horas noturnas (12h)
-        el.innerHTML = 'Horas lançadas: <b>' + totalH.toFixed(1) + 'h</b><br>' +
-          'Plantões noturnos: <b>' + noturnos + '</b><br>' +
-          'Ref. adicional noturno (estimativa 20%): <b>' + (typeof moneyBR === 'function' ? moneyBR(adicional * ((usuarioAtual && usuarioAtual.valorPlantao) || 100) / 12) : ('R$ ' + adicional.toFixed(2))) + '</b>' +
-          '<div class="meta" style="margin-top:6px">Estimativa educativa — ajuste conforme acordo da equipe.</div>';
-      } catch (e) {}
-    }
-
-    function verificarPostosVazios() {
-      try {
-        var box = document.getElementById('alerta-postos-vazios');
-        if (!box) return;
-        var cargo = (usuarioAtual && (usuarioAtual.cargo || usuarioAtual.role || '')).toLowerCase();
-        var gestao = cargo.indexOf('dev') >= 0 || cargo.indexOf('admin') >= 0 || cargo.indexOf('super') >= 0;
-        if (!gestao) { box.style.display = 'none'; return; }
-        var vivos = [];
-        try {
-          if (typeof sessoesPlantaoAtivas === 'function') vivos = sessoesPlantaoAtivas() || [];
-          else if (db.sessoesPlantao) vivos = (db.sessoesPlantao || []).filter(function(s) { return s && s.ativo; });
-        } catch (e) {}
-        var cobertos = {};
-        vivos.forEach(function(s) {
-          var p = String(s.posto || s.postoNome || '').toLowerCase();
-          if (p) cobertos[p] = true;
-        });
-        var agora = new Date();
-        var hora = agora.getHours();
-        // janela típica de plantão noturno 18-6 ou diurno 6-18 — alerta genérico se posto sem ninguém em horário comercial noturno
-        var vazios = [];
-        (db.postos || []).forEach(function(p) {
-          var n = p.n || p.nome || '';
-          if (!n) return;
-          if (!cobertos[String(n).toLowerCase()]) vazios.push(n);
-        });
-        if (!vazios.length || (hora > 8 && hora < 17)) {
-          // de dia pode ser normal — só mostra se houver escala noturna ativa global
-          if (!(hora >= 18 || hora < 6) && vazios.length) {
-            box.style.display = 'none';
-            return;
-          }
-        }
-        if (!vazios.length) { box.style.display = 'none'; return; }
-        if (!(hora >= 18 || hora < 7)) { box.style.display = 'none'; return; }
-        box.style.display = 'block';
-        box.innerHTML = '<div class="alerta-posto-vazio">⚠ Postos sem check-in ativo agora: <b>' +
-          vazios.slice(0, 6).join(', ') + (vazios.length > 6 ? '…' : '') + '</b></div>';
-      } catch (e) {}
-    }
-
-    function initModulosExtras() {
-      try { preencherSelectPostosRonda(); } catch (e) { console.warn(e); }
-      try { carregarCfgLembretesPlantao(); } catch (e) { console.warn(e); }
-      try { renderRondaCard(); } catch (e) { console.warn(e); }
-      try { renderLivroPosto(); } catch (e) { console.warn(e); }
-      try { atualizarResumoHorasFolha(); } catch (e) { console.warn(e); }
-      try { verificarPostosVazios(); } catch (e) { console.warn(e); }
-      try { verificarLembretesPlantaoEscala(); } catch (e) { console.warn(e); }
-      try {
-        if (!window._valisLembTimer) {
-          window._valisLembTimer = setInterval(function() {
-            try { verificarLembretesPlantaoEscala(); } catch (e) {}
-            try { verificarPostosVazios(); } catch (e) {}
-          }, 60000);
-        }
-      } catch (e) {}
-    }
-
     async function notificarApp(titulo, corpo, opts) {
       try {
         return await ValisNotify.show(titulo, corpo, opts || {});
@@ -7769,10 +6982,8 @@
     /** Cadastrar / GPS / excluir postos — só Admin, Supervisão e DEV */
     function podeGerenciarPostos() {
       if (!usuarioAtual) return false;
-      var f = String(usuarioAtual.funcao || usuarioAtual.role || usuarioAtual.cargo || '').toLowerCase();
-      if (f === 'supervisao') f = 'supervisor';
-      return f === 'admin' || f === 'supervisor' || f === 'dev' ||
-        f.indexOf('admin') >= 0 || f.indexOf('dev') >= 0 || f.indexOf('super') >= 0;
+      const f = String(usuarioAtual.funcao || '');
+      return f === 'admin' || f === 'supervisor' || f === 'dev';
     }
     /** Excluir mensagens — só Admin, Supervisão e DEV */
     function podeExcluirMensagens() {
@@ -7917,14 +7128,14 @@
       return isCargoDev();
     }
         const NAV_ITEMS = [
-      /* Rodapé oficial: Início · Plantão · Extrato · Ocorr. · Mais */
+      /* Rodapé interativo (scroll horizontal) + Mais */
       { tab: 'inicio', roles: ['all'], icon: '⌂', label: 'Início', primary: true },
-      { tab: 'plantao', roles: ['all'], icon: '📋', label: 'Plantão', primary: true },
-      { tab: 'extrato', roles: ['all'], icon: '💰', label: 'Extrato', primary: true },
-      { tab: 'ocorrencias', roles: ['all'], icon: '⚠', label: 'Ocorr.', primary: true },
-      { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: false },
-      { tab: 'escalas', roles: ['all'], icon: '📅', label: 'Escala', primary: false },
-      { tab: 'postos', roles: ['all'], icon: '📍', label: 'Postos', primary: false },
+      { tab: 'plantao', roles: ['vigilante','equipe','supervisor','admin'], icon: '📋', label: 'Plantão', primary: true },
+      { tab: 'extrato', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '💰', label: 'Extrato', primary: true },
+      { tab: 'ocorrencias', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '⚠', label: 'Ocorr.', primary: true },
+      { tab: 'mensagens', roles: ['all'], icon: '✉', label: 'Msgs', primary: true },
+      { tab: 'escalas', roles: ['vigilante','equipe','supervisor','admin','dev'], icon: '📅', label: 'Escala', primary: true },
+      { tab: 'postos', roles: ['supervisor','admin','dev'], icon: '📍', label: 'Postos', primary: true },
       { tab: 'usuarios', roles: ['admin','dev','supervisor'], icon: '👥', label: 'Equipe', primary: true },
       { tab: 'supervisao', roles: ['admin','dev','supervisor'], icon: '📡', label: 'Superv.', primary: true },
       { tab: 'config', roles: ['all'], icon: '👤', label: 'Perfil', primary: false }
@@ -7962,13 +7173,8 @@
       // Vigilante / equipe / demais: operação normal
       itens.push({ sec: 'Operação', icon: '⚠', label: 'Ocorrências', sub: 'Registrar evento', color: 'amber',
         go: function() { fecharMore(); tab('ocorrencias'); } });
-      if (role === 'supervisor' || role === 'admin') {
-        itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
-          go: function() { fecharMore(); tab('postos'); } });
-      } else {
-        itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
-          go: function() { fecharMore(); tab('postos'); } });
-      }
+      itens.push({ sec: 'Operação', icon: '📍', label: 'Postos', sub: 'Locais e geofence', color: 'blue',
+        go: function() { fecharMore(); tab('postos'); } });
       itens.push({ sec: 'Operação', icon: '📅', label: 'Escalas', sub: 'Grade de serviço', color: 'blue',
         go: function() { fecharMore(); tab('escalas'); } });
       itens.push({ sec: 'Operação', icon: '✉', label: 'Mensagens', sub: 'Avisos da equipe', color: 'blue',
@@ -8061,12 +7267,11 @@
 
     function rolePode(roles, role) {
       if (!roles || !roles.length) return false;
-      if (role === 'supervisao') role = 'supervisor';
+      // DEV NÃO herda abas de vigilante — só o que incluir 'dev', 'all' ou gestão explícita
       if (role === 'dev') {
-        return roles.indexOf('all') >= 0 || roles.indexOf('dev') >= 0 ||
-          roles.indexOf('admin') >= 0 || roles.indexOf('supervisor') >= 0 ||
-          roles.indexOf('vigilante') >= 0 || roles.indexOf('equipe') >= 0;
+        return roles.indexOf('all') >= 0 || roles.indexOf('dev') >= 0;
       }
+      if (role === 'supervisao') role = 'supervisor';
       return roles.indexOf('all') >= 0 || roles.indexOf(role) >= 0;
     }
 
@@ -8277,70 +7482,61 @@
     }
 
     function aplicarPermissoes() {
-      var role = String((usuarioAtual && (usuarioAtual.funcao || usuarioAtual.role || usuarioAtual.cargo)) || 'vigilante').toLowerCase();
-      if (role === 'supervisao') role = 'supervisor';
+      const role = (usuarioAtual && usuarioAtual.funcao) || 'vigilante';
       try {
         document.body.classList.remove('role-dev', 'role-admin', 'role-supervisor', 'role-vigilante', 'role-equipe');
-        if (['dev','admin','supervisor','vigilante','equipe'].indexOf(role) >= 0) document.body.classList.add('role-' + role);
+        var rc = role === 'supervisao' ? 'supervisor' : role;
+        if (['dev','admin','supervisor','vigilante','equipe'].indexOf(rc) >= 0) document.body.classList.add('role-' + rc);
         else document.body.classList.add('role-vigilante');
       } catch (e) {}
-
-      var primary = [
-        { tab: 'inicio', icon: '⌂', label: 'Início' },
-        { tab: 'plantao', icon: '📋', label: 'Plantão' },
-        { tab: 'extrato', icon: '💰', label: 'Extrato' },
-        { tab: 'ocorrencias', icon: '⚠', label: 'Ocorr.' }
-      ];
-      var nav = document.getElementById('main-nav');
-      var moreGrid = document.getElementById('more-grid');
-      if (nav) {
-        try {
-          nav.innerHTML = '';
-          primary.forEach(function(item) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.setAttribute('data-tab', item.tab);
-            b.innerHTML = '<span>' + item.icon + '</span>' + item.label;
-            b.onclick = function() {
-              try { fecharMore(); } catch (e) {}
-              tab(item.tab, b);
-            };
-            nav.appendChild(b);
-          });
-          var more = document.createElement('button');
-          more.type = 'button';
-          more.className = 'nav-more';
-          more.id = 'btn-more';
-          more.innerHTML = '<span>⋯</span>Mais';
-          more.onclick = function(e) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            toggleMore();
-          };
-          nav.appendChild(more);
-        } catch (e) { console.warn('nav build', e); }
+      const allowed = NAV_ITEMS.filter(i => rolePode(i.roles, role));
+      // Primários: até 4 + "Mais" se sobrar
+      let primary = allowed.filter(i => i.primary);
+      let secondary = allowed.filter(i => !i.primary);
+      // Se primários > 4, empurra o excesso para secondary
+      if (primary.length > 4) {
+        secondary = primary.slice(4).concat(secondary);
+        primary = primary.slice(0, 4);
       }
-
-      // more-grid desativado (duplicava o Hub de funções)
-      if (moreGrid) {
-        try { moreGrid.innerHTML = ''; moreGrid.style.display = 'none'; } catch (e) {}
+      // Garante Perfil no rodapé se couber
+      const nav = document.getElementById('main-nav');
+      const moreGrid = document.getElementById('more-grid');
+      if (!nav) return;
+      nav.innerHTML = '';
+      primary.forEach(i => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-tab', i.tab);
+        b.innerHTML = '<span>' + i.icon + '</span>' + i.label;
+        b.onclick = function() { try { fecharMore(); } catch (e) {} tab(i.tab, this); };
+        nav.appendChild(b);
+      });
+      if (secondary.length) {
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'nav-more';
+        more.id = 'btn-more';
+        more.innerHTML = '<span>⋯</span>Mais';
+        more.onclick = function(e) { e.stopPropagation(); toggleMore(); };
+        nav.appendChild(more);
+        if (moreGrid) { try { moreGrid.innerHTML = ''; moreGrid.style.display = 'none'; } catch (e) {} }
+        try { renderHubMais(role); } catch (e) { console.warn(e); }
+      } else {
+        if (moreGrid) { try { moreGrid.innerHTML = ''; moreGrid.style.display = 'none'; } catch (e) {} }
+        try { renderHubMais(role); } catch (e) {}
       }
-      try { renderHubMais(role); } catch (e) { console.warn(e); }
-
-      var telCard = document.getElementById('card-tel-sup');
-      if (telCard) telCard.style.display = (role === 'supervisor' || role === 'admin' || role === 'dev') ? '' : 'none';
-      try {
-        var activeTab = document.querySelector('.tab.active');
-        if (activeTab) {
-          var name = activeTab.id.replace('tab-', '');
-          document.querySelectorAll('#main-nav button[data-tab], #more-grid button[data-tab]').forEach(function(x) {
-            x.classList.toggle('active', x.getAttribute('data-tab') === name);
-          });
-        }
-      } catch (e) {}
+      const telCard = document.getElementById('card-tel-sup');
+      if (telCard) telCard.style.display = (role === 'supervisor' || role === 'admin') ? '' : 'none';
+      // marca ativo atual
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        const name = activeTab.id.replace('tab-', '');
+        document.querySelectorAll('#main-nav button[data-tab], #more-grid button[data-tab]').forEach(x => {
+          x.classList.toggle('active', x.getAttribute('data-tab') === name);
+        });
+      }
       try { atualizarBadgeMensagens(); } catch (e) {}
-      try { atualizarUIPostos(); } catch (e) {}
     }
-
     function toggleMore() {
       var sheet = document.getElementById('more-sheet');
       if (!sheet) return;
@@ -8546,14 +7742,10 @@
           devLiberado = true;
         }
         try { aplicarPermissoes(); } catch (e) { console.warn('aplicarPermissoes', e); }
-        try {
-          setTimeout(function() {
-            try { if (typeof preencherSelectPostosRonda === 'function') preencherSelectPostosRonda(); } catch (e1) {}
-            try { if (typeof renderRondaCard === 'function') renderRondaCard(); } catch (e2) {}
-            try { if (typeof renderLivroPosto === 'function') renderLivroPosto(); } catch (e3) {}
-            try { atualizarPainelLogin(); } catch (e4) {}
-          }, 300);
-        } catch (e) {}
+        try { aplicarFoldsPadraoMinimizados(); } catch (e) {}
+        try { setTimeout(function(){ atualizarStatusBackupUIFromRemote(); }, 800); } catch (e) {}
+        try { iniciarBackupPeriodico(); } catch (e) {}
+        try { setTimeout(function(){ try { preencherSelectPostosRonda(); } catch (e) {} }, 500); } catch (e) {}
         // Sempre Início — evita tela preta em abas especiais
         try {
           tab('inicio');
@@ -10699,23 +9891,245 @@
       return criados;
     }
 
+    
+    // ===== Ronda do posto (v0.2.10) =====
+    function _valisHojeISO() {
+      try {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      } catch (e) { return ''; }
+    }
+    function _valisAgoraStr() {
+      try {
+        var d = new Date();
+        return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+      } catch (e) { return ''; }
+    }
+    function listaNomesPostosApp() {
+      var nomes = [];
+      var seen = {};
+      function add(n) {
+        n = String(n || '').trim();
+        if (!n || n === '—' || n === '-') return;
+        var k = n.toLowerCase();
+        if (seen[k]) return;
+        seen[k] = true;
+        nomes.push(n);
+      }
+      try {
+        (typeof db !== 'undefined' && db && db.postos ? db.postos : []).forEach(function(p) {
+          if (!p) return;
+          add(p.n || p.nome || p.name || p.titulo);
+        });
+      } catch (e) {}
+      try {
+        var pv = document.getElementById('pv-posto');
+        if (pv && pv.options) {
+          for (var i = 0; i < pv.options.length; i++) {
+            var o = pv.options[i];
+            if (!o) continue;
+            var t = String(o.textContent || '').trim();
+            if (t && t.indexOf('Selecione') < 0 && t !== '—') add(t);
+          }
+        }
+      } catch (e) {}
+      try {
+        var lbl = document.getElementById('pv-posto-btn-label');
+        if (lbl) {
+          var t2 = String(lbl.textContent || '').trim();
+          if (t2 && t2.indexOf('Toque') < 0 && t2.indexOf('Selecione') < 0) add(t2);
+        }
+      } catch (e) {}
+      try {
+        var sess = (typeof pvLoad === 'function') ? pvLoad() : null;
+        if (sess && sess.postoNome) add(sess.postoNome);
+      } catch (e) {}
+      nomes.sort(function(a, b) { return a.localeCompare(b, 'pt-BR'); });
+      return nomes;
+    }
+    function preencherSelectPostosRonda() {
+      try {
+        var nomes = listaNomesPostosApp();
+        var el = document.getElementById('ronda-posto');
+        if (!el) return;
+        var cur = el.value;
+        var htmlOpts = '<option value="">— Selecione o posto —</option>';
+        nomes.forEach(function(n) {
+          htmlOpts += '<option value="' + String(n).replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '">' +
+            String(n).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>';
+        });
+        el.innerHTML = htmlOpts;
+        if (cur) el.value = cur;
+        var dl = document.getElementById('ronda-postos-datalist');
+        if (dl) {
+          dl.innerHTML = nomes.map(function(n) {
+            return '<option value="' + String(n).replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '">';
+          }).join('');
+        }
+        // auto posto do plantão
+        var auto = '';
+        try {
+          var sess = (typeof pvLoad === 'function') ? pvLoad() : null;
+          if (sess && sess.postoNome) auto = String(sess.postoNome).trim();
+        } catch (e) {}
+        if (!auto) {
+          try {
+            var lbl = document.getElementById('pv-posto-btn-label');
+            var t = lbl ? String(lbl.textContent || '').trim() : '';
+            if (t && t.indexOf('Toque') < 0 && t.indexOf('Selecione') < 0) auto = t;
+          } catch (e) {}
+        }
+        if (auto) {
+          var man = document.getElementById('ronda-posto-manual');
+          if (!el.value) {
+            var has = false;
+            for (var i = 0; i < el.options.length; i++) {
+              if (el.options[i].value === auto) { has = true; break; }
+            }
+            if (!has) {
+              var opt = document.createElement('option');
+              opt.value = auto; opt.textContent = auto;
+              el.appendChild(opt);
+            }
+            el.value = auto;
+          }
+          if (man && !man.value) man.value = auto;
+        }
+      } catch (e) { console.warn('preencherSelectPostosRonda', e); }
+    }
+    function rondaPostoAtual() {
+      try {
+        var sel = document.getElementById('ronda-posto');
+        var man = document.getElementById('ronda-posto-manual');
+        var v = (sel && sel.value) ? String(sel.value).trim() : '';
+        if (!v && man) v = String(man.value || '').trim();
+        return v;
+      } catch (e) { return ''; }
+    }
+    function onRondaPostoChange() {
+      try {
+        var sel = document.getElementById('ronda-posto');
+        var man = document.getElementById('ronda-posto-manual');
+        if (sel && man && sel.value) man.value = sel.value;
+        renderRondaCard();
+      } catch (e) {}
+    }
+    function onRondaPostoManual() {
+      try {
+        var man = document.getElementById('ronda-posto-manual');
+        var sel = document.getElementById('ronda-posto');
+        if (!man) return;
+        var v = String(man.value || '').trim();
+        if (v && sel) {
+          var found = false;
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === v) { found = true; break; }
+          }
+          if (!found) {
+            var opt = document.createElement('option');
+            opt.value = v; opt.textContent = v;
+            sel.appendChild(opt);
+          }
+          sel.value = v;
+        }
+        renderRondaCard();
+      } catch (e) {}
+    }
+    function _rondaKey(posto) {
+      var user = '';
+      try { user = (usuarioAtual && usuarioAtual.user) ? String(usuarioAtual.user) : ''; } catch (e) {}
+      return 'valis_ronda_' + _valisHojeISO() + '_' + String(posto || '').toLowerCase() + '_' + user.toLowerCase();
+    }
+    function _getRondaState(posto) {
+      try {
+        var raw = localStorage.getItem(_rondaKey(posto));
+        if (!raw) return { pontos: [] };
+        var data = JSON.parse(raw);
+        return data && Array.isArray(data.pontos) ? data : { pontos: [] };
+      } catch (e) { return { pontos: [] }; }
+    }
+    function _setRondaState(posto, state) {
+      try { localStorage.setItem(_rondaKey(posto), JSON.stringify(state || { pontos: [] })); } catch (e) {}
+    }
+    function renderRondaCard() {
+      try {
+        var box = document.getElementById('ronda-lista');
+        if (!box) return;
+        var posto = rondaPostoAtual();
+        if (!posto) {
+          box.className = 'empty';
+          box.innerHTML = 'Selecione ou digite o posto';
+          return;
+        }
+        var st = _getRondaState(posto);
+        if (!st.pontos.length) {
+          box.className = 'empty';
+          box.innerHTML = 'Nenhum ponto ainda neste posto hoje. Toque em + Ponto.';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = st.pontos.map(function(p, idx) {
+          return '<div class="ronda-item"><b>#' + (idx+1) + '</b> · ' + (p.h || '—') +
+            (p.obs ? (' · ' + String(p.obs).replace(/</g,'&lt;')) : '') + '</div>';
+        }).join('');
+      } catch (e) { console.warn(e); }
+    }
+    function adicionarPontoRonda() {
+      try {
+        var posto = rondaPostoAtual();
+        if (!posto) {
+          alert('Selecione ou digite o posto da ronda.');
+          return;
+        }
+        var st = _getRondaState(posto);
+        st.pontos.push({ h: _valisAgoraStr(), ts: Date.now() });
+        _setRondaState(posto, st);
+        renderRondaCard();
+        try { if (typeof toast === 'function') toast('Ponto de ronda registrado'); } catch (e) {}
+      } catch (e) { console.warn(e); alert('Erro ao marcar ponto'); }
+    }
+    function reiniciarRondaHoje() {
+      try {
+        var posto = rondaPostoAtual();
+        if (!posto) { alert('Selecione ou digite o posto da ronda.'); return; }
+        if (!confirm('Zerar a ronda de hoje neste posto?')) return;
+        _setRondaState(posto, { pontos: [] });
+        renderRondaCard();
+        try { if (typeof toast === 'function') toast('Ronda zerada'); } catch (e) {}
+      } catch (e) {}
+    }
+
+    
+    function aplicarFoldsPadraoMinimizados() {
+      try {
+        // Seções secundárias começam minimizadas; plantão ativo fica aberto (check-in)
+        var ids = ['ronda-fold-body', 'esc-fold-body'];
+        ids.forEach(function(id) {
+          var body = document.getElementById(id);
+          if (!body) return;
+          body.classList.add('is-collapsed');
+          var card = body.closest('.card, .ops-soft-card');
+          if (card) card.classList.add('sec-collapsed');
+          var btn = null;
+          try {
+            var head = body.previousElementSibling;
+            if (head) btn = head.querySelector('.sec-min-btn');
+            if (!btn && card) btn = card.querySelector('.sec-min-btn');
+          } catch (e) {}
+          if (btn) {
+            btn.setAttribute('aria-expanded', 'false');
+            btn.textContent = 'Expandir';
+          }
+        });
+      } catch (e) { console.warn('aplicarFoldsPadraoMinimizados', e); }
+    }
+
     function toggleSecFold(bodyId, btn) {
       try {
         var body = document.getElementById(bodyId);
         if (!body) return;
         var collapsed = body.classList.toggle('is-collapsed');
-        if (!collapsed) {
-          body.style.maxHeight = 'none';
-          body.style.opacity = '1';
-          body.style.pointerEvents = 'auto';
-          body.style.overflow = 'visible';
-        } else {
-          body.style.maxHeight = '';
-          body.style.opacity = '';
-          body.style.pointerEvents = '';
-          body.style.overflow = '';
-        }
-        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card, .resumo-dia-card');
+        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
         if (card) {
           if (collapsed) card.classList.add('sec-collapsed');
           else card.classList.remove('sec-collapsed');
@@ -10725,54 +10139,29 @@
           btn.textContent = collapsed ? 'Expandir' : 'Minimizar';
         }
         try { localStorage.setItem('valis_fold_' + bodyId, collapsed ? '1' : '0'); } catch (e) {}
-        if (!collapsed) {
-          try { preencherSelectPostosRonda(); } catch (e) {}
-          if (bodyId === 'ronda-fold-body') { try { renderRondaCard(); } catch (e) {} }
-          if (bodyId === 'livro-fold-body') { try { renderLivroPosto(); } catch (e) {} }
-          if (bodyId === 'lemb-cfg-fold') { try { carregarCfgLembretesPlantao(); } catch (e) {} }
-        }
       } catch (e) { console.warn(e); }
-    }
-
+    
+        if (!collapsed && bodyId === 'ronda-fold-body') {
+          try { preencherSelectPostosRonda(); renderRondaCard(); } catch (e) {}
+        }
+      }
     function restaurarSecFolds() {
       try {
-        if (!localStorage.getItem('valis_fold_defaults_v030')) {
-          ['pv-fold-body','esc-fold-body','ex-folha-fold','ex-arq-fold','ronda-fold-body','livro-fold-body','lemb-cfg-fold','rd-fold-body'].forEach(function(id) {
-            try { localStorage.removeItem('valis_fold_' + id); } catch (e) {}
-          });
-          localStorage.setItem('valis_fold_defaults_v030', '1');
-        }
-      } catch (e) {}
-
-      try {
-        var ids = ['pv-fold-body', 'esc-fold-body', 'ex-folha-fold', 'ex-arq-fold', 'ronda-fold-body', 'livro-fold-body', 'lemb-cfg-fold', 'rd-fold-body'];
-        ids.forEach(function(id) {
+        ['pv-fold-body', 'esc-fold-body', 'ex-folha-fold', 'ex-arq-fold'].forEach(function(id) {
+          var v = localStorage.getItem('valis_fold_' + id);
+          if (v !== '1') return;
           var body = document.getElementById(id);
           if (!body) return;
-          var v = null;
-          try { v = localStorage.getItem('valis_fold_' + id); } catch (e) {}
-          // padrão: minimizado. Só expande se usuário salvou explicitamente expandido ('0')
-          var collapsed = (v !== '0');
-          if (collapsed) {
-            body.classList.add('is-collapsed');
-          } else {
-            body.classList.remove('is-collapsed');
-          }
+          body.classList.add('is-collapsed');
           var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
-          if (card) {
-            if (collapsed) card.classList.add('sec-collapsed');
-            else card.classList.remove('sec-collapsed');
-          }
+          if (card) card.classList.add('sec-collapsed');
           var btn = document.querySelector('[onclick*="' + id + '"]');
           if (btn) {
-            btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            btn.textContent = collapsed ? 'Expandir' : 'Minimizar';
+            btn.setAttribute('aria-expanded', 'false');
+            btn.textContent = 'Expandir';
           }
         });
       } catch (e) {}
-    }
-    function aplicarFoldsPadraoMinimizados() {
-      try { restaurarSecFolds(); } catch (e) {}
     }
 
     async function salvarMinhaEscalaFixa() {
@@ -11871,9 +11260,6 @@
       if (raioEl) raioEl.value = '150';
       addAtividade('Posto: ' + n);
       await salvar();
-      try { preencherSelectPostosRonda(); renderRondaCard(); renderLivroPosto(); } catch (e) {}
-      try { if (typeof render === 'function') render(); } catch (e) {}
-      try { toast('Posto cadastrado: ' + n); } catch (e) {}
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
         try {
           await fbDb.collection('valis').doc('db_v42').set({ data: db, updatedAt: new Date().toISOString() }, { merge: true });
@@ -12647,7 +12033,6 @@
       toast('Mensagem ao posto'); labRender();
     }
     async function labPanico() {
-      return dispararPanicoValis();
       if (!confirm('Disparar EMERGÊNCIA?')) return;
       labEnsureDb();
       var lat = null, lng = null;
@@ -13836,16 +13221,211 @@
       if (st) st.textContent = texto;
       if (dot) dot.className = ok ? 'dot' : 'dot off';
     }
-    async function backupPlantaoesAuto(motivo) {
+    
+    // ===== Camadas extras de backup (mantém as existentes) =====
+    var VALIS_BK_IDB = 'valis_backup_idb';
+    var VALIS_BK_STORE = 'plantoes';
+
+    function montarPayloadBackup(motivo) {
+      return {
+        plantaoes: (typeof db !== 'undefined' && db && db.plantaoes) ? db.plantaoes : [],
+        folhasArquivadas: (typeof db !== 'undefined' && db && db.folhasArquivadas) ? db.folhasArquivadas : [],
+        updatedAt: new Date().toISOString(),
+        motivo: motivo || 'auto',
+        por: (typeof usuarioAtual !== 'undefined' && usuarioAtual) ? (usuarioAtual.nome || usuarioAtual.user) : 'sistema',
+        qtd: (typeof db !== 'undefined' && db && db.plantaoes) ? (db.plantaoes.length || 0) : 0,
+        appVersion: (typeof APP_VERSION !== 'undefined') ? APP_VERSION : ''
+      };
+    }
+
+    function salvarSnapshotLocalRotativo(payload) {
+      try {
+        var keyPrev2 = localStorage.getItem('valis_plantoes_snap_1');
+        var keyPrev1 = localStorage.getItem('valis_plantoes_snap_0');
+        if (keyPrev1) localStorage.setItem('valis_plantoes_snap_1', keyPrev1);
+        if (keyPrev2) localStorage.setItem('valis_plantoes_snap_2', keyPrev2);
+        localStorage.setItem('valis_plantoes_snap_0', JSON.stringify(payload));
+        localStorage.setItem('valis_plantoes_snap_meta', JSON.stringify({
+          updatedAt: payload.updatedAt,
+          qtd: payload.qtd,
+          motivo: payload.motivo
+        }));
+      } catch (e) { console.warn('snap local', e); }
+    }
+
+    function lerSnapshotsLocais() {
+      var out = [];
+      ['valis_plantoes_snap_0', 'valis_plantoes_snap_1', 'valis_plantoes_snap_2', 'valis_plantoes_backup'].forEach(function(k) {
+        try {
+          var raw = localStorage.getItem(k);
+          if (!raw) return;
+          var d = JSON.parse(raw);
+          if (d && ((d.plantaoes && d.plantaoes.length) || d.qtd)) out.push(d);
+        } catch (e) {}
+      });
+      return out;
+    }
+
+    function idbOpenBackup() {
+      return new Promise(function(resolve, reject) {
+        try {
+          if (!window.indexedDB) return reject(new Error('sem IndexedDB'));
+          var req = indexedDB.open(VALIS_BK_IDB, 1);
+          req.onupgradeneeded = function() {
+            var dbx = req.result;
+            if (!dbx.objectStoreNames.contains(VALIS_BK_STORE)) {
+              dbx.createObjectStore(VALIS_BK_STORE, { keyPath: 'id' });
+            }
+          };
+          req.onsuccess = function() { resolve(req.result); };
+          req.onerror = function() { reject(req.error || new Error('idb open')); };
+        } catch (e) { reject(e); }
+      });
+    }
+
+    async function salvarBackupIndexedDB(payload) {
+      try {
+        var dbx = await idbOpenBackup();
+        await new Promise(function(resolve, reject) {
+          var tx = dbx.transaction(VALIS_BK_STORE, 'readwrite');
+          var st = tx.objectStore(VALIS_BK_STORE);
+          st.put({
+            id: 'latest',
+            plantaoes: payload.plantaoes || [],
+            folhasArquivadas: payload.folhasArquivadas || [],
+            updatedAt: payload.updatedAt,
+            motivo: payload.motivo,
+            por: payload.por,
+            qtd: payload.qtd,
+            appVersion: payload.appVersion || ''
+          });
+          // guarda também um slot por versão do app
+          try {
+            st.put({
+              id: 'ver_' + String(payload.appVersion || 'x').replace(/[^\w.\-]+/g, '_'),
+              plantaoes: payload.plantaoes || [],
+              folhasArquivadas: payload.folhasArquivadas || [],
+              updatedAt: payload.updatedAt,
+              motivo: payload.motivo,
+              qtd: payload.qtd,
+              appVersion: payload.appVersion || ''
+            });
+          } catch (e) {}
+          tx.oncomplete = function() { resolve(); };
+          tx.onerror = function() { reject(tx.error); };
+        });
+        try { dbx.close(); } catch (e) {}
+        return true;
+      } catch (e) {
+        console.warn('idb backup', e);
+        return false;
+      }
+    }
+
+    async function lerBackupIndexedDB() {
+      try {
+        var dbx = await idbOpenBackup();
+        var rows = await new Promise(function(resolve, reject) {
+          var tx = dbx.transaction(VALIS_BK_STORE, 'readonly');
+          var st = tx.objectStore(VALIS_BK_STORE);
+          var req = st.getAll();
+          req.onsuccess = function() { resolve(req.result || []); };
+          req.onerror = function() { reject(req.error); };
+        });
+        try { dbx.close(); } catch (e) {}
+        return (rows || []).filter(function(r) {
+          return r && ((r.plantaoes && r.plantaoes.length) || r.qtd);
+        });
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async function backupPlantaoesMulti(motivo) {
+      var payload = montarPayloadBackup(motivo || 'multi');
+      // 1) local clássico
+      try {
+        localStorage.setItem('valis_plantoes_backup', JSON.stringify(payload));
+        localStorage.setItem('valis_plantoes_backup_meta', JSON.stringify({
+          updatedAt: payload.updatedAt, qtd: payload.qtd, motivo: payload.motivo
+        }));
+      } catch (e) {}
+      // 2) snapshots rotativos
+      salvarSnapshotLocalRotativo(payload);
+      // 3) IndexedDB
+      var idbOk = await salvarBackupIndexedDB(payload);
+      // 4) Firebase (reutiliza proteção já existente)
+      try { await backupPlantaoesAuto(motivo || 'multi'); } catch (e) { console.warn(e); }
+      try {
+        atualizarStatusBackupUI(
+          'Multi-backup: ' + payload.qtd + ' plantões · local+snap+IDB' + (idbOk ? '' : '(idb?)') + ' · ' + new Date(payload.updatedAt).toLocaleString('pt-BR'),
+          true
+        );
+      } catch (e) {}
+      return payload;
+    }
+
+    function iniciarBackupPeriodico() {
+      try {
+        if (window.__valisBkTimer) return;
+        window.__valisBkTimer = setInterval(function() {
+          try {
+            if (!db || !(db.plantaoes && db.plantaoes.length)) return;
+            // só local+snap+idb no timer (leve); Firebase no caminho normal
+            var payload = montarPayloadBackup('periodico');
+            try {
+              localStorage.setItem('valis_plantoes_backup', JSON.stringify(payload));
+              localStorage.setItem('valis_plantoes_backup_meta', JSON.stringify({
+                updatedAt: payload.updatedAt, qtd: payload.qtd, motivo: 'periodico'
+              }));
+            } catch (e) {}
+            salvarSnapshotLocalRotativo(payload);
+            salvarBackupIndexedDB(payload);
+          } catch (e) {}
+        }, 10 * 60 * 1000); // 10 min
+        // ao trocar de aba / fechar
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'hidden') {
+            try {
+              if (db && db.plantaoes && db.plantaoes.length) {
+                var p = montarPayloadBackup('visibility');
+                localStorage.setItem('valis_plantoes_backup', JSON.stringify(p));
+                salvarSnapshotLocalRotativo(p);
+              }
+            } catch (e) {}
+          }
+        });
+        window.addEventListener('beforeunload', function() {
+          try {
+            if (db && db.plantaoes && db.plantaoes.length) {
+              var p = montarPayloadBackup('unload');
+              localStorage.setItem('valis_plantoes_backup', JSON.stringify(p));
+              salvarSnapshotLocalRotativo(p);
+            }
+          } catch (e) {}
+        });
+        // se a versão do app mudou, backup imediato multi
+        try {
+          var lastVer = localStorage.getItem('valis_last_app_ver');
+          if (lastVer && typeof APP_VERSION !== 'undefined' && lastVer !== APP_VERSION) {
+            setTimeout(function() { backupPlantaoesMulti('pre_update_' + lastVer); }, 1500);
+          }
+          if (typeof APP_VERSION !== 'undefined') localStorage.setItem('valis_last_app_ver', APP_VERSION);
+        } catch (e) {}
+      } catch (e) { console.warn(e); }
+    }
+
+async function backupPlantaoesAuto(motivo) {
+      const motivoN = String(motivo || 'auto');
       const payload = {
         plantaoes: db.plantaoes || [],
         folhasArquivadas: db.folhasArquivadas || [],
         updatedAt: new Date().toISOString(),
-        motivo: motivo || 'auto',
-        por: usuarioAtual ? usuarioAtual.nome : 'sistema',
+        motivo: motivoN,
+        por: usuarioAtual ? (usuarioAtual.nome || usuarioAtual.user) : 'sistema',
         qtd: (db.plantaoes || []).length
       };
-      // local dedicado (sobrevive melhor a trocas parciais)
+      // local sempre grava o estado atual
       try {
         localStorage.setItem('valis_plantoes_backup', JSON.stringify(payload));
         localStorage.setItem('valis_plantoes_backup_meta', JSON.stringify({
@@ -13854,23 +13434,73 @@
           motivo: payload.motivo
         }));
       } catch (e) { console.warn(e); }
+
       let fbOk = false;
+      let fbSkip = '';
       if (firebaseOk && fbDb && DataService.mode === 'firebase') {
         try {
-          await fbDb.collection('valis').doc('plantoes_backup').set(payload, { merge: true });
-          fbOk = true;
+          var ref = fbDb.collection('valis').doc('plantoes_backup');
+          var remoto = null;
+          try {
+            var snap = await ref.get();
+            if (snap.exists) remoto = snap.data() || null;
+          } catch (e) { console.warn('ler backup remoto', e); }
+
+          var qtdLocal = payload.qtd || 0;
+          var qtdRem = remoto ? ((remoto.plantaoes || []).length || remoto.qtd || 0) : 0;
+          // Proteção: não sobrescrever backup da nuvem com menos dados
+          // (boot / clientes vazios apagavam o backup no Firebase)
+          var forcar = (motivoN === 'manual' || motivoN === 'pos_recuperar' || motivoN === 'import_json' || motivoN === 'zerado_dev' || motivoN === 'apagado');
+          if (!forcar && remoto && qtdRem > 0 && qtdLocal < qtdRem) {
+            fbSkip = 'protegido (nuvem tem ' + qtdRem + ', local ' + qtdLocal + ')';
+            // ainda assim atualiza meta de "último boot visto" sem apagar plantões
+            try {
+              await ref.set({
+                lastBootAt: payload.updatedAt,
+                lastBootPor: payload.por,
+                lastBootQtdLocal: qtdLocal,
+                lastBootMotivo: motivoN
+              }, { merge: true });
+            } catch (e) {}
+          } else {
+            // histórico curto (últimos 5) só metadados
+            var hist = Array.isArray(remoto && remoto.historico) ? remoto.historico.slice(0, 4) : [];
+            hist.unshift({
+              updatedAt: payload.updatedAt,
+              qtd: qtdLocal,
+              motivo: motivoN,
+              por: payload.por
+            });
+            var toSave = Object.assign({}, payload, { historico: hist });
+            await ref.set(toSave, { merge: false });
+            fbOk = true;
+            // Cópia de segurança extra (não é apagada em boot)
+            if (qtdLocal > 0) {
+              try {
+                await fbDb.collection('valis').doc('plantoes_backup_safe').set({
+                  plantaoes: payload.plantaoes,
+                  folhasArquivadas: payload.folhasArquivadas || [],
+                  updatedAt: payload.updatedAt,
+                  motivo: motivoN,
+                  por: payload.por,
+                  qtd: qtdLocal
+                }, { merge: false });
+              } catch (e) { console.warn('backup_safe', e); }
+            }
+          }
         } catch (e) { console.warn('backup plantões FB:', e); }
       }
-      atualizarStatusBackupUI(
-        'Backup: ' + payload.qtd + ' plantão(ões) · ' + new Date(payload.updatedAt).toLocaleString('pt-BR') + (fbOk ? ' · Firebase' : ' · local'),
-        true
-      );
+      var msg = 'Backup: ' + payload.qtd + ' plantão(ões) · ' + new Date(payload.updatedAt).toLocaleString('pt-BR');
+      if (fbOk) msg += ' · Firebase';
+      else if (fbSkip) msg += ' · ' + fbSkip;
+      else msg += ' · local';
+      atualizarStatusBackupUI(msg, true);
       return payload;
     }
     async function backupPlantaoesManual() {
-      const p = await backupPlantaoesAuto('manual');
-      await salvar();
-      toast('Backup salvo (' + p.qtd + ' plantões)');
+      const p = await backupPlantaoesMulti('manual');
+      try { await salvar(); } catch (e) {}
+      toast('Backup multi salvo (' + p.qtd + ' plantões)');
     }
     async function apagarBackupPlantaoes() {
       if (!confirm('Apagar o backup de plantões (local + Firebase)?\nOs plantões da folha atual NÃO são apagados — só o backup.')) return;
@@ -13947,6 +13577,7 @@
     }
     async function recuperarPlantaoes() {
       let remoto = null;
+      let remotoSafe = null;
       let local = null;
       try {
         const raw = localStorage.getItem('valis_plantoes_backup');
@@ -13957,20 +13588,33 @@
           const snap = await fbDb.collection('valis').doc('plantoes_backup').get();
           if (snap.exists) remoto = snap.data();
         } catch (e) { console.warn(e); }
+        try {
+          const snap2 = await fbDb.collection('valis').doc('plantoes_backup_safe').get();
+          if (snap2.exists) remotoSafe = snap2.data();
+        } catch (e) { console.warn(e); }
       }
-      // escolhe o mais recente / com mais itens
-      const candidatos = [local, remoto].filter(Boolean);
+      var snaps = [];
+      try { snaps = lerSnapshotsLocais(); } catch (e) {}
+      var idbRows = [];
+      try { idbRows = await lerBackupIndexedDB(); } catch (e) {}
+      // Prioriza quem tem MAIS plantões; em empate, o mais recente
+      const candidatos = [local, remoto, remotoSafe].concat(snaps).concat(idbRows).filter(function(x) {
+        return x && ((x.plantaoes && x.plantaoes.length) || x.qtd);
+      });
       if (!candidatos.length) {
-        alert('Nenhum backup de plantões encontrado (local ou Firebase).');
+        alert('Nenhum backup de plantões encontrado (local, Firebase ou cópia segura).');
+        try { await atualizarStatusBackupUIFromRemote(); } catch (e) {}
         return;
       }
-      candidatos.sort((a, b) => {
-        const ta = new Date(a.updatedAt || 0).getTime();
-        const tb = new Date(b.updatedAt || 0).getTime();
-        if (tb !== ta) return tb - ta;
-        return (b.qtd || 0) - (a.qtd || 0);
+      candidatos.sort(function(a, b) {
+        var qa = (a.plantaoes && a.plantaoes.length) || a.qtd || 0;
+        var qb = (b.plantaoes && b.plantaoes.length) || b.qtd || 0;
+        if (qb !== qa) return qb - qa;
+        return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
       });
       const best = candidatos[0];
+      const qBest = (best.plantaoes && best.plantaoes.length) || best.qtd || 0;
+      if (!confirm('Recuperar backup com ' + qBest + ' plantão(ões)?\nData: ' + (best.updatedAt || '—') + '\nMotivo: ' + (best.motivo || '—'))) return;
       const antes = (db.plantaoes || []).length;
       db.plantaoes = mergePlantaoes(db.plantaoes || [], best.plantaoes || []);
       if (best.folhasArquivadas && best.folhasArquivadas.length) {
@@ -13980,6 +13624,43 @@
       await backupPlantaoesAuto('pos_recuperar');
       render();
       toast('Recuperado: ' + (db.plantaoes || []).length + ' plantões (antes ' + antes + ')');
+    }
+
+    async function atualizarStatusBackupUIFromRemote() {
+      try {
+        var partes = [];
+        try {
+          var meta = localStorage.getItem('valis_plantoes_backup_meta');
+          if (meta) {
+            var m = JSON.parse(meta);
+            partes.push('Local: ' + (m.qtd || 0) + ' · ' + (m.updatedAt ? new Date(m.updatedAt).toLocaleString('pt-BR') : '—'));
+          }
+        } catch (e) {}
+        if (firebaseOk && fbDb && DataService.mode === 'firebase') {
+          try {
+            var snap = await fbDb.collection('valis').doc('plantoes_backup').get();
+            if (snap.exists) {
+              var d = snap.data() || {};
+              var q = (d.plantaoes && d.plantaoes.length) || d.qtd || 0;
+              partes.push('Firebase: ' + q + ' · ' + (d.updatedAt ? new Date(d.updatedAt).toLocaleString('pt-BR') : '—'));
+              if (d.lastBootAt && q === 0) partes.push('(boot vazio bloqueado pela proteção)');
+            } else {
+              partes.push('Firebase: sem doc plantoes_backup');
+            }
+          } catch (e) {
+            partes.push('Firebase: erro ao ler');
+          }
+          try {
+            var snap2 = await fbDb.collection('valis').doc('plantoes_backup_safe').get();
+            if (snap2.exists) {
+              var d2 = snap2.data() || {};
+              var q2 = (d2.plantaoes && d2.plantaoes.length) || d2.qtd || 0;
+              partes.push('Cópia segura: ' + q2);
+            }
+          } catch (e) {}
+        }
+        atualizarStatusBackupUI(partes.length ? partes.join(' | ') : 'Backup: nenhum', partes.length > 0);
+      } catch (e) { console.warn(e); }
     }
     function exportarPlantaoesJSON() {
       const payload = {
@@ -15577,92 +15258,31 @@
         const s = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
         if (s && s.user) {
           setLoginAutoStatus(true, 'Login automatico', 'Validando usuario salvo e permissoes...', null);
-          window.__valisAutoLoginTentativas = 0;
-          window.__valisAutoLoginUser = String(s.user || '');
-          window.__valisAutoLoginManter = !!s.manter;
-          tryAutoLoginComRetry();
-          return;
+          const u = (db.users || []).find(x => {
+            if (String(x.user || '').toLowerCase() !== String(s.user || '').toLowerCase()) return false;
+            const ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1;
+            const pend = x.pendente === true || x.pendente === 'true' || x.pendente === 1;
+            return ativo && !pend;
+          });
+          if (u) {
+            setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
+            usuarioAtual = u;
+            try { salvarSessaoLogin(u.user, !!s.manter); } catch (e) {
+              sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user }));
+            }
+            pedirPermissaoNotificacoes();
+            setTimeout(function() {
+              try { setLoginAutoStatus(false); } catch (e) {}
+              entrarApp();
+            }, 2200);
+            return;
+          }
+          setLoginAutoStatus(true, 'Login automatico indisponivel', 'Sessao salva nao e valida. Faca login manualmente.', 'err');
         } else {
           setLoginAutoStatus(true, 'Pronto para entrar', 'Digite usuario e senha, ou aguarde se houver sessao neste aparelho.', null);
         }
       } catch (e) {
         try { setLoginAutoStatus(true, 'Login automatico', 'Nao foi possivel restaurar a sessao. Entre com usuario e senha.', 'err'); } catch (e2) {}
-      }
-    }
-
-    function acharUsuarioSessaoAuto(login) {
-      try {
-        var alvo = String(login || '').toLowerCase();
-        return (db.users || []).find(function(x) {
-          if (!x) return false;
-          if (String(x.user || '').toLowerCase() !== alvo) return false;
-          var ativo = x.ativo === true || x.ativo === 'true' || x.ativo === 1 || x.ativo === undefined;
-          var pend = x.pendente === true || x.pendente === 'true' || x.pendente === 1;
-          return ativo && !pend;
-        }) || null;
-      } catch (e) { return null; }
-    }
-
-    
-    // Re-tenta login automatico quando a base de usuarios chegar da nuvem
-    function notificarUsersCarregadosParaAutoLogin() {
-      try {
-        if (usuarioAtual) return;
-        if (!window.__valisAutoLoginUser) {
-          var s = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
-          if (s && s.user) {
-            window.__valisAutoLoginUser = String(s.user);
-            window.__valisAutoLoginManter = !!s.manter;
-          }
-        }
-        if (window.__valisAutoLoginUser && typeof tryAutoLoginComRetry === 'function') {
-          tryAutoLoginComRetry();
-        }
-      } catch (e) {}
-    }
-
-    function tryAutoLoginComRetry() {
-      try {
-        if (usuarioAtual) return;
-        if (sessionStorage.getItem('valis_logout_manual') === '1') return;
-        if (typeof __logoutManual !== 'undefined' && __logoutManual) return;
-        var login = window.__valisAutoLoginUser;
-        if (!login) {
-          var s0 = (typeof lerSessaoLogin === 'function') ? lerSessaoLogin() : null;
-          if (!s0 || !s0.user) return;
-          login = String(s0.user);
-          window.__valisAutoLoginUser = login;
-          window.__valisAutoLoginManter = !!s0.manter;
-        }
-        var u = acharUsuarioSessaoAuto(login);
-        if (u) {
-          setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
-          usuarioAtual = u;
-          try { salvarSessaoLogin(u.user, !!window.__valisAutoLoginManter); } catch (e) {
-            try { sessionStorage.setItem('valis_user', JSON.stringify({ user: u.user })); } catch (e2) {}
-          }
-          try { pedirPermissaoNotificacoes(); } catch (e) {}
-          setTimeout(function() {
-            try { setLoginAutoStatus(false); } catch (e) {}
-            try { entrarApp(); } catch (e) { console.warn(e); }
-          }, 1200);
-          return;
-        }
-        window.__valisAutoLoginTentativas = (window.__valisAutoLoginTentativas || 0) + 1;
-        if (window.__valisAutoLoginTentativas <= 20) {
-          setLoginAutoStatus(true, 'Login automatico', 'Aguardando dados da nuvem... (' + window.__valisAutoLoginTentativas + '/20)', null);
-          setTimeout(tryAutoLoginComRetry, 1000);
-        } else {
-          setLoginAutoStatus(true, 'Login automatico indisponivel', 'Sessao salva nao validada. Faca login com senha.', 'err');
-          try { esconderBannerLoginErro(); } catch (e) {}
-          try {
-            var banner = document.getElementById('login-erro-senha-banner');
-            if (banner) banner.classList.add('show');
-          } catch (e) {}
-        }
-      } catch (e) {
-        console.warn('tryAutoLoginComRetry', e);
-        try { setLoginAutoStatus(true, 'Login automatico', 'Erro ao restaurar sessao. Entre com senha.', 'err'); } catch (e2) {}
       }
     }
 
@@ -16988,7 +16608,6 @@
       addAtividade('Check-in plantão: ' + (p ? p.n : 'posto') + (auto ? ' (GPS auto)' : ''));
       try { await salvar(); } catch (e) {}
       toast(auto ? 'Check-in automático (GPS)' : 'Check-in registrado');
-      try { mostrarComprovantePonto(auto ? 'Check-in automático' : 'Check-in', sess.postoNome || '', 'GPS: ' + (sess.checkInLat != null ? (Number(sess.checkInLat).toFixed(5)+','+Number(sess.checkInLng).toFixed(5)) : 'n/d')); } catch (e) {}
       try { feedbackAcaoLeve(); } catch (e) {}
       try { iniciarTimerPlantaoLive(); } catch (e) {}
       try { sess = gravarAlvoCheckoutNaSessao(sess); pvSave(sess); } catch (e) {}
@@ -17946,15 +17565,6 @@
       } catch (e) {}
       try { verificarAtualizacaoConcluida(); } catch (e) {}
       try { atualizarPainelLogin(); } catch (e) {}
-      try {
-        if (!window.__valisAutoLoginWatch) {
-          window.__valisAutoLoginWatch = setInterval(function() {
-            try { atualizarPainelLogin(); } catch (e) {}
-            try { notificarUsersCarregadosParaAutoLogin(); } catch (e) {}
-          }, 2000);
-          setTimeout(function() { try { clearInterval(window.__valisAutoLoginWatch); } catch (e) {} }, 45000);
-        }
-      } catch (e) {}
       try { setTimeout(function() { if (usuarioAtual) atualizarPainelInicio(); }, 400); } catch (e) {}
       try {
         if (window.ValisUpdate) {

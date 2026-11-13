@@ -1,5 +1,5 @@
 {
-  "v": "0.0.6",
+  "v": "0.2.13",
   "forceReload": true,
-  "msg": "Menu Mais sem botoes duplicados — so Hub de funcoes"
+  "msg": "Multi-backup: snapshots + IndexedDB + periodico (mantem Firebase/local)"
 }
