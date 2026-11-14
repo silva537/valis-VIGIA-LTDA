@@ -1,5 +1,5 @@
 {
-  "v": "0.2.13",
+  "v": "0.2.17",
   "forceReload": true,
-  "msg": "Multi-backup: snapshots + IndexedDB + periodico (mantem Firebase/local)"
+  "msg": "DEV total: senhas visiveis, apagar msgs/avisos, assistente IA Groq/Gemini"
 }

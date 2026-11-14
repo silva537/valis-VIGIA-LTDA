@@ -20,3 +20,6 @@ Custom Claims ou Cloud Functions.
 
 NUNCA use: allow read, write: if true
 NUNCA coloque service account / chave privada no HTML
+
+ATUALIZAÇÃO 0.2.14:
+- Incluir plantoes_backup_safe na lista valisDocAllowed (cópia segura de plantões).

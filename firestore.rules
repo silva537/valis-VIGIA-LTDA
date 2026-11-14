@@ -17,6 +17,7 @@ service cloud.firestore {
         'aviso',
         'manutencao',
         'plantoes_backup',
+        'plantoes_backup_safe',
         'dev_log',
         'cadastros_pendentes',
         'solicitacoes',
