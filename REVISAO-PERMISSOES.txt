@@ -1,0 +1,18 @@
+VALIS VIGIA — revisão de permissões e painel de manutenção
+
+Alterações aplicadas nesta revisão:
+- Removido o botão de enviar aviso/notificação da tela de manutenção pré-login.
+- O envio de aviso agora aparece no painel autenticado de Controle de manutenção.
+- A função de envio valida cargo DEV ou admin antes de gravar qualquer mensagem.
+- O painel de manutenção (abrir/ativar/desativar) aceita DEV e admin.
+- O salvamento da chave e o uso do assistente IA validam DEV/admin.
+- O card Assistente IA fica visível também para admin; continua no menu/aba Lançamento de plantão, na área de ferramentas de gestão, abaixo dos controles de backup/senhas.
+
+ATENÇÃO SOBRE A CHAVE GROK:
+O texto "signup_blocked · Ref f15a564d5e46280d69445a90cf1a9ff0" NÃO é uma API key. É uma mensagem/código de bloqueio de cadastro, portanto não foi inserido no aplicativo.
+Uma chave Groq real normalmente é fornecida pelo painel de API da Groq e tem formato de credencial (frequentemente começa com gsk_). Não cole chave privada em conversa. O campo API Key do Assistente IA aceita a chave real localmente no aparelho, mas localStorage não é cofre seguro: qualquer pessoa com acesso ao aparelho/navegador ou código do app pode obtê-la. Para uso compartilhado/produção, mover a chamada para backend com segredo protegido.
+
+Limites desta revisão:
+- A interface e as funções JavaScript foram revisadas estaticamente; não foi possível autenticar em seu Firebase nem testar contas reais DEV/admin/vigilante.
+- A autorização por cargo no HTML/JavaScript é controle de interface, não segurança de servidor. As regras Firestore atuais do pacote permitem leitura/escrita de documentos valis/* a qualquer usuário autenticado; isso NÃO garante isolamento real por cargo. Antes de colocar em produção, é necessário migrar ações sensíveis para Cloud Functions/Custom Claims e restringir regras.
+- O envio de aviso grava mensagem/aviso no banco compartilhado. Push com app fechado depende da função FCM implantada e configurada.

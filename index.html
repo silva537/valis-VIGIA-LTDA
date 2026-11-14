@@ -3647,7 +3647,8 @@
     /* v0.2.17 — dev total */
     body.role-dev .dev-only-hide { display: none !important; }
     body.role-dev #dev-senhas-card,
-    body.role-dev #dev-ia-card { display: block !important; }
+    body.role-dev #dev-ia-card,
+    body.role-admin #dev-ia-card { display: block !important; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3683,15 +3684,6 @@
         </div>
         <p id="manut-dev-erro" class="erro" style="min-height:18px;margin:0 0 8px"></p>
         <button type="button" class="btn purple" onclick="validarDevManutencao()">Desbloquear nesta sessão</button>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(148,163,184,0.2)">
-          <div class="card-label" style="margin-bottom:8px">Aviso de manutenção</div>
-          <div class="field" style="margin:0 0 8px">
-            <label>Mensagem para a equipe</label>
-            <textarea id="manut-aviso-txt" class="area" rows="2" placeholder="Ex.: Sistema em manutenção até 00:00. Evitem lançar plantão."></textarea>
-          </div>
-          <button type="button" class="btn dark" style="width:100%" onclick="enviarAvisoManutencaoDaTela()">📢 Enviar aviso / notificação de manutenção</button>
-          <p class="meta" style="font-size:11px;margin:8px 0 0;line-height:1.35">Grava aviso no app para todos na próxima sincronização. Push FCM só se estiver configurado no aparelho.</p>
-        </div>
       </div>
     </div>
   </div>
@@ -3727,6 +3719,12 @@
         <input id="manut-ctrl-eta" class="input" maxlength="60" placeholder="Ex: Atualização de sistema">
       </div>
       <div class="manut-preview" id="manut-ctrl-preview">Pré-visualização da mensagem…</div>
+      <div class="field" style="margin-top:14px">
+        <label>Aviso / notificação para a equipe</label>
+        <textarea id="manut-aviso-txt" class="area" rows="2" placeholder="Mensagem que será exibida para a equipe."></textarea>
+        <p class="meta" style="font-size:11px;margin-top:6px">Disponível somente para contas DEV e Administração. O aviso interno aparece após sincronização; push depende do FCM no servidor.</p>
+        <button type="button" class="btn dark" style="width:100%;margin-top:8px" onclick="enviarAvisoManutencaoDaTela()">📢 Enviar aviso / notificação</button>
+      </div>
       <div class="vm-actions" style="flex-direction:column;margin-top:14px">
         <button type="button" class="btn manut-btn-on" id="manut-btn-ativar" onclick="confirmarAtivarManutencao()">Ativar manutenção para todos</button>
         <button type="button" class="btn manut-btn-off" id="manut-btn-desativar" onclick="confirmarDesativarManutencao()">Desativar e liberar o app</button>
@@ -8169,8 +8167,17 @@
       }
     }
 
+    function podeEnviarAvisoManutencao() {
+      var f = String((usuarioAtual && usuarioAtual.funcao) || '').toLowerCase().trim();
+      return !!usuarioAtual && (f === 'dev' || f === 'admin');
+    }
+
     async function enviarAvisoManutencaoDaTela() {
       try {
+        if (!podeEnviarAvisoManutencao()) {
+          alert('Acesso permitido somente para DEV ou Administração.');
+          return false;
+        }
         var ta = document.getElementById('manut-aviso-txt');
         var txt = ta ? String(ta.value || '').trim() : '';
         if (!txt) {
@@ -8356,6 +8363,11 @@
     }
     function devSalvarChaveIa() {
       try {
+        var cargoIa = String((usuarioAtual && usuarioAtual.funcao) || '').toLowerCase().trim();
+        if (!usuarioAtual || (cargoIa !== 'dev' && cargoIa !== 'admin')) {
+          toast('Acesso somente DEV/Admin.');
+          return;
+        }
         var prov = document.getElementById('dev-ia-prov');
         var key = document.getElementById('dev-ia-key');
         var p = prov ? prov.value : 'groq';
@@ -13306,7 +13318,7 @@
     async function abrirPainelControleManutencao(opts) {
       opts = opts || {};
       try {
-        if (!podeDevPerigoso()) return alert('Só o cargo DEV pode gerenciar manutenção.');
+        if (!podeEnviarAvisoManutencao()) return alert('Só DEV ou Administração podem gerenciar manutenção.');
         var m = {};
         try { m = await lerManutencao(); } catch (e) { m = {}; }
         var st = document.getElementById('manut-ctrl-status');
@@ -13357,7 +13369,7 @@
     }
     async function confirmarAtivarManutencao() {
       try {
-        if (!podeDevPerigoso()) return alert('Só o cargo DEV.');
+        if (!podeEnviarAvisoManutencao()) return alert('Só DEV ou Administração podem gerenciar manutenção.');
         var titulo = ((document.getElementById('manut-ctrl-titulo') || {}).value || '').trim() || 'Sistema em manutenção';
         var msg = ((document.getElementById('manut-ctrl-msg') || {}).value || '').trim() || 'Estamos realizando melhorias. Voltamos em breve.';
         var etaTxt = ((document.getElementById('manut-ctrl-eta') || {}).value || '').trim();
@@ -13390,7 +13402,7 @@
     }
     async function confirmarDesativarManutencao() {
       try {
-        if (!podeDevPerigoso()) return alert('Só o cargo DEV.');
+        if (!podeEnviarAvisoManutencao()) return alert('Só DEV ou Administração podem gerenciar manutenção.');
         if (!confirm('Desativar manutenção e liberar o aplicativo para todos?')) return;
         await setManutencao(false, '', {});
         fecharPainelManutencao();
