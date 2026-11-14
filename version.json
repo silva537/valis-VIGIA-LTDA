@@ -1,5 +1,5 @@
 {
-  "v": "0.2.17",
+  "v": "0.2.21",
   "forceReload": true,
-  "msg": "DEV total: senhas visiveis, apagar msgs/avisos, assistente IA Groq/Gemini"
+  "msg": "Assistente IA em bolha flutuante (so DEV)"
 }
