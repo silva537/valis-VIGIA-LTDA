@@ -3627,223 +3627,6 @@
       pointer-events: none !important;
       overflow: hidden !important;
     }
-  
-    /* v0.2.14 — correcoes */
-    .sec-fold-body.is-collapsed {
-      max-height: 0 !important;
-      opacity: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      pointer-events: none !important;
-      overflow: hidden !important;
-    }
-    .sec-fold-body:not(.is-collapsed) {
-      max-height: none !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      overflow: visible !important;
-    }
-  
-    /* v0.2.17 — dev total */
-    body.role-dev .dev-only-hide { display: none !important; }
-    body.role-dev #dev-senhas-card { display: block !important; }
-    /* IA card NÃO fica display:block fixo — só bolha + painel .hidden */
-  
-    /* v0.2.18/22 — senhas só DEV; IA controlada pela bolha */
-    #dev-senhas-card {
-      display: none !important;
-    }
-    body.role-dev #dev-senhas-card {
-      display: block !important;
-    }
-    body.role-vigilante #dev-senhas-card,
-    body.role-vigilante #dev-ia-card,
-    body.role-equipe #dev-senhas-card,
-    body.role-equipe #dev-ia-card,
-    body.role-supervisor #dev-senhas-card,
-    body.role-supervisor #dev-ia-card,
-    body.role-admin #dev-senhas-card,
-    body.role-admin #dev-ia-card {
-      display: none !important;
-    }
-  
-    /* v0.2.19 — IA na tela principal (DEV) */
-    #dev-ia-card,
-    .valis-ia-panel {
-      display: none !important;
-    }
-    /* IA: não forçar display — bolha abre/fecha com .hidden */
-    body.role-vigilante #dev-ia-card,
-    body.role-equipe #dev-ia-card,
-    body.role-supervisor #dev-ia-card,
-    body.role-admin #dev-ia-card {
-      display: none !important;
-    }
-    .valis-ia-panel {
-      margin: 0 0 16px;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(125, 211, 252, 0.35);
-      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(30,27,75,0.95));
-      box-shadow: 0 0 0 1px rgba(56,189,248,0.12), 0 12px 40px rgba(0,0,0,0.35);
-    }
-    .valis-ia-head {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(167,139,250,0.18));
-      border-bottom: 1px solid rgba(148,163,184,0.2);
-    }
-    .valis-ia-ico {
-      width: 42px; height: 42px;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      background: linear-gradient(135deg, #38bdf8, #a78bfa);
-      color: #0f172a;
-      font-weight: 900;
-      box-shadow: 0 0 20px rgba(56,189,248,0.45);
-    }
-    .valis-ia-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #f8fafc;
-      letter-spacing: 0.02em;
-    }
-    .valis-ia-sub {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-top: 2px;
-    }
-    .valis-ia-body { padding: 14px 16px 16px; }
-    .valis-ia-chat {
-      min-height: 88px;
-      max-height: 220px;
-      overflow: auto;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(2,6,23,0.65);
-      border: 1px solid rgba(148,163,184,0.18);
-      color: #e2e8f0;
-      font-size: 13px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      margin-bottom: 12px;
-    }
-    .valis-ia-row {
-      display: flex;
-      gap: 8px;
-      align-items: stretch;
-    }
-    .valis-ia-input {
-      flex: 1;
-      resize: vertical;
-      min-height: 48px;
-      border-radius: 14px;
-      border: 1px solid rgba(125,211,252,0.3);
-      background: rgba(15,23,42,0.9);
-      color: #f1f5f9;
-      padding: 10px 12px;
-      font-size: 14px;
-      font-family: inherit;
-    }
-    .valis-ia-send {
-      border: none;
-      border-radius: 14px;
-      padding: 0 16px;
-      min-width: 88px;
-      font-weight: 800;
-      font-size: 13px;
-      color: #0f172a;
-      cursor: pointer;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      box-shadow: 0 6px 18px rgba(56,189,248,0.35);
-    }
-    .valis-ia-send:active { transform: scale(0.97); }
-    .valis-ia-adv {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-    .valis-ia-adv summary {
-      cursor: pointer;
-      color: #7dd3fc;
-      font-weight: 700;
-    }
-  
-    /* v0.2.21 — IA bolha flutuante */
-    .valis-ia-fab {
-      display: none;
-      position: fixed;
-      right: 16px;
-      bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-      z-index: 9000;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      font-size: 22px;
-      font-weight: 900;
-      color: #0f172a;
-      background: linear-gradient(135deg, #38bdf8, #a78bfa 55%, #f472b6);
-      box-shadow: 0 8px 28px rgba(56,189,248,0.45), 0 0 0 3px rgba(15,23,42,0.5);
-    }
-    body.role-dev .valis-ia-fab {
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-    }
-    body.role-dev .valis-ia-fab:active { transform: scale(0.94); }
-    body:not(.role-dev) .valis-ia-fab,
-    body:not(.role-dev) #dev-ia-card.valis-ia-float {
-      display: none !important;
-    }
-    .valis-ia-float {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: calc(150px + env(safe-area-inset-bottom, 0px));
-      z-index: 9001;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-    .valis-ia-float.hidden,
-    #dev-ia-card.hidden,
-    #dev-ia-card.valis-ia-float.hidden {
-      display: none !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-      opacity: 0 !important;
-    }
-    body.role-dev .valis-ia-float:not(.hidden),
-    body.role-dev #dev-ia-card.valis-ia-float:not(.hidden) {
-      display: block !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      opacity: 1 !important;
-    }
-    /* v0.2.22 — IA bolha fix */
-
-    .valis-ia-float-card {
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(125, 211, 252, 0.4);
-      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(30,27,75,0.96));
-      box-shadow: 0 16px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(56,189,248,0.12);
-    }
-    .valis-ia-close {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      border: 1px solid rgba(148,163,184,0.25);
-      background: rgba(15,23,42,0.8);
-      color: #e2e8f0;
-      font-size: 22px;
-      line-height: 1;
-      cursor: pointer;
-    }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3868,26 +3651,13 @@
       </div>
       <button type="button" class="btn dark" onclick="location.reload()">Atualizar e tentar de novo</button>
       <div class="manut-dev-box">
-        <div class="card-label" style="margin-bottom:8px">Acesso autorizado · DEV</div>
+        <div class="card-label" style="margin-bottom:8px">Acesso autorizado</div>
         <div class="field" style="margin:0 0 8px">
-          <label>Login DEV / Admin</label>
-          <input id="manut-dev-user" class="input" type="text" placeholder="dev ou admin" autocomplete="username">
-        </div>
-        <div class="field" style="margin:0 0 8px">
-          <label>Senha de desbloqueio (DEV) ou senha da conta</label>
-          <input id="manut-dev-pass" class="input" type="password" placeholder="Digite a senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')validarDevManutencao()">
+          <label>Senha de desbloqueio</label>
+          <input id="manut-dev-pass" class="input" type="password" placeholder="Digite a senha" autocomplete="off" onkeydown="if(event.key==='Enter')validarDevManutencao()">
         </div>
         <p id="manut-dev-erro" class="erro" style="min-height:18px;margin:0 0 8px"></p>
         <button type="button" class="btn purple" onclick="validarDevManutencao()">Desbloquear nesta sessão</button>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(148,163,184,0.2)">
-          <div class="card-label" style="margin-bottom:8px">Aviso de manutenção</div>
-          <div class="field" style="margin:0 0 8px">
-            <label>Mensagem para a equipe</label>
-            <textarea id="manut-aviso-txt" class="area" rows="2" placeholder="Ex.: Sistema em manutenção até 00:00. Evitem lançar plantão."></textarea>
-          </div>
-          <button type="button" class="btn dark" style="width:100%" onclick="enviarAvisoManutencaoDaTela()">📢 Enviar aviso / notificação de manutenção</button>
-          <p class="meta" style="font-size:11px;margin:8px 0 0;line-height:1.35">Grava aviso no app para todos na próxima sincronização. Push FCM só se estiver configurado no aparelho.</p>
-        </div>
       </div>
     </div>
   </div>
@@ -4008,7 +3778,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v0.2.23</div>
+        <div class="login-version" id="login-version">v0.2.13</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -4237,7 +4007,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="brand">
-          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.23</span>
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.13</span>
         </div>
         <div class="top-actions">
           <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
@@ -4284,7 +4054,6 @@
               <div class="dev-home-kpi"><div class="k">Users</div><div class="v" id="dh-kpi-users">0</div></div>
             </div>
           </div>
-          
           <div class="dev-home-grid">
             <button type="button" class="dev-home-tile red" onclick="try{abrirMenuDev()}catch(e){}">
               <span class="ico">🛠</span><div class="lab">Menu DEV</div><div class="sub">Ferramentas técnicas</div>
@@ -4656,47 +4425,6 @@
             Camadas: local · snapshots (3) · IndexedDB · Firebase · cópia segura. Atualização do app não apaga esses backups.
           </p>
           <button class="btn red" style="margin-top:8px" onclick="apagarBackupPlantaoes()">🗑 Apagar backup de plantões</button>
-
-          <div class="card vigilante-hide-dev-only" id="dev-senhas-card" style="margin-top:14px;display:none" data-dev-only="1">
-            <div class="card-label">Gerenciar senhas de acesso (DEV total)</div>
-            <p class="meta" style="font-size:12px;margin:0 0 10px;line-height:1.4">
-              Login DEV tem acesso total. Senhas no sistema usam hash (não dá para “descriptografar” a antiga).
-              Ao redefinir, o DEV passa a poder <b>ver</b> a senha salva neste painel.
-            </p>
-            <div class="field"><label>Senha mestra de manutenção (código)</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input id="dev-master-view" class="input" type="password" readonly value="" style="flex:1" placeholder="••••">
-                <button type="button" class="btn dark sm" onclick="devToggleMasterSenha()">Mostrar</button>
-              </div>
-            </div>
-            <div class="field"><label>Usuário</label>
-              <select id="dev-senha-user" class="select" onchange="devMostrarSenhaUsuario()"></select>
-            </div>
-            <div class="field"><label>Senha atual (visível só para DEV)</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input id="dev-senha-atual" class="input" type="text" readonly placeholder="—" style="flex:1">
-                <button type="button" class="btn dark sm" onclick="devCopiarSenhaUsuario()">Copiar</button>
-              </div>
-            </div>
-            <div class="field"><label>Nova senha</label>
-              <input id="dev-senha-nova" class="input" type="password" placeholder="Mín. 4 caracteres" autocomplete="new-password">
-            </div>
-            <div class="field"><label>Confirmar nova senha</label>
-              <input id="dev-senha-nova2" class="input" type="password" placeholder="Repita a senha" autocomplete="new-password">
-            </div>
-            <button type="button" class="btn green" style="width:100%;margin-bottom:10px" onclick="devRedefinirSenhaUsuario()">Salvar nova senha do usuário</button>
-            <div class="field"><label>Reautenticação periódica (horas)</label>
-              <input id="dev-reauth-horas" class="input" type="number" min="1" max="72" step="1" value="2" placeholder="2">
-            </div>
-            <button type="button" class="btn dark" style="width:100%;margin-bottom:8px" onclick="devSalvarPrazoReauth()">Aplicar prazo de reautenticação</button>
-            <button type="button" class="btn red" style="width:100%;margin-bottom:8px" onclick="devApagarTodasMensagens()">🗑 Apagar TODAS as mensagens</button>
-            <button type="button" class="btn red" style="width:100%" onclick="devLimparAvisosNotificacoes()">🗑 Limpar avisos / notificações do app</button>
-            <p id="dev-senha-status" class="meta" style="font-size:11px;margin:8px 0 0"></p>
-          </div>
-
-          
-
-
           <button class="btn dark" style="margin-top:8px" onclick="exportarPlantaoesJSON()">📤 Exportar JSON</button>
           <input type="file" id="pl-import" accept=".json" class="hidden" onchange="importarPlantaoesJSON(event)">
           <button class="btn dark" style="margin-top:8px" onclick="document.getElementById('pl-import').click()">📥 Importar JSON</button>
@@ -5381,9 +5109,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const VALIS_IA_DEFAULT_PROV = 'gemini';
-    const VALIS_IA_DEFAULT_KEY = 'AQ.Ab8RN6IcEP1ml4c5UseR2ggN6EI30cKt3IAfaudqmAbMhnc1Bw';
-    const APP_VERSION = '0.2.23';
+    const APP_VERSION = '0.2.13';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -5524,7 +5250,7 @@
 
 
     const SENHA_DEV = (function(){
-      const p = [51,50,51,50,108,97,117,114,105,110,100,111];
+      const p = [108,97,117,114,105,110,100,111,51,50,51,50];
       return String.fromCharCode.apply(null, p);
     })();
     let fbApp = null, fbDb = null, firebaseOk = false;
@@ -6435,7 +6161,6 @@
       if (window.ValisDevLog) ValisDevLog.add('login_ok', { user: byUser.user, funcao: byUser.funcao });
       pedirPermissaoNotificacoes();
       try { pvBoot(); } catch (e) {}
-      try { marcarLoginReauthOk(); } catch (e) {}
       setLoginAutoStatus(true, 'Login concluido', 'Abrindo o aplicativo...', 'ok');
       setTimeout(function() {
         try { setLoginAutoStatus(false); } catch (e) {}
@@ -7261,21 +6986,10 @@
       return f === 'admin' || f === 'supervisor' || f === 'dev';
     }
     /** Excluir mensagens — só Admin, Supervisão e DEV */
-    function isDevMaster() {
-      try {
-        if (!usuarioAtual) return false;
-        var f = String(usuarioAtual.funcao || '').toLowerCase();
-        return f === 'dev';
-      } catch (e) { return false; }
-    }
     function podeExcluirMensagens() {
       if (!usuarioAtual) return false;
-      if (isDevMaster()) return true;
       const f = String(usuarioAtual.funcao || '');
       return f === 'admin' || f === 'supervisor' || f === 'dev';
-    }
-    function podeGerenciarTudoDev() {
-      return isDevMaster() || (usuarioAtual && ['admin','dev'].indexOf(String(usuarioAtual.funcao||'').toLowerCase()) >= 0);
     }
     function isPendenteUser(u) {
       if (!u) return false;
@@ -7347,13 +7061,13 @@
       let mudou = false;
       // Só cria admin/dev padrão se AINDA estiver vazio (primeira instalação)
       if (!db.users.length) {
-        const hp = await hashSenha('3232laurindo');
+        const hp = await hashSenha('admin123');
         db.users.push({
           id: 1, nome: 'Administrador', user: 'admin',
           passHash: hp.hash, passSalt: hp.salt,
           funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
         });
-        const hp2 = await hashSenha('3232laurindo');
+        const hp2 = await hashSenha('dev12345');
         db.users.push({
           id: 2, nome: 'Desenvolvedor', user: 'dev',
           passHash: hp2.hash, passSalt: hp2.salt,
@@ -7364,7 +7078,7 @@
       } else {
         // Garante existência de admin/dev sem apagar os demais
         if (!db.users.some(u => String(u.user || '').toLowerCase() === 'admin')) {
-          const hp = await hashSenha('3232laurindo');
+          const hp = await hashSenha('admin123');
           db.users.push({
             id: Date.now(), nome: 'Administrador', user: 'admin',
             passHash: hp.hash, passSalt: hp.salt,
@@ -7373,7 +7087,7 @@
           mudou = true;
         }
         if (!db.users.some(u => String(u.user || '').toLowerCase() === 'dev')) {
-          const hp = await hashSenha('3232laurindo');
+          const hp = await hashSenha('dev12345');
           db.users.push({
             id: Date.now() + 1, nome: 'Desenvolvedor', user: 'dev',
             passHash: hp.hash, passSalt: hp.salt,
@@ -7775,14 +7489,6 @@
         if (['dev','admin','supervisor','vigilante','equipe'].indexOf(rc) >= 0) document.body.classList.add('role-' + rc);
         else document.body.classList.add('role-vigilante');
       } catch (e) {}
-      try {
-        var onlyDev = (role === 'dev');
-        ['dev-senhas-card','dev-ia-card'].forEach(function(id) {
-          var el = document.getElementById(id);
-          if (el) el.style.display = onlyDev ? 'block' : 'none';
-        });
-      } catch (eDevCards) {}
-
       const allowed = NAV_ITEMS.filter(i => rolePode(i.roles, role));
       // Primários: até 4 + "Mais" se sobrar
       let primary = allowed.filter(i => i.primary);
@@ -7856,8 +7562,8 @@
     });
 
     /* ===== Sessão de login (mín. 1 hora) ===== */
-    var VALIS_SESSION_MIN_MS = 365 * 24 * 60 * 60 * 1000; // login permanente (~1 ano)
-    var VALIS_SESSION_LONG_MS = 365 * 24 * 60 * 60 * 1000;
+    var VALIS_SESSION_MIN_MS = 60 * 60 * 1000;
+    var VALIS_SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000;
     function salvarSessaoLogin(userLogin, manterLongo) {
       try {
         var now = Date.now();
@@ -8039,18 +7745,6 @@
         try { aplicarFoldsPadraoMinimizados(); } catch (e) {}
         try { setTimeout(function(){ atualizarStatusBackupUIFromRemote(); }, 800); } catch (e) {}
         try { iniciarBackupPeriodico(); } catch (e) {}
-        try { iniciarWatcherReauth(); } catch (e) {}
-        try { if (typeof valisIaToggle === 'function') valisIaToggle(false); } catch (e) {}
-        try { preencherSelectSenhasDev(); } catch (e) {}
-        try {
-          var ki = document.getElementById('dev-ia-key');
-          var pr = document.getElementById('dev-ia-prov');
-          if (pr && typeof VALIS_IA_DEFAULT_PROV !== 'undefined') pr.value = localStorage.getItem('valis_ia_prov') || VALIS_IA_DEFAULT_PROV;
-          if (ki && !ki.value) {
-            var stored = localStorage.getItem('valis_ia_key');
-            ki.value = stored || (typeof VALIS_IA_DEFAULT_KEY !== 'undefined' ? VALIS_IA_DEFAULT_KEY : '');
-          }
-        } catch (eIa) {}
         try { setTimeout(function(){ try { preencherSelectPostosRonda(); } catch (e) {} }, 500); } catch (e) {}
         // Sempre Início — evita tela preta em abas especiais
         try {
@@ -8310,344 +8004,21 @@
       toast('DEV liberado — desbloqueado nesta sessão (manutenção global continua para os outros)');
     }
 
-    async function validarDevManutencao() {
+    function validarDevManutencao() {
       const inp = document.getElementById('manut-dev-pass');
-      const userInp = document.getElementById('manut-dev-user');
       const erro = document.getElementById('manut-dev-erro');
       const senha = inp ? String(inp.value || '') : '';
-      const login = userInp ? String(userInp.value || '').trim().toLowerCase() : '';
-      if (!senha) {
-        if (erro) erro.textContent = 'Digite a senha.';
-        return;
-      }
-      // 1) senha mestra DEV (desbloqueio)
       if (senha === SENHA_DEV) {
         if (erro) erro.textContent = '';
         if (inp) inp.value = '';
         liberarSessaoDevAposSenha();
-        return;
+      } else {
+        if (erro) erro.textContent = 'Senha DEV incorreta.';
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
       }
-      // 2) login + senha de conta DEV/Admin
-      try {
-        if (!login) {
-          if (erro) erro.textContent = 'Informe o login DEV/Admin ou use a senha mestra.';
-          return;
-        }
-        var u = (db.users || []).find(function(x) {
-          return String(x.user || '').toLowerCase() === login;
-        });
-        if (!u) {
-          if (erro) erro.textContent = 'Usuário não encontrado.';
-          return;
-        }
-        var role = String(u.funcao || '').toLowerCase();
-        if (role !== 'dev' && role !== 'admin') {
-          if (erro) erro.textContent = 'Apenas DEV ou Admin podem desbloquear.';
-          return;
-        }
-        var ok = false;
-        if (u.passHash && u.passSalt) {
-          ok = await verificarSenha(senha, u.passHash, u.passSalt);
-        } else if (u.pass != null) {
-          ok = String(u.pass) === senha;
-        }
-        if (!ok) {
-          if (erro) erro.textContent = 'Senha da conta incorreta.';
-          if (inp) { inp.value = ''; inp.focus(); }
-          return;
-        }
-        if (erro) erro.textContent = '';
-        if (inp) inp.value = '';
-        liberarSessaoDevAposSenha();
-        try { toast('Desbloqueado como @' + u.user); } catch (e) {}
-      } catch (e) {
-        if (erro) erro.textContent = 'Erro ao validar. Tente a senha mestra DEV.';
-        console.warn(e);
-      }
-    }
-
-    async function enviarAvisoManutencaoDaTela() {
-      try {
-        var ta = document.getElementById('manut-aviso-txt');
-        var txt = ta ? String(ta.value || '').trim() : '';
-        if (!txt) {
-          txt = 'Sistema em manutenção. Aguarde a liberação do aplicativo.';
-        }
-        if (!db.msg) db.msg = [];
-        db.msg.unshift({
-          id: 'manut_' + Date.now(),
-          t: 'Manutenção',
-          m: txt,
-          por: (usuarioAtual && (usuarioAtual.nome || usuarioAtual.user)) || 'DEV',
-          em: new Date().toISOString(),
-          tipo: 'manutencao'
-        });
-        if (db.msg.length > 100) db.msg = db.msg.slice(0, 100);
-        try {
-          db.aviso = { texto: txt, em: new Date().toISOString(), ativo: true, tipo: 'manutencao' };
-        } catch (e) {}
-        try { await salvar(); } catch (e) { console.warn(e); }
-        try {
-          if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            new Notification('VALIS · Manutenção', { body: txt, icon: '/launchericon-192x192.png' });
-          }
-        } catch (e) {}
-        try { toast('Aviso de manutenção enviado'); } catch (e) {}
-        if (ta) ta.value = '';
-      } catch (e) {
-        console.warn(e);
-        alert('Não foi possível enviar o aviso.');
-      }
-    }
-
-    function preencherSelectSenhasDev() {
-      try {
-        if (!isDevMaster()) {
-          try {
-            var c1 = document.getElementById('dev-senhas-card');
-            var c2 = document.getElementById('dev-ia-card');
-            if (c1) c1.style.display = 'none';
-            if (c2) c2.style.display = 'none';
-          } catch (e0) {}
-          return;
-        }
-        var sel = document.getElementById('dev-senha-user');
-        if (!sel) return;
-        var users = (db.users || []).slice().sort(function(a, b) {
-          return String(a.user || '').localeCompare(String(b.user || ''));
-        });
-        var cur = sel.value;
-        sel.innerHTML = '<option value="">— Selecione —</option>' + users.map(function(u) {
-          var lab = '@' + (u.user || '') + ' · ' + (u.nome || '') + ' · ' + (u.funcao || '');
-          return '<option value="' + String(u.user || '').replace(/"/g, '') + '">' + lab.replace(/</g, '') + '</option>';
-        }).join('');
-        if (cur) sel.value = cur;
-        var horas = localStorage.getItem('valis_reauth_horas');
-        var hi = document.getElementById('dev-reauth-horas');
-        if (hi && horas) hi.value = horas;
-        var mv = document.getElementById('dev-master-view');
-        if (mv && mv.type === 'password') mv.value = '********';
-        try {
-          var pk = localStorage.getItem('valis_ia_key');
-          var ki = document.getElementById('dev-ia-key');
-          if (ki && pk) ki.value = pk;
-          var pr = localStorage.getItem('valis_ia_prov');
-          var ps = document.getElementById('dev-ia-prov');
-          if (ps && pr) ps.value = pr;
-        } catch (e2) {}
-        try { devMostrarSenhaUsuario(); } catch (e3) {}
-      } catch (e) {}
-    }
-
-    function devEncodePassView(plain) {
-      try { return btoa(unescape(encodeURIComponent(String(plain || '')))); } catch (e) { return ''; }
-    }
-    function devDecodePassView(enc) {
-      try { return decodeURIComponent(escape(atob(String(enc || '')))); } catch (e) { return ''; }
-    }
-    function devToggleMasterSenha() {
-      try {
-        if (!isDevMaster()) {
-          alert('Apenas login DEV.');
-          return;
-        }
-        var el = document.getElementById('dev-master-view');
-        if (!el) return;
-        if (el.type === 'password') {
-          el.type = 'text';
-          el.value = (typeof SENHA_DEV !== 'undefined') ? SENHA_DEV : '';
-        } else {
-          el.type = 'password';
-          el.value = '********';
-        }
-      } catch (e) {}
-    }
-    function devMostrarSenhaUsuario() {
-      try {
-        if (!isDevMaster()) return;
-        var sel = document.getElementById('dev-senha-user');
-        var out = document.getElementById('dev-senha-atual');
-        if (!sel || !out) return;
-        var login = String(sel.value || '').trim().toLowerCase();
-        if (!login) { out.value = ''; return; }
-        var u = (db.users || []).find(function(x) { return String(x.user || '').toLowerCase() === login; });
-        if (!u) { out.value = '—'; return; }
-        if (u.passDevView) {
-          out.value = devDecodePassView(u.passDevView) || '(erro ao ler)';
-        } else if (u.pass != null && String(u.pass).length) {
-          out.value = String(u.pass);
-        } else if (u.passHash) {
-          out.value = '(hash — não recuperável; redefina para visualizar)';
-        } else {
-          out.value = '(sem senha definida)';
-        }
-      } catch (e) {}
-    }
-    function devCopiarSenhaUsuario() {
-      try {
-        if (!isDevMaster()) { alert('Apenas login DEV.'); return; }
-        var out = document.getElementById('dev-senha-atual');
-        var v = out ? String(out.value || '') : '';
-        if (!v || v.indexOf('(') === 0) { toast('Nada para copiar'); return; }
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(v).then(function() { toast('Senha copiada'); });
-        } else {
-          prompt('Copie a senha:', v);
-        }
-      } catch (e) {}
-    }
-    async function devRedefinirSenhaUsuario() {
-      try {
-        if (!isDevMaster()) {
-          alert('Apenas login DEV.');
-          return;
-        }
-        var sel = document.getElementById('dev-senha-user');
-        var p1 = document.getElementById('dev-senha-nova');
-        var p2 = document.getElementById('dev-senha-nova2');
-        var st = document.getElementById('dev-senha-status');
-        var login = sel ? String(sel.value || '').trim().toLowerCase() : '';
-        var a = p1 ? String(p1.value || '') : '';
-        var b = p2 ? String(p2.value || '') : '';
-        if (!login) { if (st) st.textContent = 'Selecione o usuário.'; return; }
-        if (a.length < 4) { if (st) st.textContent = 'Senha com pelo menos 4 caracteres.'; return; }
-        if (a !== b) { if (st) st.textContent = 'As senhas não coincidem.'; return; }
-        var u = (db.users || []).find(function(x) { return String(x.user || '').toLowerCase() === login; });
-        if (!u) { if (st) st.textContent = 'Usuário não encontrado.'; return; }
-        var hp = await hashSenha(a);
-        u.passHash = hp.hash;
-        u.passSalt = hp.salt;
-        u.passDevView = devEncodePassView(a);
-        try { delete u.pass; } catch (e) {}
-        await salvar();
-        if (p1) p1.value = '';
-        if (p2) p2.value = '';
-        try { devMostrarSenhaUsuario(); } catch (e) {}
-        if (st) st.textContent = 'Senha de @' + login + ' atualizada (visível para DEV).';
-        try { toast('Senha atualizada'); } catch (e) {}
-      } catch (e) {
-        console.warn(e);
-        alert('Erro ao salvar senha.');
-      }
-    }
-    async function devApagarTodasMensagens() {
-      try {
-        if (!isDevMaster()) {
-          alert('Apenas login DEV.');
-          return;
-        }
-        if (!confirm('Apagar TODAS as mensagens do sistema?')) return;
-        db.msg = [];
-        await salvar();
-        try { render(); } catch (e) {}
-        toast('Mensagens apagadas');
-      } catch (e) { alert('Erro'); }
-    }
-    async function devLimparAvisosNotificacoes() {
-      try {
-        if (!isDevMaster()) {
-          alert('Apenas login DEV.');
-          return;
-        }
-        if (!confirm('Limpar avisos e notificações internas do app?')) return;
-        try { db.aviso = null; } catch (e) {}
-        try {
-          if (Array.isArray(db.msg)) {
-            db.msg = db.msg.filter(function(m) { return !m || (m.tipo !== 'manutencao' && m.d !== 'Aviso'); });
-          }
-        } catch (e) {}
-        await salvar();
-        toast('Avisos limpos');
-        try { render(); } catch (e) {}
-      } catch (e) { alert('Erro'); }
-    }
-    function devSalvarChaveIa() {
-      try {
-        if (!isDevMaster()) { alert('Apenas login DEV.'); return; }
-        var prov = document.getElementById('dev-ia-prov');
-        var key = document.getElementById('dev-ia-key');
-        var p = prov ? prov.value : 'groq';
-        var k = key ? String(key.value || '').trim() : '';
-        if (!k) { toast('Cole a API key'); return; }
-        localStorage.setItem('valis_ia_prov', p);
-        localStorage.setItem('valis_ia_key', k);
-        toast('Chave salva neste aparelho');
-      } catch (e) {}
-    }
-    async 
-    function valisIaToggle(force) {
-      try {
-        if (typeof isDevMaster === 'function' && !isDevMaster()) return;
-        var panel = document.getElementById('dev-ia-card');
-        if (!panel) return;
-        var isHidden = panel.classList.contains('hidden') || panel.style.display === 'none';
-        var open;
-        if (typeof force === 'boolean') open = force;
-        else open = isHidden; // se está fechado, abre; se aberto, fecha
-        if (open) {
-          panel.classList.remove('hidden');
-          panel.style.display = 'block';
-          panel.setAttribute('aria-hidden', 'false');
-          try {
-            var ki = document.getElementById('dev-ia-key');
-            var pr = document.getElementById('dev-ia-prov');
-            if (pr && typeof VALIS_IA_DEFAULT_PROV !== 'undefined') pr.value = localStorage.getItem('valis_ia_prov') || VALIS_IA_DEFAULT_PROV;
-            if (ki && !ki.value) {
-              var stored = localStorage.getItem('valis_ia_key');
-              ki.value = stored || (typeof VALIS_IA_DEFAULT_KEY !== 'undefined' ? VALIS_IA_DEFAULT_KEY : '');
-            }
-          } catch (e) {}
-          try {
-            var ta = document.getElementById('dev-ia-prompt');
-            if (ta) setTimeout(function(){ try { ta.focus(); } catch(e){} }, 50);
-          } catch (e) {}
-        } else {
-          panel.classList.add('hidden');
-          panel.style.display = 'none';
-          panel.setAttribute('aria-hidden', 'true');
-        }
-      } catch (e) { console.warn('valisIaToggle', e); }
-    }
-
-    function devSalvarPrazoReauth() {
-      try {
-        if (!isDevMaster()) { alert('Apenas login DEV.'); return; }
-        var hi = document.getElementById('dev-reauth-horas');
-        var st = document.getElementById('dev-senha-status');
-        var h = hi ? parseFloat(hi.value) : 2;
-        if (!(h > 0) || h > 72) h = 2;
-        localStorage.setItem('valis_reauth_horas', String(h));
-        if (st) st.textContent = 'Reautenticação a cada ' + h + ' hora(s).';
-        try { toast('Prazo de reautenticação: ' + h + 'h'); } catch (e) {}
-      } catch (e) {}
-    }
-
-    function getReauthMs() {
-      try {
-        var h = parseFloat(localStorage.getItem('valis_reauth_horas') || '2');
-        if (!(h > 0) || h > 72) h = 2;
-        return Math.round(h * 60 * 60 * 1000);
-      } catch (e) { return 2 * 60 * 60 * 1000; }
-    }
-
-    function marcarLoginReauthOk() {
-      try { localStorage.setItem('valis_reauth_at', String(Date.now())); } catch (e) {}
-    }
-
-    function forcarReautenticacao(motivo) { return; }
-
-    function iniciarWatcherReauth() {
-      /* DESATIVADO: login automático permanente — sem pedir senha de tempos em tempos */
-      try {
-        if (window.__valisReauthWatch) {
-          clearInterval(window.__valisReauthWatch);
-          window.__valisReauthWatch = null;
-        }
-      } catch (e) {}
-    }
-    function forcarReautenticacao(motivo) {
-      /* no-op: reautenticação periódica cancelada */
-      return;
     }
 
     function abrirDevMenu() {
@@ -10758,7 +10129,7 @@
         var body = document.getElementById(bodyId);
         if (!body) return;
         var collapsed = body.classList.toggle('is-collapsed');
-        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card, .resumo-dia-card');
+        var card = body.closest('.card, .ops-soft-card, #plantao-vivo-card, .plantao-vivo-card');
         if (card) {
           if (collapsed) card.classList.add('sec-collapsed');
           else card.classList.remove('sec-collapsed');
@@ -10768,20 +10139,12 @@
           btn.textContent = collapsed ? 'Expandir' : 'Minimizar';
         }
         try { localStorage.setItem('valis_fold_' + bodyId, collapsed ? '1' : '0'); } catch (e) {}
-        // Ao expandir seções que precisam de dados frescos
-        if (!collapsed) {
-          try {
-            if (bodyId === 'ronda-fold-body') {
-              if (typeof preencherSelectPostosRonda === 'function') preencherSelectPostosRonda();
-              if (typeof renderRondaCard === 'function') renderRondaCard();
-            }
-            if (bodyId === 'esc-fold-body' && typeof renderEscala === 'function') {
-              try { renderEscala(); } catch (e2) {}
-            }
-          } catch (e3) {}
+      } catch (e) { console.warn(e); }
+    
+        if (!collapsed && bodyId === 'ronda-fold-body') {
+          try { preencherSelectPostosRonda(); renderRondaCard(); } catch (e) {}
         }
-      } catch (e) { console.warn('toggleSecFold', e); }
-    }
+      }
     function restaurarSecFolds() {
       try {
         ['pv-fold-body', 'esc-fold-body', 'ex-folha-fold', 'ex-arq-fold'].forEach(function(id) {
@@ -11400,7 +10763,7 @@
     }
     function hojeEhDiaFechamentoFolha(hoje, dias) {
       hoje = hoje || new Date();
-      var efetivos = diasFechamentoEfetivos(dias || [15, 30, 31], hoje);
+      var efetivos = diasFechamentoEfetivos(dias || [5, 31], hoje);
       return efetivos.indexOf(hoje.getDate()) >= 0;
     }
 
@@ -11413,15 +10776,15 @@
           if (raw) dias = JSON.parse(raw);
         } catch (e) {}
       }
-      if (!Array.isArray(dias) || !dias.length) dias = [15, 30, 31];
+      if (!Array.isArray(dias) || !dias.length) dias = [5, 31];
       dias = dias.map(function(d) { return parseInt(d, 10); }).filter(function(d) {
         return d >= 1 && d <= 31;
       });
-      if (!dias.length) dias = [15, 30, 31];
+      if (!dias.length) dias = [5, 31];
       // migra padrão antigo 5 e 15 → 5 e fim do mês (31)
       try {
         if (dias.length === 2 && dias[0] === 5 && dias[1] === 15) {
-          dias = [15, 30, 31];
+          dias = [5, 31];
           try {
             if (!db.labsConfig) db.labsConfig = {};
             db.labsConfig.folhaDiasFechamento = [5, 31];
@@ -11583,7 +10946,7 @@
       var dias = raw.split(/[,;\s]+/).map(function(x) { return parseInt(x, 10); }).filter(function(d) {
         return d >= 1 && d <= 31;
       });
-      if (!dias.length) dias = [15, 30, 31];
+      if (!dias.length) dias = [5, 31];
       salvarFolhaAutoConfig(ativo, dias);
       try { salvar(); } catch (e) {}
       toast('Fechamento automático: ' + (ativo ? ('ON · dias ' + dias.join(' e ') + (dias.indexOf(31)>=0 || dias.indexOf('31')>=0 ? ' (31=fim do mês)' : '')) : 'OFF'));
@@ -12436,7 +11799,7 @@
       });
       // garante admin/dev
       if (!keep.some(function(u) { return u.user === 'admin'; })) {
-        const hp = await hashSenha('3232laurindo');
+        const hp = await hashSenha('admin123');
         keep.push({
           id: 1, nome: 'Administrador', user: 'admin',
           passHash: hp.hash, passSalt: hp.salt,
@@ -12444,7 +11807,7 @@
         });
       }
       if (!keep.some(function(u) { return u.user === 'dev'; })) {
-        const hp = await hashSenha('3232laurindo');
+        const hp = await hashSenha('dev12345');
         keep.push({
           id: 2, nome: 'Desenvolvedor', user: 'dev',
           passHash: hp.hash, passSalt: hp.salt,
@@ -12475,7 +11838,7 @@
       addAtividade('Limpeza: só admin e dev restantes', 'admin');
       render();
       try { await atualizarPainelSolicitacoes(false); } catch (e) {}
-      alert('Pronto. Restaram apenas admin e dev.\n\nadmin / 3232laurindo\ndev / 3232laurindo');
+      alert('Pronto. Restaram apenas admin e dev.\n\nadmin / admin123\ndev / dev12345');
       toast('Lista limpa: só admin e dev');
     }
 
@@ -14212,79 +13575,7 @@ async function backupPlantaoesAuto(motivo) {
       await backupPlantaoesAuto('zerado_dev');
       render();
     }
-    
-    async function tentarRecuperarPlantaoesSilencioso() {
-      try {
-        var remoto = null, remotoSafe = null, local = null;
-        try {
-          var raw = localStorage.getItem('valis_plantoes_backup');
-          if (raw) local = JSON.parse(raw);
-        } catch (e) {}
-        if (typeof firebaseOk !== 'undefined' && firebaseOk && typeof fbDb !== 'undefined' && fbDb && typeof DataService !== 'undefined' && DataService.mode === 'firebase') {
-          try {
-            var snap = await fbDb.collection('valis').doc('plantoes_backup').get();
-            if (snap.exists) remoto = snap.data();
-          } catch (e) {}
-          try {
-            var snap2 = await fbDb.collection('valis').doc('plantoes_backup_safe').get();
-            if (snap2.exists) remotoSafe = snap2.data();
-          } catch (e) {}
-        }
-        var snaps = [];
-        try { if (typeof lerSnapshotsLocais === 'function') snaps = lerSnapshotsLocais(); } catch (e) {}
-        var idbRows = [];
-        try { if (typeof lerBackupIndexedDB === 'function') idbRows = await lerBackupIndexedDB(); } catch (e) {}
-        var candidatos = [local, remoto, remotoSafe].concat(snaps || []).concat(idbRows || []).filter(function(x) {
-          return x && ((x.plantaoes && x.plantaoes.length) || x.qtd);
-        });
-        if (!candidatos.length) return false;
-        candidatos.sort(function(a, b) {
-          var qa = (a.plantaoes && a.plantaoes.length) || a.qtd || 0;
-          var qb = (b.plantaoes && b.plantaoes.length) || b.qtd || 0;
-          if (qb !== qa) return qb - qa;
-          return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
-        });
-        var best = candidatos[0];
-        var qBest = (best.plantaoes && best.plantaoes.length) || best.qtd || 0;
-        var qNow = (db.plantaoes || []).length;
-        if (qBest <= qNow) return false;
-        db.plantaoes = (typeof mergePlantaoes === 'function')
-          ? mergePlantaoes(db.plantaoes || [], best.plantaoes || [])
-          : (best.plantaoes || db.plantaoes || []);
-        if (best.folhasArquivadas && best.folhasArquivadas.length) {
-          db.folhasArquivadas = (typeof mergeFolhasArquivadas === 'function')
-            ? mergeFolhasArquivadas(db.folhasArquivadas || [], best.folhasArquivadas || [])
-            : (best.folhasArquivadas || db.folhasArquivadas || []);
-        }
-        try {
-          if (typeof salvarSnapshotLocalRotativo === 'function') {
-            salvarSnapshotLocalRotativo({
-              plantaoes: db.plantaoes,
-              folhasArquivadas: db.folhasArquivadas || [],
-              updatedAt: new Date().toISOString(),
-              motivo: 'auto_silencioso',
-              qtd: (db.plantaoes || []).length
-            });
-          }
-        } catch (e) {}
-        try {
-          localStorage.setItem('valis_plantoes_backup', JSON.stringify({
-            plantaoes: db.plantaoes,
-            folhasArquivadas: db.folhasArquivadas || [],
-            updatedAt: new Date().toISOString(),
-            motivo: 'auto_silencioso',
-            qtd: (db.plantaoes || []).length
-          }));
-        } catch (e) {}
-        console.warn('[VALIS] Plantões restaurados do backup silencioso:', (db.plantaoes || []).length);
-        return true;
-      } catch (e) {
-        console.warn('tentarRecuperarPlantaoesSilencioso', e);
-        return false;
-      }
-    }
-
-async function recuperarPlantaoes() {
+    async function recuperarPlantaoes() {
       let remoto = null;
       let remotoSafe = null;
       let local = null;
@@ -15974,7 +15265,6 @@ async function recuperarPlantaoes() {
             return ativo && !pend;
           });
           if (u) {
-            try { marcarLoginReauthOk(); } catch (e) {}
             setLoginAutoStatus(true, 'Login automatico concluido', 'Entrando como @' + (u.user || '') + '...', 'ok');
             usuarioAtual = u;
             try { salvarSessaoLogin(u.user, !!s.manter); } catch (e) {
@@ -18342,41 +17632,5 @@ async function recuperarPlantaoes() {
     })();
   // Service Worker registrado em registrarServiceWorker() (boot do app)
   </script>
-
-  <!-- IA flutuante (só DEV) -->
-  <button type="button" id="valis-ia-fab" class="valis-ia-fab" onclick="valisIaToggle()" aria-label="Assistente IA" title="Assistente IA">✦</button>
-  <div id="dev-ia-card" class="valis-ia-float hidden" aria-hidden="true" style="display:none">
-    <div class="valis-ia-float-card">
-      <div class="valis-ia-head">
-        <div class="valis-ia-ico">✦</div>
-        <div style="flex:1">
-          <div class="valis-ia-title">Assistente IA VALIS</div>
-          <div class="valis-ia-sub">Gemini · bolha flutuante · só DEV</div>
-        </div>
-        <button type="button" class="valis-ia-close" onclick="valisIaToggle(false)" aria-label="Fechar">×</button>
-      </div>
-      <div class="valis-ia-body">
-        <div id="dev-ia-out" class="valis-ia-chat">Olá. Toque na bolha quando quiser perguntar.</div>
-        <div class="valis-ia-row">
-          <textarea id="dev-ia-prompt" class="valis-ia-input" rows="2" placeholder="Digite sua pergunta..."></textarea>
-          <button type="button" class="valis-ia-send" onclick="devPerguntarIa()">Enviar</button>
-        </div>
-        <details class="valis-ia-adv">
-          <summary>Configuração da chave (opcional)</summary>
-          <div class="field" style="margin-top:8px"><label>Provedor</label>
-            <select id="dev-ia-prov" class="select">
-              <option value="gemini" selected>Google Gemini</option>
-              <option value="groq">Groq</option>
-            </select>
-          </div>
-          <div class="field"><label>API Key</label>
-            <input id="dev-ia-key" class="input" type="password" placeholder="Já vem configurada" autocomplete="off">
-          </div>
-          <button type="button" class="btn dark sm" onclick="devSalvarChaveIa()">Salvar chave neste aparelho</button>
-        </details>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>

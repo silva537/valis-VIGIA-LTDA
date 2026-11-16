@@ -1,7 +1,4 @@
-/* VALIS — SW legado mantido no pacote.
- * O app registra /pwabuilder-sw.js (não este arquivo).
- * Este SW só se desregistra se alguém o registrar por engano.
- */
+/* VALIS — SW desativado de propósito (WebInto). */
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil(
