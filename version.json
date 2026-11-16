@@ -1,5 +1,5 @@
 {
-  "v": "0.2.22",
+  "v": "0.2.23",
   "forceReload": true,
-  "msg": "IA bolha abre/fecha + senha padrao 3232laurindo"
+  "msg": "Login permanente, folha 15/30/31, recover backup silencioso"
 }

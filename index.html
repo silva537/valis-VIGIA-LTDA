@@ -4008,7 +4008,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v0.2.22</div>
+        <div class="login-version" id="login-version">v0.2.23</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -4237,7 +4237,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="brand">
-          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.22</span>
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.23</span>
         </div>
         <div class="top-actions">
           <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
@@ -5383,7 +5383,7 @@
     // senha DEV ofuscada em partes
     const VALIS_IA_DEFAULT_PROV = 'gemini';
     const VALIS_IA_DEFAULT_KEY = 'AQ.Ab8RN6IcEP1ml4c5UseR2ggN6EI30cKt3IAfaudqmAbMhnc1Bw';
-    const APP_VERSION = '0.2.22';
+    const APP_VERSION = '0.2.23';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -7856,8 +7856,8 @@
     });
 
     /* ===== Sessão de login (mín. 1 hora) ===== */
-    var VALIS_SESSION_MIN_MS = 60 * 60 * 1000;
-    var VALIS_SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000;
+    var VALIS_SESSION_MIN_MS = 365 * 24 * 60 * 60 * 1000; // login permanente (~1 ano)
+    var VALIS_SESSION_LONG_MS = 365 * 24 * 60 * 60 * 1000;
     function salvarSessaoLogin(userLogin, manterLongo) {
       try {
         var now = Date.now();
@@ -8634,62 +8634,21 @@
       try { localStorage.setItem('valis_reauth_at', String(Date.now())); } catch (e) {}
     }
 
-    function forcarReautenticacao(motivo) {
-      try {
-        var userKeep = '';
-        try {
-          if (usuarioAtual && usuarioAtual.user) userKeep = String(usuarioAtual.user);
-          else {
-            var s = typeof lerSessaoLogin === 'function' ? lerSessaoLogin() : null;
-            if (s && s.user) userKeep = String(s.user);
-          }
-        } catch (e) {}
-        usuarioAtual = null;
-        try { limparSessaoLogin(); } catch (e) {}
-        try {
-          var app = document.getElementById('app');
-          if (app) { app.classList.remove('show'); app.style.display = 'none'; }
-        } catch (e) {}
-        try { mostrarLogin('entrar'); } catch (e) {}
-        try {
-          var u = document.getElementById('login-user');
-          if (u && userKeep) u.value = userKeep;
-        } catch (e) {}
-        var msg = motivo || 'Por segurança, confirme sua senha novamente.';
-        try {
-          setLoginAutoStatus(true, '⚠ CONFIRME SUA IDENTIDADE', msg, 'err');
-        } catch (e) {}
-        try {
-          var banner = document.getElementById('login-erro-senha-banner');
-          if (banner) {
-            banner.classList.add('show');
-            banner.style.display = 'block';
-            banner.innerHTML = '⚠ FAÇA LOGIN COM SENHA AGAIN<small>' + msg + ' Digite a senha para continuar.</small>'.replace('AGAIN', '');
-          }
-        } catch (e) {}
-      } catch (e) { console.warn(e); }
-    }
+    function forcarReautenticacao(motivo) { return; }
 
     function iniciarWatcherReauth() {
+      /* DESATIVADO: login automático permanente — sem pedir senha de tempos em tempos */
       try {
-        if (window.__valisReauthWatch) clearInterval(window.__valisReauthWatch);
-        window.__valisReauthWatch = setInterval(function() {
-          try {
-            if (!usuarioAtual) return;
-            if (document.visibilityState !== 'visible') return;
-            var at = parseInt(localStorage.getItem('valis_reauth_at') || '0', 10);
-            if (!at) {
-              marcarLoginReauthOk();
-              return;
-            }
-            if (Date.now() - at >= getReauthMs()) {
-              forcarReautenticacao('Sessão periódica expirou. Confirme que é você.');
-            }
-          } catch (e) {}
-        }, 30 * 1000);
+        if (window.__valisReauthWatch) {
+          clearInterval(window.__valisReauthWatch);
+          window.__valisReauthWatch = null;
+        }
       } catch (e) {}
     }
-
+    function forcarReautenticacao(motivo) {
+      /* no-op: reautenticação periódica cancelada */
+      return;
+    }
 
     function abrirDevMenu() {
       // logado como cargo DEV → acesso direto ao menu (sem senha extra)
@@ -11441,7 +11400,7 @@
     }
     function hojeEhDiaFechamentoFolha(hoje, dias) {
       hoje = hoje || new Date();
-      var efetivos = diasFechamentoEfetivos(dias || [5, 31], hoje);
+      var efetivos = diasFechamentoEfetivos(dias || [15, 30, 31], hoje);
       return efetivos.indexOf(hoje.getDate()) >= 0;
     }
 
@@ -11454,15 +11413,15 @@
           if (raw) dias = JSON.parse(raw);
         } catch (e) {}
       }
-      if (!Array.isArray(dias) || !dias.length) dias = [5, 31];
+      if (!Array.isArray(dias) || !dias.length) dias = [15, 30, 31];
       dias = dias.map(function(d) { return parseInt(d, 10); }).filter(function(d) {
         return d >= 1 && d <= 31;
       });
-      if (!dias.length) dias = [5, 31];
+      if (!dias.length) dias = [15, 30, 31];
       // migra padrão antigo 5 e 15 → 5 e fim do mês (31)
       try {
         if (dias.length === 2 && dias[0] === 5 && dias[1] === 15) {
-          dias = [5, 31];
+          dias = [15, 30, 31];
           try {
             if (!db.labsConfig) db.labsConfig = {};
             db.labsConfig.folhaDiasFechamento = [5, 31];
@@ -11624,7 +11583,7 @@
       var dias = raw.split(/[,;\s]+/).map(function(x) { return parseInt(x, 10); }).filter(function(d) {
         return d >= 1 && d <= 31;
       });
-      if (!dias.length) dias = [5, 31];
+      if (!dias.length) dias = [15, 30, 31];
       salvarFolhaAutoConfig(ativo, dias);
       try { salvar(); } catch (e) {}
       toast('Fechamento automático: ' + (ativo ? ('ON · dias ' + dias.join(' e ') + (dias.indexOf(31)>=0 || dias.indexOf('31')>=0 ? ' (31=fim do mês)' : '')) : 'OFF'));
@@ -14253,7 +14212,79 @@ async function backupPlantaoesAuto(motivo) {
       await backupPlantaoesAuto('zerado_dev');
       render();
     }
-    async function recuperarPlantaoes() {
+    
+    async function tentarRecuperarPlantaoesSilencioso() {
+      try {
+        var remoto = null, remotoSafe = null, local = null;
+        try {
+          var raw = localStorage.getItem('valis_plantoes_backup');
+          if (raw) local = JSON.parse(raw);
+        } catch (e) {}
+        if (typeof firebaseOk !== 'undefined' && firebaseOk && typeof fbDb !== 'undefined' && fbDb && typeof DataService !== 'undefined' && DataService.mode === 'firebase') {
+          try {
+            var snap = await fbDb.collection('valis').doc('plantoes_backup').get();
+            if (snap.exists) remoto = snap.data();
+          } catch (e) {}
+          try {
+            var snap2 = await fbDb.collection('valis').doc('plantoes_backup_safe').get();
+            if (snap2.exists) remotoSafe = snap2.data();
+          } catch (e) {}
+        }
+        var snaps = [];
+        try { if (typeof lerSnapshotsLocais === 'function') snaps = lerSnapshotsLocais(); } catch (e) {}
+        var idbRows = [];
+        try { if (typeof lerBackupIndexedDB === 'function') idbRows = await lerBackupIndexedDB(); } catch (e) {}
+        var candidatos = [local, remoto, remotoSafe].concat(snaps || []).concat(idbRows || []).filter(function(x) {
+          return x && ((x.plantaoes && x.plantaoes.length) || x.qtd);
+        });
+        if (!candidatos.length) return false;
+        candidatos.sort(function(a, b) {
+          var qa = (a.plantaoes && a.plantaoes.length) || a.qtd || 0;
+          var qb = (b.plantaoes && b.plantaoes.length) || b.qtd || 0;
+          if (qb !== qa) return qb - qa;
+          return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
+        });
+        var best = candidatos[0];
+        var qBest = (best.plantaoes && best.plantaoes.length) || best.qtd || 0;
+        var qNow = (db.plantaoes || []).length;
+        if (qBest <= qNow) return false;
+        db.plantaoes = (typeof mergePlantaoes === 'function')
+          ? mergePlantaoes(db.plantaoes || [], best.plantaoes || [])
+          : (best.plantaoes || db.plantaoes || []);
+        if (best.folhasArquivadas && best.folhasArquivadas.length) {
+          db.folhasArquivadas = (typeof mergeFolhasArquivadas === 'function')
+            ? mergeFolhasArquivadas(db.folhasArquivadas || [], best.folhasArquivadas || [])
+            : (best.folhasArquivadas || db.folhasArquivadas || []);
+        }
+        try {
+          if (typeof salvarSnapshotLocalRotativo === 'function') {
+            salvarSnapshotLocalRotativo({
+              plantaoes: db.plantaoes,
+              folhasArquivadas: db.folhasArquivadas || [],
+              updatedAt: new Date().toISOString(),
+              motivo: 'auto_silencioso',
+              qtd: (db.plantaoes || []).length
+            });
+          }
+        } catch (e) {}
+        try {
+          localStorage.setItem('valis_plantoes_backup', JSON.stringify({
+            plantaoes: db.plantaoes,
+            folhasArquivadas: db.folhasArquivadas || [],
+            updatedAt: new Date().toISOString(),
+            motivo: 'auto_silencioso',
+            qtd: (db.plantaoes || []).length
+          }));
+        } catch (e) {}
+        console.warn('[VALIS] Plantões restaurados do backup silencioso:', (db.plantaoes || []).length);
+        return true;
+      } catch (e) {
+        console.warn('tentarRecuperarPlantaoesSilencioso', e);
+        return false;
+      }
+    }
+
+async function recuperarPlantaoes() {
       let remoto = null;
       let remotoSafe = null;
       let local = null;
