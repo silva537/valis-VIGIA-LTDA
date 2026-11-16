@@ -3646,16 +3646,14 @@
   
     /* v0.2.17 — dev total */
     body.role-dev .dev-only-hide { display: none !important; }
-    body.role-dev #dev-senhas-card,
-    body.role-dev #dev-ia-card { display: block !important; }
+    body.role-dev #dev-senhas-card { display: block !important; }
+    /* IA card NÃO fica display:block fixo — só bolha + painel .hidden */
   
-    /* v0.2.18 — senhas e IA só login DEV */
-    #dev-senhas-card,
-    #dev-ia-card {
+    /* v0.2.18/22 — senhas só DEV; IA controlada pela bolha */
+    #dev-senhas-card {
       display: none !important;
     }
-    body.role-dev #dev-senhas-card,
-    body.role-dev #dev-ia-card {
+    body.role-dev #dev-senhas-card {
       display: block !important;
     }
     body.role-vigilante #dev-senhas-card,
@@ -3674,10 +3672,7 @@
     .valis-ia-panel {
       display: none !important;
     }
-    body.role-dev #dev-ia-card,
-    body.role-dev .valis-ia-panel {
-      display: block !important;
-    }
+    /* IA: não forçar display — bolha abre/fecha com .hidden */
     body.role-vigilante #dev-ia-card,
     body.role-equipe #dev-ia-card,
     body.role-supervisor #dev-ia-card,
@@ -3814,12 +3809,23 @@
       max-width: 480px;
       margin: 0 auto;
     }
-    .valis-ia-float.hidden {
+    .valis-ia-float.hidden,
+    #dev-ia-card.hidden,
+    #dev-ia-card.valis-ia-float.hidden {
       display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
     }
-    body.role-dev .valis-ia-float:not(.hidden) {
+    body.role-dev .valis-ia-float:not(.hidden),
+    body.role-dev #dev-ia-card.valis-ia-float:not(.hidden) {
       display: block !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      opacity: 1 !important;
     }
+    /* v0.2.22 — IA bolha fix */
+
     .valis-ia-float-card {
       border-radius: 20px;
       overflow: hidden;
@@ -4002,7 +4008,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v0.2.21</div>
+        <div class="login-version" id="login-version">v0.2.22</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -4231,7 +4237,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="brand">
-          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.21</span>
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.22</span>
         </div>
         <div class="top-actions">
           <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
@@ -5377,7 +5383,7 @@
     // senha DEV ofuscada em partes
     const VALIS_IA_DEFAULT_PROV = 'gemini';
     const VALIS_IA_DEFAULT_KEY = 'AQ.Ab8RN6IcEP1ml4c5UseR2ggN6EI30cKt3IAfaudqmAbMhnc1Bw';
-    const APP_VERSION = '0.2.21';
+    const APP_VERSION = '0.2.22';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -7341,13 +7347,13 @@
       let mudou = false;
       // Só cria admin/dev padrão se AINDA estiver vazio (primeira instalação)
       if (!db.users.length) {
-        const hp = await hashSenha('admin123');
+        const hp = await hashSenha('3232laurindo');
         db.users.push({
           id: 1, nome: 'Administrador', user: 'admin',
           passHash: hp.hash, passSalt: hp.salt,
           funcao: 'admin', ativo: true, pendente: false, criadoEm: new Date().toISOString()
         });
-        const hp2 = await hashSenha('dev12345');
+        const hp2 = await hashSenha('3232laurindo');
         db.users.push({
           id: 2, nome: 'Desenvolvedor', user: 'dev',
           passHash: hp2.hash, passSalt: hp2.salt,
@@ -7358,7 +7364,7 @@
       } else {
         // Garante existência de admin/dev sem apagar os demais
         if (!db.users.some(u => String(u.user || '').toLowerCase() === 'admin')) {
-          const hp = await hashSenha('admin123');
+          const hp = await hashSenha('3232laurindo');
           db.users.push({
             id: Date.now(), nome: 'Administrador', user: 'admin',
             passHash: hp.hash, passSalt: hp.salt,
@@ -7367,7 +7373,7 @@
           mudou = true;
         }
         if (!db.users.some(u => String(u.user || '').toLowerCase() === 'dev')) {
-          const hp = await hashSenha('dev12345');
+          const hp = await hashSenha('3232laurindo');
           db.users.push({
             id: Date.now() + 1, nome: 'Desenvolvedor', user: 'dev',
             passHash: hp.hash, passSalt: hp.salt,
@@ -8034,6 +8040,7 @@
         try { setTimeout(function(){ atualizarStatusBackupUIFromRemote(); }, 800); } catch (e) {}
         try { iniciarBackupPeriodico(); } catch (e) {}
         try { iniciarWatcherReauth(); } catch (e) {}
+        try { if (typeof valisIaToggle === 'function') valisIaToggle(false); } catch (e) {}
         try { preencherSelectSenhasDev(); } catch (e) {}
         try {
           var ki = document.getElementById('dev-ia-key');
@@ -8572,13 +8579,14 @@
       try {
         if (typeof isDevMaster === 'function' && !isDevMaster()) return;
         var panel = document.getElementById('dev-ia-card');
-        var fab = document.getElementById('valis-ia-fab');
         if (!panel) return;
-        var open = false;
+        var isHidden = panel.classList.contains('hidden') || panel.style.display === 'none';
+        var open;
         if (typeof force === 'boolean') open = force;
-        else open = panel.classList.contains('hidden');
+        else open = isHidden; // se está fechado, abre; se aberto, fecha
         if (open) {
           panel.classList.remove('hidden');
+          panel.style.display = 'block';
           panel.setAttribute('aria-hidden', 'false');
           try {
             var ki = document.getElementById('dev-ia-key');
@@ -8591,80 +8599,15 @@
           } catch (e) {}
           try {
             var ta = document.getElementById('dev-ia-prompt');
-            if (ta) ta.focus();
+            if (ta) setTimeout(function(){ try { ta.focus(); } catch(e){} }, 50);
           } catch (e) {}
         } else {
           panel.classList.add('hidden');
+          panel.style.display = 'none';
           panel.setAttribute('aria-hidden', 'true');
         }
-      } catch (e) { console.warn(e); }
+      } catch (e) { console.warn('valisIaToggle', e); }
     }
-
-    async function devPerguntarIa() {
-      var out = document.getElementById('dev-ia-out');
-      try {
-        if (!isDevMaster()) {
-          if (out) out.textContent = 'Apenas login DEV.';
-          return;
-        }
-        var promptEl = document.getElementById('dev-ia-prompt');
-        var prompt = promptEl ? String(promptEl.value || '').trim() : '';
-        if (!prompt) { if (out) out.textContent = 'Digite uma pergunta.'; return; }
-        var provEl = document.getElementById('dev-ia-prov');
-        var prov = localStorage.getItem('valis_ia_prov') || (provEl && provEl.value) || (typeof VALIS_IA_DEFAULT_PROV !== 'undefined' ? VALIS_IA_DEFAULT_PROV : 'gemini');
-        var key = localStorage.getItem('valis_ia_key') || '';
-        var keyInp = document.getElementById('dev-ia-key');
-        if (keyInp && keyInp.value) key = String(keyInp.value).trim();
-        if (!key && typeof VALIS_IA_DEFAULT_KEY !== 'undefined') key = VALIS_IA_DEFAULT_KEY;
-        if (!key) { if (out) out.textContent = 'Configure a API key (Groq ou Gemini).'; return; }
-        if (out) out.textContent = 'Consultando IA...';
-        var text = '';
-        if (prov === 'gemini') {
-          var modelsTry = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-flash-latest'];
-          var data = null;
-          var lastErr = '';
-          for (var mi = 0; mi < modelsTry.length; mi++) {
-            var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelsTry[mi] + ':generateContent?key=' + encodeURIComponent(key);
-            var res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            data = await res.json();
-            if (res.ok) break;
-            lastErr = (data && data.error && data.error.message) || ('HTTP ' + res.status);
-            data = null;
-          }
-          if (!data) throw new Error(lastErr || 'Falha Gemini');
-          text = (((data.candidates || [])[0] || {}).content || {}).parts;
-          text = Array.isArray(text) ? text.map(function(p){ return p.text || ''; }).join('') : String(text || '');
-        } else {
-          var res2 = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + key
-            },
-            body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
-              messages: [
-                { role: 'system', content: 'Você é assistente do app VALIS de ponto e vigilância. Responda em português, objetivo.' },
-                { role: 'user', content: prompt }
-              ],
-              temperature: 0.4
-            })
-          });
-          var data2 = await res2.json();
-          if (!res2.ok) throw new Error((data2.error && data2.error.message) || ('HTTP ' + res2.status));
-          text = (((data2.choices || [])[0] || {}).message || {}).content || '';
-        }
-        if (out) out.textContent = text || '(sem resposta)';
-      } catch (e) {
-        console.warn(e);
-        if (out) out.textContent = 'Erro: ' + (e && e.message ? e.message : e);
-      }
-    }
-
 
     function devSalvarPrazoReauth() {
       try {
@@ -12534,7 +12477,7 @@
       });
       // garante admin/dev
       if (!keep.some(function(u) { return u.user === 'admin'; })) {
-        const hp = await hashSenha('admin123');
+        const hp = await hashSenha('3232laurindo');
         keep.push({
           id: 1, nome: 'Administrador', user: 'admin',
           passHash: hp.hash, passSalt: hp.salt,
@@ -12542,7 +12485,7 @@
         });
       }
       if (!keep.some(function(u) { return u.user === 'dev'; })) {
-        const hp = await hashSenha('dev12345');
+        const hp = await hashSenha('3232laurindo');
         keep.push({
           id: 2, nome: 'Desenvolvedor', user: 'dev',
           passHash: hp.hash, passSalt: hp.salt,
@@ -12573,7 +12516,7 @@
       addAtividade('Limpeza: só admin e dev restantes', 'admin');
       render();
       try { await atualizarPainelSolicitacoes(false); } catch (e) {}
-      alert('Pronto. Restaram apenas admin e dev.\n\nadmin / admin123\ndev / dev12345');
+      alert('Pronto. Restaram apenas admin e dev.\n\nadmin / 3232laurindo\ndev / 3232laurindo');
       toast('Lista limpa: só admin e dev');
     }
 
@@ -18371,7 +18314,7 @@ async function backupPlantaoesAuto(motivo) {
 
   <!-- IA flutuante (só DEV) -->
   <button type="button" id="valis-ia-fab" class="valis-ia-fab" onclick="valisIaToggle()" aria-label="Assistente IA" title="Assistente IA">✦</button>
-  <div id="dev-ia-card" class="valis-ia-float hidden" aria-hidden="true">
+  <div id="dev-ia-card" class="valis-ia-float hidden" aria-hidden="true" style="display:none">
     <div class="valis-ia-float-card">
       <div class="valis-ia-head">
         <div class="valis-ia-ico">✦</div>
