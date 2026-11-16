@@ -3639,6 +3639,84 @@
       border-color: rgba(192, 132, 252, 0.55) !important;
       color: #f3e8ff !important;
     }
+  
+    /* v0.2.25 — pwa banner instalar */
+    .pwa-install-banner {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      top: max(12px, env(safe-area-inset-top));
+      z-index: 10050;
+      max-width: 480px;
+      margin: 0 auto;
+      animation: pwaBannerIn 0.35s ease;
+    }
+    .pwa-install-banner.hidden {
+      display: none !important;
+    }
+    @keyframes pwaBannerIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pwa-install-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,64,175,0.95));
+      border: 1px solid rgba(56,189,248,0.45);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(56,189,248,0.12);
+    }
+    .pwa-install-ico {
+      font-size: 28px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .pwa-install-txt {
+      flex: 1;
+      min-width: 0;
+    }
+    .pwa-install-txt strong {
+      display: block;
+      color: #f8fafc;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .pwa-install-txt span {
+      display: block;
+      color: #94a3b8;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .pwa-install-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: stretch;
+      flex-shrink: 0;
+    }
+    .pwa-btn-ok {
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #0f172a;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      white-space: nowrap;
+    }
+    .pwa-btn-x {
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 10px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #cbd5e1;
+      background: transparent;
+    }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3790,7 +3868,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v0.2.24</div>
+        <div class="login-version" id="login-version">v0.2.25</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -4019,7 +4097,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="brand">
-          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.24</span>
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.25</span>
         </div>
         <div class="top-actions">
           <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
@@ -5147,7 +5225,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.24';
+    const APP_VERSION = '0.2.25';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -7783,6 +7861,7 @@
         try { aplicarFoldsPadraoMinimizados(); } catch (e) {}
         try { setTimeout(function(){ atualizarStatusBackupUIFromRemote(); }, 800); } catch (e) {}
         try { iniciarBackupPeriodico(); } catch (e) {}
+        try { if (!isPwaInstalado()) setTimeout(mostrarBannerPWA, 800); } catch (e) {}
         try { setTimeout(function(){ try { preencherSelectPostosRonda(); } catch (e) {} }, 500); } catch (e) {}
         // Sempre Início — evita tela preta em abas especiais
         try {
@@ -12246,6 +12325,7 @@
           '<p>' + lista.length + ' plantoes - Total R$ ' + total.toFixed(2) + '</p>' +
           '<table><thead><tr><th>Data</th><th>Por</th><th>Tipo</th><th>Posto</th><th>Valor</th></tr></thead><tbody>' + rows + '</tbody></table>' +
           '<script>window.onload=function(){window.print()}<\/script></body></html>';
+        
         w.document.open();
         w.document.write(htmlDoc);
         w.document.close();
@@ -14388,23 +14468,128 @@ async function backupPlantaoesAuto(motivo) {
         if (el) el.classList.add('aviso-banner-soft');
       } catch (e) {}
     }
-    // PWA install soft prompt
+    // PWA install soft prompt + banner (some 12s; some se já instalado)
     var __deferredInstall = null;
+    var __pwaBannerTimer = null;
     try {
       window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
         __deferredInstall = e;
+        try { agendarBannerPWA(); } catch (err) {}
+      });
+      window.addEventListener('appinstalled', function() {
+        try {
+          localStorage.setItem('valis_pwa_installed', '1');
+          esconderBannerPWA(true);
+          __deferredInstall = null;
+        } catch (err) {}
       });
     } catch (e) {}
-    function instalarAppPWA() {
+
+    function isPwaInstalado() {
       try {
-        if (__deferredInstall) {
-          __deferredInstall.prompt();
+        if (localStorage.getItem('valis_pwa_installed') === '1') return true;
+        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+        if (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) return true;
+        if (window.navigator && window.navigator.standalone === true) return true; // iOS
+        if (document.referrer && document.referrer.indexOf('android-app://') === 0) return true;
+      } catch (e) {}
+      return false;
+    }
+
+    function esconderBannerPWA(permanente) {
+      try {
+        var el = document.getElementById('pwa-install-banner');
+        if (el) {
+          el.classList.add('hidden');
+          el.style.display = 'none';
+        }
+        if (__pwaBannerTimer) {
+          clearTimeout(__pwaBannerTimer);
+          __pwaBannerTimer = null;
+        }
+        if (permanente) {
+          try { localStorage.setItem('valis_pwa_installed', '1'); } catch (e) {}
+        }
+      } catch (e) {}
+    }
+
+    function dispensarBannerPWA() {
+      // só esconde nesta sessão / por algumas horas — volta a lembrar se ainda não instalou
+      try {
+        sessionStorage.setItem('valis_pwa_banner_dismiss', String(Date.now()));
+        esconderBannerPWA(false);
+      } catch (e) {
+        esconderBannerPWA(false);
+      }
+    }
+
+    function mostrarBannerPWA() {
+      try {
+        if (isPwaInstalado()) {
+          esconderBannerPWA(true);
           return;
         }
-        toast('Use o menu do navegador → Instalar aplicativo');
-      } catch (e) { toast('Instale pelo menu do navegador'); }
+        try {
+          var d = parseInt(sessionStorage.getItem('valis_pwa_banner_dismiss') || '0', 10);
+          if (d && (Date.now() - d) < 4 * 60 * 60 * 1000) return; // dispensou há pouco
+        } catch (e) {}
+        var el = document.getElementById('pwa-install-banner');
+        if (!el) return;
+        el.classList.remove('hidden');
+        el.style.display = 'block';
+        if (__pwaBannerTimer) clearTimeout(__pwaBannerTimer);
+        __pwaBannerTimer = setTimeout(function() {
+          esconderBannerPWA(false);
+        }, 12000); // ~12 segundos
+      } catch (e) {}
     }
+
+    function agendarBannerPWA() {
+      try {
+        if (isPwaInstalado()) return;
+        setTimeout(function() { mostrarBannerPWA(); }, 1200);
+      } catch (e) {}
+    }
+
+    function instalarAppPWA() {
+      try {
+        if (isPwaInstalado()) {
+          esconderBannerPWA(true);
+          try { toast('App já está instalado'); } catch (e) {}
+          return;
+        }
+        if (__deferredInstall) {
+          __deferredInstall.prompt();
+          __deferredInstall.userChoice.then(function(choice) {
+            if (choice && choice.outcome === 'accepted') {
+              localStorage.setItem('valis_pwa_installed', '1');
+              esconderBannerPWA(true);
+            }
+            __deferredInstall = null;
+          }).catch(function() {});
+          return;
+        }
+        // iOS / navegador sem beforeinstallprompt
+        var isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+        if (isiOS) {
+          alert('No iPhone: toque em Compartilhar → Adicionar à Tela de Início.');
+        } else {
+          try { toast('Menu do navegador → Instalar aplicativo / Adicionar à tela inicial'); } catch (e) {
+            alert('Use o menu do navegador → Instalar aplicativo');
+          }
+        }
+      } catch (e) {
+        try { toast('Instale pelo menu do navegador'); } catch (e2) {}
+      }
+    }
+
+    // marca instalado se já estiver em modo app
+    try {
+      if (isPwaInstalado()) localStorage.setItem('valis_pwa_installed', '1');
+      else agendarBannerPWA();
+    } catch (e) {}
+
 
 
     /* ===== Pack 0.0.4 — DEV + app ===== */
@@ -17810,5 +17995,20 @@ async function backupPlantaoesAuto(motivo) {
     })();
   // Service Worker registrado em registrarServiceWorker() (boot do app)
   </script>
+
+  <div id="pwa-install-banner" class="pwa-install-banner hidden" role="dialog" aria-live="polite">
+    <div class="pwa-install-inner">
+      <div class="pwa-install-ico">📲</div>
+      <div class="pwa-install-txt">
+        <strong>Instale o VALIS no celular</strong>
+        <span>Fica na tela inicial, abre mais rápido e parece um app de verdade.</span>
+      </div>
+      <div class="pwa-install-actions">
+        <button type="button" class="pwa-btn-ok" onclick="instalarAppPWA()">Instalar</button>
+        <button type="button" class="pwa-btn-x" onclick="dispensarBannerPWA()" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
