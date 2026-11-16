@@ -3627,6 +3627,18 @@
       pointer-events: none !important;
       overflow: hidden !important;
     }
+  
+    /* troca de plantão na escala */
+    .esc-day.cedido {
+      background: rgba(251, 146, 60, 0.35) !important;
+      border-color: rgba(251, 146, 60, 0.55) !important;
+      color: #ffedd5 !important;
+    }
+    .esc-day.recebido {
+      background: rgba(192, 132, 252, 0.35) !important;
+      border-color: rgba(192, 132, 252, 0.55) !important;
+      color: #f3e8ff !important;
+    }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
@@ -3778,7 +3790,7 @@
         <p class="sub">Controle de ponto · vigilância</p>
         <p class="sub" style="color:#94a3b8;margin-top:6px!important">UFV São Miguel</p>
         <p class="login-meta">Desenvolvido por <b>Vitor Silva</b> · <button type="button" class="linkish" onclick="abrirTermos()">Termos e privacidade</button></p>
-        <div class="login-version" id="login-version">v0.2.13</div>
+        <div class="login-version" id="login-version">v0.2.24</div>
       </div>
       <div class="login-body">
       <div id="login-erro-senha-banner" role="alert" aria-live="assertive">
@@ -4007,7 +4019,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="brand">
-          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.13</span>
+          VALIS TM <span class="ver-badge" id="app-ver-badge">v0.2.24</span>
         </div>
         <div class="top-actions">
           <button type="button" class="btn-sup-menu" id="btn-sup-menu" title="Menu Supervisão" onclick="abrirMenuSup()">👁</button>
@@ -4252,9 +4264,35 @@
           <button type="button" class="btn green" style="width:100%;margin-bottom:8px" onclick="salvarMinhaEscalaFixa()">Salvar minha escala</button>
           <div class="meta" id="esc-fixa-resumo" style="font-size:12px;margin-bottom:6px">—</div>
           <div class="meta" style="font-size:11px;color:var(--muted);margin-bottom:4px">
-            <span style="color:#86efac">■</span> Trabalho &nbsp; <span style="color:#64748b">■</span> Folga
+            <span style="color:#86efac">■</span> Trabalho &nbsp; <span style="color:#64748b">■</span> Folga &nbsp;
+            <span style="color:#fb923c">■</span> Cedido &nbsp; <span style="color:#c084fc">■</span> Recebido
           </div>
           <div id="esc-fixa-cal" class="esc-cal"></div>
+          <div class="card" id="esc-troca-box" style="margin-top:12px;padding:12px;background:rgba(15,23,42,0.55);border:1px solid rgba(148,163,184,0.15);border-radius:12px">
+            <div class="card-label" style="margin-bottom:8px">Troca de plantão</div>
+            <p class="meta" style="font-size:11px;margin:0 0 8px;line-height:1.4">
+              Ex.: você cede a sexta e recebe a terça de um colega. Fica registrado na escala.
+            </p>
+            <div class="grid2">
+              <div class="field"><label>Data do plantão</label>
+                <input type="date" id="esc-troca-data" class="input">
+              </div>
+              <div class="field"><label>Tipo</label>
+                <select id="esc-troca-tipo" class="input">
+                  <option value="cedido">Cedi meu plantão (outra pessoa faz)</option>
+                  <option value="recebido">Recebi plantão (eu faço o dele)</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label>Com quem</label>
+              <input type="text" id="esc-troca-com" class="input" placeholder="Nome do colega">
+            </div>
+            <div class="field"><label>Observação (opcional)</label>
+              <input type="text" id="esc-troca-obs" class="input" placeholder="Ex.: posto, combinado">
+            </div>
+            <button type="button" class="btn green" style="width:100%;margin-bottom:8px" onclick="salvarTrocaEscala()">Salvar troca na escala</button>
+            <div id="esc-troca-lista" class="meta" style="font-size:12px"></div>
+          </div>
           <div class="esc-mes-bar">
             <button type="button" class="esc-mes-arrow" onclick="navegarMesEscala(-1)" aria-label="Mês anterior">‹</button>
             <div class="esc-mes-centro">
@@ -5109,7 +5147,7 @@
       measurementId: _S.g
     };
     // senha DEV ofuscada em partes
-    const APP_VERSION = '0.2.13';
+    const APP_VERSION = '0.2.24';
     const APP_SECURITY_BUILD = 'sec-2026-10';
     function verificarAmbienteSeguro() {
       try {
@@ -9615,7 +9653,8 @@
         inicio: String(e.inicio).slice(0, 10),
         turno: e.turno || 'noturno',
         padrao: e.padrao || '12x36',
-        valorPlantao: e.valorPlantao != null ? e.valorPlantao : (u.valorPlantao != null ? u.valorPlantao : 100)
+        valorPlantao: e.valorPlantao != null ? e.valorPlantao : (u.valorPlantao != null ? u.valorPlantao : 100),
+        trocas: Array.isArray(e.trocas) ? e.trocas : []
       };
     }
     function ehDiaTrabalhoEscala(dataRef, cfg) {
@@ -9733,14 +9772,146 @@
           return '<div class="esc-dow">' + t + '</div>';
         }).join('');
         for (var i = 0; i < startDow; i++) htmlC += '<div class="esc-day vazio"></div>';
+        var trocasMes = [];
+        try {
+          trocasMes = (cfg.trocas || []).filter(function(t) {
+            if (!t || !t.data) return false;
+            var p = String(t.data).slice(0, 10).split('-');
+            return parseInt(p[0], 10) === y && (parseInt(p[1], 10) - 1) === m;
+          });
+        } catch (eTr) {}
+        function trocaDoDia(d) {
+          var ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+          for (var ti = 0; ti < trocasMes.length; ti++) {
+            if (String(trocasMes[ti].data).slice(0, 10) === ds) return trocasMes[ti];
+          }
+          return null;
+        }
         for (var d = 1; d <= ult; d++) {
           var trab = diasTrab.indexOf(d) >= 0;
           var isHoje = (hoje.getFullYear() === y && hoje.getMonth() === m && hoje.getDate() === d);
-          htmlC += '<div class="esc-day' + (trab ? ' trabalho' : '') + (isHoje ? ' hoje' : '') + '">' + d + '</div>';
+          var tr = trocaDoDia(d);
+          var cls = 'esc-day';
+          if (tr && tr.tipo === 'cedido') cls += ' cedido';
+          else if (tr && tr.tipo === 'recebido') cls += ' recebido';
+          else if (trab) cls += ' trabalho';
+          if (isHoje) cls += ' hoje';
+          var title = tr ? ((tr.tipo === 'cedido' ? 'Cedido para ' : 'Recebido de ') + (tr.comQuem || '—')) : '';
+          htmlC += '<div class="' + cls + '"' + (title ? (' title="' + String(title).replace(/"/g, '') + '"') : '') + '>' + d + '</div>';
         }
         cal.innerHTML = htmlC;
+        try { renderListaTrocasEscala(cfg); } catch (eL) {}
       } catch (e) { console.warn(e); }
     }
+
+    function getTrocasEscalaArr() {
+      try {
+        if (usuarioAtual && usuarioAtual.escalaFixa && Array.isArray(usuarioAtual.escalaFixa.trocas)) {
+          return usuarioAtual.escalaFixa.trocas;
+        }
+      } catch (e) {}
+      return [];
+    }
+
+    function renderListaTrocasEscala(cfg) {
+      try {
+        var box = document.getElementById('esc-troca-lista');
+        if (!box) return;
+        var list = (cfg && cfg.trocas) ? cfg.trocas : getTrocasEscalaArr();
+        if (!list.length) {
+          box.innerHTML = '<span style="color:var(--muted)">Nenhuma troca registrada.</span>';
+          return;
+        }
+        var sorted = list.slice().sort(function(a, b) {
+          return String(a.data || '').localeCompare(String(b.data || ''));
+        });
+        box.innerHTML = sorted.map(function(t, idx) {
+          var tipo = t.tipo === 'recebido' ? 'Recebido de' : 'Cedido para';
+          var cor = t.tipo === 'recebido' ? '#c084fc' : '#fb923c';
+          return '<div style="padding:6px 0;border-bottom:1px solid rgba(148,163,184,0.12);display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+            '<span><b style="color:' + cor + '">' + String(t.data || '').slice(0, 10) + '</b> · ' + tipo + ' <b>' +
+            String(t.comQuem || '—').replace(/</g, '') + '</b>' +
+            (t.obs ? (' <span style="color:var(--muted)">(' + String(t.obs).replace(/</g, '') + ')</span>') : '') +
+            '</span>' +
+            '<button type="button" class="btn red sm" onclick="removerTrocaEscala(\'' + String(t.data || '').slice(0, 10) + '\',\'' + String(t.tipo || '') + '\')">Excluir</button>' +
+            '</div>';
+        }).join('');
+      } catch (e) { console.warn(e); }
+    }
+
+    async function salvarTrocaEscala() {
+      try {
+        if (!usuarioAtual) return toast('Faça login');
+        if (!usuarioAtual.escalaFixa || !usuarioAtual.escalaFixa.inicio) {
+          return toast('Salve a escala fixa antes de registrar trocas');
+        }
+        var dataEl = document.getElementById('esc-troca-data');
+        var tipoEl = document.getElementById('esc-troca-tipo');
+        var comEl = document.getElementById('esc-troca-com');
+        var obsEl = document.getElementById('esc-troca-obs');
+        var data = dataEl ? String(dataEl.value || '').slice(0, 10) : '';
+        var tipo = tipoEl ? String(tipoEl.value || 'cedido') : 'cedido';
+        var com = comEl ? String(comEl.value || '').trim() : '';
+        var obs = obsEl ? String(obsEl.value || '').trim() : '';
+        if (!data) return toast('Informe a data do plantão');
+        if (!com) return toast('Informe com quem foi a troca');
+        if (!Array.isArray(usuarioAtual.escalaFixa.trocas)) usuarioAtual.escalaFixa.trocas = [];
+        // atualiza se já existe mesma data+tipo
+        var arr = usuarioAtual.escalaFixa.trocas.filter(function(t) {
+          return !(t && String(t.data).slice(0, 10) === data && t.tipo === tipo);
+        });
+        arr.push({
+          id: Date.now(),
+          data: data,
+          tipo: tipo,
+          comQuem: com,
+          obs: obs,
+          em: new Date().toISOString()
+        });
+        usuarioAtual.escalaFixa.trocas = arr;
+        usuarioAtual.escalaFixa.atualizadoEm = new Date().toISOString();
+        // espelha em db.users
+        try {
+          var u = (db.users || []).find(function(x) {
+            return String(x.user || '').toLowerCase() === String(usuarioAtual.user || '').toLowerCase();
+          });
+          if (u) {
+            u.escalaFixa = usuarioAtual.escalaFixa;
+          }
+        } catch (e) {}
+        await salvar();
+        if (dataEl) dataEl.value = '';
+        if (comEl) comEl.value = '';
+        if (obsEl) obsEl.value = '';
+        try { renderEscalaFixaCard(); } catch (e) {}
+        toast('Troca salva na escala');
+      } catch (e) {
+        console.warn(e);
+        alert('Erro ao salvar troca');
+      }
+    }
+
+    async function removerTrocaEscala(data, tipo) {
+      try {
+        if (!usuarioAtual || !usuarioAtual.escalaFixa) return;
+        if (!confirm('Remover esta troca da escala?')) return;
+        data = String(data || '').slice(0, 10);
+        tipo = String(tipo || '');
+        usuarioAtual.escalaFixa.trocas = (usuarioAtual.escalaFixa.trocas || []).filter(function(t) {
+          return !(t && String(t.data).slice(0, 10) === data && String(t.tipo || '') === tipo);
+        });
+        try {
+          var u = (db.users || []).find(function(x) {
+            return String(x.user || '').toLowerCase() === String(usuarioAtual.user || '').toLowerCase();
+          });
+          if (u) u.escalaFixa = usuarioAtual.escalaFixa;
+        } catch (e) {}
+        await salvar();
+        try { renderEscalaFixaCard(); } catch (e) {}
+        toast('Troca removida');
+      } catch (e) { console.warn(e); }
+    }
+
     function navegarMesEscala(delta) {
       var agora = new Date();
       if (!__escMesView) __escMesView = { y: agora.getFullYear(), m: agora.getMonth() };
@@ -10177,11 +10348,18 @@
           if (vEl && vEl.value !== '') valorPl = Number(vEl.value) || 100;
         } catch (e) {}
         usuarioAtual.valorPlantao = valorPl;
+        var trocasKeep = [];
+        try {
+          if (usuarioAtual.escalaFixa && Array.isArray(usuarioAtual.escalaFixa.trocas)) {
+            trocasKeep = usuarioAtual.escalaFixa.trocas.slice();
+          }
+        } catch (eT) {}
         usuarioAtual.escalaFixa = {
           inicio: String(ini).slice(0, 10),
           turno: turno,
           padrao: padrao,
           valorPlantao: valorPl,
+          trocas: trocasKeep,
           atualizadoEm: new Date().toISOString()
         };
         // regime fixo
